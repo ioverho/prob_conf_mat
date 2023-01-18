@@ -5,18 +5,19 @@ from functools import partial
 from pathlib import Path
 
 import numpy as np
+import numpy.typing
 
-from io import load_file
-from stats import (
+from main.io import load_file, ObjectIO
+from main.stats import (
     compute_confusion_matrix,
     get_batched_confusion_matrix_stats,
     summarize_posterior_samples,
 )
-from distributions import init_dirichlet_prior
-from format import find_format_backend, flatten_summary, pandas_summary
+from main.distributions import init_dirichlet_prior
+from main.format import find_format_backend, flatten_summary, pandas_summary
 
 
-class HierarchicalBayesConfusionMatrix(object):
+class HierarchicalBayesConfusionMatrix(ObjectIO):
     """ """
 
     def __init__(
@@ -26,7 +27,16 @@ class HierarchicalBayesConfusionMatrix(object):
         num_classes: int,
         dirichlet_prior: typing.Union[str, float],
         confidence_level: float,
+        verbose: bool = False,
     ):
+        super().__init__(
+            preds_fp=preds_fp,
+            labels_fp=labels_fp,
+            num_classes=num_classes,
+            dirichlet_prior=dirichlet_prior,
+            confidence_level=confidence_level,
+            verbose=verbose,
+        )
 
         self.preds_fp = Path(preds_fp)
         self.labels_fp = Path(labels_fp)
@@ -50,10 +60,16 @@ class HierarchicalBayesConfusionMatrix(object):
             dirichlet_prior, self.num_classes**2
         )
 
-    def summarize(self, backend: typing.Optional[str] = None, verbose: bool = False):
+        self.verbose = verbose
+
+    @property
+    def _save_str(self):
+        return "HierarchicalBayesConfusionMatrix.pickle"
+
+    def summarize(self, backend: typing.Optional[str] = None):
 
         if backend is None:
-            backend = find_format_backend(verbose)
+            backend = find_format_backend(self.verbose)
 
         if backend == "pandas":
             records = flatten_summary(self.summary)

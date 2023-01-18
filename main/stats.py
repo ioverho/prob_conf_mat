@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 
+
 def compute_confusion_matrix(
     preds: np.typing.ArrayLike, labels: np.typing.ArrayLike, num_classes: int
 ):
