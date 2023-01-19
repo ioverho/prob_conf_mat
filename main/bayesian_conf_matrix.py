@@ -14,7 +14,7 @@ from main.stats import (
     summarize_posterior_samples,
 )
 from main.distributions import init_dirichlet_prior
-from main.format import find_format_backend, flatten_summary, pandas_summary
+from main.format import find_format_backend, flatten_summary, pandas_posterior_summary
 
 
 class HierarchicalBayesConfusionMatrix(ObjectIO):
@@ -23,10 +23,10 @@ class HierarchicalBayesConfusionMatrix(ObjectIO):
     def __init__(
         self,
         preds_fp: str,
-        labels_fp: str,
         num_classes: int,
         dirichlet_prior: typing.Union[str, float],
         confidence_level: float,
+        labels_fp: typing.Optional[str] = None,
         verbose: bool = False,
     ):
         super().__init__(
@@ -38,29 +38,47 @@ class HierarchicalBayesConfusionMatrix(ObjectIO):
             verbose=verbose,
         )
 
-        self.preds_fp = Path(preds_fp)
-        self.labels_fp = Path(labels_fp)
         self.num_classes = num_classes
+
+        if preds_fp != "example":
+            self.preds_fp = Path(preds_fp)
+            if labels_fp is not None:
+                self.labels_fp = Path(labels_fp)
+
+            preds, labels = self.load_preds_and_labels()
+
+            self.confusion_matrix = compute_confusion_matrix(
+                preds, labels, num_classes=self.num_classes
+            )
+
+        else:
+            self.confusion_matrix = np.array(
+                [
+                    [6, 2],
+                    [1, 3],
+                ]
+            )
+
         if confidence_level > 0 and confidence_level < 1:
             self.alpha = 1 - confidence_level
         else:
             raise ValueError("Confidence level has to be a float in range (0, 1)")
-
-        preds = load_file(self.preds_fp)
-        labels = load_file(self.labels_fp)
-
-        self.confusion_matrix = compute_confusion_matrix(
-            preds, labels, num_classes=self.num_classes
-        )
         self.N = np.sum(self.confusion_matrix)
-
-        self.init_summary()
 
         self._dirichlet_prior = init_dirichlet_prior(
             dirichlet_prior, self.num_classes**2
         )
 
         self.verbose = verbose
+
+        self.init_summary()
+
+    def load_preds_and_labels(self):
+
+        preds = load_file(self.preds_fp)
+        labels = load_file(self.labels_fp)
+
+        return preds, labels
 
     @property
     def _save_str(self):
@@ -73,7 +91,7 @@ class HierarchicalBayesConfusionMatrix(ObjectIO):
 
         if backend == "pandas":
             records = flatten_summary(self.summary)
-            summary_table = pandas_summary(records)
+            summary_table = pandas_posterior_summary(records)
 
         elif backend == "json":
             summary_table = json.dumps(self.summary, indent=2)

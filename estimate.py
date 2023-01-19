@@ -3,7 +3,7 @@ import argparse
 import math
 from pprint import pprint
 
-from main.bayesian_conf_matrix import HierarchicalBayesConfusionMatrix
+from main import HierarchicalBayesConfusionMatrix
 
 
 def estimate(args):
@@ -56,9 +56,9 @@ if __name__ == "__main__":
     parser.add_argument("--num_classes", type=int, help="number of classes")
     parser.add_argument(
         "--num_samples",
-        default=10000,
+        default=1000000,
         type=int,
-        help="number of samples to draw from the posterior. Defaults to 10 000.",
+        help="number of samples to draw from the posterior. Defaults to 1 000 000.",
     )
     parser.add_argument(
         "--verbose",

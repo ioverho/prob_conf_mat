@@ -1,10 +1,23 @@
-COLUMN_ORDER = [
+POSTERIOR_COLUMN_ORDER = [
     "Instance",
+    "N",
     "MAP",
     "Mean",
     "Std. Dev",
     "CI LB",
     "CI UB",
+]
+
+INDEP_TEST_COLUMN_ORDER = [
+    "A Mean",
+    "A CI LB",
+    "A CI UB",
+    "B Mean",
+    "B CI LB",
+    "B CI UB",
+    "p(A>B)",
+    "WSI LB",
+    "WSI UB",
 ]
 
 
@@ -68,6 +81,22 @@ def pandas_summary(records):
         values="Value",
     )
 
-    df = df[COLUMN_ORDER]
+    return df
+
+
+def pandas_posterior_summary(records):
+
+    df = pandas_summary(records)
+
+    df = df[POSTERIOR_COLUMN_ORDER]
+
+    return df
+
+
+def pandas_indep_test_summary(records):
+
+    df = pandas_summary(records)
+
+    df = df[INDEP_TEST_COLUMN_ORDER]
 
     return df

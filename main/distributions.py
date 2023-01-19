@@ -15,6 +15,9 @@ def init_dirichlet_prior(
         num_categories (int): _description_
     """
 
+    if isinstance(strategy, int):
+        strategy = float(strategy)
+
     if isinstance(strategy, float):
         prior = np.full(shape=(num_categories,), fill_value=strategy)
 

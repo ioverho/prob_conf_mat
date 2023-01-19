@@ -22,43 +22,54 @@ def get_batched_confusion_matrix_stats(confusion_matrices: np.typing.ArrayLike):
 
     This function is fully vectorized and should scale nicely.
 
-    """
+    Currently does not deal with nan division. It simply removes those.
 
+    """
     num_classes = confusion_matrices.shape[-1]
 
-    stats = dict()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        stats = dict()
 
-    n_label = np.sum(confusion_matrices, axis=2)
-    n_predicted = np.sum(confusion_matrices, axis=1)
-    n_correct = np.trace(confusion_matrices, axis1=1, axis2=2)
-    n = np.sum(confusion_matrices, axis=(1, 2))
-    n2 = np.power(n, 2)
+        n_label = np.sum(confusion_matrices, axis=2)
+        n_predicted = np.sum(confusion_matrices, axis=1)
+        n_correct = np.trace(confusion_matrices, axis1=1, axis2=2)
+        n = np.sum(confusion_matrices, axis=(1, 2))
+        n2 = np.power(n, 2)
 
-    stats["accuracy"] = n_correct / n
+        stats["accuracy"] = n_correct / n
 
-    tp = np.diagonal(confusion_matrices, axis1=1, axis2=2)
-    fp = n_predicted - tp
-    tn = n_correct[:, np.newaxis] - tp
-    fn = n_label - tp
+        tp = np.diagonal(confusion_matrices, axis1=1, axis2=2)
+        fp = n_predicted - tp
+        tn = n_correct[:, np.newaxis] - tp
+        fn = n_label - tp
 
-    stats["precision"] = tp / (tp + fp)
-    stats["recall"] = tp / (tp + fn)
+        stats["precision"] = tp / (tp + fp)
+        stats["recall"] = tp / (tp + fn)
 
-    stats["f1"] = (
-        2
-        * (stats["precision"] * stats["recall"])
-        / (stats["precision"] + stats["recall"])
-    )
+        stats["f1"] = (
+            2
+            * (stats["precision"] * stats["recall"])
+            / (stats["precision"] + stats["recall"])
+        )
 
-    stats["f1_micro"] = np.einsum("bl,bl->b", n_label, stats["f1"]) / n
-    stats["f1_macro"] = np.sum(stats["f1"], axis=1) / num_classes
+        stats["f1_micro"] = np.einsum("bl,bl->b", n_label, stats["f1"]) / n
+        stats["f1_macro"] = np.sum(stats["f1"], axis=1) / num_classes
 
-    mcc_num = n_correct * n - np.einsum("bl,bl->b", n_label, n_predicted)
-    mcc_denom = np.sqrt(n2 - np.einsum("bl,bl->b", n_predicted, n_predicted)) * np.sqrt(
-        n2 - np.einsum("bl,bl->b", n_label, n_label)
-    )
+        mcc_num = n_correct * n - np.einsum("bl,bl->b", n_label, n_predicted)
+        mcc_denom = np.sqrt(
+            n2 - np.einsum("bl,bl->b", n_predicted, n_predicted)
+        ) * np.sqrt(n2 - np.einsum("bl,bl->b", n_label, n_label))
 
-    stats["mcc"] = mcc_num / mcc_denom
+        stats["mcc"] = mcc_num / mcc_denom
+
+    for k, v in stats.items():
+
+        if len(v.shape) > 1:
+            nan_mask = np.any(np.isnan(v), axis=-1)
+        else:
+            nan_mask = np.isnan(v)
+
+        stats[k] = v[~nan_mask]
 
     return stats
 
@@ -79,14 +90,12 @@ def summarize_posterior_samples(samples, alpha: float = 0.05):
     mode = (bin_edges[modal_bin] + bin_edges[modal_bin + 1]) / 2
 
     summary = {
-        "MAP": mode,
-        "Mean": np.mean(samples),
-        "Std. Dev": np.std(samples),
-        f"CI LB": quantiles[4],
-        f"CI UB": quantiles[5],
+        "N": samples.shape[0],
+        "MAP": f"{mode:.4f}",
+        "Mean": f"{np.mean(samples):.4f}",
+        "Std. Dev": f"{np.std(samples):.4f}",
+        f"CI LB": f"{quantiles[4]:.4f}",
+        f"CI UB": f"{quantiles[5]:.4f}",
     }
-
-    for k, v in summary.items():
-        summary[k] = f"{v:.4f}"
 
     return summary
