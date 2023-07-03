@@ -131,7 +131,9 @@ dmypy.json
 # Ivo stuff
 */klad*/
 klad*.*
-main/.vscode
+.vscode/
 logs/
 misc/
 results/
+dev/
+deprecated_src/

@@ -3,7 +3,7 @@ import argparse
 import math
 from pprint import pprint
 
-from main import HierarchicalBayesConfusionMatrix
+from src import HierarchicalBayesConfusionMatrix
 
 
 def estimate(args):
