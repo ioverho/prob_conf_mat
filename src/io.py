@@ -12,7 +12,7 @@ def load_preds_file(
     dialect: str = "excel",
     delimiter: str = ",",
     lineterminator: str = "\r\n",
-) -> jtyping.Int[jtyping.Array, "num_samples 2"]:
+) -> jtyping.Int[np.ndarray, "num_samples 2"]:
     pred_target = []
     with open(fp, "r", newline=newline, encoding=encoding) as f:
         reader = csv.reader(
@@ -39,7 +39,7 @@ def load_preds_file(
 
 
 def pred_target_to_confusion_matrix(
-    pred_target: jtyping.Int[jtyping.Array, "num_samples 2"]
+    pred_target: jtyping.Int[np.ndarray, "num_samples 2"]
 ):
     support = np.unique(pred_target)
     support_size = support.shape[0]

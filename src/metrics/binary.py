@@ -3,47 +3,95 @@ import typing
 import numpy as np
 import jaxtyping as jtyping
 
-from confusion_matrix import ConfusionMatrixSamples
-from aggregation import numpy_batched_harmonic_mean
+from src.metrics.registration import register_complex_metric
+from src.metrics.aggregation import numpy_batched_harmonic_mean
 
 
-def compute_positive_likelihood_ratio(conf_mats: ConfusionMatrixSamples):
-    return conf_mats.true_positive_rate / conf_mats.false_positive_rate
-
-
-def compute_negative_likelihood_ratio(conf_mats: ConfusionMatrixSamples):
-    return conf_mats.false_negative_rate / conf_mats.true_negative_rate
-
-
-def compute_diagnostic_odds_ratio(
-    conf_mats: ConfusionMatrixSamples,
-    positive_likelihood_ratio: typing.Optional[
-        jtyping.Float[jtyping.Array, "num_samples support_size"]
-    ] = None,
-    negative_likelihood_ratio: typing.Optional[
-        jtyping.Float[jtyping.Array, "num_samples support_size"]
-    ] = None,
+@register_complex_metric(
+    identifier="plr",
+    full_name="Positive Likelihood Ratio",
+    is_multiclass=False,
+    range=(0.0, float("inf")),
+    required_simple_metrics=(
+        "tpr",
+        "fpr",
+    ),
+)
+def compute_positive_likelihood_ratio(
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
-    if positive_likelihood_ratio is None:
-        positive_likelihood_ratio = compute_positive_likelihood_ratio(conf_mats)
-
-    if negative_likelihood_ratio is None:
-        negative_likelihood_ratio = compute_negative_likelihood_ratio(conf_mats)
-
-    return positive_likelihood_ratio / negative_likelihood_ratio
+    return tpr / fpr
 
 
+@register_complex_metric(
+    identifier="nlr",
+    full_name="Negative Likelihood Ratio",
+    is_multiclass=False,
+    range=(0.0, float("inf")),
+    required_simple_metrics=(
+        "fnr",
+        "tnr",
+    ),
+)
+def compute_negative_likelihood_ratio(
+    fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+):
+    return fnr / tnr
+
+
+@register_complex_metric(
+    identifier="dor",
+    full_name="Diagnostic Odds Ratio",
+    is_multiclass=False,
+    range=(0, float("inf")),
+    required_simple_metrics=(
+        "tpr",
+        "fpr",
+        "fnr",
+        "tnr",
+    ),
+)
+def compute_diagnostic_odds_ratio(
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+):
+    positive_likelihood_ratio = compute_positive_likelihood_ratio(
+        tpr=tpr,
+        fpr=fpr,
+    )
+
+    negative_likelihood_ratio = compute_negative_likelihood_ratio(
+        fnr=fnr,
+        tnr=tnr,
+    )
+
+    diagnostic_odds_ratio = positive_likelihood_ratio / negative_likelihood_ratio
+
+    return diagnostic_odds_ratio
+
+
+@register_complex_metric(
+    identifier="fbeta",
+    full_name="F-beta Score",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "ppv",
+        "tpr",
+    ),
+)
 def compute_fbeta(
-    conf_mats: ConfusionMatrixSamples,
+    ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
     beta: typing.Optional[float] = 1,
 ):
     beta_2 = beta**2
 
-    f1 = (
-        (1 + beta_2)
-        * (conf_mats.positive_predictive_value * conf_mats.true_positive_rate)
-        / (beta_2 * conf_mats.positive_predictive_value + conf_mats.true_positive_rate)
-    )
+    f1 = (1 + beta_2) * (ppv * tpr) / (beta_2 * ppv + tpr)
 
     # In case one of the ratios is nan (most likely due to 0 division), set to 0
     f1 = np.nan_to_num(
@@ -54,33 +102,81 @@ def compute_fbeta(
     return f1
 
 
+@register_complex_metric(
+    identifier="f1",
+    full_name="F1",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "ppv",
+        "tpr",
+    ),
+)
 def compute_f1(
-    conf_mats: ConfusionMatrixSamples,
+    ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
-    return compute_fbeta(conf_mats, beta=1)
+    return compute_fbeta(ppv=ppv, tpr=tpr, beta=1)
 
 
+@register_complex_metric(
+    identifier="informedness",
+    full_name="Informedness",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "tpr",
+        "tnr",
+    ),
+)
 def compute_informedness(
-    conf_mats: ConfusionMatrixSamples,
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
-    return conf_mats.true_positive_rate + conf_mats.true_negative_rate - 1
+    return tpr + tnr - 1
 
 
+@register_complex_metric(
+    identifier="markedness",
+    full_name="Markedness",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "ppv",
+        "npv",
+    ),
+)
 def compute_markedness(
-    conf_mats: ConfusionMatrixSamples,
+    ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    npv: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
-    return conf_mats.positive_predictive_value + conf_mats.negative_predictive_value - 1
+    return ppv + npv - 1
 
 
+@register_complex_metric(
+    identifier="p4",
+    full_name="P4",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "ppv",
+        "tpr",
+        "tnr",
+        "npv",
+    ),
+)
 def compute_p4(
-    conf_mats: ConfusionMatrixSamples,
+    ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    npv: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
     values = np.stack(
         [
-            conf_mats.positive_predictive_value,
-            conf_mats.true_positive_rate,
-            conf_mats.true_negative_rate,
-            conf_mats.negative_predictive_value,
+            ppv,
+            tpr,
+            tnr,
+            npv,
         ],
         axis=2,
     )
@@ -88,17 +184,40 @@ def compute_p4(
     return numpy_batched_harmonic_mean(values, keepdims=False)
 
 
-def compute_jaccard_index(conf_mats: ConfusionMatrixSamples):
-    return conf_mats.diag_mass / (
-        conf_mats.p_pred + conf_mats.p_condition - conf_mats.diag_mass
-    )
+@register_complex_metric(
+    identifier="jaccard",
+    full_name="Jaccard Index",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "diag_mass",
+        "p_pred",
+        "p_condition",
+    ),
+)
+def compute_jaccard_index(
+    diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
+):
+    return diag_mass / (p_pred + p_condition - diag_mass)
 
 
-def compute_prevalence_threshold(conf_mats: ConfusionMatrixSamples):
-    num = (
-        np.sqrt(conf_mats.true_positive_rate * conf_mats.false_positive_rate)
-        - conf_mats.false_positive_rate
-    )
-    denom = conf_mats.true_positive_rate - conf_mats.false_positive_rate
+@register_complex_metric(
+    identifier="prev_thresh",
+    full_name="Prevalence Threshold",
+    is_multiclass=False,
+    range=(0.0, 1.0),
+    required_simple_metrics=(
+        "tpr",
+        "fpr",
+    ),
+)
+def compute_prevalence_threshold(
+    tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+):
+    num = np.sqrt(tpr * fpr) - fpr
+    denom = tpr - fpr
 
     return num / denom
