@@ -1,4 +1,3 @@
-import typing
 from collections import OrderedDict
 
 #! DO NOT ALTER
@@ -8,6 +7,18 @@ from .simple import *
 from .binary import *
 from .multiclass import *
 from .aggregation import *
+
+
+def compute_all_simple_metrics(samples):
+    simple_metrics = dict()
+    for indentifier, simple_metric in filter(
+        lambda x: x[1],
+        list(IMPLEMENTED_SIMPLE_METRICS.items()),
+    ):
+        simple_metrics[indentifier] = simple_metric(samples)
+
+    return simple_metrics
+
 
 IMPLEMENTED_CLASS_AGGREGATIONS = OrderedDict(
     [

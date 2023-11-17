@@ -1,10 +1,8 @@
-import typing
-
 import numpy as np
 import jaxtyping as jtyping
 
-from src.metrics.registration import register_complex_metric
-from src.metrics.aggregation import numpy_batched_harmonic_mean
+from bayes_conf_mat.metrics.registration import register_complex_metric
+from bayes_conf_mat.metrics.aggregation import numpy_batched_harmonic_mean
 
 
 @register_complex_metric(
@@ -16,6 +14,7 @@ from src.metrics.aggregation import numpy_batched_harmonic_mean
         "tpr",
         "fpr",
     ),
+    sklearn_equivalent="class_likelihood_ratios",
 )
 def compute_positive_likelihood_ratio(
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -33,6 +32,7 @@ def compute_positive_likelihood_ratio(
         "fnr",
         "tnr",
     ),
+    sklearn_equivalent="class_likelihood_ratios",
 )
 def compute_negative_likelihood_ratio(
     fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -52,6 +52,7 @@ def compute_negative_likelihood_ratio(
         "fnr",
         "tnr",
     ),
+    sklearn_equivalent=None,
 )
 def compute_diagnostic_odds_ratio(
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -83,11 +84,12 @@ def compute_diagnostic_odds_ratio(
         "ppv",
         "tpr",
     ),
+    sklearn_equivalent="fbeta_score",
 )
 def compute_fbeta(
     ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    beta: typing.Optional[float] = 1,
+    beta: float,
 ):
     beta_2 = beta**2
 
@@ -111,6 +113,7 @@ def compute_fbeta(
         "ppv",
         "tpr",
     ),
+    sklearn_equivalent="f1_score",
 )
 def compute_f1(
     ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -128,6 +131,7 @@ def compute_f1(
         "tpr",
         "tnr",
     ),
+    sklearn_equivalent=None,
 )
 def compute_informedness(
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -145,6 +149,7 @@ def compute_informedness(
         "ppv",
         "npv",
     ),
+    sklearn_equivalent=None,
 )
 def compute_markedness(
     ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -164,6 +169,7 @@ def compute_markedness(
         "tnr",
         "npv",
     ),
+    sklearn_equivalent=None,
 )
 def compute_p4(
     ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -194,6 +200,7 @@ def compute_p4(
         "p_pred",
         "p_condition",
     ),
+    sklearn_equivalent="jaccard_score",
 )
 def compute_jaccard_index(
     diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -212,6 +219,7 @@ def compute_jaccard_index(
         "tpr",
         "fpr",
     ),
+    sklearn_equivalent=None,
 )
 def compute_prevalence_threshold(
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],

@@ -1,7 +1,7 @@
 import numpy as np
 import jaxtyping as jtyping
 
-from src.metrics.registration import register_complex_metric
+from bayes_conf_mat.metrics.registration import register_complex_metric
 
 
 @register_complex_metric(
@@ -10,12 +10,13 @@ from src.metrics.registration import register_complex_metric
     is_multiclass=True,
     range=(0.0, 1.0),
     required_simple_metrics=("diag_mass",),
+    sklearn_equivalent="accuracy_score",
 )
 def compute_accuracy(
     diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
     """Computes the (multiclass) accuracy score.
-    
+
     The rate of correct classifications to all classifications:
         `(TP + TN) / N`
     where TP are the true positives, TN the true negatives and N the total number of predictions.
@@ -29,7 +30,7 @@ def compute_accuracy(
     Returns:
         np.ndarray [num_samples, num_classes]
     """  # noqa: E501
-    
+
     return np.sum(diag_mass, axis=1)
 
 
@@ -39,15 +40,16 @@ def compute_accuracy(
     is_multiclass=True,
     range=(0.0, 1.0),
     required_simple_metrics=("tpr",),
+    sklearn_equivalent="balanced_accuracy_score",
 )
 def compute_balanced_accuracy(
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
 ):
     """Computes the (multiclass) balanced accuracy score.
-    
+
     Uses the scikit-learn definition, but is equivalent to Wikipedia.
     The macro-average of the per-class TPR:
-        `1/|C|\sum TPR_{c}`
+        `1/|C|\\sum TPR_{c}`
 
     scikit-learn: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
 
@@ -75,6 +77,7 @@ def compute_balanced_accuracy(
         "tpr",
         "p_condition",
     ),
+    sklearn_equivalent="balanced_accuracy_score",
 )
 def compute_adjusted_balanced_accuracy(
     tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -105,6 +108,7 @@ def compute_adjusted_balanced_accuracy(
         "p_condition",
         "p_pred",
     ),
+    sklearn_equivalent="cohen_kappa_score",
 )
 def compute_cohens_kappa(
     diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -128,6 +132,7 @@ def compute_cohens_kappa(
         "p_condition",
         "p_pred",
     ),
+    sklearn_equivalent="matthews_corrcoef",
 )
 def compute_mcc(
     diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -137,9 +142,9 @@ def compute_mcc(
     """Computes the (multiclass) Matthew's Correlation Coefficient (MCC).
 
     A metric that holistically combines many different classification metrics.
-    
+
     A perfect classifier scores `1.0`, a random classifier `0.0`. Smaller values indicate worse than random performance.
-    
+
     It is related to Pearson's Chi-square test.
 
     Quoting Wikipedia:

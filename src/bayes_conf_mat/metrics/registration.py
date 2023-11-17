@@ -33,7 +33,8 @@ def register_complex_metric(
     full_name: str,
     is_multiclass: bool,
     range: typing.Tuple[float, float],
-    required_simple_metrics: typing.Tuple[str],
+    required_simple_metrics: typing.Tuple[str, ...],
+    sklearn_equivalent: typing.Optional[str] = None,
 ):
     """Function wrapper for registering a metric function and assigning some attributes to it.
 
@@ -53,6 +54,7 @@ def register_complex_metric(
         func.is_multiclass = is_multiclass
         func.range = range
         func.required_simple_metrics = required_simple_metrics
+        func.sklearn_equivalent = sklearn_equivalent
 
         # Check that the identifier is unique
         if identifier in IMPLEMENTED_SIMPLE_METRICS:
@@ -69,8 +71,11 @@ def register_complex_metric(
         for required_identifier in required_simple_metrics:
             if required_identifier not in IMPLEMENTED_SIMPLE_METRICS:
                 raise ValueError(
-                    f"'{required_identifier}' not recognized as a simple metric. Currently registered are: {IMPLEMENTED_SIMPLE_METRICS.keys()}"
+                    f"'{required_identifier}' not recognized as a simple metric. Currently registered are: {IMPLEMENTED_SIMPLE_METRICS.keys()}"  # noqa: E501
                 )
+
+        # TODO: check that the sklearn equivalent function exists
+        # Want to avoid an sklearn import though
 
         # Register the function
         IMPLEMENTED_COMPLEX_METRICS[identifier] = func

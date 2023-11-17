@@ -75,7 +75,7 @@ def summarize_posterior_samples(samples, alpha: float = 0.05):
             ("StdDev", std_dev),
             ("Median", median),
             ("Q25", q25),
-            ("Q75", q75),            
+            ("Q75", q75),
         ]
     )
 

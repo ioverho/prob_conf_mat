@@ -4,8 +4,8 @@ import warnings
 import numpy as np
 import jaxtyping as jtyping
 
-from src.confusion_matrix import ConfusionMatrixSamples
-from src.metrics.registration import register_simple_metric
+from bayes_conf_mat.confusion_matrix import ConfusionMatrixSamples
+from bayes_conf_mat.metrics.registration import register_simple_metric
 
 
 @register_simple_metric(

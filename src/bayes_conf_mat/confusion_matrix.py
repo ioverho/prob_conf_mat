@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 import jaxtyping as jtyping
 
-from src.distributions import dirichlet_prior, dirichlet_sample
+from bayes_conf_mat.distributions import dirichlet_prior, dirichlet_sample
 
 
 @dataclass(frozen=True)
