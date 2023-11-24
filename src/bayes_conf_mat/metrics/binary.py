@@ -2,7 +2,7 @@ import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.metrics.registration import register_complex_metric
-from bayes_conf_mat.metrics.aggregation import numpy_batched_harmonic_mean
+from bayes_conf_mat.math.batched_aggregation import numpy_batched_harmonic_mean
 
 
 @register_complex_metric(

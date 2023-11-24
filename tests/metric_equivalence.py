@@ -13,7 +13,7 @@ from bayes_conf_mat.metrics import (
     compute_all_simple_metrics,
     IMPLEMENTED_COMPLEX_METRICS,
 )
-from bayes_conf_mat.io import (
+from bayes_conf_mat.utils.io import (
     load_integer_csv_into_numpy,
     confusion_matrix_to_pred_target,
 )

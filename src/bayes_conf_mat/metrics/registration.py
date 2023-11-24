@@ -2,6 +2,7 @@ import typing
 
 IMPLEMENTED_SIMPLE_METRICS: typing.Dict[str, typing.Callable] = dict()
 IMPLEMENTED_COMPLEX_METRICS: typing.Dict[str, typing.Callable] = dict()
+IMPLEMENTED_AGGREGATION_FUNCTIONS: typing.Dict[str, typing.Callable] = dict()
 
 
 def register_simple_metric(
@@ -79,6 +80,32 @@ def register_complex_metric(
 
         # Register the function
         IMPLEMENTED_COMPLEX_METRICS[identifier] = func
+
+        return func
+
+    return wrapper
+
+
+def register_metric_aggregation(
+    identifier: str,
+    full_name: str,
+    required_simple_metrics: typing.Tuple[str, ...] = (),
+    sklearn_equivalent: typing.Optional[str] = None,
+):
+    def wrapper(func):
+        # Add the function's attributes
+        func.identifier = identifier
+        func.full_name = full_name
+        func.required_simple_metrics = required_simple_metrics
+        func.sklearn_equivalent = sklearn_equivalent
+
+        # Register the function
+        if identifier in IMPLEMENTED_AGGREGATION_FUNCTIONS:
+            raise ValueError(
+                f"'{identifier}' already exists as {IMPLEMENTED_AGGREGATION_FUNCTIONS[identifier]}. Please use a unique string for the indentifier."  # noqa: E501
+            )
+        else:
+            IMPLEMENTED_AGGREGATION_FUNCTIONS[identifier] = func
 
         return func
 

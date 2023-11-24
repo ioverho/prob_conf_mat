@@ -13,13 +13,16 @@ _PRIOR_STRATEGIES = {
     "zeros": 0,
 }
 
+
 def dirichlet_prior(strategy: str, shape: typing.Union[int, typing.Tuple[int]]):
     if isinstance(strategy, int):
         prior = np.full(shape, fill_value=strategy)
 
     elif isinstance(strategy, str):
         if strategy not in _PRIOR_STRATEGIES:
-            raise ValueError(f"Prior strategy '{strategy}' not recognized.")
+            raise ValueError(
+                f"Prior strategy `{strategy}` not recognized. Choose one of: {set(_PRIOR_STRATEGIES.keys())}"  # noqa: E501
+            )
 
         strategy_fill_value = _PRIOR_STRATEGIES[strategy]
         prior = np.full(shape, fill_value=strategy_fill_value)
@@ -34,8 +37,11 @@ def dirichlet_sample(
     rng: np.random.RandomState, alphas: np.ndarray, num_samples: int = 1
 ):
     """
-    Generate samples from an array of alpha distributions.
-    https://stackoverflow.com/a/15917312
+    Generate Dirichlet distributed samples from an array of Gamma distributions.
+
+    Unlike the numpy implementation, this can be batched.
+
+    Taken from: https://stackoverflow.com/a/15917312
     """
     # Check if the first dimension of the array is `num_samples`
     if alphas.shape != num_samples:

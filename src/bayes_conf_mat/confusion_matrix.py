@@ -1,9 +1,10 @@
+import typing
 from dataclasses import dataclass
 
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.distributions import dirichlet_prior, dirichlet_sample
+from bayes_conf_mat.math.dirichlet_distribution import dirichlet_prior, dirichlet_sample
 
 
 @dataclass(frozen=True)
@@ -19,13 +20,13 @@ class ConfusionMatrixSamples:
     ]
 
 
-class BayesianConfusionMatrix:
-    """
-    Simple wrapper class for holding some paramters for Bayesian estimation of confusion matrices.
-    """  # noqa: E501
-
+class UncertainConfusionMatrix:
     def __init__(
-        self, confusion_matrix, prior_strategy: str = "laplace", seed: int = 0
+        self,
+        confusion_matrix,
+        seed: int = 0,
+        prior_strategy: str = "laplace",
+        num_samples: typing.Optional[int] = None,
     ):
         self.confusion_matrix = confusion_matrix
         self.prior_strategy = prior_strategy
@@ -57,14 +58,23 @@ class BayesianConfusionMatrix:
         # Control RNG
         self.rng = np.random.default_rng(seed=seed)
 
+        #
+        self.num_samples = num_samples
+
     def _sample(
         self,
-        num_samples: int,
+        num_samples: typing.Union[int, None],
         condition_counts: jtyping.Float[np.ndarray, " num_classes"],
         pred_given_condition_counts: jtyping.Float[
             np.ndarray, " num_classes num_classes"
         ],
     ) -> ConfusionMatrixSamples:
+        if num_samples is None:
+            if self.num_samples is None:
+                raise ValueError("Need to specify `num_samples`.")
+            else:
+                num_samples = self.num_samples
+
         p_condition = dirichlet_sample(
             rng=self.rng,
             alphas=condition_counts,
@@ -113,7 +123,7 @@ class BayesianConfusionMatrix:
 
     def sample_prior(
         self,
-        num_samples: int,
+        num_samples: typing.Optional[int] = None,
     ):
         """Sample from the prior distribution.
 
@@ -132,7 +142,7 @@ class BayesianConfusionMatrix:
 
     def sample_posterior(
         self,
-        num_samples: int,
+        num_samples: typing.Optional[int] = None,
     ):
         """Sample from the posterior distribution.
 
@@ -149,12 +159,12 @@ class BayesianConfusionMatrix:
             self.posterior_pred_given_condtion_counts,
         )
 
-    def sample_null_model(
+    def simulate_random_model(
         self,
-        num_samples: int,
+        num_samples: typing.Optional[int] = None,
     ):
         """
-        Sample from the null model distribution.
+        Sample from the randomly initialized model distribution.
         It uses the class prevalence from the data, but a random confusion matrix.
         Thus, this should model a random classifier on the used dataset, accountingfor class imbalance.
 
@@ -166,8 +176,17 @@ class BayesianConfusionMatrix:
             _type_: _description_
         """  # noqa: E501
 
+        random_pred_given_condition_counts = np.broadcast_to(
+            np.mean(
+                self.posterior_pred_given_condtion_counts,
+                axis=-1,
+                keepdims=True,
+            ),
+            (self.num_classes, self.num_classes),
+        )
+
         return self._sample(
             num_samples,
             self.posterior_condition_counts,
-            self.prior_pred_given_condition_counts,
+            random_pred_given_condition_counts,
         )
