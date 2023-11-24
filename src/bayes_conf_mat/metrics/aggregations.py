@@ -1,0 +1,122 @@
+import numpy as np
+import jaxtyping as jtyping
+
+from bayes_conf_mat.metrics.base import Aggregation
+from bayes_conf_mat.math.batched_aggregation import (
+    numpy_batched_arithmetic_mean,
+    numpy_batched_convex_combination,
+    numpy_batched_geometric_mean,
+)
+
+
+class MacroAverage(Aggregation):
+    # TODO: write documentation
+
+    full_name = "Macro Averaging"
+    dependencies = ()
+    sklearn_equivalent = "macro"
+    aliases = ["macro", "macro_average", "mean"]
+
+    def compute_aggregation(
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        scalar_array = numpy_batched_arithmetic_mean(
+            metric_values,
+            axis=1,
+            keepdims=False,
+        )
+
+        return scalar_array
+
+
+class WeightedAverage(Aggregation):
+    # TODO: write documentation
+
+    full_name = "Class Prevalence Weighted Averaging"
+    dependencies = ("p_condition",)
+    sklearn_equivalent = "weighted"
+    aliases = ["weighted", "weighted_average"]
+
+    def compute_aggregation(
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+        p_condition: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        scalar_array = numpy_batched_convex_combination(
+            metric_values,
+            convex_weights=p_condition,
+            axis=1,
+            keepdims=False,
+        )
+
+        return scalar_array
+
+
+class SelectPositiveClass(Aggregation):
+    # TODO: write documentation
+
+    full_name = "Select Positive Class"
+    dependencies = ()
+    sklearn_equivalent = "binary"
+    aliases = ["select_positive", "binary", "select"]
+
+    def __init__(self, positive_class: int = -1) -> None:
+        super().__init__()
+
+        self.positive_class = positive_class
+
+    def compute_aggregation(
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        if metric_values.shape[1] < self.positive_class:
+            raise IndexError(
+                f"Passed metric values contain fewer classes than 'positive_class' argument: `{self.positive_class}`."  # noqa: E501
+            )
+
+        scalar_array = metric_values[:, self.positive_class]
+
+        return scalar_array
+
+
+class HarmonicMean(Aggregation):
+    # TODO: write documentation
+
+    full_name = "Harmonic Mean Averaging"
+    dependencies = ()
+    sklearn_equivalent = None
+    aliases = ["harmonic", "harm"]
+
+    def compute_aggregation(
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        scalar_array = numpy_batched_geometric_mean(
+            metric_values,
+            axis=1,
+            keepdims=False,
+        )
+
+        return scalar_array
+
+
+class GeometricMean(Aggregation):
+    # TODO: write documentation
+
+    full_name = "Geometric Mean Averaging"
+    dependencies = ()
+    sklearn_equivalent = None
+    aliases = ["geometric", "geom"]
+
+    def compute_aggregation(
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        scalar_array = numpy_batched_geometric_mean(
+            metric_values,
+            axis=1,
+            keepdims=False,
+        )
+
+        return scalar_array
