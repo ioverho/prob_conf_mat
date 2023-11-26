@@ -1,12 +1,50 @@
 from abc import ABCMeta, abstractmethod
 import inspect
 import typing
+from dataclasses import dataclass
+from inspect import signature
 
 import numpy as np
 import jaxtyping as jtyping
 
+_ROOT_METRICS = {
+    "norm_confusion_matrix",
+    "p_condition",
+    "p_pred_given_condition",
+    "p_pred",
+    "p_condition_given_pred",
+}
 METRIC_REGISTRY = dict()
 AGGREGATION_REGISTRY = dict()
+
+
+@dataclass(frozen=True)
+class RootMetric:
+    name: str
+
+    @property
+    def full_name(self):
+        return self.name
+
+    @property
+    def is_multiclass(self):
+        raise TypeError("Root metrics are not directly interpretable.")
+
+    @property
+    def range(self):
+        raise TypeError("Root metrics are not directly interpretable.")
+
+    @property
+    def dependencies(self):
+        return ()
+
+    @property
+    def sklearn_equivalent(self):
+        raise TypeError("Root metrics are not directly interpretable.")
+
+    @property
+    def aliases(self):
+        return [self.name]
 
 
 class Metric(metaclass=ABCMeta):
@@ -29,11 +67,23 @@ class Metric(metaclass=ABCMeta):
                     f"Alias '{alias}' not unique. Currently used by {METRIC_REGISTRY[alias]}."  # noqa: E501
                 )
 
+        # Make sure the parameters of the `compute_metric` function are actually
+        # the ones listed as dependencies
+        parameters = set(signature(cls.compute_metric).parameters.keys()) - {"self"}
+        dependencies = set(cls.dependencies)
+        if parameters != dependencies:
+            raise TypeError(
+                f"The input for the {cls.__name__}'s `compute_metric` method does not match the specified dependencies: {parameters} != {dependencies}"  # noqa: E501
+            )
+
         # Register =============================================================
         for alias in cls.aliases:
             METRIC_REGISTRY[alias] = cls
 
-        cls._kwargs = inspect.getfullargspec(cls).annotations
+        cls._kwargs = {
+            param.name: param.annotation
+            for param in inspect.signature(cls).parameters.values()
+        }
 
     @property
     @abstractmethod
@@ -75,8 +125,28 @@ class Metric(metaclass=ABCMeta):
         return self.compute_metric(*args, **kwargs)
 
     @property
-    def name(self):
+    def _metric_name(self):
         return self.aliases[0]
+
+    @property
+    def name(self):
+        metric_kwargs = "".join(
+            [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()]
+        )
+
+        return self._metric_name + metric_kwargs
+
+    def __repr__(self) -> str:
+        return self.name
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
 
 
 class Aggregation(metaclass=ABCMeta):
@@ -99,11 +169,20 @@ class Aggregation(metaclass=ABCMeta):
                     f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}."  # noqa: E501
                 )
 
+        for alias in cls.aliases:
+            if alias in METRIC_REGISTRY:
+                raise ValueError(
+                    f"Alias '{alias}' not unique. Currently used by {METRIC_REGISTRY[alias]}."  # noqa: E501
+                )
+
         # Register =============================================================
         for alias in cls.aliases:
             AGGREGATION_REGISTRY[alias] = cls
 
-        cls._kwargs = inspect.getfullargspec(cls).annotations
+        cls._kwargs = {
+            param.name: param.annotation
+            for param in inspect.signature(cls).parameters.values()
+        }
 
     @property
     @abstractmethod
@@ -138,8 +217,26 @@ class Aggregation(metaclass=ABCMeta):
         return self.compute_aggregation(metric_vals, *args, **kwargs)
 
     @property
-    def name(self):
+    def _aggregation_name(self):
         return self.aliases[0]
+
+    @property
+    def name(self):
+        kwargs = "".join([f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()])
+
+        return self._aggregation_name + kwargs
+
+    def __repr__(self) -> str:
+        return self.name
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
 
 
 class AggregatedMetric(metaclass=ABCMeta):
@@ -216,10 +313,6 @@ class AggregatedMetric(metaclass=ABCMeta):
         return aggregated_metric_vals
 
     @property
-    def name(self):
-        return f"{self.base_metric.name}@{self.aggregation.name}"
-
-    @property
     def _kwargs(self):
         kwargs = {
             "metric": self.base_metric._kwargs,
@@ -227,3 +320,19 @@ class AggregatedMetric(metaclass=ABCMeta):
         }
 
         return kwargs
+
+    @property
+    def name(self):
+        return f"{self.base_metric.name}@{self.aggregation.name}"
+
+    def __repr__(self) -> str:
+        return self.name
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)

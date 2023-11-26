@@ -4,7 +4,6 @@ This contains relatively simple metrics, usually only used as intermediate varia
 The simple/complex dichotomy is pretty arbitrary though
 """
 
-import warnings
 
 import jaxtyping as jtyping
 import numpy as np
@@ -22,15 +21,14 @@ class Prevalence(Metric):
     full_name = "Marginal Distribution of Condition"
     is_multiclass = False
     range = (0.0, 1.0)
-    dependencies = ()
+    dependencies = ("p_condition",)
     sklearn_equivalent = None
-    aliases = ["prevalence", "p_condition"]
+    aliases = ["prevalence"]
 
     def compute_metric(
-        self, samples
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        p_condition = samples.p_condition
-
+        self,
+        p_condition: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
         return p_condition
 
 
@@ -48,35 +46,19 @@ class ModelBias(Metric):
     full_name = "Marginal Distribution of Predictions"
     is_multiclass = False
     range = (0.0, 1.0)
-    dependencies = ()
+    dependencies = ("p_pred",)
     sklearn_equivalent = None
-    aliases = ["model_bias", "p_pred"]
+    aliases = ["model_bias"]
 
     def compute_metric(
-        self, samples
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        p_pred = samples.norm_confusion_matrix.sum(axis=1)
-
-        if (p_pred == 0).any():
-            warnings.warn("Simulated model neglects class, `p_pred' contains 0.")
+        self,
+        p_pred: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
+        # TODO: check confusion matrix before metric computation
+        # if (p_pred == 0).any():
+        #    warnings.warn("Simulated model neglects class, `p_pred' contains 0.")
 
         return p_pred
-
-
-class PCondGivenPred(Metric):
-    # TODO: write compute method for this function
-
-    full_name = "Conditional Distribution of Condition Given Prediction"
-    is_multiclass = False
-    range = (0.0, 1.0)
-    dependencies = ()
-    sklearn_equivalent = None
-    aliases = ["p_condition_given_pred", "p_cond_given_pred"]
-
-    def compute_metric(
-        self, samples
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        raise NotImplementedError
 
 
 class DiagMass(Metric):
@@ -95,15 +77,18 @@ class DiagMass(Metric):
     full_name = "Diagonal of Normalized Confusion Matrix"
     is_multiclass = False
     range = (0.0, 1.0)
-    dependencies = ()
+    dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = None
     aliases = ["diag_mass"]
 
     def compute_metric(
-        self, samples
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        self,
+        norm_confusion_matrix: jtyping.Float[
+            np.ndarray, " num_samples num_classes num_classes"
+        ],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
         diag_mass = np.diagonal(
-            a=samples.norm_confusion_matrix,
+            a=norm_confusion_matrix,
             axis1=1,
             axis2=2,
         )
@@ -125,15 +110,18 @@ class TruePositiveRate(Metric):
     full_name = "True Positive Rate"
     is_multiclass = False
     range = (0.0, 1.0)
-    dependencies = ()
+    dependencies = ("p_pred_given_condition",)
     sklearn_equivalent = None
-    aliases = ["tpr", "true_positive_rate", "sensitivity", "recall", "hit_rate"]
+    aliases = ["true_positive_rate", "sensitivity", "recall", "hit_rate", "tpr"]
 
     def compute_metric(
-        self, samples
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        self,
+        p_pred_given_condition: jtyping.Float[
+            np.ndarray, " num_samples num_classes num_classes"
+        ],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
         true_positive_rate = np.diagonal(
-            a=samples.p_pred_given_condition,
+            a=p_pred_given_condition,
             axis1=1,
             axis2=2,
         )
@@ -156,9 +144,9 @@ class FalseNegativeRate(Metric):
     is_complex = True
     is_multiclass = False
     range = (0.0, 1.0)
-    dependencies = ("tpr",)
+    dependencies = ("true_positive_rate",)
     sklearn_equivalent = None
-    aliases = ["fnr", "false_negative_rate", "miss_rate"]
+    aliases = ["false_negative_rate", "miss_rate", "fnr"]
 
     def compute_metric(
         self,
@@ -186,7 +174,7 @@ class PositivePredictiveValue(Metric):
     range = (0.0, 1.0)
     dependencies = ("p_condition_given_pred",)
     sklearn_equivalent = None
-    aliases = ["ppv", "positive_predictive_value", "precision"]
+    aliases = ["positive_predictive_value", "precision", "ppv"]
 
     def compute_metric(
         self,
@@ -218,7 +206,7 @@ class FalseDiscoveryRate(Metric):
     range = (0.0, 1.0)
     dependencies = ("positive_predictive_value",)
     sklearn_equivalent = None
-    aliases = ["fdr", "false_discovery_rate"]
+    aliases = ["false_discovery_rate", "fdr"]
 
     def compute_metric(
         self,
@@ -248,7 +236,7 @@ class FalsePositiveRate(Metric):
     range = (0.0, 1.0)
     dependencies = ("diag_mass", "p_pred", "p_condition")
     sklearn_equivalent = None
-    aliases = ["fpr", "false_positive_rate", "fall-out", "fall_out"]
+    aliases = ["false_positive_rate", "fall-out", "fall_out", "fpr"]
 
     def compute_metric(
         self,
@@ -278,7 +266,7 @@ class TrueNegativeRate(Metric):
     range = (0.0, 1.0)
     dependencies = ("false_positive_rate",)
     sklearn_equivalent = None
-    aliases = ["tnr", "true_negative_rate", "specificity", "selectivity"]
+    aliases = ["true_negative_rate", "specificity", "selectivity", "tnr"]
 
     def compute_metric(
         self,
@@ -306,7 +294,7 @@ class FalseOmissionRate(Metric):
     range = (0.0, 1.0)
     dependencies = ("p_condition", "p_pred", "diag_mass")
     sklearn_equivalent = None
-    aliases = ["for", "false_omission_rate"]
+    aliases = ["false_omission_rate", "for"]
 
     def compute_metric(
         self,
@@ -338,7 +326,7 @@ class NegativePredictiveValue(Metric):
     range = (0.0, 1.0)
     dependencies = ("false_omission_rate",)
     sklearn_equivalent = None
-    aliases = ["npv", "negative_predictive_value"]
+    aliases = ["negative_predictive_value", "npv"]
 
     def compute_metric(
         self,

@@ -1,9 +1,11 @@
 import re
 
 from bayes_conf_mat.metrics.base import (
+    _ROOT_METRICS,
     METRIC_REGISTRY,
     AGGREGATION_REGISTRY,
     AggregatedMetric,
+    RootMetric,
 )
 
 RESERVED_CHARACTERS = {
@@ -70,9 +72,12 @@ def get_metric(syntax_string: str) -> callable:
     if metric_name in METRIC_REGISTRY:
         metric_class = METRIC_REGISTRY[metric_name]
 
+    elif metric_name in _ROOT_METRICS:
+        return RootMetric(name=metric_name)
+
     else:
         raise ValueError(
-            f"Metric `{metric_name}` not found. Please choose one of: {set(METRIC_REGISTRY.keys())}"  # noqa: E501
+            f"Metric alias `{metric_name}` not found. Please choose one of: {set(METRIC_REGISTRY.keys())}"  # noqa: E501
         )
 
     # Parse and pass the kwargs for the metric function ========================
@@ -97,7 +102,7 @@ def get_metric(syntax_string: str) -> callable:
             aggregation_class = AGGREGATION_REGISTRY[aggregation_name]
         except KeyError:
             raise ValueError(
-                f"Aggregation `{aggregation_name}` not found. Please choose one of: {set(AGGREGATION_REGISTRY.keys())}"  # noqa: E501
+                f"Aggregation alias `{aggregation_name}` not found. Please choose one of: {set(AGGREGATION_REGISTRY.keys())}"  # noqa: E501
             )
 
         # Parse and pass the kwargs for the metric function ========================

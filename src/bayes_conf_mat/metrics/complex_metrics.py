@@ -36,7 +36,7 @@ class NegativeLikelihoodRatio(Metric):
     range = (0.0, float("inf"))
     dependencies = ("fnr", "tnr")
     sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["nlr", "negative_likelihood_ratio"]
+    aliases = ["negative_likelihood_ratio", "nlr"]
 
     def compute_metric(
         self,
@@ -52,7 +52,7 @@ class DiagnosticOddsRatio(Metric):
     full_name = "Negative Likelihood Ratio"
     is_multiclass = False
     range = (0.0, float("inf"))
-    dependencies = ("plr", "nlr")
+    dependencies = ("nlr", "plr")
     sklearn_equivalent = None
     aliases = ["dor", "diagnostic_odds_ratio"]
 
