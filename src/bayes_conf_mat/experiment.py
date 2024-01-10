@@ -1,6 +1,9 @@
 import typing
 import warnings
 from collections.abc import Iterable
+import random
+import datetime
+import string
 
 import numpy as np
 import jaxtyping as jtyping
@@ -16,12 +19,16 @@ _IMPLEMENTED_SAMPLING_METHODS = {"prior", "posterior", "random", "input"}
 class Experiment:
     def __init__(
         self,
+        name: str,
         confusion_matrix: jtyping.Int[np.ndarray, " num_classes num_classes"],
         num_samples: typing.Optional[int] = None,
-        seed: int = 0,
+        seed: typing.Optional[int | np.random.BitGenerator] = 0,
         prior_strategy: str = "laplace",
         metrics: typing.Optional[typing.Iterable[str]] = (),
     ) -> None:
+        self.time_stamp = format(datetime.datetime.now(), "%y%m%d-%H:%M:%S")
+        self.name = name
+
         # Argument Validation ==================================================
         # Import the confusion matrix
         # If not a numpy array, tries to make it one
@@ -44,8 +51,7 @@ class Experiment:
             self._rng = seed
 
         # Other Stuff ==========================================================
-        self._metric_names = list()
-        self._metrics = list()
+        self.metrics = list()
         self._metrics_set = set()
         self.add_metric(metric=metrics)
 
@@ -240,16 +246,14 @@ class Experiment:
                 )  # noqa: E501
                 return None
 
-            self._metric_names.append(metric)
             # TODO: replace with ordered dict
-            self._metrics.append(metric_instance)
+            self.metrics.append(metric_instance)
             self._metrics_set.add(metric_instance)
 
         elif issubclass(metric.__class__, Metric) or issubclass(
             metric.__class__, AggregatedMetric
         ):
-            self._metric_names.append(metric.name)
-            self._metrics.append(metric)
+            self.metrics.append(metric)
             self._metrics_set.add(metric)
 
         else:
@@ -257,10 +261,10 @@ class Experiment:
                 f"Metric must be of type `str`, or a subclass of `Metric` or `AggregatedMetric`, not {metric}: {type(metric)}"  # noqa: E501
             )
 
-    def _compute_metrics(
+    def compute_metrics(
         self, sample_method: str, num_samples: typing.Optional[int] = None
     ):
-        if len(self._metrics) == 0:
+        if len(self.metrics) == 0:
             raise ValueError(
                 "No metrics have been added to the experiment yet. Use the `add_metric` method to add some."  # noqa: E501
             )
@@ -284,7 +288,7 @@ class Experiment:
         elif sample_method == "input":
             intermediate_stats.update(self.sample_input())
 
-        computation_schedule = generate_metric_computation_schedule(self._metrics)
+        computation_schedule = generate_metric_computation_schedule(self.metrics)
 
         for metric in computation_schedule:
             if isinstance(metric, RootMetric):
@@ -300,8 +304,8 @@ class Experiment:
             intermediate_stats[metric.name] = values
 
         reported_metrics = {
-            self._metric_names[i]: intermediate_stats[metric.name]
-            for i, metric in enumerate(self._metrics)
+            metric.name: intermediate_stats[metric.name]
+            for metric in self.metrics
         }
 
         return reported_metrics

@@ -18,11 +18,12 @@ from bayes_conf_mat.utils.io import (
 class TestMetricEquivalence(unittest.TestCase):
     def setUp(self):
         # Load in all the test cases
-        _, _, files = next(os.walk("./tests/confusion_matrices/"))
+        data_dir = "./data/test_cases"
+        _, _, files = next(os.walk(data_dir))
 
         self.test_cases = []
         for file_name in files:
-            fp = f"./tests/confusion_matrices/{file_name}"
+            fp = f"{data_dir}/{file_name}"
             confusion_matrix = load_integer_csv_into_numpy(fp=fp)
 
             self.test_cases.append((file_name, confusion_matrix))
@@ -195,28 +196,6 @@ class TestMetricEquivalence(unittest.TestCase):
             sklearn_func=sklearn_func,
         )
 
-
-# def test_nlr(self):
-#    sklearn_func_ = sklearn.metrics.class_likelihood_ratios
-#
-#    def sklearn_func(x, y):
-#        return sklearn_func_(x, y)[1]
-#
-#    self._throw_univariate_cases_against_metric(
-#        our_func=IMPLEMENTED_COMPLEX_METRICS["nlr"],
-#        sklearn_func=sklearn_func,
-#    )
-#
-# def test_dor(self):
-#    sklearn_func_ = sklearn.metrics.class_likelihood_ratios
-#
-#    def sklearn_func(x, y):
-#        return sklearn_func_(x, y)[0] / sklearn_func_(x, y)[1]
-#
-#    self._throw_univariate_cases_against_metric(
-#        our_func=IMPLEMENTED_COMPLEX_METRICS["dor"],
-#        sklearn_func=sklearn_func,
-#    )
 
 if __name__ == "__main__":
     unittest.main()
