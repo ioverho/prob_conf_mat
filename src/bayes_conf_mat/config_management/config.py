@@ -68,7 +68,7 @@ class Config:
                     self.yaml_config["metrics"][metric] = default_metric_kwargs
 
     def __getattribute__(self, __name: str) -> Any:
-        """Hacky method for letting the config act as an immutable attrdict/namespace."""
+        """Hacky method for letting this config act as an immutable attrdict/namespace."""
         try:
             return super().__getattribute__(__name)
         except AttributeError as e:

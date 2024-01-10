@@ -1,3 +1,5 @@
+# TODO: move this to utils folder
+# Just a helper class, not that important
 from types import SimpleNamespace
 
 
