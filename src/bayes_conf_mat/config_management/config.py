@@ -67,6 +67,12 @@ class Config:
                 for metric in no_metric_kwargs:
                     self.yaml_config["metrics"][metric] = default_metric_kwargs
 
+        # RULE: the number of processes to use must be 0 (main process) or greater (multiprocessing)
+        if not self.yaml_config["num_proc"].data >= 0:
+            raise ConfigError(
+                "The number of processes to use must be 0 (main process) or greater (multiprocessing)"
+            )
+
     def __getattribute__(self, __name: str) -> Any:
         """Hacky method for letting this config act as an immutable attrdict/namespace."""
         try:

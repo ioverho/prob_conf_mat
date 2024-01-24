@@ -33,10 +33,16 @@ class FrozenAttrDict(SimpleNamespace):
         return len(self.__dict__)
 
     def keys(self):
-        return self.__dict__.keys()
+        return tuple(self.__dict__.keys())
 
     def values(self):
-        return self.__dict__.values()
+        return tuple(self.__dict__.values())
 
     def items(self):
-        return self.__dict__.items()
+        return tuple(self.__dict__.items())
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __hash__(self) -> int:
+        return hash(self.items())

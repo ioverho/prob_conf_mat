@@ -1,17 +1,12 @@
 import typing
-import warnings
-from collections.abc import Iterable
-import random
 import datetime
-import string
 
 import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.metrics import get_metric
-from bayes_conf_mat.metrics.base import RootMetric, Metric, AggregatedMetric
+from bayes_conf_mat.metrics.base import RootMetric
 from bayes_conf_mat.math.dirichlet_distribution import dirichlet_sample, dirichlet_prior
-from bayes_conf_mat.utils._scheduling import generate_metric_computation_schedule
 
 _IMPLEMENTED_SAMPLING_METHODS = {"prior", "posterior", "random", "input"}
 
@@ -21,10 +16,8 @@ class Experiment:
         self,
         name: str,
         confusion_matrix: jtyping.Int[np.ndarray, " num_classes num_classes"],
-        num_samples: typing.Optional[int] = None,
-        seed: typing.Optional[int | np.random.BitGenerator] = 0,
+        rng: np.random.BitGenerator,
         prior_strategy: str = "laplace",
-        metrics: typing.Optional[typing.Iterable[str]] = (),
     ) -> None:
         self.time_stamp = format(datetime.datetime.now(), "%y%m%d-%H:%M:%S")
         self.name = name
@@ -39,21 +32,8 @@ class Experiment:
         # The prior strategy used for defining the Dirichlet prior counts
         self.prior_strategy = prior_strategy
 
-        # The number of synthetic confusion matrices to sample
-        self.num_samples = num_samples
-
         # The RNG
-        if isinstance(seed, int) or isinstance(seed, float):
-            self._rng = np.random.default_rng(seed=seed)
-        elif isinstance(seed, np.random.BitGenerator) or isinstance(
-            seed, np.random.Generator
-        ):
-            self._rng = seed
-
-        # Other Stuff ==========================================================
-        self.metrics = list()
-        self._metrics_set = set()
-        self.add_metric(metric=metrics)
+        self.rng = rng
 
     @property
     def num_classes(self):
@@ -73,19 +53,14 @@ class Experiment:
         confusion_matrix: jtyping.Float[np.ndarray, " num_classes num_classes"],
         num_samples: typing.Optional[int] = None,
     ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes ..."]]:
-        if self.num_samples is None and num_samples is None:
-            raise ValueError("Must specify `num_samples`")
-        elif num_samples is None:
-            num_samples = self.num_samples
-
         p_condition = dirichlet_sample(
-            rng=self._rng,
+            rng=self.rng,
             alphas=condition_counts,
             num_samples=num_samples,
         )
 
         p_pred_given_condition = dirichlet_sample(
-            rng=self._rng,
+            rng=self.rng,
             alphas=confusion_matrix,
             num_samples=num_samples,
         )
@@ -97,11 +72,11 @@ class Experiment:
         p_condition_given_pred = norm_confusion_matrix / p_pred[:, np.newaxis, :]
 
         output_dict = {
-            "norm_confusion_matrix": norm_confusion_matrix,
-            "p_condition": p_condition,
-            "p_pred_given_condition": p_pred_given_condition,
-            "p_pred": p_pred,
-            "p_condition_given_pred": p_condition_given_pred,
+            RootMetric("norm_confusion_matrix"): norm_confusion_matrix,
+            RootMetric("p_condition"): p_condition,
+            RootMetric("p_pred_given_condition"): p_pred_given_condition,
+            RootMetric("p_pred"): p_pred,
+            RootMetric("p_condition_given_pred"): p_condition_given_pred,
         }
 
         return output_dict
@@ -218,49 +193,38 @@ class Experiment:
 
         return output_dict
 
-    def add_metric(
+    def sample(
         self,
-        metric: str
-        | typing.Type[Metric]
-        | typing.Type[AggregatedMetric]
-        | typing.Iterable[str | typing.Type[Metric] | typing.Type[AggregatedMetric]],
+        sampling_method: str,
+        num_samples: int,
     ):
-        """_summary_
+        # if len(self.metrics) == 0:
+        #    raise ValueError(
+        #        "No metrics have been added to the experiment yet. Use the `add_metric` method to add some."  # noqa: E501
+        #    )
 
-        Args:
-            metric (str | typing.Type[Metric] | typing.Type[AggregatedMetric] | typing.Iterable[str  |  typing.Type[Metric]  |  typing.Type[AggregatedMetric]]): _description_
-        """  # noqa: E501
-        if isinstance(metric, Iterable):
-            for m in metric:
-                self._add_metric(m)
-        else:
-            self._add_metric(metric)
+        root_metrics = dict()
 
-    def _add_metric(self, metric: str | Metric | AggregatedMetric):
-        if isinstance(metric, str):
-            metric_instance = get_metric(metric)
+        if sampling_method not in _IMPLEMENTED_SAMPLING_METHODS:
+            raise ValueError(
+                f"Sampling method must be one of `{_IMPLEMENTED_SAMPLING_METHODS}`"
+            )  # noqa: E501
 
-            if metric_instance in self._metrics_set:
-                warnings.warn(
-                    f"Metric `{metric}` already added to experiment. Skipping."
-                )  # noqa: E501
-                return None
+        elif sampling_method == "posterior":
+            root_metrics.update(self.sample_posterior(num_samples=num_samples))
 
-            # TODO: replace with ordered dict
-            self.metrics.append(metric_instance)
-            self._metrics_set.add(metric_instance)
+        elif sampling_method == "prior":
+            root_metrics.update(self.sample_prior(num_samples=num_samples))
 
-        elif issubclass(metric.__class__, Metric) or issubclass(
-            metric.__class__, AggregatedMetric
-        ):
-            self.metrics.append(metric)
-            self._metrics_set.add(metric)
+        elif sampling_method == "posterior":
+            root_metrics.update(self.sample_random_model(num_samples=num_samples))
 
-        else:
-            raise TypeError(
-                f"Metric must be of type `str`, or a subclass of `Metric` or `AggregatedMetric`, not {metric}: {type(metric)}"  # noqa: E501
-            )
+        elif sampling_method == "input":
+            root_metrics.update(self.sample_input())
 
+        return root_metrics
+
+    # TODO: move this method to experiment manager class
     def compute_metrics(
         self, sample_method: str, num_samples: typing.Optional[int] = None
     ):
@@ -268,6 +232,9 @@ class Experiment:
             raise ValueError(
                 "No metrics have been added to the experiment yet. Use the `add_metric` method to add some."  # noqa: E501
             )
+
+        if num_samples is None:
+            num_samples = self.num_samples
 
         intermediate_stats = dict()
 
@@ -288,9 +255,9 @@ class Experiment:
         elif sample_method == "input":
             intermediate_stats.update(self.sample_input())
 
-        computation_schedule = generate_metric_computation_schedule(self.metrics)
-
-        for metric in computation_schedule:
+        for metric in self.metrics.get_compute_order():
+            # RootMetric has no dependency per-definition
+            # and is computed automatically
             if isinstance(metric, RootMetric):
                 continue
 
@@ -305,7 +272,7 @@ class Experiment:
 
         reported_metrics = {
             metric.name: intermediate_stats[metric.name]
-            for metric in self.metrics
+            for metric in self.metrics.get_insert_order()
         }
 
         return reported_metrics

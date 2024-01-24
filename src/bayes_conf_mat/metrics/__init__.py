@@ -3,11 +3,14 @@ from .base import (
     _ROOT_METRICS,
     METRIC_REGISTRY,
     AGGREGATION_REGISTRY,
-)  # noqa: F401
+    Metric,  # noqa: F401, F403
+    AggregatedMetric,  # noqa: F401, F403
+)
 from .simple_metrics import *  # noqa: F401, F403
 from .complex_metrics import *  # noqa: F401, F403
 from .aggregations import *  # noqa: F401, F403
 from .interface import get_metric  # noqa: F401
+from .collection import MetricCollection  # noqa: F401
 
 # Check that all metrics have valid dependencies
 for metric in METRIC_REGISTRY:

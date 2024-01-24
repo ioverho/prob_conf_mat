@@ -1,8 +1,9 @@
-from abc import ABCMeta, abstractmethod
 import inspect
 import typing
+from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from inspect import signature
+from itertools import product
 
 import numpy as np
 import jaxtyping as jtyping
@@ -137,10 +138,10 @@ class Metric(metaclass=ABCMeta):
         return self._metric_name + metric_kwargs
 
     def __repr__(self) -> str:
-        return self.name
+        return f"Metric({self.name})"
 
     def __str__(self) -> str:
-        return self.name
+        return f"Metric({self.name})"
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.name == other.name
@@ -255,6 +256,13 @@ class AggregatedMetric(metaclass=ABCMeta):
         self.aggregation = aggregation
 
     @property
+    def aliases(self):
+        return [
+            f"{lhs}@{rhs}"
+            for lhs, rhs in product(self.base_metric.aliases, self.aggregation.aliases)
+        ]
+
+    @property
     def full_name(self):
         return f"{self.base_metric.full_name} with {self.aggregation.full_name}"
 
@@ -326,10 +334,10 @@ class AggregatedMetric(metaclass=ABCMeta):
         return f"{self.base_metric.name}@{self.aggregation.name}"
 
     def __repr__(self) -> str:
-        return self.name
+        return f"AggregatedMetric({self.name})"
 
     def __str__(self) -> str:
-        return self.name
+        return f"AggregatedMetric({self.name})"
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.name == other.name

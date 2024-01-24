@@ -9,6 +9,7 @@ top_level_validator = {
     strictyaml.Optional("prior_strategy", default="laplace"): strictyaml.Enum(
         _PRIOR_STRATEGIES
     ),
+    strictyaml.Optional("num_proc", default=0): strictyaml.Int(),
 }
 
 experiment_validator = {
