@@ -1,0 +1,21 @@
+#### Experiment Aggregation
+
+Using the `@@aggregation_name@@` aggregator with the following parameters:
+
+```txt
+@@aggregation_params@@
+```
+
+*Forest plot*
+
+@@forest_plot@@
+
+*Posterior Summary*
+
+```txt
+@@summary_table@@
+```
+
+*Heterogeneity*
+
+$I^2$ was @@i2_value@@%, which corresponds to '@@i2_interpretation@@'.

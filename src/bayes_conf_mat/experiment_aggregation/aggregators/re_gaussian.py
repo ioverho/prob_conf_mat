@@ -5,10 +5,8 @@ import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
-from bayes_conf_mat.experiment_aggregation.utils.truncated_sampling import (
+from bayes_conf_mat.experiment_aggregation.utils import (
     truncated_sample,
-)
-from bayes_conf_mat.experiment_aggregation.utils.heterogeneity import (
     heterogeneity_DL,
     heterogeneity_PM,
 )
@@ -22,19 +20,17 @@ class REGaussianAggregator(ExperimentAggregation):
     def __init__(
         self,
         rng: np.random.BitGenerator,
-        num_proc: int = 0,
         paule_mandel_heterogeneity: bool = True,
         hksj_sampling_distribution: bool = True,
     ) -> None:
-        super().__init__(rng=rng, num_proc=num_proc)
+        super().__init__(rng=rng)
         self.paule_mandel_heterogeneity = paule_mandel_heterogeneity
         self.hksj_sampling_distribution = hksj_sampling_distribution
 
     def aggregate(
         self,
         distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
-        extrema: typing.Tuple[int],
-        rng: np.random.BitGenerator,
+        bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_experiments, num_samples = distribution_samples.shape
 
@@ -76,13 +72,6 @@ class REGaussianAggregator(ExperimentAggregation):
                 scale=hksj_factor * np.sqrt(agg_variance),
             )
 
-            aggregated_distribution_samples = truncated_sample(
-                sampling_distribution=aggregated_distribution,
-                range=extrema,
-                rng=rng,
-                num_samples=num_samples,
-            )
-
         else:
             # Uses Gaussian distrbution
             aggregated_distribution = scipy.stats.norm(
@@ -90,11 +79,11 @@ class REGaussianAggregator(ExperimentAggregation):
                 scale=np.sqrt(agg_variance),
             )
 
-            aggregated_distribution_samples = truncated_sample(
-                sampling_distribution=aggregated_distribution,
-                range=extrema,
-                rng=rng,
-                num_samples=num_samples,
-            )
+        aggregated_distribution_samples = truncated_sample(
+            sampling_distribution=aggregated_distribution,
+            bounds=bounds,
+            rng=self.rng,
+            num_samples=num_samples,
+        )
 
         return aggregated_distribution_samples

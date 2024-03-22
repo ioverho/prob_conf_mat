@@ -1,15 +1,14 @@
 import typing
 from collections import deque, OrderedDict
-from collections.abc import Iterable
 from graphlib import TopologicalSorter
 
 from bayes_conf_mat.metrics.interface import get_metric
-from bayes_conf_mat.metrics.base import RootMetric, Metric, AggregatedMetric
+from bayes_conf_mat.metrics.base import RootMetric, Metric, AveragedMetric
 
 
 def generate_metric_computation_schedule(
-    metrics: typing.Iterable[str | typing.Type[Metric] | typing.Type[AggregatedMetric]],
-) -> typing.Generator[typing.Type[Metric] | typing.Type[AggregatedMetric], None, None]:
+    metrics: typing.Iterable[str | typing.Type[Metric] | typing.Type[AveragedMetric]],
+) -> typing.Generator[typing.Type[Metric] | typing.Type[AveragedMetric], None, None]:
     """Generates a topological ordering of the inserted metrics and their dependencies.
 
     Ensures no function is computed before its dependencies are available.
@@ -44,14 +43,23 @@ def generate_metric_computation_schedule(
 
     computation_schedule = topological_sorter.static_order()
 
-    return computation_schedule
+    return tuple(computation_schedule)
 
 
 class MetricCollection:
+    """Endows a list of metrics with various needed properties, like:
+        - metric syntax interfacing
+        - redundancy checking
+        - topological sorting
+
+    Args:
+        metrics (typing.Optional[ typing.Iterable[str  |  typing.Type[Metric]  |  typing.Type[AggregatedMetric]] ], optional): the iterable of metrics. Defaults to ().
+    """
+
     def __init__(
         self,
         metrics: typing.Optional[
-            typing.Iterable[str | typing.Type[Metric] | typing.Type[AggregatedMetric]]
+            typing.Iterable[str | typing.Type[Metric] | typing.Type[AveragedMetric]]
         ] = (),
     ) -> None:
         self._metrics = OrderedDict()
@@ -64,32 +72,49 @@ class MetricCollection:
         self,
         metric: str
         | typing.Type[Metric]
-        | typing.Type[AggregatedMetric]
-        | typing.Iterable[str | typing.Type[Metric] | typing.Type[AggregatedMetric]],
+        | typing.Type[AveragedMetric]
+        | typing.Iterable[str | typing.Type[Metric] | typing.Type[AveragedMetric]],
     ):
-        if isinstance(metric, Iterable):
+        """Adds a metric to the metric collection. The 'metric' must be one of:
+            - a valid metric syntax string
+            - an instance of `Metric` or `AveragedMetric`
+            - an iterable of the above two
+            - a `MetricCollection`
+
+        Args:
+            metric (str | typing.Type[Metric] | typing.Type[AggregatedMetric] | typing.Iterable[str  |  typing.Type[Metric]  |  typing.Type[AggregatedMetric]]): _description_
+        """
+
+        if (
+            isinstance(metric, str)
+            or issubclass(metric.__class__, Metric)
+            or issubclass(metric.__class__, AveragedMetric)
+            or issubclass(metric.__class__, RootMetric)
+        ):
+            self._add_metric(metric)
+        elif (
+            isinstance(metric, list)
+            or isinstance(metric, set)
+            or isinstance(metric, tuple)
+        ):
             for m in metric:
-                self._add_metric(m)
+                self.add(m)
         elif isinstance(metric, self.__class__):
             for m in metric.get_insert_order():
-                self._add_metric(m)
+                self.add(m)
         else:
-            self._add_metric(metric)
+            raise ValueError(
+                f"Cannot process input of type `{type(metric)}` into a MetricCollection."
+            )
 
-    def _add_metric(self, metric: str | Metric | AggregatedMetric):
-        # If the passed metric is a string, try to parse it with the `get_metric` intertface
+    def _add_metric(self, metric: str | Metric | AveragedMetric):
         if isinstance(metric, str):
             metric_instance = get_metric(metric)
             self._metrics_by_alias_or_name.update({metric: metric_instance})
-            # if metric_instance in self._metrics:
-            #    warnings.warn(
-            #        f"Metric `{metric}` already added to experiment. Skipping."
-            #    )  # noqa: E501
-            #    return None
 
         elif (
             issubclass(metric.__class__, Metric)
-            or issubclass(metric.__class__, AggregatedMetric)
+            or issubclass(metric.__class__, AveragedMetric)
             or issubclass(metric.__class__, RootMetric)
         ):
             metric_instance = metric
@@ -105,9 +130,6 @@ class MetricCollection:
             {alias: metric_instance for alias in metric_instance.aliases}
         )
 
-    def __getitem__(self, key: str):
-        return self._metrics_by_alias_or_name[key]
-
     def get_insert_order(self):
         return list(self._metrics.keys())
 
@@ -117,6 +139,9 @@ class MetricCollection:
         )
 
         return MetricCollection(topologically_sorted)
+
+    def __getitem__(self, key: str):
+        return self._metrics_by_alias_or_name[key]
 
     def __iter__(self):
         for metric in tuple(self.get_insert_order()):

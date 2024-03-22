@@ -1,15 +1,15 @@
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.metrics.base import Aggregation
-from bayes_conf_mat.math.batched_aggregation import (
+from bayes_conf_mat.metrics.base import Averaging
+from bayes_conf_mat.stats import (
     numpy_batched_arithmetic_mean,
     numpy_batched_convex_combination,
     numpy_batched_geometric_mean,
 )
 
 
-class MacroAverage(Aggregation):
+class MacroAverage(Averaging):
     # TODO: write documentation
 
     full_name = "Macro Averaging"
@@ -17,7 +17,7 @@ class MacroAverage(Aggregation):
     sklearn_equivalent = "macro"
     aliases = ["macro", "macro_average", "mean"]
 
-    def compute_aggregation(
+    def compute_average(
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
@@ -30,7 +30,7 @@ class MacroAverage(Aggregation):
         return scalar_array
 
 
-class WeightedAverage(Aggregation):
+class WeightedAverage(Averaging):
     # TODO: write documentation
 
     full_name = "Class Prevalence Weighted Averaging"
@@ -38,7 +38,7 @@ class WeightedAverage(Aggregation):
     sklearn_equivalent = "weighted"
     aliases = ["weighted", "weighted_average"]
 
-    def compute_aggregation(
+    def compute_average(
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
         p_condition: jtyping.Float[np.ndarray, " num_samples num_classes"],
@@ -53,7 +53,7 @@ class WeightedAverage(Aggregation):
         return scalar_array
 
 
-class SelectPositiveClass(Aggregation):
+class SelectPositiveClass(Averaging):
     # TODO: write documentation
 
     full_name = "Select Positive Class"
@@ -66,7 +66,7 @@ class SelectPositiveClass(Aggregation):
 
         self.positive_class = positive_class
 
-    def compute_aggregation(
+    def compute_average(
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
@@ -80,7 +80,7 @@ class SelectPositiveClass(Aggregation):
         return scalar_array
 
 
-class HarmonicMean(Aggregation):
+class HarmonicMean(Averaging):
     # TODO: write documentation
 
     full_name = "Harmonic Mean Averaging"
@@ -88,7 +88,7 @@ class HarmonicMean(Aggregation):
     sklearn_equivalent = None
     aliases = ["harmonic", "harm"]
 
-    def compute_aggregation(
+    def compute_average(
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
@@ -101,7 +101,7 @@ class HarmonicMean(Aggregation):
         return scalar_array
 
 
-class GeometricMean(Aggregation):
+class GeometricMean(Averaging):
     # TODO: write documentation
 
     full_name = "Geometric Mean Averaging"
@@ -109,7 +109,7 @@ class GeometricMean(Aggregation):
     sklearn_equivalent = None
     aliases = ["geometric", "geom"]
 
-    def compute_aggregation(
+    def compute_average(
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:

@@ -3,16 +3,18 @@ import re
 from bayes_conf_mat.metrics.base import (
     _ROOT_METRICS,
     METRIC_REGISTRY,
-    AGGREGATION_REGISTRY,
-    AggregatedMetric,
+    AVERAGING_REGISTRY,
+    AveragedMetric,
     RootMetric,
 )
 
 RESERVED_CHARACTERS = {
-    "@",
-    "+",
-    "=",
+    "@",  # Denotes the boundary between describing the metric and its averaging method
+    "+",  # Denotes a kwarg key
+    "=",  # Denotes a kwarg value
 }
+# TODO: document these regex strings
+# Reminder: always document regex immediately after writing down...
 NAME_REGEX = re.compile(r"([^\+\@\=]+)[\+\@\=]?")
 ARGUMENT_REGEX = re.compile(r"\+([^\+\@\=]+)\=([^\+\@\=]+)[^\+\@]?")
 
@@ -43,25 +45,20 @@ def _parse_kwargs(kwargs):
 
 
 def get_metric(syntax_string: str) -> callable:
-    """Takes a metric syntax string and returns a metric function, potentially with included aggregation.
+    """Takes a metric syntax string and returns a metric class instance, potentially with included averaging.
 
     Args:
         syntax_string (str): a valid metric syntax string
 
-    Raises:
-        ValueError: _description_
-        ValueError: _description_
-        ValueError: _description_
-        ValueError: _description_
-
     Returns:
-        callable: a valid metric function
+        callable: a metric class instance
     """  # noqa: E501
+    # Split on the averaging
     syntax_components = syntax_string.split("@")
 
     if len(syntax_components) > 2:
         raise ValueError(
-            f"Multiple aggregations found in metric string `{syntax_string}`. Make sure to include only one `@` character"  # noqa: E501
+            f"Multiple averaging methods found in metric string `{syntax_string}`. Make sure to include only one `@` character"  # noqa: E501
         )
 
     # Parse the metric name ====================================================
@@ -87,36 +84,40 @@ def get_metric(syntax_string: str) -> callable:
 
     metric_instance = metric_class(**metric_kwargs)
 
-    # Parse the aggregation name ===============================================
+    metric_instance._instantiation_name = metric_string
+
+    # Parse the averaging name ===============================================
     if len(syntax_components) == 2:
-        aggregation_string = syntax_components[1]
+        averaging_string = syntax_components[1]
 
         if metric_instance.is_multiclass:
             raise ValueError(
-                "Metric is already multivariate and does not need to be aggregated. Please remove the `@` specification"  # noqa: E501
+                "Metric is already multivariate and does not need to be averaged. Please remove the `@` specification"  # noqa: E501
             )
 
-        aggregation_name = NAME_REGEX.findall(aggregation_string)[0]
+        averaging_name = NAME_REGEX.findall(averaging_string)[0]
 
         try:
-            aggregation_class = AGGREGATION_REGISTRY[aggregation_name]
+            averaging_class = AVERAGING_REGISTRY[averaging_name]
         except KeyError:
             raise ValueError(
-                f"Aggregation alias `{aggregation_name}` not found. Please choose one of: {set(AGGREGATION_REGISTRY.keys())}"  # noqa: E501
+                f"Averaging alias `{averaging_name}` not found. Please choose one of: {set(AVERAGING_REGISTRY.keys())}"  # noqa: E501
             )
 
         # Parse and pass the kwargs for the metric function ========================
-        aggregation_kwargs = ARGUMENT_REGEX.findall(aggregation_string)
-        aggregation_kwargs = dict(aggregation_kwargs)
-        aggregation_kwargs = _parse_kwargs(aggregation_kwargs)
+        averaging_kwargs = ARGUMENT_REGEX.findall(averaging_string)
+        averaging_kwargs = dict(averaging_kwargs)
+        averaging_kwargs = _parse_kwargs(averaging_kwargs)
 
-        aggregation_instance = aggregation_class(**aggregation_kwargs)
+        averaging_instance = averaging_class(**averaging_kwargs)
 
-        # Compose the metric & aggregation function ============================
-        composed_metric_instance = AggregatedMetric(
+        # Compose the metric & averaging function ============================
+        composed_metric_instance = AveragedMetric(
             metric=metric_instance,
-            aggregation=aggregation_instance,
+            averaging=averaging_instance,
         )
+
+        composed_metric_instance._instantiation_name = syntax_string
 
         return composed_metric_instance
 

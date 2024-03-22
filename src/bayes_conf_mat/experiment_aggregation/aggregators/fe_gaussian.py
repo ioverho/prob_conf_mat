@@ -5,9 +5,7 @@ import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
-from bayes_conf_mat.experiment_aggregation.utils.truncated_sampling import (
-    truncated_sample,
-)
+from bayes_conf_mat.experiment_aggregation.utils import truncated_sample
 
 
 class FEGaussianAggregator(ExperimentAggregation):
@@ -15,14 +13,13 @@ class FEGaussianAggregator(ExperimentAggregation):
     full_name = "Fixed-effect Gaussian meta-analytical experiment aggregator"
     aliases = ["fe", "fixed_effect", "fe_gaussian", "gaussian"]
 
-    def __init__(self, rng: np.random.BitGenerator, num_proc: int = 0) -> None:
-        super().__init__(rng=rng, num_proc=num_proc)
+    def __init__(self, rng: np.random.BitGenerator) -> None:
+        super().__init__(rng=rng)
 
     def aggregate(
         self,
         distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
-        extrema: typing.Tuple[int],
-        rng: np.random.BitGenerator,
+        bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_experiments, num_samples = distribution_samples.shape
 
@@ -43,11 +40,11 @@ class FEGaussianAggregator(ExperimentAggregation):
             scale=np.sqrt(agg_var),
         )
 
-        # Sample from the distribution, truncating at the extrema of the metric
+        # Sample from the distribution, truncating at the bounds of the metric
         conflated_distribution_samples = truncated_sample(
             sampling_distribution=conflated_distribution,
-            range=extrema,
-            rng=rng,
+            bounds=bounds,
+            rng=self.rng,
             num_samples=num_samples,
         )
 

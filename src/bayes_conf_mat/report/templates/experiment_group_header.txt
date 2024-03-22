@@ -1,0 +1,25 @@
+# @@title@@
+
+## Configuration
+
+### Parameters
+
+Please see: [`@@config_file_name@@`](@@config_file_loc@@)
+
+### Experiments
+
+@@experiment_list@@
+
+## Posterior Summaries
+
+### Multivariate Metrics
+
+@@multivariate_metrics_posterior_summary@@
+
+### Univariate Metrics
+
+@@univariate_metrics_posterior_summary@@
+
+## Aggregations
+
+@@all_metrics_expanded@@

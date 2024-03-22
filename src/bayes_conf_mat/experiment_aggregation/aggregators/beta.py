@@ -12,8 +12,10 @@ class BetaAggregator(ExperimentAggregation):
     full_name = "Beta conflated experiment aggregation"
     aliases = ["beta", "beta_conflation"]
 
-    def __init__(self, rng: np.random.BitGenerator, num_proc: int = 0, estimation_method: str = "mle") -> None:
-        super().__init__(rng=rng, num_proc=num_proc)
+    def __init__(
+        self, rng: np.random.BitGenerator, estimation_method: str = "mle"
+    ) -> None:
+        super().__init__(rng=rng)
 
         # Honestly should get rid of this
         # MLE is more efficient than MoME, and difference is small
@@ -22,8 +24,7 @@ class BetaAggregator(ExperimentAggregation):
     def aggregate(
         self,
         distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
-        extrema: typing.Tuple[int],
-        rng: np.random.BitGenerator,
+        bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_experiments, num_samples = distribution_samples.shape
 
@@ -33,8 +34,8 @@ class BetaAggregator(ExperimentAggregation):
             alpha, beta, _, _ = scipy.stats.beta.fit(
                 samples,
                 method=self.estimation_method,
-                floc=extrema[0],
-                fscale=extrema[1],
+                floc=bounds[0],
+                fscale=bounds[1],
             )
 
             alphas.append(alpha)
@@ -47,7 +48,7 @@ class BetaAggregator(ExperimentAggregation):
             a=conflated_alpha,
             b=conflated_beta,
             size=num_samples,
-            random_state=rng,
+            random_state=self.rng,
         )
 
         return conflated_distribution_samples

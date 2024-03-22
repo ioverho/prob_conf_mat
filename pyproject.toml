@@ -1,25 +1,35 @@
+# TODO: finish writing this file
 [project]
 name = "bayes_conf_mat"
 version = "0.0.1"
-description = "An easy, efficient package to derive uncertainty estimates, perform simple hypothesis tests and aggregate experiments from confusion matrices."
-authors = [
-  { name = "Ivo Verhoeven", email = "ioverho@mailbox.org" },
-]
+description = ""
+authors = [{ name = "Ivo Verhoeven", email = "i.o.verhoeven@uva.nl" }]
 license = { file = "LICENSE" }
 readme = "README.md"
-classifiers = [
-    "Programming Language :: Python :: 3",
-]
+# TODO: check out the other available classifiers
+classifiers = ["Programming Language :: Python :: 3"]
+# TODO: add some keywords
+
 requires-python = ">=3.8"
 dependencies = [
-  "requests>2",
+  "numpy",
+  "scipy",
+  "tabulate",
+  "matplotlib",
+  "jaxtyping",
+  "strictyaml",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[project.optional-dependencies]
+kde = ["lightkde"]
 
 [project.urls]
-"Homepage" = "https://github.com/pypa/bayes_conf_mat"
+"Homepage" = "https://github.com/ioverho/bayes_conf_mat"
 
-[tool]
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore `F401` (import violations) and `F403` (undefined names) in all `__init__.py` files
+"__init__.py" = ["F401", "F403"]

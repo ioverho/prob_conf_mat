@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import jaxtyping as jtyping
 import numpy as np
 import scipy
@@ -112,8 +114,18 @@ def heterogeneity_PM(
     return tau2
 
 
-def estimate_i2(individual_samples: jtyping.Float[np.ndarray, " num_samples"]):
-    """Estimates a generalised I2 metric, as suggested by Bowden et al. [1], using a Paule-Mandel tau2 estimator.
+@dataclass(frozen=True)
+class HeterogeneityResult:
+    i2: float
+    within_experiment_variance: float
+    between_experiment_variance: float
+    i2_interpretation: str
+
+
+def estimate_i2(
+    individual_samples: jtyping.Float[np.ndarray, " num_classes num_samples"],
+) -> float:
+    """Estimates a generalised I^2 metric, as suggested by Bowden et al. [1], using a Paule-Mandel tau2 estimator.
 
     Measures the amopunt of variance attributable to within-experiment variation vs. between-experiment variation.
 
@@ -121,10 +133,10 @@ def estimate_i2(individual_samples: jtyping.Float[np.ndarray, " num_samples"]):
     [1] Bowden, J., Tierney, J. F., Copas, A. J., & Burdett, S. (2011). Quantifying, displaying and accounting for heterogeneity in the meta-analysis of RCTs using standard and generalised Qstatistics. BMC medical research methodology, 11(1), 1-12.
 
     Args:
-        individual_samples (_type_): _description_
+        individual_samples (jtyping.Float[np.ndarray, " num_classes num_samples"])
 
     Returns:
-        float: I2 estimate
+        float: the I^2 estimate
     """  # noqa: E501
     num_samples = [samples.shape[0] for samples in individual_samples]
     means = np.mean(individual_samples, axis=1)
@@ -138,17 +150,24 @@ def estimate_i2(individual_samples: jtyping.Float[np.ndarray, " num_samples"]):
     # Estimate of inter-experiment variance
     tau2_dl = heterogeneity_DL(means, variances)
     tau2_pm = heterogeneity_PM(
-        means, variances, init_tau2=tau2_dl, use_viechtbauer_correction=True
+        means, variances, init_tau2=tau2_dl, use_viechtbauer_correction=False
     )
 
     # Proportion of variance attributable to inter-experiment variance
     i2 = tau2_pm / (tau2_pm + pooled_var)
 
-    return i2
+    result = HeterogeneityResult(
+        i2=i2,
+        within_experiment_variance=pooled_var,
+        between_experiment_variance=tau2_pm,
+        i2_interpretation=interpret_i2(i2),
+    )
+
+    return result
 
 
 def interpret_i2(i2_score: float):
-    """'Interprets' I2 values using the guideline prescribed by the Cochrane Handbook [1]
+    """'Interprets I^2 values using the guideline prescribed by the Cochrane Handbook [1]
 
     References:
     [1] Higgins, J. P., & Green, S. (Eds.). (2008). Cochrane handbook for systematic reviews of interventions.
@@ -161,19 +180,21 @@ def interpret_i2(i2_score: float):
     """  # noqa: E501
     if i2_score < 0.0 or i2_score > 1.0:
         raise ValueError(
-            "I2 should be in the range (0.0, 1.0). Currently out-of-bounds."
+            "I^2 should be in the range (0.0, 1.0). Currently out-of-bounds."
         )
     elif i2_score < 0.3:
-        het_sig = "insignificant heterogeneity"
+        het_sig = "insignificant"
     elif i2_score >= 0.3 and i2_score < 0.4:
-        het_sig = "borderline moderate heterogeneity"
+        het_sig = "borderline moderate"
     elif i2_score >= 0.4 and i2_score < 0.5:
-        het_sig = "moderate heterogeneity"
+        het_sig = "moderate"
     elif i2_score >= 0.5 and i2_score < 0.6:
-        het_sig = "borderline substantial heterogeneity"
+        het_sig = "borderline substantial"
     elif i2_score >= 0.6 and i2_score < 0.75:
-        het_sig = "borderline considerable heterogeneity"
+        het_sig = "borderline considerable"
     elif i2_score >= 0.75 and i2_score <= 1.0:
-        het_sig = "considerable heterogeneity"
+        het_sig = "considerable"
+
+    het_sig += " heterogeneity"
 
     return het_sig

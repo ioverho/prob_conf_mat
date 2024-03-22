@@ -1,38 +1,54 @@
 import typing
 from collections import defaultdict, OrderedDict
+from dataclasses import dataclass
 
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.metrics.base import Metric, AggregatedMetric, RootMetric
-from bayes_conf_mat.metrics.collection import MetricCollection
-from bayes_conf_mat.experiment import Experiment
+from bayes_conf_mat.experiment import Experiment, ExperimentResult
+from bayes_conf_mat.metrics import (
+    Metric,
+    AveragedMetric,
+    RootMetric,
+    MetricCollection,
+)
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
+from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.utils.heterogeneity import (
+    HeterogeneityResult,
+)
 
 
+# TODO: document class
 class ExperimentManager:
     def __init__(
         self,
+        name: str,
         experiments: typing.Dict[
-            str, jtyping.Int[np.ndarray, " num_classes num_classes"]
+            str, typing.Dict | jtyping.Int[np.ndarray, " num_classes num_classes"]
         ],
-        num_samples: typing.Optional[int] = None,
-        seed: typing.Optional[int | np.random.BitGenerator] = 0,
-        num_proc: typing.Optional[int] = 0,
-        prior_strategy: str = "laplace",
+        num_samples: typing.Optional[int],
+        seed: typing.Optional[int | np.random.BitGenerator],
+        prevalence_prior: str | int | jtyping.Int[np.ndarray, " num_classes"],
+        confusion_prior: str
+        | int
+        | jtyping.Int[np.ndarray, " num_classes num_classes"],
         metrics: typing.Optional[typing.Iterable[str]] = (),
         experiment_aggregations: typing.Optional[
             typing.Dict[str, typing.Dict[str, str]]
         ] = None,
     ) -> None:
+        self.name = name
+
         # Import hyperparameters
         # The number of synthetic confusion matrices to sample
         self.num_samples = num_samples
 
         # The prior strategy to use for each experiment
-        self.prior_strategy = prior_strategy
+        self.prevalence_prior = prevalence_prior
+        self.confusion_prior = confusion_prior
 
-        # The RNG
+        # The manager's RNG
         if isinstance(seed, int) or isinstance(seed, float):
             self.rng = np.random.default_rng(seed=seed)
         elif isinstance(seed, np.random.BitGenerator) or isinstance(
@@ -40,17 +56,15 @@ class ExperimentManager:
         ):
             self.rng = seed
 
-        # The number of processes to use for parallelization
-        self.num_proc = num_proc
-
-        # Collection of the experiments
+        # The collection of experiments
+        self.num_classes = None
         self.experiments = OrderedDict()
         self.add_experiments(experiments)
 
-        # Collection of the metrics used
+        # The collection of metrics
         self.metrics = MetricCollection(metrics)
 
-        # Collection of experiment aggregators
+        # The collection of experiment aggregators
         self.experiment_aggregations = dict()
         self.metric_to_aggregator = dict()
         if experiment_aggregations is not None:
@@ -59,20 +73,44 @@ class ExperimentManager:
                     metric_name=metric_name, aggregation_config=aggregation_config
                 )
 
+    @property
+    def num_experiments(self):
+        return len(self.experiments)
+
+    # TODO: document method
     def add_experiments(
         self,
         experiments: typing.Dict[
-            str, jtyping.Int[np.ndarray, " num_classes num_classes"]
+            str, typing.Dict | jtyping.Int[np.ndarray, " num_classes num_classes"]
         ],
     ) -> None:
+        # Each experiment gets its own RNG, spawned from the manager's RNG
+        # In theory, should allow for parallelizing the different experiments
+        indep_rngs = self.rng.spawn(len(experiments))
+
         temp_experiments = OrderedDict()
-        for name, confusion_matrix in experiments.items():
+        for (name, confusion_matrix), rng in zip(experiments.items(), indep_rngs):
             temp_experiments[name] = Experiment(
+                # Provided for the user
+                # Unique to each experiment
                 name=name,
                 confusion_matrix=confusion_matrix,
-                rng=self.rng,
-                prior_strategy=self.prior_strategy,
+                # Shared across experiments
+                prevalence_prior=self.prevalence_prior,
+                confusion_prior=self.confusion_prior,
+                # Provided by the manager
+                rng=rng,
             )
+
+            if self.num_classes is None:
+                self.num_classes = temp_experiments[name].num_classes
+            else:
+                experiment_num_classes = temp_experiments[name].num_classes
+                if experiment_num_classes != self.num_classes:
+                    # TODO: come up with own error class
+                    raise AttributeError(
+                        f"Experiment {name} has {experiment_num_classes} classes, not the expected {self.num_classes}!"
+                    )
 
         self.experiments.update(temp_experiments)
 
@@ -80,8 +118,8 @@ class ExperimentManager:
         self,
         metric: str
         | typing.Type[Metric]
-        | typing.Type[AggregatedMetric]
-        | typing.Iterable[str | typing.Type[Metric] | typing.Type[AggregatedMetric]],
+        | typing.Type[AveragedMetric]
+        | typing.Iterable[str | typing.Type[Metric] | typing.Type[AveragedMetric]],
     ) -> None:
         self.metrics.add(metric)
 
@@ -94,7 +132,6 @@ class ExperimentManager:
             aggregator = get_experiment_aggregator(
                 **aggregation_config,
                 rng=self.rng,
-                num_proc=self.num_proc,
             )
 
             self.experiment_aggregations[aggregation_config] = aggregator
@@ -102,9 +139,10 @@ class ExperimentManager:
         metric_instance = self.metrics[metric_name]
         self.metric_to_aggregator[metric_instance] = aggregator
 
+    # TODO: document method
     def compute_metrics(
         self, sampling_method: str, num_samples: typing.Optional[int] = None
-    ):
+    ) -> typing.Dict[str, typing.List[ExperimentResult]]:
         if len(self.metrics) == 0:
             raise ValueError(
                 "No metrics have been added to the experiment yet. Use the `add_metric` method to add some."  # noqa: E501
@@ -113,12 +151,17 @@ class ExperimentManager:
         if num_samples is None:
             num_samples = self.num_samples
 
+        # Get the topological ordering of the metrics, such that no metric is computed before
+        # its dependencies are
         metric_compute_order = self.metrics.get_compute_order()
 
-        all_experiment_metric_values = defaultdict(OrderedDict)
+        all_experiment_metric_values = defaultdict(list)
         for experiment_name, experiment in self.experiments.items():
-            # First have the experiment generate synthetic confusion matrices and needed root metrics
-            intermediate_stats = experiment.sample(
+            # TODO: parallelize metric computation???
+            # First have the experiment generate synthetic confusion matrices and needed RootMetrics
+            intermediate_stats: typing.Dict[
+                RootMetric, ExperimentResult
+            ] = experiment.sample(
                 sampling_method=sampling_method, num_samples=num_samples
             )
 
@@ -130,56 +173,96 @@ class ExperimentManager:
                     continue
 
                 # Filter out all the dependencies for the current metric
-                dependencies = dict()
+                # Since we allow each metric to define it's own dependencies by name (or alias)
+                # We have to be a little lenient with how we look these up
+                dependencies: typing.Dict[Metric, np.ndarray] = dict()
                 for dependency_name in metric.dependencies:
-                    # Get the dependency's name
-                    # Unfortunately this means we have to instantiate another metric
-                    # But that's the cost of allowing any dependency
-                    # Should get garbage collected out immediately
                     dependency = metric_compute_order[dependency_name]
-                    dependencies[dependency_name] = intermediate_stats[dependency]
+                    dependencies[dependency_name] = intermediate_stats[
+                        dependency
+                    ].values
 
                 # Compute the current metric and add it to the dict
-                values = metric(**dependencies)
+                metric_values = metric(**dependencies)
 
                 # Add the metric values to the intermediate stats dictionary
-                intermediate_stats[metric] = values
+                intermediate_stats[metric] = ExperimentResult(
+                    experiment=self.experiments[experiment_name],
+                    metric=metric,
+                    values=metric_values,
+                )
 
             # Filter out only the requested metrics
             # The keys are Metric instances, not str
-            experiment_metric_values = {
+            experiment_metric_values: typing.Dict[Metric, ExperimentResult] = {
                 metric: intermediate_stats[metric] for metric in self.metrics
             }
 
             # Invert the key ordering
-            for metric_name, metric_values in experiment_metric_values.items():
-                all_experiment_metric_values[metric_name][
-                    experiment_name
-                ] = metric_values
+            for metric, metric_result in experiment_metric_values.items():
+                all_experiment_metric_values[metric].append(metric_result)
 
         # Convert defaultdict to dict
-        all_experiment_metric_values = dict(all_experiment_metric_values)
+        all_experiment_metric_values = {
+            metric.name: experiment_results
+            for metric, experiment_results in all_experiment_metric_values.items()
+        }
 
         return all_experiment_metric_values
 
     def aggregate_experiments(
         self,
-        metric_values: typing.Dict[
-            Metric | AggregatedMetric,
-            typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes"]],
-        ],
+        metric_values: typing.Dict[str, typing.List[ExperimentResult]],
     ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes"]]:
-        all_aggregated_vals = OrderedDict()
+        all_aggregated_vals = dict()
 
         # Iterate through the dict of metrics and values for each experiment
-        for metric, metric_vals in metric_values.items():
+        for metric_name, experiment_results in metric_values.items():
+            # TODO: implement check for assumption that all ExperimentResult objects use the same metric
+            # and that this metric matches the metric name
+            metric = experiment_results[0].metric
             # Fetch the right aggregator
             aggregator = self.metric_to_aggregator[metric]
 
             # Aggregate all the experiments into a summary distribution
-            aggregated_vals = aggregator(experiment_samples=metric_vals, metric=metric)
+            aggregation_result = aggregator(
+                metric=metric, experiment_samples=experiment_results
+            )
+
+            # Wrap the output fromt he aggregator in a custom result dataclass
+            aggregation_result = [
+                ExperimentAggregationResult(
+                    experiment_group=self,
+                    aggregator=aggregator,
+                    metric=metric,
+                    heterogeneity=heterogeneity,
+                    values=aggregated_vals,
+                )
+                for aggregated_vals, heterogeneity in aggregation_result
+            ]
 
             # Record for output
-            all_aggregated_vals[metric] = aggregated_vals
+            all_aggregated_vals[metric_name] = aggregation_result
 
         return all_aggregated_vals
+
+    def __repr__(self) -> str:
+        return f"ExperimentManager({self.name})"
+
+    def __str__(self) -> str:
+        return f"ExperimentManager({self.name})"
+
+
+@dataclass(frozen=True)
+class ExperimentAggregationResult:
+    experiment_group: ExperimentManager
+    aggregator: typing.Type[ExperimentAggregation]
+    metric: typing.Type[Metric] | typing.Type[AveragedMetric]
+
+    heterogeneity: HeterogeneityResult
+
+    values: jtyping.Float[np.ndarray, " num_samples"]
+
+    @property
+    def name(self):
+        return self.experiment_group.name

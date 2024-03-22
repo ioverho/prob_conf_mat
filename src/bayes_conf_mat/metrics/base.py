@@ -8,6 +8,8 @@ from itertools import product
 import numpy as np
 import jaxtyping as jtyping
 
+# Root metrics are always computed, because they're (almost) always needed as
+# intermediate variables
 _ROOT_METRICS = {
     "norm_confusion_matrix",
     "p_condition",
@@ -16,7 +18,7 @@ _ROOT_METRICS = {
     "p_condition_given_pred",
 }
 METRIC_REGISTRY = dict()
-AGGREGATION_REGISTRY = dict()
+AVERAGING_REGISTRY = dict()
 
 
 @dataclass(frozen=True)
@@ -32,7 +34,7 @@ class RootMetric:
         raise TypeError("Root metrics are not directly interpretable.")
 
     @property
-    def range(self):
+    def bounds(self):
         raise TypeError("Root metrics are not directly interpretable.")
 
     @property
@@ -98,7 +100,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def range(self):
+    def bounds(self):
         raise NotImplementedError
 
     @property
@@ -131,11 +133,14 @@ class Metric(metaclass=ABCMeta):
 
     @property
     def name(self):
-        metric_kwargs = "".join(
-            [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()]
-        )
+        if hasattr(self, "_instantiation_name"):
+            return self._instantiation_name
+        else:
+            metric_kwargs = "".join(
+                [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()]
+            )
 
-        return self._metric_name + metric_kwargs
+            return self._metric_name + metric_kwargs
 
     def __repr__(self) -> str:
         return f"Metric({self.name})"
@@ -150,12 +155,12 @@ class Metric(metaclass=ABCMeta):
         return hash(self.name)
 
 
-class Aggregation(metaclass=ABCMeta):
-    """The abstract base class for metric aggregations.
+class Averaging(metaclass=ABCMeta):
+    """The abstract base class for metric averaging.
 
-    Properties should be implemented as class attributes in derived metrics
+    Properties should be implemented as class attributes in derived metrics.
 
-    The `compute_aggregation` method needs to be implemented
+    The `compute_average` method needs to be implemented
 
     """
 
@@ -165,9 +170,9 @@ class Aggregation(metaclass=ABCMeta):
         # Validate =============================================================
         # Make sure that all aliases are unique
         for alias in cls.aliases:
-            if alias in AGGREGATION_REGISTRY:
+            if alias in AVERAGING_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}."  # noqa: E501
+                    f"Alias '{alias}' not unique. Currently used by {AVERAGING_REGISTRY[alias]}."  # noqa: E501
                 )
 
         for alias in cls.aliases:
@@ -178,7 +183,7 @@ class Aggregation(metaclass=ABCMeta):
 
         # Register =============================================================
         for alias in cls.aliases:
-            AGGREGATION_REGISTRY[alias] = cls
+            AVERAGING_REGISTRY[alias] = cls
 
         cls._kwargs = {
             param.name: param.annotation
@@ -206,7 +211,7 @@ class Aggregation(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def compute_aggregation(self, *args, **kwargs):
+    def compute_average(self, *args, **kwargs):
         raise NotImplementedError()
 
     def __call__(
@@ -215,17 +220,22 @@ class Aggregation(metaclass=ABCMeta):
         *args,
         **kwargs,
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        return self.compute_aggregation(metric_vals, *args, **kwargs)
+        return self.compute_average(metric_vals, *args, **kwargs)
 
     @property
-    def _aggregation_name(self):
+    def _averaging_name(self):
         return self.aliases[0]
 
     @property
     def name(self):
-        kwargs = "".join([f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()])
+        if hasattr(self, "_instantiation_name"):
+            return self._instantiation_name
+        else:
+            kwargs = "".join(
+                [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()]
+            )
 
-        return self._aggregation_name + kwargs
+            return self._averaging_name + kwargs
 
     def __repr__(self) -> str:
         return self.name
@@ -240,10 +250,15 @@ class Aggregation(metaclass=ABCMeta):
         return hash(self.name)
 
 
-class AggregatedMetric(metaclass=ABCMeta):
-    def __init__(
-        self, metric: typing.Type[Metric], aggregation: typing.Type[Aggregation]
-    ):
+class AveragedMetric(metaclass=ABCMeta):
+    """The base class for the composition of any instance of `Metric` with any instance of `Averaging`
+
+    Args:
+        metric (typing.Type[Metric])
+        averaging (typing.Type[Averaging])
+    """
+
+    def __init__(self, metric: typing.Type[Metric], averaging: typing.Type[Averaging]):
         super().__init__()
 
         self.base_metric = metric
@@ -253,32 +268,32 @@ class AggregatedMetric(metaclass=ABCMeta):
                 f"Cannot aggregate a metric ({self.base_metric.name}) that is already multiclass."  # noqa: E501
             )
 
-        self.aggregation = aggregation
+        self.averaging = averaging
 
     @property
     def aliases(self):
         return [
             f"{lhs}@{rhs}"
-            for lhs, rhs in product(self.base_metric.aliases, self.aggregation.aliases)
+            for lhs, rhs in product(self.base_metric.aliases, self.averaging.aliases)
         ]
 
     @property
     def full_name(self):
-        return f"{self.base_metric.full_name} with {self.aggregation.full_name}"
+        return f"{self.base_metric.full_name} with {self.averaging.full_name}"
 
     @property
     def is_multiclass(self):
         return True
 
     @property
-    def range(self):
-        return self.base_metric.range
+    def bounds(self):
+        return self.base_metric.bounds
 
     @property
     def dependencies(self):
         dependencies = (
             *self.base_metric.dependencies,
-            *self.aggregation.dependencies,
+            *self.averaging.dependencies,
         )
 
         return dependencies
@@ -286,10 +301,10 @@ class AggregatedMetric(metaclass=ABCMeta):
     @property
     def sklearn_equivalent(self):
         sklearn_equivalent = self.base_metric.sklearn_equivalent
-        if self.aggregation.sklearn_equivalent is not None:
+        if self.averaging.sklearn_equivalent is not None:
             (
                 sklearn_equivalent.sklearn_equivalent
-                + f"with average={self.aggregation.sklearn_equivalent}"
+                + f"with average={self.averaging.sklearn_equivalent}"
             )
 
         return sklearn_equivalent
@@ -297,8 +312,8 @@ class AggregatedMetric(metaclass=ABCMeta):
     def compute_metric(self, *args, **kwargs):
         return self.base_metric(*args, **kwargs)
 
-    def compute_aggregation(self, *args, **kwargs):
-        return self.aggregation(*args, **kwargs)
+    def compute_average(self, *args, **kwargs):
+        return self.averaging(*args, **kwargs)
 
     def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples"]:
         metric_vals = self.compute_metric(
@@ -309,12 +324,12 @@ class AggregatedMetric(metaclass=ABCMeta):
             }
         )
 
-        aggregated_metric_vals = self.aggregation(
+        aggregated_metric_vals = self.averaging(
             metric_vals,
             **{
                 key: value
                 for key, value in kwargs.items()
-                if key in self.aggregation.dependencies
+                if key in self.averaging.dependencies
             },
         )
 
@@ -324,20 +339,23 @@ class AggregatedMetric(metaclass=ABCMeta):
     def _kwargs(self):
         kwargs = {
             "metric": self.base_metric._kwargs,
-            "aggregation": self.aggregation._kwargs,
+            "averaging": self.averaging._kwargs,
         }
 
         return kwargs
 
     @property
     def name(self):
-        return f"{self.base_metric.name}@{self.aggregation.name}"
+        if hasattr(self, "_instantiation_name"):
+            return self._instantiation_name
+        else:
+            return f"{self.base_metric.name}@{self.averaging.name}"
 
     def __repr__(self) -> str:
-        return f"AggregatedMetric({self.name})"
+        return f"AveragedMetric({self.name})"
 
     def __str__(self) -> str:
-        return f"AggregatedMetric({self.name})"
+        return f"AveragedMetric({self.name})"
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.name == other.name

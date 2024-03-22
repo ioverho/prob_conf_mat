@@ -7,7 +7,7 @@ import numpy as np
 import sklearn
 import sklearn.metrics
 
-from bayes_conf_mat.experiment import Experiment
+from bayes_conf_mat.experiment_manager import ExperimentManager
 from bayes_conf_mat.metrics import get_metric
 from bayes_conf_mat.utils.io import (
     load_integer_csv_into_numpy,
@@ -39,12 +39,21 @@ class TestMetricEquivalence(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore")
 
-            experiment = Experiment(confusion_matrix=confusion_matrix)
-            experiment.add_metric(metric)
+            experiment_group = ExperimentManager(
+                name=None,
+                experiments={"test": confusion_matrix},
+                seed=0,
+                prevalence_prior="laplace",
+                confusion_prior="laplace",
+                num_samples=0,
+            )
+            experiment_group.add_metric(metric)
 
-            our_metric_val = experiment._compute_metrics(sample_method="input")[
-                metric.name
-            ]
+            experiment_output = experiment_group.compute_metrics(
+                sampling_method="input"
+            )
+
+            our_metric_val = experiment_output[metric._instantiation_name][0].values
 
             pred_target = confusion_matrix_to_pred_target(
                 confusion_matrix,

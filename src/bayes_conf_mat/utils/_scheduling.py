@@ -3,12 +3,12 @@ from collections import deque
 from graphlib import TopologicalSorter
 
 from bayes_conf_mat.metrics import get_metric
-from bayes_conf_mat.metrics.base import Metric, AggregatedMetric
+from bayes_conf_mat.metrics.base import Metric, AveragedMetric
 
 
 def generate_metric_computation_schedule(
-    metrics: typing.Iterable[str | typing.Type[Metric] | typing.Type[AggregatedMetric]],
-) -> typing.Generator[typing.Type[Metric] | typing.Type[AggregatedMetric], None, None]:
+    metrics: typing.Iterable[str | typing.Type[Metric] | typing.Type[AveragedMetric]],
+) -> typing.Generator[typing.Type[Metric] | typing.Type[AveragedMetric], None, None]:
     """Generates a topological ordering of the inserted metrics and their dependencies.
 
     Ensures no function is computed before its dependencies are available.

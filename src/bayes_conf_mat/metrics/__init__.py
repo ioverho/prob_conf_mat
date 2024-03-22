@@ -2,15 +2,15 @@
 from .base import (
     _ROOT_METRICS,
     METRIC_REGISTRY,
-    AGGREGATION_REGISTRY,
-    Metric,  # noqa: F401, F403
-    AggregatedMetric,  # noqa: F401, F403
+    AVERAGING_REGISTRY,
+    RootMetric,
+    Metric,
+    AveragedMetric,
 )
-from .simple_metrics import *  # noqa: F401, F403
-from .complex_metrics import *  # noqa: F401, F403
-from .aggregations import *  # noqa: F401, F403
-from .interface import get_metric  # noqa: F401
-from .collection import MetricCollection  # noqa: F401
+from .metrics import *
+from .averaging import *
+from .interface import get_metric
+from .collection import MetricCollection
 
 # Check that all metrics have valid dependencies
 for metric in METRIC_REGISTRY:
@@ -25,8 +25,8 @@ for metric in METRIC_REGISTRY:
                 f"Dependency `{dependency}` of `{metric}` not valid because: {e}"  # noqa: E501
             )
 
-for aggregation in AGGREGATION_REGISTRY:
-    for dependency in AGGREGATION_REGISTRY[aggregation].dependencies:
+for aggregation in AVERAGING_REGISTRY:
+    for dependency in AVERAGING_REGISTRY[aggregation].dependencies:
         if dependency in _ROOT_METRICS:
             continue
 
