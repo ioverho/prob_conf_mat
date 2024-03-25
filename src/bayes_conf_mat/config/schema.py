@@ -10,12 +10,12 @@ top_level_validator = {
     "num_samples": strictyaml.Int(),
     # Default values for prior is now 0.0, aka Haldane's prior
     strictyaml.Optional(
-        "prevalence_prior", default=0.0, drop_if_none=False
+        "prevalence_prior", default=0.0, drop_if_none=True
     ): strictyaml.Enum(_DIRICHLET_PRIOR_STRATEGIES)
     | strictyaml.Float()
     | strictyaml.CommaSeparated(strictyaml.Float()),
     strictyaml.Optional(
-        "confusion_prior", default=0.0, drop_if_none=False
+        "confusion_prior", default=0.0, drop_if_none=True
     ): strictyaml.Enum(_DIRICHLET_PRIOR_STRATEGIES)
     | strictyaml.Float()
     | strictyaml.Seq(strictyaml.CommaSeparated(strictyaml.Float())),

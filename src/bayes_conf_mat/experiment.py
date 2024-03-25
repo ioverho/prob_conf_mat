@@ -55,8 +55,6 @@ class Experiment:
             confusion_prior, shape=(self.num_classes, self.num_classes)
         )
 
-        # self.confusion_prior = self.confusion_prior / self.num_classes
-
         # The RNG
         self.rng = rng
 

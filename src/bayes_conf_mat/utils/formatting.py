@@ -6,7 +6,7 @@ def fmt(number: float, precision: int = 4, mode: str = "f"):
         else:
             return f"{number:.{precision}f}"
 
-    elif mode == "s":
+    elif mode == "e":
         return f"{number:.{precision}e}"
 
     elif mode == "%":

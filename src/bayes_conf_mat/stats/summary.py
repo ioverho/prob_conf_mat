@@ -17,11 +17,27 @@ class PosteriorSummary:
     skew: float
     kurtosis: float
 
+    @property
+    def metric_uncertainty(self):
+        return self.hdi[1] - self.hdi[0]
+
+    @property
+    def headers(self):
+        return [
+            "Median",
+            "Mode",
+            f"{self.ci_probability*100:.1f}% HDI",
+            "MU",
+            "Skew",
+            "Kurt",
+        ]
+
     def as_dict(self):
         d = {
             "Median": self.median,
             "Mode": self.mode,
             f"{self.ci_probability*100:.1f}% HDI": self.hdi,
+            "MU": self.metric_uncertainty,
             "Skew": self.skew,
             "Kurt": self.kurtosis,
         }

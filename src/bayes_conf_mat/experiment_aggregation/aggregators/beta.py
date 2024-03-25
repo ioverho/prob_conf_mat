@@ -28,14 +28,19 @@ class BetaAggregator(ExperimentAggregation):
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_experiments, num_samples = distribution_samples.shape
 
+        if bounds[0] != 0.0 or bounds[1] != 1.0:
+            distribution_samples = (distribution_samples - bounds[0]) / (
+                bounds[1] - bounds[0]
+            )
+
         alphas = []
         betas = []
         for samples in distribution_samples:
             alpha, beta, _, _ = scipy.stats.beta.fit(
                 samples,
                 method=self.estimation_method,
-                floc=bounds[0],
-                fscale=bounds[1],
+                floc=0.0,
+                fscale=1.0,
             )
 
             alphas.append(alpha)
@@ -50,5 +55,9 @@ class BetaAggregator(ExperimentAggregation):
             size=num_samples,
             random_state=self.rng,
         )
+
+        conflated_distribution_samples = (
+            bounds[1] - bounds[0]
+        ) * conflated_distribution_samples + bounds[0]
 
         return conflated_distribution_samples

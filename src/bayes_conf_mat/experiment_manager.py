@@ -136,13 +136,22 @@ class ExperimentManager:
 
             self.experiment_aggregations[aggregation_config] = aggregator
 
-        metric_instance = self.metrics[metric_name]
-        self.metric_to_aggregator[metric_instance] = aggregator
+        try:
+            self.metrics[metric_name]
+        except Exception as e:
+            raise ValueError(
+                f"Encountered error while trying to find metric {metric_name}: {e}"
+            )
+
+        self.metric_to_aggregator[metric_name] = aggregator
 
     # TODO: document method
     def compute_metrics(
         self, sampling_method: str, num_samples: typing.Optional[int] = None
-    ) -> typing.Dict[str, typing.List[ExperimentResult]]:
+    ) -> typing.Dict[
+        str,
+        typing.Annotated[typing.List[ExperimentResult], " num_experiments num_classes"],
+    ]:
         if len(self.metrics) == 0:
             raise ValueError(
                 "No metrics have been added to the experiment yet. Use the `add_metric` method to add some."  # noqa: E501
@@ -194,55 +203,79 @@ class ExperimentManager:
 
             # Filter out only the requested metrics
             # The keys are Metric instances, not str
-            experiment_metric_values: typing.Dict[Metric, ExperimentResult] = {
-                metric: intermediate_stats[metric] for metric in self.metrics
+            experiment_metric_values: typing.Dict[
+                Metric, typing.List[SplitExperimentResult]
+            ] = {
+                metric: experiment_result_to_split_experiment_results(
+                    intermediate_stats[metric]
+                )
+                for metric in self.metrics
             }
 
             # Invert the key ordering
             for metric, metric_result in experiment_metric_values.items():
                 all_experiment_metric_values[metric].append(metric_result)
 
-        # Convert defaultdict to dict
-        all_experiment_metric_values = {
-            metric.name: experiment_results
+        # Transpose the list of lists
+        # i.e., go from [num_experiment, num_classes] to [num_classes, num_experiments]
+        # Convert to dict
+        all_experiment_metric_values: typing.Dict[
+            Metric,
+            typing.Annotated[
+                typing.List[typing.List[ExperimentResult]],
+                "num_classes num_experiments",
+            ],
+        ] = {
+            metric.name: list(map(list, zip(*experiment_results)))
             for metric, experiment_results in all_experiment_metric_values.items()
         }
 
         return all_experiment_metric_values
 
+    # TODO: document this method
     def aggregate_experiments(
         self,
-        metric_values: typing.Dict[str, typing.List[ExperimentResult]],
-    ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes"]]:
+        metric_values: typing.Dict[
+            str,
+            typing.Annotated[
+                typing.List[typing.List[ExperimentResult]],
+                "num_classes num_experiments",
+            ],
+        ],
+    ) -> typing.Dict[str, typing.Annotated[typing.List, "num_classes"]]:
         all_aggregated_vals = dict()
 
         # Iterate through the dict of metrics and values for each experiment
-        for metric_name, experiment_results in metric_values.items():
-            # TODO: implement check for assumption that all ExperimentResult objects use the same metric
-            # and that this metric matches the metric name
-            metric = experiment_results[0].metric
+        for metric_name, experiment_class_results in metric_values.items():
             # Fetch the right aggregator
-            aggregator = self.metric_to_aggregator[metric]
+            metric = self.metrics[metric_name]
+            aggregator = self.metric_to_aggregator[metric_name]
+            aggregation_results = []
+            for experiment_results in experiment_class_results:
+                # Aggregate all the experiments into a summary distribution
+                aggregation_result = aggregator(
+                    metric=metric, experiment_samples=experiment_results
+                )
 
-            # Aggregate all the experiments into a summary distribution
-            aggregation_result = aggregator(
-                metric=metric, experiment_samples=experiment_results
-            )
+                aggregation_results.append(aggregation_result)
 
             # Wrap the output fromt he aggregator in a custom result dataclass
-            aggregation_result = [
+            aggregation_results = [
                 ExperimentAggregationResult(
                     experiment_group=self,
                     aggregator=aggregator,
                     metric=metric,
+                    class_index=i,
                     heterogeneity=heterogeneity,
                     values=aggregated_vals,
                 )
-                for aggregated_vals, heterogeneity in aggregation_result
+                for i, (aggregated_vals, heterogeneity) in enumerate(
+                    aggregation_results
+                )
             ]
 
             # Record for output
-            all_aggregated_vals[metric_name] = aggregation_result
+            all_aggregated_vals[metric_name] = aggregation_results
 
         return all_aggregated_vals
 
@@ -254,14 +287,67 @@ class ExperimentManager:
 
 
 @dataclass(frozen=True)
+class SplitExperimentResult(ExperimentResult):
+    """Just like an experiment result, but now the values have been split across the individual classes.
+    For convenience.
+
+    Args:
+        experiment (Experiment):
+        metric (Metric | AveragedMetric):
+        class_index (int): defaults to `None`.
+        values: (Float[ndarray, "num_samples"])
+    """
+
+    experiment: Experiment
+    metric: typing.Type[Metric] | typing.Type[AveragedMetric]
+    values: jtyping.Float[np.ndarray, " num_samples"]
+    class_index: typing.Optional[int] = None
+
+
+def experiment_result_to_split_experiment_results(
+    experiment_result: ExperimentResult,
+) -> typing.List[SplitExperimentResult]:
+    experiment_values = experiment_result.values
+    metric = experiment_result.metric
+
+    if metric.is_multiclass:
+        split_experiment_results = [
+            SplitExperimentResult(
+                experiment=experiment_result.experiment,
+                metric=experiment_result.metric,
+                class_index=None,
+                values=experiment_values,
+            )
+        ]
+
+    else:
+        split_experiment_values = np.split(
+            ary=experiment_values,
+            indices_or_sections=experiment_values.shape[1],
+            axis=1,
+        )
+
+        split_experiment_results = [
+            SplitExperimentResult(
+                experiment=experiment_result.experiment,
+                metric=experiment_result.metric,
+                class_index=i,
+                values=np.squeeze(vals),
+            )
+            for i, vals in enumerate(split_experiment_values)
+        ]
+
+    return split_experiment_results
+
+
+@dataclass(frozen=True)
 class ExperimentAggregationResult:
     experiment_group: ExperimentManager
     aggregator: typing.Type[ExperimentAggregation]
     metric: typing.Type[Metric] | typing.Type[AveragedMetric]
-
     heterogeneity: HeterogeneityResult
-
     values: jtyping.Float[np.ndarray, " num_samples"]
+    class_index: typing.Optional[int] = None
 
     @property
     def name(self):

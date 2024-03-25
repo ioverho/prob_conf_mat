@@ -5,7 +5,6 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment import ExperimentResult
 from bayes_conf_mat.metrics import Metric, AveragedMetric
 from bayes_conf_mat.experiment_aggregation.utils import estimate_i2, HeterogeneityResult
 
@@ -70,48 +69,19 @@ class ExperimentAggregation(metaclass=ABCMeta):
     def __call__(
         self,
         metric: Metric | AveragedMetric,
-        experiment_samples: typing.List[ExperimentResult],
-    ) -> typing.List[typing.Tuple[np.ndarray, HeterogeneityResult]]:
-        # TODO: do this earlier?
-        # Stack and split the experiment values such that
+        experiment_samples: typing.Annotated[typing.List, "num_experiments"],
+    ) -> typing.Tuple[np.ndarray, HeterogeneityResult]:
+        # Stack the experiment values
         stacked_experiment_values: jtyping.Float[
-            np.ndarray, " num_experiments num_samples *num_classes"
+            np.ndarray, " num_experiments num_samples"
         ] = np.stack([result.values for result in experiment_samples], axis=0)
 
-        # No need to repeat aggregation across multiple classes
-        if metric.is_multiclass:
-            if len(stacked_experiment_values.shape) > 2:
-                raise ValueError(
-                    f"The `experiment_samples` array should have two dimensions if the metric is multivariate. Found the following dimensions: {stacked_experiment_values.shape}"
-                )
+        aggregated_samples = self.aggregate(
+            stacked_experiment_values, bounds=metric.bounds
+        )
+        aggregation_heterogeneity = estimate_i2(stacked_experiment_values)
 
-            aggregated_samples = self.aggregate(
-                stacked_experiment_values, bounds=metric.bounds
-            )
-            aggregation_heterogeneity = estimate_i2(stacked_experiment_values)
-
-            aggregation_results = [(aggregated_samples, aggregation_heterogeneity)]
-
-        else:
-            num_classes = experiment_samples[0].num_classes
-
-            split_values = np.split(
-                stacked_experiment_values, indices_or_sections=num_classes, axis=2
-            )
-
-            aggregation_results = []
-            for samples in split_values:
-                distribution_samples = np.squeeze(samples, axis=2)
-                aggregated_samples = self.aggregate(
-                    distribution_samples=distribution_samples, bounds=metric.bounds
-                )
-                aggregation_heterogeneity = estimate_i2(distribution_samples)
-
-                aggregation_results.append(
-                    (aggregated_samples, aggregation_heterogeneity)
-                )
-
-        return aggregation_results
+        return (aggregated_samples, aggregation_heterogeneity)
 
     def __repr__(self) -> str:
         return f"ExperimentAggregator({self.name})"
