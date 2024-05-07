@@ -1,5 +1,6 @@
-# TODO: rewrite this to reflect the updated library
 # Metric Syntax
+
+TODO: rewrite this to reflect the updated library
 
 The metric syntax provides a handy interface to creating unique metric functions not hard-coded into the library. Any (binary) metric function can be combined with an aggregation function. Some metric functions and aggregation functions also require arguments. Rather than having the user search for the required metric and aggregation function, one only needs to pass a single string and have the library return the required function.
 

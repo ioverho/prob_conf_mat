@@ -4,7 +4,6 @@ This monolithic file contains all pre-defined metrics.
 Honestly, just use the search feature when going through this.
 """
 
-
 import jaxtyping as jtyping
 import numpy as np
 
@@ -565,17 +564,14 @@ class Accuracy(Metric):
     """Computes the (multiclass) accuracy score.
 
     The rate of correct classifications to all classifications:
-        `(TP + TN) / N`
-    where TP are the true positives, TN the true negatives and N the total number of predictions.
 
-    scikit-learn: https://scikit-learn.org/stable/modules/model_evaluation.html#accuracy-score
-    Wikipedia: https://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification
+    $$(TP + TN) / N$$
 
-    Args:
-        diag_mass (np.ndarray [num_samples, num_classes]): a simple metric
+    where $TP$ are the true positives, $TN$ the true negatives and $N$ the total number of predictions.
 
-    Returns:
-        np.ndarray [num_samples]
+    Note: Read more:
+        1. [scikit-learn](https://scikit-learn.org/stable/modules/model_evaluation.html#accuracy-score)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/Accuracy_and_precision#In_binary_classification)
     """  # noqa: E501
 
     full_name = "Accuracy"
@@ -589,6 +585,13 @@ class Accuracy(Metric):
         self,
         diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        """
+        Args:
+            diag_mass:
+
+        Returns:
+            :
+        """
         return np.sum(diag_mass, axis=1)
 
 

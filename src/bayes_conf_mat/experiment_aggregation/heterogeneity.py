@@ -4,6 +4,8 @@ import jaxtyping as jtyping
 import numpy as np
 import scipy
 
+from bayes_conf_mat.utils.formatting import fmt
+
 
 def heterogeneity_DL(
     means,
@@ -120,6 +122,16 @@ class HeterogeneityResult:
     within_experiment_variance: float
     between_experiment_variance: float
     i2_interpretation: str
+
+    def template_sentence(self, precision: int = 4):
+        template_sentence = ""
+
+        template_sentence += f"I2 is {fmt(self.i2, precision=precision, mode='%')}"
+        template_sentence += f" (variance within={fmt(self.within_experiment_variance, precision=precision, mode='f')}, "
+        template_sentence += f"between={fmt(self.between_experiment_variance, precision=precision, mode='f')})."
+        template_sentence += f"\nThis can be considered '{self.i2_interpretation}'."
+
+        return template_sentence
 
 
 def estimate_i2(

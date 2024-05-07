@@ -28,19 +28,46 @@ class BetaAggregator(ExperimentAggregation):
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_experiments, num_samples = distribution_samples.shape
 
-        if bounds[0] != 0.0 or bounds[1] != 1.0:
-            distribution_samples = (distribution_samples - bounds[0]) / (
-                bounds[1] - bounds[0]
+        if bounds[0] == -float("inf") or bounds[1] == float("inf"):
+            raise NotImplementedError(
+                "Beta aggregation does not (yet) support metrics with infite bounds."
             )
+
+        # Tranform the data to lie in the bounds of the beta distribution
+        # if bounds[0] != 0.0 or bounds[1] != 1.0:
+        #    if bounds[0] == -float("inf") or bounds[1] == float("inf"):
+        #        raise NotImplementedError(
+        #            "Beta aggregation does not (yet) support metrics with infite bounds."
+        #        )
+        #
+        #    transformed_distribution_samples = (distribution_samples - bounds[0]) / (
+        #        bounds[1] - bounds[0]
+        #    )
+        #
+        # else:
+        #    transformed_distribution_samples = distribution_samples
+        #
+        ## Try to shift any values at the bounds just off the bounds using 'prior'
+        ## https://stats.stackexchange.com/a/31313
+        ## Otherwise MLE breaks
+        # if (
+        #    np.min(transformed_distribution_samples) == 0.0
+        #    or np.max(transformed_distribution_samples) == 1.0
+        # ):
+        #    mome_mean = np.mean(transformed_distribution_samples)
+        #
+        #    transformed_distribution_samples = (
+        #        transformed_distribution_samples * (num_samples - 1) + mome_mean
+        #    ) / num_samples
 
         alphas = []
         betas = []
         for samples in distribution_samples:
             alpha, beta, _, _ = scipy.stats.beta.fit(
-                samples,
+                np.clip(samples, a_min=bounds[0] + 1e-9, a_max=bounds[1] - 1e-9),
                 method=self.estimation_method,
-                floc=0.0,
-                fscale=1.0,
+                floc=bounds[0],
+                fscale=bounds[1] - bounds[0],
             )
 
             alphas.append(alpha)
@@ -53,11 +80,13 @@ class BetaAggregator(ExperimentAggregation):
             a=conflated_alpha,
             b=conflated_beta,
             size=num_samples,
+            loc=bounds[0],
+            scale=bounds[1] - bounds[0],
             random_state=self.rng,
         )
 
-        conflated_distribution_samples = (
-            bounds[1] - bounds[0]
-        ) * conflated_distribution_samples + bounds[0]
+        # conflated_distribution_samples = (
+        #    bounds[1] - bounds[0]
+        # ) * conflated_distribution_samples + bounds[0]
 
         return conflated_distribution_samples

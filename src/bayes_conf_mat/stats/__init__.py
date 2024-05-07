@@ -11,3 +11,5 @@ from .dirichlet_distribution import (
     dirichlet_sample,
 )
 from .score_interval import wilson_score_interval
+from .truncated_sampling import truncated_sample
+from .hdi_estimation import hdi_estimator

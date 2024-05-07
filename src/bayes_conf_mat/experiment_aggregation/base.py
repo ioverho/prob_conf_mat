@@ -6,7 +6,10 @@ import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.metrics import Metric, AveragedMetric
-from bayes_conf_mat.experiment_aggregation.utils import estimate_i2, HeterogeneityResult
+from bayes_conf_mat.experiment_aggregation.heterogeneity import (
+    estimate_i2,
+    HeterogeneityResult,
+)
 
 AGGREGATION_REGISTRY = dict()
 

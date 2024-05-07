@@ -91,35 +91,42 @@ class Metric(metaclass=ABCMeta):
     @property
     @abstractmethod
     def full_name(self):
+        """A human-readable name for this metric"""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def is_multiclass(self):
+    def is_multiclass(self) -> bool:
+        """Whether or not this metric computes a value for each class individually, or for all classes at once."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def bounds(self):
+    def bounds(self) -> typing.Tuple[float, float]:
+        """A tuple of the minimum and maximum possible value for this metric to take. Can be infinite."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def dependencies(self):
+    def dependencies(self) -> typing.Iterable[str]:
+        """All metrics upon which this metric depends. Used to generate a computation schedule, such that no metric is calculated before its dependencies. The dependencies **must** match the `compute_metric` signature. This is checked during class definition."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self):
+    def sklearn_equivalent(self) -> str | None:
+        """The `sklearn` equivalent function, if applicable"""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def aliases(self):
+    def aliases(self) -> typing.List[str]:
+        """A list of all valid aliases for this metric. Can be used when creating metric syntax strings."""
         return [None]
 
     @abstractmethod
     def compute_metric(self, *args, **kwargs):
+        """Computes the metric values from its dependencies."""
         raise NotImplementedError()
 
     def __call__(

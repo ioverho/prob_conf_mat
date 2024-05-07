@@ -1,6 +1,7 @@
 import inspect
 import typing  # noqa: F401
 from abc import ABCMeta, abstractmethod  # noqa: F401
+from pathlib import Path
 
 import numpy as np  # noqa: F401
 import jaxtyping as jtyping  # noqa: F401
@@ -11,7 +12,12 @@ IO_REGISTRY = dict()
 
 class IOBase(metaclass=ABCMeta):
     def __init__(self, location: str):
-        self.location = location
+        self.location = Path(location).resolve()
+
+        if not (self.location.exists() and self.location.is_file()):
+            raise ValueError(f"No file found at: {str(self.location)}")
+
+        self.location = str(self.location)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

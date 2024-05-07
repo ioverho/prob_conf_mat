@@ -6,9 +6,7 @@ import scipy.stats
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
-from bayes_conf_mat.experiment_aggregation.utils.truncated_sampling import (
-    truncated_sample,
-)
+from bayes_conf_mat.stats import truncated_sample
 
 
 class GammaAggregator(ExperimentAggregation):
@@ -33,7 +31,7 @@ class GammaAggregator(ExperimentAggregation):
         # Minmal impact on the conflated distribution
         if self.shifted:
             loc_estimate = (
-                min(np.min(samples) for samples in distribution_samples) - 1e-12
+                min(np.min(samples) for samples in distribution_samples) - 1e-9
             )
         else:
             loc_estimate = bounds[0]

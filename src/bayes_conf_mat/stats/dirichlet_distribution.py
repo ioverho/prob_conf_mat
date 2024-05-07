@@ -75,6 +75,6 @@ def dirichlet_sample(
 
     r = rng.standard_gamma(alphas)
 
-    d = r / r.sum(-1, keepdims=True)
+    d = r / np.sum(r, axis=-1, keepdims=True)
 
     return d

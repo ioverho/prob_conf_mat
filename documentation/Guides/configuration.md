@@ -1,15 +1,5 @@
 # Configuration
 
-- [Configuration](#configuration)
-  - [1. `name`](#1-name)
-  - [2. `seed`](#2-seed)
-  - [3. `num_samples`](#3-num_samples)
-  - [4. `prevalence_prior`](#4-prevalence_prior)
-  - [5. `confusion_prior`](#5-confusion_prior)
-  - [6. `experiments`](#6-experiments)
-    - [6.1. `$experiment group$`](#61-experiment-group)
-  - [7. `metrics`](#7-metrics)
-
 We use [strictyaml](https://hitchdev.com/strictyaml/) to convert a YAML configuration into Python in a type-safe manner.
 
 This document outlines the schema used to validate the YAML configuration file. Each of the headings below specifies a top-level tag in the document. Subheadings denote important child tags requiring additional explanation. Each section comes with its own examples.
@@ -69,7 +59,7 @@ num_samples: 10000
 *Type*: `scalar:str` | `scalar:float`, positive | `sequence:float`, positive
 
 The prior used for the prevalence distribution, i.e., the proportional occurrence of a condition. The type must be one of:
-    - a `scalar:str`, corresponding to an [implemented prior strategy](../src/bayes_conf_mat/stats/dirichlet_distribution.py)
+    - a `scalar:str`, corresponding to an [implemented prior strategy](../../src/bayes_conf_mat/stats/dirichlet_distribution.py)
     - a `scalar:float`, resulting in a constant vector of that value
     - a `sequence:float` (e.g., a YAML list of floats), in which case the full prior should be specified. The list *must* contain the same number of columns as there are classes in the confusion matrix
 

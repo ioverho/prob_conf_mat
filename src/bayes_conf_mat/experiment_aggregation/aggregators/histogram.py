@@ -44,13 +44,13 @@ class HistogramAggregator(ExperimentAggregation):
         max_max = np.max(distribution_samples)
 
         found_bins = np.arange(
-            start=max(min_min - bin_width, bounds[0]),
-            stop=min(max_max + 2 * bin_width, bounds[1]),
-            step=bin_width,
+            start=max(min_min - min_bin_width, bounds[0]),
+            stop=min(max_max + 2 * min_bin_width, bounds[1]),
+            step=min_bin_width,
         )
         num_bins = found_bins.shape[0]
 
-        # The pseudo-counts should have `pseudo_count_weight` the weight of the true samples
+        # The pseudo-counts should have `pseudo_count_weight` time the weight of the true samples
         smoothing_coeff = 1 / num_bins * self.pseudo_count_weight * num_samples
 
         conflated_distribution = np.zeros(shape=(num_bins - 1,))
@@ -59,7 +59,7 @@ class HistogramAggregator(ExperimentAggregation):
             binned_distribution, bins = np.histogram(
                 samples,
                 bins=found_bins,
-                bounds=bounds,
+                range=bounds,
             )
 
             # Estimate the bin probabilities
@@ -81,11 +81,13 @@ class HistogramAggregator(ExperimentAggregation):
             p=conflated_distribution,
         )
 
-        # Jitter the values so they 'fall' off the bin midpoints
+        # Jitter the values so they fall off the bin midpoints
         bin_noise = self.rng.uniform(
             low=-min_bin_width / 2, high=min_bin_width / 2, size=num_samples
         )
 
-        conflated_distribution_samples = conflated_distribution_samples + bin_noise
+        conflated_distribution_samples = np.clip(
+            conflated_distribution_samples + bin_noise, a_min=bounds[0], a_max=bounds[1]
+        )
 
         return conflated_distribution_samples

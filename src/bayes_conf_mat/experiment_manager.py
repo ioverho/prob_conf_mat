@@ -14,13 +14,26 @@ from bayes_conf_mat.metrics import (
 )
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
 from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
-from bayes_conf_mat.experiment_aggregation.utils.heterogeneity import (
+from bayes_conf_mat.experiment_aggregation.heterogeneity import (
     HeterogeneityResult,
 )
 
 
 # TODO: document class
 class ExperimentManager:
+    """_summary_
+
+    Args:
+        name (str): _description_
+        experiments (typing.Dict[ str, typing.Dict  |  jtyping.Int[np.ndarray, 'num_classes num_classes'] ]): _description_
+        num_samples (typing.Optional[int]): _description_
+        seed (typing.Optional[int  |  np.random.BitGenerator]): _description_
+        prevalence_prior (str | int | jtyping.Int[np.ndarray, 'num_classes']): _description_
+        confusion_prior (str | int | jtyping.Int[np.ndarray, 'num_classes num_classes']): _description_
+        metrics (typing.Optional[typing.Iterable[str]], optional): _description_. Defaults to ().
+        experiment_aggregations (typing.Optional[ typing.Dict[str, typing.Dict[str, str]] ], optional): _description_. Defaults to None.
+    """
+
     def __init__(
         self,
         name: str,
@@ -131,7 +144,7 @@ class ExperimentManager:
         if aggregator is None:
             aggregator = get_experiment_aggregator(
                 **aggregation_config,
-                rng=self.rng,
+                rng=self.rng.spawn(1)[0],
             )
 
             self.experiment_aggregations[aggregation_config] = aggregator
@@ -152,6 +165,16 @@ class ExperimentManager:
         str,
         typing.Annotated[typing.List[ExperimentResult], " num_experiments num_classes"],
     ]:
+        """
+        _summary_
+
+        Raises:
+            ValueError: _description_
+
+        Returns:
+            _type_: _description_
+        """
+
         if len(self.metrics) == 0:
             raise ValueError(
                 "No metrics have been added to the experiment yet. Use the `add_metric` method to add some."  # noqa: E501
@@ -168,10 +191,10 @@ class ExperimentManager:
         for experiment_name, experiment in self.experiments.items():
             # TODO: parallelize metric computation???
             # First have the experiment generate synthetic confusion matrices and needed RootMetrics
-            intermediate_stats: typing.Dict[
-                RootMetric, ExperimentResult
-            ] = experiment.sample(
-                sampling_method=sampling_method, num_samples=num_samples
+            intermediate_stats: typing.Dict[RootMetric, ExperimentResult] = (
+                experiment.sample(
+                    sampling_method=sampling_method, num_samples=num_samples
+                )
             )
 
             # Go through all metrics and dependencies in order

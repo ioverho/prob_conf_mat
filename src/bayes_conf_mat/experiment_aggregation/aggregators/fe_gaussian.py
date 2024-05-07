@@ -5,7 +5,7 @@ import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
-from bayes_conf_mat.experiment_aggregation.utils import truncated_sample
+from bayes_conf_mat.stats import truncated_sample
 
 
 class FEGaussianAggregator(ExperimentAggregation):

@@ -1,0 +1,160 @@
+# For now, allow errors and warnings
+# Change once documentation is complete
+strict: false
+
+docs_dir: documentation
+
+site_name: bayes-conf-mat
+site_url: https://github.com/ioverho/bayes_conf_mat
+site_description: "TODO: add a description"
+site_author: Ivo Verhoeven
+use_directory_urls: false
+
+repo_url: https://github.com/ioverho/bayes_conf_mat
+repo_name: ioverho/bayes_conf_mat
+
+copyright: Copyright &copy; 2024 Ivo Verhoeven
+
+nav:
+  - index.md
+  - Guides:
+      - Guides/configuration.md
+      - Guides/metric_syntax.md
+      - Guides/extending_the_library/implementing_metrics_and_aggregations.md
+  - API:
+      - API/API.md
+      - API/ExperimentManager.md
+      - API/Experiment.md
+      - Metrics:
+          - API/Metrics/Accuracy.md
+
+theme:
+  name: material
+  language: en
+  # Project loge, top-left
+  logo: _static/logo.png
+  favicon: _static/logo.png
+  icon:
+    # GitHub logo, top-right
+    repo: fontawesome/brands/github
+  features:
+    # Footnotes with tooltip hover
+    # https://squidfunk.github.io/mkdocs-material/reference/footnotes
+    - content.footnote.tooltips
+    # Tooltips for elements
+    # https://squidfunk.github.io/mkdocs-material/reference/tooltips/#improved-tooltips
+    - content.tooltips
+    # Code block copy and line selection
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
+    - content.code.copy
+    - content.code.select
+    # ==========================================================================
+    # Navigation
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/
+    # ==========================================================================
+    # Loading without flicker
+    - navigation.instant
+    # Add navigation headers to the top
+    - navigation.tabs
+    # Remove invisble navigation pages
+    #- navigation.prune
+    # Section pages
+    - navigation.indexes
+    # URL matches active anchor
+    - navigation.tracking
+    - toc.follow
+    # ==========================================================================
+    # Table of content
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#table-of-contents
+    # ==========================================================================
+    - toc.follow
+    # Back to top buttons
+    - navigation.top
+    # ==========================================================================
+    # Search
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/
+    # ==========================================================================
+    - search
+    # Suggestions
+    - search.suggest
+    # ==========================================================================
+    # Misc
+    # ==========================================================================
+    #- navigation.footer
+
+plugins:
+  # Search bar
+  # https://squidfunk.github.io/mkdocs-material/plugins/search/
+  - search
+  - mkdocs-jupyter
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - ./src/
+          options:
+            # Do not add source code as block
+            show_source: false
+            heading_level: 3
+            show_root_heading: true
+            show_root_members_full_path: false
+            # Add symbol types, like Github
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            docstring_style: google
+            docstring_section_style: spacy # table | list | spacy
+            # Order by code, not name
+            members_order: source
+            # Try to keep annotations limited
+            annotations_path: brief
+            # Add categories to docstrings
+            group_by_category: true
+            show_category_heading: true
+            extensions:
+              # Allows importing documentation from parent class
+              - griffe_inherited_docstrings
+  - git-revision-date-localized:
+      enable_creation_date: false
+      type: date
+
+markdown_extensions:
+  # Callouts
+  # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
+  - admonition
+  # TOC handling
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#table-of-contents
+  - toc:
+      permalink: "#"
+      toc_depth: 4
+  # Footnotes with tooltip hover
+  # https://squidfunk.github.io/mkdocs-material/reference/footnotes
+  - footnotes
+  # MathJax
+  # https://squidfunk.github.io/mkdocs-material/reference/math/#mathjax-mkdocsyml
+  - pymdownx.arithmatex:
+      generic: true
+  # Better bold and italics detection
+  - pymdownx.betterem
+  # Details
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#details
+  - pymdownx.details
+  # Fancy code blocks
+  # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  # Allows integrating files into document
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/?h=snipp#snippets
+  - pymdownx.snippets
+  # Nested callouts
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#superfences
+  - pymdownx.superfences
+
+extra_javascript:
+  # MathJax
+  # https://squidfunk.github.io/mkdocs-material/reference/math/#mathjax-mkdocsyml
+  - _static/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+

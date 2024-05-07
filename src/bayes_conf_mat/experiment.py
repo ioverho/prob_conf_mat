@@ -256,7 +256,7 @@ class Experiment:
         elif sampling_method == "prior":
             root_metrics.update(self.sample_prior(num_samples=num_samples))
 
-        elif sampling_method == "posterior":
+        elif sampling_method == "random":
             root_metrics.update(self.sample_random_model(num_samples=num_samples))
 
         elif sampling_method == "input":

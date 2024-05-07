@@ -1,11 +1,19 @@
 import typing
 
 
-def fmt(number: float, precision: int = 4):
-    if round(number, precision) == 0:
-        return f"{number:.2e}"
-    else:
-        return f"{number:{precision+2}.{precision}f}"
+def fmt(number: float, precision: int = 4, mode: str = "f"):
+    # Format as float, falling back to scientific notation if too small
+    if mode == "f":
+        if number != 0.0 and abs(number) <= 1 * (10 ** (-precision)):
+            return f"{number:.{precision}e}"
+        else:
+            return f"{number:.{precision}f}"
+
+    elif mode == "e":
+        return f"{number:.{precision}e}"
+
+    elif mode == "%":
+        return f"{number*100:2.{precision-2}f}%"
 
 
 def summary_to_table_row(

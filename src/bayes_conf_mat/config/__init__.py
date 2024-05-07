@@ -1,1 +1,1 @@
-from .config import validate_config
+from .load_config import load_config, Config

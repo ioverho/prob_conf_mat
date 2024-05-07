@@ -1,21 +1,23 @@
-#### Experiment Aggregation
+<details>
+<summary><b>Experiment Aggregation</b></summary>
 
 Using the `@@aggregation_name@@` aggregator with the following parameters:
 
-```txt
+```yaml
 @@aggregation_params@@
 ```
 
-*Forest plot*
+#### Forest plot
 
 @@forest_plot@@
 
-*Posterior Summary*
+#### Posterior Summary
 
 ```txt
 @@summary_table@@
 ```
 
-*Heterogeneity*
+#### Heterogeneity
 
-$I^2$ was @@i2_value@@%, which corresponds to '@@i2_interpretation@@'.
+@@heterogeneity_sentence@@
+</details>

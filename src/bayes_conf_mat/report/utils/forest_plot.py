@@ -2,26 +2,28 @@ import typing
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import jaxtyping as jtyping
 import numpy as np
 
-from bayes_conf_mat.report.utils.stats import hdi_estimator
+from bayes_conf_mat.experiment_manager import (
+    SplitExperimentResult,
+    ExperimentAggregationResult,
+)
+from bayes_conf_mat.stats import hdi_estimator
+from bayes_conf_mat.report.utils.formatting import fmt
 
-MAX_HIST_HEIGHT = 0.75
 
-
+# TODO: document this function
 def forest_plot(
-    individual_samples: typing.List[
-        typing.Tuple[str, jtyping.Float[np.ndarray, " num_samples"]]
-    ],
-    aggregated_samples: typing.List[
-        typing.Tuple[str, jtyping.Float[np.ndarray, " num_samples"]]
-    ],
-    extrema: typing.Tuple[float, float],
-    hdi_prob: float,
-    agg_offset: typing.Optional[int] = 1,
-    fontsize: typing.Optional[int] = 10,
+    individual_samples: typing.List[SplitExperimentResult],
+    aggregated_samples: typing.List[ExperimentAggregationResult],
+    bounds: typing.Tuple[float, float],
+    ci_probability: float,
+    precision: int = 4,
+    fontsize: typing.Optional[int] = 9,
     figsize: typing.Optional[typing.Tuple[int, int]] = None,
+    add_summary_info: bool = True,
+    agg_offset: typing.Optional[int] = 1,
+    max_hist_height: float = 0.7,
 ):
     # Try to automatically determine figsize
     if figsize is None:
@@ -32,16 +34,18 @@ def forest_plot(
     fig, ax = plt.subplots(ncols=1, nrows=1, figsize=figsize)
 
     # Plot the individual experiments
+    individ_bins = []
+    individ_counts = []
     smallest_min = float("inf")
     largest_max = -float("inf")
     y_ticklabels_left = []
     y_ticklabels_right = []
-    for i, (experiment_name, experiment_samples) in enumerate(individual_samples):
-        median = np.median(experiment_samples)
-        hdi = hdi_estimator(experiment_samples, prob=hdi_prob)
+    for i, experiment_result in enumerate(individual_samples):
+        median = np.median(experiment_result.values)
+        hdi = hdi_estimator(experiment_result.values, prob=ci_probability)
         uncertainty = hdi[1] - hdi[0]
 
-        y_ticklabels_left.append(experiment_name)
+        y_ticklabels_left.append(experiment_result.experiment.name)
         y_ticklabels_right.append([median, *hdi, uncertainty])
 
         ax.scatter(
@@ -71,33 +75,24 @@ def forest_plot(
             largest_max = hdi[1]
 
         counts, bins = np.histogram(
-            experiment_samples,
+            experiment_result.values,
             bins="auto",
+            density=True,
         )
 
-        counts = counts / counts.max()
-
-        for l_edge, r_edge, count in zip(bins[:-1], bins[1:], counts):
-            bar = patches.Rectangle(
-                xy=(l_edge, i - MAX_HIST_HEIGHT * count),
-                height=MAX_HIST_HEIGHT * count,
-                width=l_edge - r_edge,
-                color="black",
-                alpha=0.30,
-                linewidth=0.0,
-                # linewidth=1,
-                zorder=-1,
-            )
-            ax.add_patch(bar)
+        individ_bins.append(bins)
+        individ_counts.append(counts)
 
     agg_base = i + 1 + agg_offset
     first_agg_median = None
 
+    agg_bins = []
+    agg_counts = []
     central_point = 0.0
-    for ii, (agg_name, agg_samples) in enumerate(aggregated_samples):
+    for ii, agg_result in enumerate(aggregated_samples):
         # Plot the aggregated measures
         # Handle the conflated/aggregated/overall distribution
-        median = np.median(agg_samples)
+        median = np.median(agg_result.values)
         if ii == 0:
             first_agg_median = median
         else:
@@ -110,11 +105,11 @@ def forest_plot(
                 linestyles="dotted",
             )
 
-        hdi = hdi_estimator(agg_samples, prob=hdi_prob)
+        hdi = hdi_estimator(agg_result.values, prob=ci_probability)
 
         uncertainty = hdi[1] - hdi[0]
 
-        y_ticklabels_left.append(agg_name)
+        y_ticklabels_left.append(agg_result.aggregator.name)
         y_ticklabels_right.append([median, *hdi, uncertainty])
 
         central_point += median
@@ -142,16 +137,39 @@ def forest_plot(
 
         # Distribution
         counts, bins = np.histogram(
-            agg_samples,
+            agg_result.values,
             bins="auto",
+            density=True,
         )
 
-        counts = counts / counts.max()
+        agg_bins.append(bins)
+        agg_counts.append(counts)
 
+    # Actually plot the histograms
+    # Divide the individual counts by the global maximum count
+    highest_count = max(max(counts) for counts in individ_counts)
+    for i, (bins, counts) in enumerate(zip(individ_bins, individ_counts)):
         for l_edge, r_edge, count in zip(bins[:-1], bins[1:], counts):
             bar = patches.Rectangle(
-                xy=(l_edge, agg_base + ii - MAX_HIST_HEIGHT * count),
-                height=MAX_HIST_HEIGHT * count,
+                xy=(l_edge, i - max_hist_height * count / highest_count),
+                height=max_hist_height * count / highest_count,
+                width=l_edge - r_edge,
+                color="black",
+                alpha=0.30,
+                linewidth=0.0,
+                # linewidth=1,
+                zorder=-1,
+            )
+            ax.add_patch(bar)
+
+    for ii, (bins, counts) in enumerate(zip(agg_bins, agg_counts)):
+        for l_edge, r_edge, count in zip(bins[:-1], bins[1:], counts):
+            bar = patches.Rectangle(
+                xy=(
+                    l_edge,
+                    agg_base + ii - max_hist_height * count / highest_count,
+                ),
+                height=max_hist_height * count / highest_count,
                 width=l_edge - r_edge,
                 color="black",
                 alpha=0.30,
@@ -185,9 +203,9 @@ def forest_plot(
     experiment_name_size = max(15, longest_experiment_name)
 
     ax.set_yticklabels(
-        [f"{'Experiment Name':<{experiment_name_size}}{'':5}"]
+        [f"{'Experiment Name':<{experiment_name_size}}{'':2}"]
         + [
-            f"{experiment_name[:experiment_name_size]:<{experiment_name_size}}{'':5}"
+            f"{experiment_name[:experiment_name_size]:<{experiment_name_size}}{'':2}"
             for experiment_name in y_ticklabels_left
         ],
         fontsize=fontsize,
@@ -206,12 +224,12 @@ def forest_plot(
     largest_deviation = max(largest_max - central_point, central_point - smallest_min)
 
     plot_range_min = max(
-        extrema[0] - 0.05,
+        bounds[0],
         central_point - 1.25 * largest_deviation,
     )
 
     plot_range_max = min(
-        extrema[1] + 0.05,
+        bounds[1],
         central_point + 1.25 * largest_deviation,
     )
 
@@ -227,31 +245,34 @@ def forest_plot(
 
     ax.tick_params(axis="x", which="both", labelsize=fontsize)
 
-    # Add summary info to right side of plot
-    ax_clone = ax.twinx()
+    if add_summary_info:
+        # Add summary info to right side of plot
+        ax_clone = ax.twinx()
 
-    ax_clone.set_yticks(
-        [ax_ylim[0]]
-        + [i for i in range(len(individual_samples))]
-        + [agg_base + ii for ii in range(len(aggregated_samples))]
-    )
+        ax_clone.set_yticks(
+            [ax_ylim[0]]
+            + [i for i in range(len(individual_samples))]
+            + [agg_base + ii for ii in range(len(aggregated_samples))]
+        )
 
-    ax_clone.set_yticklabels(
-        [f"{'':5}{'Median':^6}{'':3}{f'{hdi_prob*100:.2f}%HDI':^16}{'':3}{'Uncert':^6}"]
-        + [
-            f"{'':5}{median:.4f}{'':3}[{hdi_lb:.4f}, {hdi_ub:.4f}]{'':3}{uncertainty:.4f}"
-            for (median, hdi_lb, hdi_ub, uncertainty) in y_ticklabels_right
-        ],
-        fontsize=fontsize,
-        fontname="monospace",
-    )
+        ax_clone.set_yticklabels(
+            [
+                f"{'':1}{'Median':^6}{'':1}{f'{ci_probability*100:.2f}%HDI':^16}{'':1}{'MU':^6}"
+            ]
+            + [
+                f"{'':1}{fmt(median, precision=precision, mode='f')}{'':1}[{fmt(hdi_lb, precision=precision, mode='f')}, {fmt(hdi_ub, precision=precision, mode='f')}]{'':1}{fmt(uncertainty, precision=precision, mode='f')}"
+                for (median, hdi_lb, hdi_ub, uncertainty) in y_ticklabels_right
+            ],
+            fontsize=fontsize,
+            fontname="monospace",
+        )
 
-    ax_clone.spines["right"].set_visible(False)
-    ax_clone.spines["top"].set_visible(False)
-    ax_clone.spines["left"].set_visible(False)
-    ax_clone.tick_params(axis="x", which="both", labelsize=fontsize)
-    ax_clone.tick_params(axis="y", which="both", length=0)
-    ax_clone.set_ylim(ax_ylim[::-1])
+        ax_clone.spines["right"].set_visible(False)
+        ax_clone.spines["top"].set_visible(False)
+        ax_clone.spines["left"].set_visible(False)
+        ax_clone.tick_params(axis="x", which="both", labelsize=fontsize)
+        ax_clone.tick_params(axis="y", which="both", length=0)
+        ax_clone.set_ylim(ax_ylim[::-1])
 
     fig.subplots_adjust()
     fig.tight_layout()

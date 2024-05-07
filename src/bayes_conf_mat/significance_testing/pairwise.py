@@ -1,3 +1,4 @@
+import typing
 from dataclasses import dataclass
 
 import numpy as np
@@ -5,7 +6,7 @@ import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment import ExperimentResult
 from bayes_conf_mat.experiment_manager import ExperimentAggregationResult
-from bayes_conf_mat.utils import fmt
+from bayes_conf_mat.report.utils import fmt
 from bayes_conf_mat.stats import (
     summarize_posterior,
     PosteriorSummary,
@@ -50,50 +51,50 @@ class PairwiseComparisonResult:
         template_sentence += (
             " greater" if self.diff_dist_summary.median > 0 else " lesser"
         )
-        template_sentence += f" than <{self.rhs_name}> is"
+        template_sentence += f" than <{self.rhs_name}> could be considered"
         template_sentence += f" '{self.p_direction_interpretation}' "
 
         # Existence statistics
         template_sentence += f"(Median {DELTA}={fmt(self.diff_dist_summary.median, precision=precision)}, "
-        template_sentence += f"{fmt(self.diff_dist_summary.ci_probability, precision=precision, mode="%")} HDI="
+        template_sentence += f"{fmt(self.diff_dist_summary.ci_probability, precision=precision, mode='%')} HDI="
         template_sentence += (
-            f"[{fmt(self.diff_dist_summary.hdi[0], precision=4, mode="f")}, "
+            f"[{fmt(self.diff_dist_summary.hdi[0], precision=4, mode='f')}, "
         )
         template_sentence += (
-            f"{fmt(self.diff_dist_summary.hdi[1], precision=4, mode="f")}], "
+            f"{fmt(self.diff_dist_summary.hdi[1], precision=4, mode='f')}], "
         )
         template_sentence += (
-            f"p_direction={fmt(self.p_direction, precision=4, mode="%")})."
+            f"p_direction={fmt(self.p_direction, precision=4, mode='%')})."
         )
 
         # Bidirectional significance
         template_sentence += (
-            f"\nThere is a {fmt(self.p_bi_sig, precision=precision, mode="%")}"
+            f"\nThere is a {fmt(self.p_bi_sig, precision=precision, mode='%')}"
         )
         template_sentence += (
             " probability that this difference is bidirectionally significant"
         )
         template_sentence += (
-            f" (ROPE=[{fmt(-self.min_sig_diff, precision=4, mode="f")}, "
+            f" (ROPE=[{fmt(-self.min_sig_diff, precision=4, mode='f')}, "
         )
-        template_sentence += f"{fmt(self.min_sig_diff, precision=4, mode="f")}], "
+        template_sentence += f"{fmt(self.min_sig_diff, precision=4, mode='f')}], "
         template_sentence += (
-            f"p_ROPE={fmt(self.p_rope, precision=precision, mode="%")})."
+            f"p_ROPE={fmt(self.p_rope, precision=precision, mode='%')})."
         )
         template_sentence += f"\nBidirectional significance could be considered '{self.p_bi_sig_interpretation}'."
 
         # Unidirectional significance
         template_sentence += (
-            f"\nThere is a {fmt(self.p_uni_sig, precision=precision, mode="%")}"
+            f"\nThere is a {fmt(self.p_uni_sig, precision=precision, mode='%')}"
         )
         template_sentence += (
             f" probability that this difference is significantly {self.direction}"
         )
         template_sentence += (
-            f" (p_pos={fmt(self.p_sig_pos, precision=precision, mode="%")},"
+            f" (p_pos={fmt(self.p_sig_pos, precision=precision, mode='%')},"
         )
         template_sentence += (
-            f" p_neg={fmt(self.p_sig_neg, precision=precision, mode="%")})."
+            f" p_neg={fmt(self.p_sig_neg, precision=precision, mode='%')})."
         )
 
         return template_sentence
@@ -142,11 +143,13 @@ def p_rope_interpretation_guideline(p_rope: float):
     return significance
 
 
-def compare_posteriors(
+def pairwise_compare(
     lhs: ExperimentResult | ExperimentAggregationResult,
     rhs: ExperimentResult | ExperimentAggregationResult,
     ci_probability: float,
-    min_sig_diff: float,
+    min_sig_diff: float = None,
+    lhs_name: typing.Optional[str] = None,
+    rhs_name: typing.Optional[str] = None,
 ):
     if lhs.metric.name != rhs.metric.name:
         raise ValueError(
@@ -169,9 +172,7 @@ def compare_posteriors(
 
     # Define a default ROPE
     if min_sig_diff is None:
-        min_sig_diff = (
-            0.1 * np.sqrt(np.power(lhs.values, 2) + np.power(rhs.values, 2))[0]
-        )
+        min_sig_diff = 0.1 * np.std(diff_dist)
 
     # Count the number of instances within each bin
     # Significantly negative, within ROPE, significantly positive
@@ -187,8 +188,8 @@ def compare_posteriors(
 
     result = PairwiseComparisonResult(
         # Admin
-        lhs_name=lhs.name,
-        rhs_name=rhs.name,
+        lhs_name=lhs.name if lhs_name is None else lhs_name,
+        rhs_name=rhs.name if rhs_name is None else rhs_name,
         metric_name=lhs.metric.name,
         # The difference distribution
         diff_dist=diff_dist,

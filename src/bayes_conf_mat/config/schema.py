@@ -19,6 +19,7 @@ top_level_validator = {
     ): strictyaml.Enum(_DIRICHLET_PRIOR_STRATEGIES)
     | strictyaml.Float()
     | strictyaml.Seq(strictyaml.CommaSeparated(strictyaml.Float())),
+    "ci_probability": strictyaml.Float(),
 }
 
 experiments_validator = {
@@ -56,7 +57,6 @@ metrics_validator = {
 analysis_validator = {
     strictyaml.Optional("analysis"): strictyaml.MapCombined(
         {
-            "ci_probability": strictyaml.Float(),
             strictyaml.Optional(
                 "pairwise_compare", drop_if_none=True
             ): strictyaml.UniqueSeq(strictyaml.CommaSeparated(strictyaml.Str()))
