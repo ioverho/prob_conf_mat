@@ -2,6 +2,9 @@
 # Change once documentation is complete
 strict: false
 
+extra_css:
+  - _static/custom.css
+
 docs_dir: documentation
 
 site_name: bayes-conf-mat
@@ -17,21 +20,27 @@ copyright: Copyright &copy; 2024 Ivo Verhoeven
 
 nav:
   - index.md
-  - Guides:
-      - Guides/configuration.md
-      - Guides/metric_syntax.md
-      - Guides/extending_the_library/implementing_metrics_and_aggregations.md
-  - API:
-      - API/API.md
-      - API/ExperimentManager.md
-      - API/Experiment.md
+  - Getting Started:
+      - "Getting Started/mnist_digits_class.ipynb"
+  - How-To:
+      - How To Guides/configuration.md
+      - How To Guides/metric_syntax.md
+      - How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
+  - References:
+      - References/ExperimentManager.md
+      - References/Experiment.md
       - Metrics:
-          - API/Metrics/Accuracy.md
+          - References/Metrics/index.md
+          - References/Metrics/Metrics.md
+          - References/Metrics/Averaging.md
+  - Explanation:
+      - "Explanation/index.md"
 
 theme:
   name: material
   language: en
-  # Project loge, top-left
+  # Project logo, top-left
+  # TODO: get a nice logo
   logo: _static/logo.png
   favicon: _static/logo.png
   icon:
@@ -54,15 +63,17 @@ theme:
     # ==========================================================================
     # Loading without flicker
     - navigation.instant
+    # Progress bar for slow connections
+    - navigation.instant.progress
     # Add navigation headers to the top
     - navigation.tabs
-    # Remove invisble navigation pages
-    #- navigation.prune
+    - navigation.tabs.sticky
     # Section pages
     - navigation.indexes
     # URL matches active anchor
     - navigation.tracking
-    - toc.follow
+    # Only keep the first page of a section
+    - navigation.prune
     # ==========================================================================
     # Table of content
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#table-of-contents
@@ -81,6 +92,21 @@ theme:
     # Misc
     # ==========================================================================
     #- navigation.footer
+  palette:
+    # Blatantly stolen from `jaxtyping`
+    # TODO: come up with own colour palette
+    # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
+    # Light mode / dark mode
+    - scheme: arviz
+      toggle:
+        icon: material/circle-half-full
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/circle-half-full
+        name: Switch to light mode
 
 plugins:
   # Search bar
@@ -98,6 +124,8 @@ plugins:
             heading_level: 3
             show_root_heading: true
             show_root_members_full_path: false
+            # Don't show the entire path of a class
+            show_root_full_path: false
             # Add symbol types, like Github
             show_symbol_type_heading: true
             show_symbol_type_toc: true
@@ -113,9 +141,9 @@ plugins:
             extensions:
               # Allows importing documentation from parent class
               - griffe_inherited_docstrings
-  - git-revision-date-localized:
-      enable_creation_date: false
-      type: date
+  #- git-revision-date-localized:
+  #    enable_creation_date: false
+  #    type: date
 
 markdown_extensions:
   # Callouts
@@ -157,4 +185,3 @@ extra_javascript:
   - _static/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-

@@ -1,77 +1,28 @@
-"""
-This monolithic file contains all pre-defined metrics.
-
-Honestly, just use the search feature when going through this.
-"""
-
 import jaxtyping as jtyping
 import numpy as np
 
-from bayes_conf_mat.stats import numpy_batched_harmonic_mean
 from bayes_conf_mat.metrics.base import Metric
+from bayes_conf_mat.stats import numpy_batched_harmonic_mean
 
 
-class Prevalence(Metric):
-    """Computes the marginal distribution of condition occurence, i.e. prevalence.
-
-    Returns:
-        np.ndarray [num_samples, num_classes]
-    """  # noqa: E501
-
-    full_name = "Marginal Distribution of Condition"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("p_condition",)
-    sklearn_equivalent = None
-    aliases = ["prevalence"]
-
-    def compute_metric(
-        self,
-        p_condition: jtyping.Float[np.ndarray, " num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
-        return p_condition
-
-
-class ModelBias(Metric):
-    """Computes the marginal probability distribution of predictions.
-
-    The probability that the model predicts a class
-        `(TP + FN) / N`
-    where TP are the true positives, FN are the falsely predicted negatives, and N are the total number of predictions.
-
-    Returns:
-        np.ndarray [num_samples, num_classes]
-    """  # noqa: E501
-
-    full_name = "Marginal Distribution of Predictions"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("p_pred",)
-    sklearn_equivalent = None
-    aliases = ["model_bias"]
-
-    def compute_metric(
-        self,
-        p_pred: jtyping.Float[np.ndarray, " num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
-        # TODO: check confusion matrix before metric computation
-        # if (p_pred == 0).any():
-        #    warnings.warn("Simulated model neglects class, `p_pred' contains 0.")
-
-        return p_pred
-
-
+# ==============================================================================
+# Fundamental metrics
+# Pretty much all metrics are going to rely on these
+# ==============================================================================
 class DiagMass(Metric):
     """Computes the mass on the diagonal of the normalized confusion matrix.
 
-    The rate of true positives to *all* entries:
-        `TP / N`
-    where TP are the true positives, and N are the total number of predictions.
+    It is defined as the rate of true positives to all entries:
+
+    $$TP / N$$
+
+    where $TP$ are the true positives, and $N$ are the total number of predictions.
+
+    This is a metric primarily used as a intermediate value for other metrics, and say relatively little
+    on its own.
 
     Not to be confused with the True Positive Rate.
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
     """  # noqa: E501
 
     full_name = "Diagonal of Normalized Confusion Matrix"
@@ -96,15 +47,91 @@ class DiagMass(Metric):
         return diag_mass
 
 
+class Prevalence(Metric):
+    """Computes the marginal distribution of condition occurence. Also known as the prevalence.
+
+    It can be defined as the rate of positives to all predictions:
+
+    $$P / N$$
+
+    where $P$ is the count of condition positives, and $N$ are the total number of predictions.
+
+    This is a metric primarily used as a intermediate value for other metrics, and say relatively little
+    on its own.
+
+    """  # noqa: E501
+
+    full_name = "Marginal Distribution of Condition"
+    is_multiclass = False
+    bounds = (0.0, 1.0)
+    dependencies = ("p_condition",)
+    sklearn_equivalent = None
+    aliases = ["prevalence"]
+
+    def compute_metric(
+        self,
+        p_condition: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
+        return p_condition
+
+
+class ModelBias(Metric):
+    """Computes the marginal distribution of prediction occurence. Also known as the model bias.
+
+    It can be defined as the rate of predicted positives to all predictions:
+
+    $$PP / N$$
+
+    where $PP$ is the count of predicted positives, and $N$ are the total number of predictions.
+
+    This is a metric primarily used as a intermediate value for other metrics, and say relatively little
+    on its own.
+
+    """  # noqa: E501
+
+    full_name = "Marginal Distribution of Predictions"
+    is_multiclass = False
+    bounds = (0.0, 1.0)
+    dependencies = ("p_pred",)
+    sklearn_equivalent = None
+    aliases = ["model_bias"]
+
+    def compute_metric(
+        self,
+        p_pred: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
+        # TODO: check confusion matrix before metric computation
+        # if (p_pred == 0).any():
+        #    warnings.warn("Simulated model neglects class, `p_pred' contains 0.")
+
+        return p_pred
+
+
+# ==============================================================================
+# Simple metrics
+# These tell us a little about model performanec, but not the whole story
+# Can be computed directly on the fundametal metrics, but are still usually
+# used as intermediate values
+# ==============================================================================
 class TruePositiveRate(Metric):
-    """Computes the True Positive Rate, i.e. recall, sensitivity.
+    """Computes the True Positive Rate, also known as recall, sensitivity.
 
-    The ratio of true positives to condition positives:
-        `TP / (TP + FN)`
-    where TP are the true positives, and FN are the false negatives.
+    It is defined as the ratio of correctly predited positives to all condition positives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$TP / P$$
+
+    where $TP$ are the true positives, and $TN$ are true negatives and $N$ the number of predictions.
+
+    Essentially, out of all condition positives, how many were correctly predicted. Can be seen as a metric
+    measuring retrieval.
+
+    Examples:
+        - `tpr`
+        - `recall@macro`
+
+    Note: Read more:
+        1. [scikit-learn](https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/Precision_and_recall)
     """  # noqa: E501
 
     full_name = "True Positive Rate"
@@ -130,14 +157,20 @@ class TruePositiveRate(Metric):
 
 
 class FalseNegativeRate(Metric):
-    """Computes the False Negative Rate, i.e. miss-rate
+    """Computes the False Negative Rate, also known as the miss-rate.
 
-    The ratio of false negatives to condition positives:
-        `FN / (TP + FN)`
-    where TP are the true positives, and FN are the false negatives.
+    It is defined as the ratio of false negatives to condition positives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$FN / (TP + FN)$$
+
+    where $TP$ are the true positives, and $FN$ are the false negatives.
+
+    Examples:
+        - `fnr`
+        - `false_negative_rate@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/False_positives_and_false_negatives#Related_terms)
     """  # noqa: E501
 
     full_name = "False Negative Rate"
@@ -158,14 +191,23 @@ class FalseNegativeRate(Metric):
 
 
 class PositivePredictiveValue(Metric):
-    """Computes the Positive Predictive Value, i.e. precision.
+    """Computes the Positive Predictive Value, also known as precision.
 
-    The ratio of true positives to predicted positives:
-        `TP / (TP + FP)`
-    where TP are the true positives, and FP are the falsely predicted positives.
+    It is defined as the ratio of true positives to predicted positives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$TP / (TP + FP)$$
+
+    where $TP$ is the count of true positives, and $FP$ the count falsely predicted positives.
+
+    It is the complement of the False Discovery Rate, $PPV=1-FDR$.
+
+    Examples:
+        - `ppv`
+        - `precision@macro`
+
+    Note: Read more:
+        1. [scikit-learn](https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/Precision_and_recall)
     """  # noqa: E501
 
     full_name = "Positive Predictive Value"
@@ -192,12 +234,20 @@ class PositivePredictiveValue(Metric):
 class FalseDiscoveryRate(Metric):
     """Computes the False Discovery Rate.
 
-    The ratio of falsely predicted positives to predicted positives:
-        `FP / (TP + FP)`
-    where TP are the true positives, and FP are the falsely predicted positives.
+    It is defined as the ratio of falsely predicted positives to predicted positives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$FP / (TP + FP)$$
+
+    where $TP$ is the count of true positives, and $FP$ the count of falsely predicted positives.
+
+    It is the complement of the Positive Predictve Value, $FDR=1-PPV$.
+
+    Examples:
+        - `fdr`
+        - `false_discovery_rate@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/False_discovery_rate)
     """  # noqa: E501
 
     full_name = "False Discovery Rate"
@@ -221,13 +271,22 @@ class FalseDiscoveryRate(Metric):
 
 class FalsePositiveRate(Metric):
     """Computes the False Positive Rate, the probability of false alarm.
+    Also known as the fall-out.
 
-    The ratio of falsely predicted positives to condition negatives:
-        `FP / (TN + FP)`
-    where TN are the true negatives, and FP are the falsely predicted positives.
+    It is defined as the ratio of falsely predicted positives to condition negatives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$FP / (TN + FP)$$
+
+    where $TN$ is the count of true negatives, and $FP$ the count of falsely predicted positives.
+
+    It is the complement of the True Negative Rate, $FPR=1-TNR$.
+
+    Examples:
+        - `fpr`
+        - `fall-out@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/False_positive_rate)
     """  # noqa: E501
 
     full_name = "False Positive Rate"
@@ -252,12 +311,20 @@ class FalsePositiveRate(Metric):
 class TrueNegativeRate(Metric):
     """Computes the True Negative Rate, i.e. specificity, selectivity.
 
-    The ratio of true predicted negatives to condition negatives:
-        `TN / (TN + FP)`
-    where TN are the true negatives, and FP are the falsely predicted positives.
+    It is defined as the ratio of true predicted negatives to condition negatives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$TN / (TN + FP)$$
+
+    where $TN$ is the count of true negatives, and FP the count of falsely predicted positives.
+
+    It is the complement of the False Positive Rate, $TNR=1-FPR$.
+
+    Examples:
+        - `tnr`
+        - `selectivity@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Sensitivity_and_specificity)
     """  # noqa: E501
 
     full_name = "True Negative Rate"
@@ -280,12 +347,20 @@ class TrueNegativeRate(Metric):
 class FalseOmissionRate(Metric):
     """Computes the False Omission Rate.
 
-    The ratio of falsely predicted negatives to predicted negatives:
-        `FN / (TN + FN)`
-    where TN are the true negatives, and FN are the falsely predicted negatives.
+    It is defined as the ratio of falsely predicted negatives to all predicted negatives:
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    $$FN / (TN + FN)$$
+
+    where $$TN$$ is the count of true negatives, and $$FN$$ the count of falsely predicted negatives.
+
+    It is the complement of the Negative Predictive Value, $FOR=1-NPV$.
+
+    Examples:
+        - `for`
+        - `false_omission_rate@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#false_omission_rate)
     """  # noqa: E501
 
     full_name = "False Omission Rate"
@@ -312,12 +387,20 @@ class FalseOmissionRate(Metric):
 class NegativePredictiveValue(Metric):
     """Computes the Negative Predicitive Value.
 
-    The ratio of true negatives to predicted negatives:
-        `TN / (TN + FN)`
+    It is defined as the ratio of true negatives to all predicted negatives:
+
+    $$TN / (TN + FN)$$
+
     where TN are the true negatives, and FN are the falsely predicted negatives.
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
+    It is the complement of the False Omission Rate, $NPV=1-FOR$.
+
+    Examples:
+        - `npv`
+        - `negative_predictive_value@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value_(NPV))
     """  # noqa: E501
 
     full_name = "Negative Predictive Value"
@@ -339,235 +422,26 @@ class NegativePredictiveValue(Metric):
         return negative_predictive_value
 
 
-class PositiveLikelihoodRatio(Metric):
-    # TODO: write documentation
-
-    full_name = "Positive Likelihood Ratio"
-    is_multiclass = False
-    bounds = (0.0, float("inf"))
-    dependencies = ("tpr", "fpr")
-    sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["plr", "positive_likelihood_ratio"]
-
-    def compute_metric(
-        self,
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        return tpr / fpr
-
-
-class NegativeLikelihoodRatio(Metric):
-    # TODO: write documentation
-
-    full_name = "Negative Likelihood Ratio"
-    is_multiclass = False
-    bounds = (0.0, float("inf"))
-    dependencies = ("fnr", "tnr")
-    sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["negative_likelihood_ratio", "nlr"]
-
-    def compute_metric(
-        self,
-        fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        return fnr / tnr
-
-
-class DiagnosticOddsRatio(Metric):
-    # TODO: write documentation
-
-    full_name = "Negative Likelihood Ratio"
-    is_multiclass = False
-    bounds = (0.0, float("inf"))
-    dependencies = ("nlr", "plr")
-    sklearn_equivalent = None
-    aliases = ["dor", "diagnostic_odds_ratio"]
-
-    def compute_metric(
-        self,
-        plr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        nlr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        dor = plr / nlr
-
-        return dor
-
-
-class F1(Metric):
-    # TODO: write documentation
-
-    full_name = "F1-score"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("ppv", "tpr")
-    sklearn_equivalent = "f1_score"
-    aliases = ["f1"]
-
-    def compute_metric(
-        self,
-        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        f1 = 2 * (ppv * tpr) / (ppv + tpr)
-
-        # In case one of the ratios is nan (most likely due to 0 division), set to 0
-        f1 = np.nan_to_num(
-            f1,
-            nan=0.0,
-        )
-
-        return f1
-
-
-class FBeta(Metric):
-    # TODO: write documentation
-
-    full_name = "FBeta-score"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("ppv", "tpr")
-    sklearn_equivalent = "fbeta_score"
-    aliases = ["fbeta"]
-
-    def __init__(self, beta: float = 1.0):
-        super().__init__()
-
-        self.beta = beta
-
-    def compute_metric(
-        self,
-        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        beta_2 = self.beta**2
-
-        f1 = (1 + beta_2) * (ppv * tpr) / (beta_2 * ppv + tpr)
-
-        # In case one of the ratios is nan (most likely due to 0 division), set to 0
-        f1 = np.nan_to_num(
-            f1,
-            nan=0.0,
-        )
-
-        return f1
-
-
-class Informedness(Metric):
-    # TODO: write documentation
-
-    full_name = "Informedness"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("tpr", "tnr")
-    sklearn_equivalent = None
-    aliases = ["informedness", "youdenj", "youden_j", "bookmaker_informedness"]
-
-    def compute_metric(
-        self,
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        return tpr + tnr - 1
-
-
-class Markedness(Metric):
-    # TODO: write documentation
-
-    full_name = "Markedness"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("ppv", "npv")
-    sklearn_equivalent = None
-    aliases = ["markedness", "delta_p"]
-
-    def compute_metric(
-        self,
-        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        npv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        return ppv + npv - 1
-
-
-class P4(Metric):
-    # TODO: write documentation
-
-    full_name = "P4-score"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("ppv", "tpr", "tnr", "npv")
-    sklearn_equivalent = None
-    aliases = ["p4"]
-
-    def compute_metric(
-        self,
-        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        npv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        values = np.stack(
-            [
-                ppv,
-                tpr,
-                tnr,
-                npv,
-            ],
-            axis=2,
-        )
-
-        return numpy_batched_harmonic_mean(values, axis=2, keepdims=False)
-
-
-class JaccardIndex(Metric):
-    # TODO: write documentation
-
-    full_name = "Jaccard Index"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("diag_mass", "p_pred", "p_condition")
-    sklearn_equivalent = "jaccard_score"
-    aliases = ["jaccard", "jaccard_index", "threat_score", "critical_success_index"]
-
-    def compute_metric(
-        self,
-        diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        return diag_mass / (p_pred + p_condition - diag_mass)
-
-
-class PrevalenceThreshold(Metric):
-    # TODO: write documentation
-
-    full_name = "Prevalence Threshold"
-    is_multiclass = False
-    bounds = (0.0, 1.0)
-    dependencies = ("tpr", "fpr")
-    sklearn_equivalent = None
-    aliases = ["prev_thresh", "prevalence_threshold"]
-
-    def compute_metric(
-        self,
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        num = np.sqrt(tpr * fpr) - fpr
-        denom = tpr - fpr
-
-        return num / denom
-
-
+# ==============================================================================
+# Complex metrics
+# These actually tell you something interesting about model performance
+# ==============================================================================
 class Accuracy(Metric):
-    """Computes the (multiclass) accuracy score.
+    """Computes the multiclass accuracy score.
 
-    The rate of correct classifications to all classifications:
+    It is defined as the rate of correct classifications to all classifications:
 
     $$(TP + TN) / N$$
 
     where $TP$ are the true positives, $TN$ the true negatives and $N$ the total number of predictions.
+
+    Possible values lie in the range [0.0, 1.0], with larger values denoting better performance. The value
+    of a random classifier is dependent on the label distribution, which makes accuracy especially susceptible
+    to class imbalance. It is also not directly comparable across datasets.
+
+    Examples:
+        - `acc`
+        - `accuracy@macro`
 
     Note: Read more:
         1. [scikit-learn](https://scikit-learn.org/stable/modules/model_evaluation.html#accuracy-score)
@@ -585,35 +459,33 @@ class Accuracy(Metric):
         self,
         diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        """
-        Args:
-            diag_mass:
-
-        Returns:
-            :
-        """
         return np.sum(diag_mass, axis=1)
 
 
 class BalancedAccuracy(Metric):
-    """Computes the (multiclass) balanced accuracy score.
+    """Computes the balanced accuracy score.
 
-    Uses the scikit-learn definition, but is equivalent to Wikipedia.
-    The macro-average of the per-class TPR:
-        `1/|C|\\sum TPR_{c}`
+    It is defined as the the arithmetic average of the per-class true-positive rate:
 
-    scikit-learn: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+    $$\\frac{1}{|C|}\\sum TPR_{c}$$
 
-    If `adjusted=True`, the chance-corrected variant is computed instead.
+    where $TPR$ is the true positive rate (precision).
 
-    For more information, see: https://scikit-learn.org/stable/modules/model_evaluation.html#balanced-accuracy-score
+    Possible values lie in the range [0.0, 1.0], with larger values denoting better performance. Unlike
+    accuracy, balanced accuracy can be 'chance corrected', such that random performance is yield a score
+    of 0.0. This can be achieved by setting `adjusted=True`.
+
+    Examples:
+        - `ba`
+        - `balanced_accuracy@macro`
+        - `ba+adjusted=True`
+
+    Note: Read more:
+        1. [scikit-learn](https://scikit-learn.org/stable/modules/model_evaluation.html#balanced-accuracy-score)
 
     Args:
-        tpr (np.ndarray [num_samples, num_classes])
-
-    Returns:
-        np.ndarray [num_samples, num_classes]
-    """
+        adjusted (bool): whether the chance-corrected variant is computed. Defaults to `False`.
+    """  # noqa: E501
 
     full_name = "Balanced Accuracy"
     is_multiclass = True
@@ -624,7 +496,6 @@ class BalancedAccuracy(Metric):
 
     def __init__(self, adjusted: bool = False) -> None:
         super().__init__()
-
         self.adjusted = adjusted
 
     def _compute_ba(
@@ -635,7 +506,6 @@ class BalancedAccuracy(Metric):
             tpr,
             axis=-1,
         )
-
         return balanced_accuracy
 
     def compute_metric(
@@ -644,60 +514,36 @@ class BalancedAccuracy(Metric):
         p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
         ba = self._compute_ba(tpr)
-
         if self.adjusted:
             chance = 1 / (p_condition != 0).sum(axis=1)
-
             ba = (ba - chance) / (1 - chance)
-
         return ba
 
 
-class CohensKappa(Metric):
-    # TODO: write documentation
-
-    full_name = "Cohen's Kappa"
-    is_multiclass = True
-    bounds = (-1.0, 1.0)
-    dependencies = ("diag_mass", "p_condition", "p_pred")
-    sklearn_equivalent = "cohen_kappa_score"
-    aliases = ["kappa", "cohen_kappa"]
-
-    def compute_metric(
-        self,
-        diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        p_agreement = np.sum(diag_mass, axis=1)
-
-        p_chance = np.einsum("bc, bc->b", p_condition, p_pred)
-
-        return (p_agreement - p_chance) / (1 - p_chance)
-
-
 class MatthewsCorrelationCoefficient(Metric):
-    """Computes Matthew's Correlation Coefficient (MCC).
+    """Computes the multiclass Matthew's Correlation Coefficient (MCC), also known as the phi coefficient.
+
+    Goes by a variety of names, depending on the application scenario.
 
     A metric that holistically combines many different classification metrics.
 
-    A perfect classifier scores `1.0`, a random classifier `0.0`. Smaller values indicate worse than random performance.
+    A perfect classifier scores 1.0, a random classifier 0.0. Values smaller than 0
+    indicate worse than random performance.
 
-    It is related to Pearson's Chi-square test.
+    It's absolute value is proportional to the square root of the Chi-square test statistic.
 
     Quoting Wikipedia:
-    'Some scientists claim the Matthews correlation coefficient to be the most informative single score to establish the quality of a binary classifier prediction in a confusion matrix context.'
+    > Some scientists claim the Matthews correlation coefficient to be the most informative
+    single score to establish the quality of a binary classifier prediction in a confusion matrix context.
 
-    scikit-learn: https://scikit-learn.org/stable/modules/model_evaluation.html#matthews-correlation-coefficient
-    Wikipedia: https://en.wikipedia.org/wiki/Phi_coefficient
+    Examples:
+        - `mcc`
+        - `phi`
 
-    Args:
-        diag_mass (np.ndarray [num_samples, num_classes]): a simple metric
-        p_condition (np.ndarray [num_samples, num_classes]): a simple metric
-        p_pred (np.ndarray [num_samples, num_classes]): a simple metric
+    Note: Read more:
+        1. [scikit-learn](https://scikit-learn.org/stable/modules/model_evaluation.html#matthews-correlation-coefficient)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/Phi_coefficient)
 
-    Returns:
-        np.ndarray [num_samples, num_classes]
     """  # noqa: E501
 
     full_name = "Matthews Correlation Coefficient"
@@ -728,3 +574,467 @@ class MatthewsCorrelationCoefficient(Metric):
         )
 
         return mcc
+
+
+class CohensKappa(Metric):
+    """Computes the multiclass Cohen's Kappa coefficient.
+
+    Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
+    be used to quantify the quality of a predictor.
+
+    It is defined as
+
+    $$\\frac{p_o-p_e}{1-p_e}$$
+
+    where $p_o$ is the observed agreement and $p_e$ the expected agreement
+    due to chance. Perfect agreement yields a score of 1, with a score of
+    0 corresponding to random performance. Several guidelines exist to interpret
+    the magnitude of the score.
+
+    Examples:
+        - `kappa`
+        - `cohen_kappa`
+
+    Note: Read more:
+        1. [sklearn](https://scikit-learn.org/stable/modules/model_evaluation.html#cohen-kappa)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/Cohen%27s_kappa)
+    """
+
+    full_name = "Cohen's Kappa"
+    is_multiclass = True
+    bounds = (-1.0, 1.0)
+    dependencies = ("diag_mass", "p_condition", "p_pred")
+    sklearn_equivalent = "cohen_kappa_score"
+    aliases = ["kappa", "cohen_kappa"]
+
+    def compute_metric(
+        self,
+        diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        p_agreement = np.sum(diag_mass, axis=1)
+
+        p_chance = np.einsum("bc, bc->b", p_condition, p_pred)
+
+        return (p_agreement - p_chance) / (1 - p_chance)
+
+
+class F1(Metric):
+    """Computes the univariate $F_{1}$-score.
+
+    It is defined as:
+
+    $$2\\dfrac{\\text{precision} \cdot \\text{recall}}{\\text{precision} + \\text{recall}}$$
+
+    or simply put, the harmonic mean between precision (PPV) and recall (TPR).
+
+    It is an exceedingly common metric used to evaluate machine learning performance. It is closely related
+    to the Precision-Recall curve, an anlysis with varying thresholds.
+
+    The 1 in the name from an unseen $\\beta$ parameter that weights precision and recall.
+    See the `FBeta` metric.
+
+    The $F_{1}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A random
+    classifier which predicts a class with a probability $p$, achieves a performance of,
+
+    $$2\\dfrac{\\text{prevalence}\cdot p}{\\text{prevalence}+p}.$$
+
+    Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
+    recommend comparing performance not to a random classifier, but the 'always-on' classifier (perfect recall
+    but poor precision). See the `F1Gain` metric.
+
+    Examples:
+        - `f1`
+        - `f1@macro`
+
+    Note: Read more:
+        1. [sklearn](https://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-f-measure-metrics)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/F-score)
+    """
+
+    full_name = "F1-score"
+    is_multiclass = False
+    bounds = (0.0, 1.0)
+    dependencies = ("ppv", "tpr")
+    sklearn_equivalent = "f1_score"
+    aliases = ["f1"]
+
+    def compute_metric(
+        self,
+        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        f1 = 2 * (ppv * tpr) / (ppv + tpr)
+
+        # In case one of the ratios is nan (most likely due to 0 division), set to 0
+        f1 = np.nan_to_num(
+            f1,
+            nan=0.0,
+        )
+
+        return f1
+
+
+class FBeta(Metric):
+    """Computes the univariate $F_{\\beta}$-score.
+
+    Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
+    be used to quantify the quality of a predictor.
+
+    It is defined as:
+
+    $$(1+\\beta^2)\\dfrac{\\text{precision} \cdot \\text{recall}}{\\beta^2\cdot\\text{precision} + \\text{recall}}$$
+
+    or simply put, the weighted harmonic mean between precision (PPV) and recall (TPR).
+
+    The value of $\\beta$ determines to which degree a user deems recall more important than precision. Larger
+    values (x > 1) weight recall more, whereas lower values weight precision more. A value of 1 corresponds to
+    equal weighting, see the `F1` metric.
+
+    The $F_{\\beta}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A random
+    classifier which predicts a class with a probability $p$, achieves a performance of,
+
+    $$(1+\\beta^2)\\dfrac{\\text{prevalence}\cdot p}{\\beta^2\cdot\\text{prevalence}+p}.$$
+
+    Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
+    recommend comparing performance not to a random classifier, but the 'always-on' classifier (perfect recall
+    but poor precision). See the `FBetaGain` metric.
+
+    Examples:
+        - `fbeta+beta=2`
+        - `fbeta+beta=0.5@macro`
+
+    Note: Read more:
+        1. [sklearn](https://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-f-measure-metrics)
+        2. [Wikipedia](https://en.wikipedia.org/wiki/F-score)
+    """
+
+    full_name = "FBeta-score"
+    is_multiclass = False
+    bounds = (0.0, 1.0)
+    dependencies = ("ppv", "tpr")
+    sklearn_equivalent = "fbeta_score"
+    aliases = ["fbeta"]
+
+    def __init__(self, beta: float = 1.0):
+        super().__init__()
+
+        self.beta = beta
+
+    def compute_metric(
+        self,
+        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        beta_2 = self.beta**2
+
+        fbeta = (1 + beta_2) * (ppv * tpr) / (beta_2 * ppv + tpr)
+
+        # In case one of the ratios is nan (most likely due to 0 division), set to 0
+        fbeta = np.nan_to_num(
+            fbeta,
+            nan=0.0,
+        )
+
+        return fbeta
+
+
+class Informedness(Metric):
+    """Computes the Informedness metric, also known Youden's J.
+
+    It is defined as:
+
+    $$\\text{sensitivity}+\\text{specificity}-1$$
+
+    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+
+    Values fall in the range [-1, 1], with higher values corresponding to better performance and 0
+    corresponding to random performance.
+
+    In the binary case, this metric is equivalent to the adjusted balanced accuracy, `ba+adj=True`.
+
+    It is commonly used in conjunction with a Reciever-Operator Curve analysis.
+
+    Examples:
+        - `informedness`
+        - `youdenj@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Youden%27s_J_statistic)
+    """
+
+    full_name = "Informedness"
+    is_multiclass = False
+    bounds = (-1.0, 1.0)
+    dependencies = ("tpr", "tnr")
+    sklearn_equivalent = None
+    aliases = ["informedness", "youdenj", "youden_j", "bookmaker_informedness"]
+
+    def compute_metric(
+        self,
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        return tpr + tnr - 1
+
+
+class Markedness(Metric):
+    """Computes the markedness metric, also known as $\\Delta p$
+
+    It is defined as:
+
+    $$\\text{precision}+NPV-1$$
+
+    where precision is the Positive Predictive Value (PPV).
+
+    Values fall in the range [-1, 1], with higher values corresponding to better performance and 0
+    corresponding to random performance.
+
+    It is commonly used in conjunction with a Reciever-Operator Curve analysis.
+
+    Examples:
+        - `markedness`
+        - `delta_p@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Markedness#)
+    """
+
+    full_name = "Markedness"
+    is_multiclass = False
+    bounds = (-1.0, 1.0)
+    dependencies = ("ppv", "npv")
+    sklearn_equivalent = None
+    aliases = ["markedness", "delta_p"]
+
+    def compute_metric(
+        self,
+        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        npv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        return ppv + npv - 1
+
+
+class P4(Metric):
+    """Computes the P4 metric.
+
+    It is defined as:
+
+    $$4\\left(\\dfrac{1}{\\text{precision}}+\\dfrac{1}{\\text{recall}}+\\dfrac{1}{\\text{specificity}}+\\dfrac{1}{NPV}\\right)^{-1}$$
+
+    where precision corresponds to the Positive Predictive Value (PPV), recall to the True Positive Rate (TPR),
+    and specificity to the True Negative Rate (TNR). Put otherwise, it is the harmonic mean of the 4 listed
+    metrics.
+
+    Introduced in 2022 by [Sitarz](https://arxiv.org/abs/2210.11997), it is meant to extend the properties of
+    the F1, Markedness and Informedness metrics. It is one of few defined metrics that incorporates the
+    Negative Predictive Value.
+
+    Possible values lie in the range [0, 1], with a score of 0 implying one of the intermediate metrics is 0,
+    and a 1 requiring perfect classification.
+
+    Relative to MCC, the author notes different behaviour at extreme values, but otherwise the metrics are
+    meant to provide a similar amount of information with a single value.
+
+    Examples:
+        - `p4`
+        - `p4@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/P4-metric)
+
+    """
+
+    full_name = "P4-score"
+    is_multiclass = False
+    bounds = (0.0, 1.0)
+    dependencies = ("ppv", "tpr", "tnr", "npv")
+    sklearn_equivalent = None
+    aliases = ["p4"]
+
+    def compute_metric(
+        self,
+        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        npv: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        values = np.stack(
+            [
+                ppv,
+                tpr,
+                tnr,
+                npv,
+            ],
+            axis=2,
+        )
+
+        return numpy_batched_harmonic_mean(values, axis=2, keepdims=False)
+
+
+class JaccardIndex(Metric):
+    """Computes the Jaccard Index, also known as the threat score.
+
+    It is defined as:
+
+    $$\dfrac{TP}{TP+FP+FN}$$
+
+    where $TP$ is the count of true positives, $FP$ the count of false positives and $FN$ the count of
+    false negatives.
+
+    Alternatively, it may be defined as the area of overlap between predicted and conditions, divided by the
+    area of all predicted and condition positives.
+
+    Due to the alternative definition, it is commonly used when labels are not readily present, for example in
+    evaluating clustering performance.
+
+    Examples:
+        - `jaccard`
+        - `critical_success_index@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Jaccard_index#Jaccard_index_in_binary_classification_confusion_matrices)
+
+    """
+
+    full_name = "Jaccard Index"
+    is_multiclass = False
+    bounds = (0.0, 1.0)
+    dependencies = ("diag_mass", "p_pred", "p_condition")
+    sklearn_equivalent = "jaccard_score"
+    aliases = ["jaccard", "jaccard_index", "threat_score", "critical_success_index"]
+
+    def compute_metric(
+        self,
+        diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        return diag_mass / (p_pred + p_condition - diag_mass)
+
+
+class PositiveLikelihoodRatio(Metric):
+    """Computes the positive likelihood ratio.
+
+    It is defined as
+
+    $$\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
+
+    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+
+    Simply put, it is the ratio of the probabilities of the model predicting a positive when the condition
+    is positive and negative, respectively.
+
+    Possible values lie in the range [0.0, $\infty$], with 0.0 corresponding to no true positives, and
+    infinity corresponding to no false positives. Larger values indicate better performance, with a score
+    of 1 corresponding to random performance.
+
+    Examples:
+        - `plr`
+        - `positive_likelihood_ratio@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Likelihood_ratios_in_diagnostic_testing#positive_likelihood_ratio)
+
+    """
+
+    full_name = "Positive Likelihood Ratio"
+    is_multiclass = False
+    bounds = (0.0, float("inf"))
+    dependencies = ("tpr", "fpr")
+    sklearn_equivalent = "class_likelihood_ratios"
+    aliases = ["plr", "positive_likelihood_ratio"]
+
+    def compute_metric(
+        self,
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        return tpr / fpr
+
+
+class NegativeLikelihoodRatio(Metric):
+    """Computes the negative likelihood ratio.
+
+    It is defined as
+
+    $$\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
+
+    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+
+    Simply put, it is the ratio of the probabilities of the model predicting a negative when the condition
+    is positive and negative, respectively.
+
+    Possible values lie in the range [0.0, $\infty$], with 0.0 corresponding to no false negatives, and
+    infinity corresponding to no true negatives. Smaller values indicate better performance, with a score
+    of 1 corresponding to random performance.
+
+    Examples:
+        - `nlr`
+        - `negative_likelihood_ratio@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Likelihood_ratios_in_diagnostic_testing#negative_likelihood_ratio)
+
+    """
+
+    full_name = "Negative Likelihood Ratio"
+    is_multiclass = False
+    bounds = (0.0, float("inf"))
+    dependencies = ("fnr", "tnr")
+    sklearn_equivalent = "class_likelihood_ratios"
+    aliases = ["negative_likelihood_ratio", "nlr"]
+
+    def compute_metric(
+        self,
+        fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        return fnr / tnr
+
+
+class DiagnosticOddsRatio(Metric):
+    """Computes the diagnostic odds ratio.
+
+    It is defined as:
+
+    $$\dfrac{LR_{+}}{LR_{-}}$$
+
+    where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
+
+    Possible values lie in the range [0.0, $\infty$]. Larger values indicate better performance, with a score
+    of 1 corresponding to random performance.
+
+    To make experiment aggregation easier, you can log transform this metric by specifying
+    `log_transform=true`. This makes the sampling distribution essentially Gaussian.
+
+    Examples:
+        - `dor`
+        - `dor+log_transform=true`
+        - `diagnostic_odds_ratio@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Diagnostic_odds_ratio)
+
+    """
+
+    full_name = "Negative Likelihood Ratio"
+    is_multiclass = False
+    bounds = (0.0, float("inf"))
+    dependencies = ("nlr", "plr")
+    sklearn_equivalent = None
+    aliases = ["dor", "diagnostic_odds_ratio"]
+
+    def __init__(self, log_transform: bool = False):
+        self.log_transform = log_transform
+
+    def compute_metric(
+        self,
+        plr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        nlr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        if self.log_transform:
+            return np.log(plr) - np.log(nlr)
+        else:
+            return plr / nlr

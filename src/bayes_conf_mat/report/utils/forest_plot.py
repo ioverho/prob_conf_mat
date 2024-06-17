@@ -9,7 +9,7 @@ from bayes_conf_mat.experiment_manager import (
     ExperimentAggregationResult,
 )
 from bayes_conf_mat.stats import hdi_estimator
-from bayes_conf_mat.report.utils.formatting import fmt
+from bayes_conf_mat.utils.formatting import fmt
 
 
 # TODO: document this function

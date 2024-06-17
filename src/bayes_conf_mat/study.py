@@ -6,7 +6,6 @@ from pathlib import Path
 
 import numpy as np
 
-from bayes_conf_mat.cache import InMemoryCache, PickleCache
 from bayes_conf_mat.config import load_config, Config
 from bayes_conf_mat.experiment import ExperimentResult
 from bayes_conf_mat.experiment_manager import ExperimentManager
@@ -18,6 +17,7 @@ from bayes_conf_mat.report.utils import (
     listwise_comparison_table,
     expected_reward_table,
 )
+from bayes_conf_mat.utils.cache import InMemoryCache, PickleCache
 
 
 class Study:
@@ -287,8 +287,8 @@ class Study:
     def report_forest_plot(
         self,
         metric_name: str,
-        class_label: int,
         experiment_group_name: str,
+        class_label: int = None,
         precision: int = 4,
         fontsize: typing.Optional[int] = 9,
         figsize: typing.Optional[typing.Tuple[int, int]] = None,
@@ -377,9 +377,9 @@ class Study:
     def report_pairwise_comparison(
         self,
         metric_name: str,
-        class_label: int,
         experiment_group_name_a: str,
         experiment_group_name_b: str,
+        class_label: int = None,
         min_sig_diff: float = None,
         precision: int = 4,
     ):
@@ -396,9 +396,9 @@ class Study:
     def report_pairwise_comparison_plot(
         self,
         metric_name: str,
-        class_label: int,
         experiment_group_name_a: str,
         experiment_group_name_b: str,
+        class_label: int = None,
         min_sig_diff: float = None,
         precision: int = 4,
         figsize: typing.Tuple[float, float] = None,
@@ -420,8 +420,8 @@ class Study:
     def _pairwise_compare_random(
         self,
         metric_name: str,
-        class_label: int,
         experiment_group_name: str,
+        class_label: int = None,
         min_sig_diff: float = None,
     ):
         metric = self.experiment_groups[experiment_group_name].metrics[metric_name]
@@ -458,8 +458,8 @@ class Study:
     def report_pairwise_random_comparison(
         self,
         metric_name: str,
-        class_label: int,
         experiment_group_name: str,
+        class_label: int = None,
         min_sig_diff: float = None,
         precision: int = 4,
     ):
@@ -472,7 +472,7 @@ class Study:
 
         return comparison_result.template_sentence(precision=precision)
 
-    def _listwise_compare(self, metric_name: str, class_label: int):
+    def _listwise_compare(self, metric_name: str, class_label: int = None):
         metric = list(self.experiment_groups.values())[0].metrics[metric_name]
 
         if metric.is_multiclass:
@@ -501,7 +501,7 @@ class Study:
         return listwise_comparison_result
 
     def report_listwise_comparison(
-        self, metric_name: str, class_label: int, precision: int = 4
+        self, metric_name: str, class_label: int = None, precision: int = 4
     ):
         listwise_comparison_result = self._listwise_compare(
             metric_name=metric_name, class_label=class_label
@@ -515,7 +515,7 @@ class Study:
     def report_expected_reward(
         self,
         metric_name: str,
-        class_label: int,
+        class_label: int = None,
         rewards: typing.Optional[typing.List[float]] = None,
         precision: int = 4,
     ):

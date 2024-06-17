@@ -10,9 +10,7 @@ When parsing the configuration file, it is tested against the schema described b
 
 Regardless, this might be overwhelming to many. Folder [examples] contains some example configuration files that should allow you to get started quickly.
 
-## 1. `name`
-
-[^ Jump to top ^](#configuration)
+## `name`
 
 *Type*: `scalar:str`
 

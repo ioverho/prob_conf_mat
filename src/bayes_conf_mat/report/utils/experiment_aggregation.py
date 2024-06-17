@@ -2,7 +2,7 @@ from tabulate import tabulate, SEPARATING_LINE
 import numpy as np
 
 from bayes_conf_mat.stats import summarize_posterior
-from bayes_conf_mat.report.utils.formatting import fmt
+from bayes_conf_mat.utils.formatting import fmt
 
 
 def values_to_table_row(

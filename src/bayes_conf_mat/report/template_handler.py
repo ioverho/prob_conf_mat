@@ -4,7 +4,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from collections import OrderedDict
 
-from bayes_conf_mat.report.utils import fmt
+from bayes_conf_mat.utils import fmt
 
 REPL_STRING = re.compile(r"@@(.+?)@@")
 TEMPLATE_DIR = Path(__file__).parent / "templates"

@@ -3,7 +3,7 @@ import typing
 import matplotlib.pyplot as plt
 
 from bayes_conf_mat.significance_testing import PairwiseComparisonResult
-from bayes_conf_mat.report.utils.formatting import fmt
+from bayes_conf_mat.utils.formatting import fmt
 
 
 POS_REGION_COLOUR = "#1E88E5"
@@ -35,8 +35,6 @@ def pairwise_comparison_plot(
     fontsize: int = 11,
 ):
     # Try to set a reasonable figsize
-    figsize = None
-
     if figsize is None:
         figsize = (6.29921, 1.787402)
 

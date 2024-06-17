@@ -6,7 +6,7 @@ import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment import ExperimentResult
 from bayes_conf_mat.experiment_manager import ExperimentAggregationResult
-from bayes_conf_mat.report.utils import fmt
+from bayes_conf_mat.utils.formatting import fmt
 from bayes_conf_mat.stats import (
     summarize_posterior,
     PosteriorSummary,

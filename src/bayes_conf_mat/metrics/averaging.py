@@ -10,7 +10,7 @@ from bayes_conf_mat.stats import (
 
 
 class MacroAverage(Averaging):
-    # TODO: write documentation
+    """Computes the arithmetic mean over all classes, also known as macro-averaging."""
 
     full_name = "Macro Averaging"
     dependencies = ()
@@ -31,7 +31,7 @@ class MacroAverage(Averaging):
 
 
 class WeightedAverage(Averaging):
-    # TODO: write documentation
+    """Computes the class prevalence weighted mean over all classes, also known as weighted averaging."""
 
     full_name = "Class Prevalence Weighted Averaging"
     dependencies = ("p_condition",)
@@ -54,7 +54,7 @@ class WeightedAverage(Averaging):
 
 
 class SelectPositiveClass(Averaging):
-    # TODO: write documentation
+    """Selects only the positive class, also known as binary averaging."""
 
     full_name = "Select Positive Class"
     dependencies = ()
@@ -81,7 +81,7 @@ class SelectPositiveClass(Averaging):
 
 
 class HarmonicMean(Averaging):
-    # TODO: write documentation
+    """Computes the harmonic mean over all classes."""
 
     full_name = "Harmonic Mean Averaging"
     dependencies = ()
@@ -102,7 +102,7 @@ class HarmonicMean(Averaging):
 
 
 class GeometricMean(Averaging):
-    # TODO: write documentation
+    """Computes the geometric mean over all classes."""
 
     full_name = "Geometric Mean Averaging"
     dependencies = ()

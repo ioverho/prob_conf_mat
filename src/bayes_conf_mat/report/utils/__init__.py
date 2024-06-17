@@ -1,4 +1,3 @@
-from .formatting import fmt
 from .forest_plot import forest_plot
 from .experiment_aggregation import aggregation_summary_table
 from .pairwise_comparison_plot import pairwise_comparison_plot

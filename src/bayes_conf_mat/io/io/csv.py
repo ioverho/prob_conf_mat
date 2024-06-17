@@ -3,13 +3,25 @@ import csv
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.io.base import IOBase
+from bayes_conf_mat.io.base import IOBase, ConfMatIOException
 from bayes_conf_mat.io.utils import pred_cond_to_confusion_matrix
 
-_CSV_TYPES = {"confusion_matrix", "pred_cond", "cond_pred"}
+_CSV_TYPES = {"confusion_matrix", "conf_mat", "pred_cond", "cond_pred"}
 
 
 class CSV(IOBase):
+    """Loads in a csv file as a confusion matrix, or a separated list of predictions and conditions.
+
+    Args:
+        location (str): the location of the CSV file
+        type (str): the type of file. Must be one of `_CSV_TYPES`
+        encoding (str, optional): the file's encoding. Defaults to "utf-8".
+        newline (str, optional): the newline character. Defaults to "\\n".
+        dialect (str, optional): the csv dialect. Defaults to "excel".
+        delimiter (str, optional): the delimiter character. Defaults to ",".
+        lineterminator (str, optional): the line terminator character. Defaults to "\\r\\n".
+    """
+
     format = "csv"
 
     def __init__(
@@ -34,7 +46,7 @@ class CSV(IOBase):
         self.delimiter = delimiter
         self.lineterminator = lineterminator
 
-    def load(self) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
+    def _load(self) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
         rows = []
         with open(
             self.location, "r", newline=self.newline, encoding=self.encoding
@@ -46,8 +58,13 @@ class CSV(IOBase):
                 lineterminator=self.lineterminator,
             )
 
-            for row in reader:
-                row_vals = list(map(int, row))
+            for i, row in enumerate(reader):
+                try:
+                    row_vals = list(map(int, row))
+                except ValueError:
+                    raise ConfMatIOException(
+                        f"Row contains values that cannot be converted to int: Row number: {i}. File: {self.location}"
+                    )
 
                 rows.append(row_vals)
 

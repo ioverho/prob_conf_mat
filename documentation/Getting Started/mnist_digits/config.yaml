@@ -1,0 +1,75 @@
+# A comment
+name: cifar_classification
+
+seed: 942
+num_samples: 100000
+
+prevalence_prior: 0.0
+confusion_prior: haldane
+
+ci_probability: 0.95
+
+experiments:
+  svm:
+    fold_0:
+      location: "./mnist_digits/svm_0.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_1:
+      location: "./mnist_digits/svm_1.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_2:
+      location: "./mnist_digits/svm_2.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_3:
+      location: "./mnist_digits/svm_3.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_4:
+      location: "./mnist_digits/svm_4.csv"
+      format: csv
+      type: confusion_matrix
+
+  mlp:
+    fold_0:
+      location: "./mnist_digits/mlp_0.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_1:
+      location: "./mnist_digits/mlp_1.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_2:
+      location: "./mnist_digits/mlp_2.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_3:
+      location: "./mnist_digits/mlp_3.csv"
+      format: csv
+      type: confusion_matrix
+
+    fold_4:
+      location: "./mnist_digits/mlp_4.csv"
+      format: csv
+      type: confusion_matrix
+
+metrics:
+  __default__:
+    aggregation: beta
+    estimation_method: mle
+  f1:
+  f1@macro:
+  mcc:
+    aggregation: fe_gaussian
+  dor:
+    aggregation: gamma
+    shifted: true

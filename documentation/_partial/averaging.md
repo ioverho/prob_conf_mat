@@ -1,0 +1,1 @@
+@@averaging_methods_list@@

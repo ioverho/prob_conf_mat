@@ -7,7 +7,6 @@ from .base import (
     Metric,
     AveragedMetric,
 )
-from .metrics import *
 from ._metrics import *
 from .averaging import *
 from .interface import get_metric

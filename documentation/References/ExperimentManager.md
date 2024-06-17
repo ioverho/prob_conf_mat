@@ -2,7 +2,7 @@
 
 Hello there!
 
-## API
+## References
 
 ::: bayes_conf_mat.experiment_manager.ExperimentManager
 
