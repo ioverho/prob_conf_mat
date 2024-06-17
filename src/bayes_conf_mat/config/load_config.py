@@ -13,7 +13,20 @@ from bayes_conf_mat.config.validation import (
 ALLOWED_FILE_EXTENSIONS = {".yaml", ".yml"}
 
 
-def load_config(config_location: str, encoding: str = "utf-8") -> Config:
+def load_config_from_text(config_string: str) -> Config:
+    yaml_config = strictyaml.load(config_string, schema=schema)
+
+    config = Config(yaml_config)
+
+    config = validate_experiments(config=config)
+
+    if "analysis" in config:
+        validate_analysis(config=config)
+
+    return config
+
+
+def load_config_from_file(config_location: str, encoding: str = "utf-8") -> Config:
     config_location = Path(config_location).resolve()
 
     if config_location.suffix not in ALLOWED_FILE_EXTENSIONS:
@@ -25,15 +38,8 @@ def load_config(config_location: str, encoding: str = "utf-8") -> Config:
     elif not config_location.is_file():
         raise ConfigError(f"File path `{config_location}` is not a file.")
 
-    parsed_yaml = config_location.read_text(encoding=encoding)
+    parsed_text = config_location.read_text(encoding=encoding)
 
-    yaml_config = strictyaml.load(parsed_yaml, schema=schema)
-
-    config = Config(yaml_config)
-
-    config = validate_experiments(config=config)
-
-    if "analysis" in config:
-        validate_analysis(config=config)
+    config = load_config_from_text(parsed_text)
 
     return config

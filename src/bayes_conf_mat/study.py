@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from bayes_conf_mat.config import load_config, Config
+from bayes_conf_mat.config import load_config_from_file, load_config_from_text, Config
 from bayes_conf_mat.experiment import ExperimentResult
 from bayes_conf_mat.experiment_manager import ExperimentManager
 from bayes_conf_mat.significance_testing import pairwise_compare, listwise_comparison
@@ -86,11 +86,23 @@ class Study:
     def _parse_config(self, config: str | Config, encoding: str = "utf-8"):
         if isinstance(config, Config):
             self.config = config
+        elif isinstance(config, str) or isinstance(config, Path):
+            if Path(config).is_file():
+                self.config = load_config_from_file(
+                    config_location=config, encoding=encoding
+                )
+            else:
+                try:
+                    self.config = load_config_from_text(config_string=config)
+                except Exception as e:
+                    raise ValueError(f"Error when parsing config as config string: {e}")
         else:
-            self.config = load_config(config_location=config, encoding=encoding)
+            raise ValueError(f"Type of config variable not implemented: {type(config)}")
 
     @classmethod
-    def from_config(cls, config: str | Config, encoding: str = "utf-8", **init_kwargs):
+    def from_config(
+        cls, config: str | Path | Config, encoding: str = "utf-8", **init_kwargs
+    ):
         instance = cls(**init_kwargs)
 
         instance._parse_config(config=config, encoding=encoding)

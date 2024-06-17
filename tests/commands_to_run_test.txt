@@ -1,1 +1,6 @@
-python ./tests/metric_equivalence.py -v
+All:
+pytest --disable-warnings
+
+Specific:
+pytest -q ./tests/test_io.py
+pytest -q ./tests/test_metric_equivalence.py
