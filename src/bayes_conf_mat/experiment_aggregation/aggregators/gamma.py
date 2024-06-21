@@ -10,6 +10,31 @@ from bayes_conf_mat.stats import truncated_sample
 
 
 class GammaAggregator(ExperimentAggregation):
+    """Samples from the Gamma-conflated distribution.
+
+    Specifically, the aggregate distribution $\\text{Gamma}(\\tilde{\\alpha}, \\tilde{\\beta})$
+    ($\\alpha$ is the shape, $\\beta$ the rate parameter) is estimated as:
+
+    $$\\begin{aligned}
+        \\tilde{\\alpha}&=\\left[\sum_{i}^{M}\\alpha_{i}\\right]-(M-1) \\\\
+        \\tilde{\\beta}&=\\dfrac{1}{\sum_{i}^{M}\\beta_{i}^{-1}}
+    \\end{aligned}$$
+
+    where $M$ is the total number of experiments.
+
+    An optional `shifted: bool` argument exists to dynamically estimate the support for the distribution. Can
+    help fit to individual experiments, but likely minimally impacts the aggregate distribution.
+
+    Danger: Assumptions:
+        - the individual experiment distributions are gamma distributed
+
+    References: Read more:
+        1. [Hill, T. (2008). Conflations Of Probability Distributions: An Optimal Method For Consolidating Data From Different Experiments.](http://arxiv.org/abs/0808.1808)
+        2. [Hill, T., & Miller, J. (2011). How to combine independent data sets for the same quantity.](https://arxiv.org/abs/1005.4978)
+        3. ['Gamma distribution' on Wikipedia](https://en.wikipedia.org/wiki/Gamma_distribution)
+
+    """
+
     name = "gamma"
     full_name = "Gamma conflated experiment aggregator"
     aliases = ["gamma", "gamma_conflation"]

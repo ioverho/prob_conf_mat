@@ -7,12 +7,14 @@ from tabulate import tabulate
 from bayes_conf_mat.report.template_handler import Template
 from bayes_conf_mat.io import IO_REGISTRY
 from bayes_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY
+from bayes_conf_mat.experiment_aggregation import AGGREGATION_REGISTRY
 
 REFERENCES_PART = "References"
 METRICS_AND_AVERAGING_CHAPTER = REFERENCES_PART + "/Metrics"
 METRICS_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Metrics.md"
 AVERAGING_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Averaging.md"
 IO_SECTION = REFERENCES_PART + "/IO.md"
+EXPERIMENT_AGGREGATION_SECTION = REFERENCES_PART + "/Experiment Aggregation/index.md"
 
 
 def metrics_and_averaging_overview():
@@ -170,6 +172,36 @@ def io():
     logger.info(f"Wrote IO methods to '{IO_SECTION}'")
 
 
+def experiment_aggregation():
+    logger = logging.getLogger(__name__)
+
+    # Load in the template
+    template = Template(
+        Path("./documentation/_partial/experiment_aggregation.md").resolve()
+    )
+
+    # Complete the template
+    # Creates a table with some important information as an overview
+    all_agg_methods = {
+        str(agg_method): agg_method for agg_method in AGGREGATION_REGISTRY.values()
+    }
+
+    template.set(
+        "experiment_aggregators_list",
+        value="\n".join(
+            f"::: {agg_method.__module__}.{agg_method.__name__}"
+            for agg_method in all_agg_methods.values()
+        ),
+    )
+
+    # Write the template to a md file
+    Path(f"./documentation/{EXPERIMENT_AGGREGATION_SECTION}").write_text(
+        str(template), encoding="utf-8"
+    )
+
+    logger.info(f"Wrote IO methods to '{EXPERIMENT_AGGREGATION_SECTION}")
+
+
 if __name__ == "__main__":
     logging.basicConfig(
         stream=sys.stdout,
@@ -188,3 +220,6 @@ if __name__ == "__main__":
 
     # References/IO.md
     io()
+
+    # References/ExperimentAggregation.md
+    experiment_aggregation()

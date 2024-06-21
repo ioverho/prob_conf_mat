@@ -11,7 +11,48 @@ from bayes_conf_mat.experiment_aggregation.heterogeneity import (
 )
 from bayes_conf_mat.stats import truncated_sample
 
+
 class REGaussianAggregator(ExperimentAggregation):
+    """Samples from the Random Effects Meta-Analytical Estimator.
+
+    First uses the standard the inverse variance weighted mean and standard errors as model parameters, before
+    debiasing the weights to incorporate inter-experiment heterogeneity. As a result, studies with larger
+    standard errors will be upweighted relative to the fixed-effects model.
+
+    Specifically, starting with a Fixed-Effects model $\\mathcal{N}(\\tilde{\\mu_{\\text{FE}}}, \\tilde{\\sigma_{\\text{FE}}})$,
+
+    $$\\begin{aligned}
+        w_{i}&=\\dfrac{\\left(\\sigma_{i}^2+\\tau^2\\right)^{-1}}{\sum_{j}^{M}\\left(\\sigma_{j}^2+\\tau^2\\right)^{-1}} \\\\
+        \\tilde{\\mu}&=\sum_{i}^{M}w_{i}\\mu_{i} \\\\
+        \\tilde{\\sigma^2}&=\\dfrac{1}{\sum_{i}^{M}\\sigma_{i}^{-2}}
+    \\end{aligned}$$
+
+    where $\\tau$ is the estimated inter-experiment heterogeneity, and $M$ is the total number of experiments.
+
+    Uses the Paule-Mandel iterative heterogeneity estimator, which does not make a parametric assumption. The
+    more common (but biased) DerSimonian-Laird estimator can also be used by setting
+    `paule_mandel_heterogeneity: bool = False`.
+
+    If `hksj_sampling_distribution: bool = True`, the aggregated distribution is a more conservative
+    $t$-distribution, with degrees of freedom equal to $M-1$. This is especially more conservative when there
+    are only a few experiments available, and can substantially increase the aggregated distribution's variance.
+
+    Danger: Assumptions:
+        - the individual experiment distributions are normally (Gaussian) distributed
+        - there **is** inter-experiment heterogeneity present
+
+    References: Read more:
+        3. [Higgins, J., & Thomas, J. (Eds.). (2023). Cochrane handbook for systematic reviews of interventions.](https://training.cochrane.org/handbook/current/chapter-10#section-10-3)
+        4. [Borenstein et al. (2021). Introduction to meta-analysis.](https://www.wiley.com/en-us/Introduction+to+Meta-Analysis%2C+2nd+Edition-p-9781119558354)
+        5. ['Meta-analysis' on Wikipedia](https://en.wikipedia.org/wiki/Meta-analysis#Statistical_models_for_aggregate_data)
+        4. [IntHout, J., Ioannidis, J. P., & Borm, G. F. (2014). The Hartung-Knapp-Sidik-Jonkman method for random effects meta-analysis is straightforward and considerably outperforms the standard DerSimonian-Laird method.](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/1471-2288-14-25)
+        5. [Langan et al. (2019). A comparison of heterogeneity variance estimators in simulated random‐effects meta‐analyses.](https://onlinelibrary.wiley.com/doi/full/10.1002/jrsm.1316?casa_token=NcK51p09KsYAAAAA%3A_ZkOpRymLWcDTOK5uv6UCJah6MLuEZ430pJJAENiRq2HF9_K4AlGQqhJ7_akJUig5DxkoiKec1Hdp60)
+
+    Args:
+        paule_mandel_heterogeneity (bool): whether to use the Paule-Mandel method for estimating inter-experiment heterogeneity, or fallback to the DerSimonian-Laird estimator. Defaults to True.
+        hksj_sampling_distribution (bool): whether to use the Hartung-Knapp-Sidik-Jonkman corrected $t$-distribition as the aggregate sampling distribution. Defaults to False.
+    """
+
     name = "re_gaussian"
     full_name = "Random-effects Gaussian meta-analytical experiment aggregator"
     aliases = ["re", "random_effect", "re_gaussian"]
@@ -20,7 +61,7 @@ class REGaussianAggregator(ExperimentAggregation):
         self,
         rng: np.random.BitGenerator,
         paule_mandel_heterogeneity: bool = True,
-        hksj_sampling_distribution: bool = True,
+        hksj_sampling_distribution: bool = False,
     ) -> None:
         super().__init__(rng=rng)
         self.paule_mandel_heterogeneity = paule_mandel_heterogeneity

@@ -8,6 +8,33 @@ from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
 
 
 class BetaAggregator(ExperimentAggregation):
+    """Samples from the beta-conflated distribution.
+
+    Specifically, the aggregate distribution $\\text{Beta}(\\tilde{\\alpha}, \\tilde{\\beta})$ is estimated as:
+
+    $$\\begin{aligned}
+        \\tilde{\\alpha}&=\\left[\sum_{i=1}^{M}\\alpha_{i}\\right]-\\left(M-1\\right) \\\\
+        \\tilde{\\beta}&=\\left[\sum_{i=1}^{M}\\beta_{i}\\right]-\\left(M-1\\right)
+    \\end{aligned}$$
+
+    where $M$ is the total number of experiments.
+
+    Uses [`scipy.stats.beta`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html) class to fit beta-distributions.
+
+    Danger: Assumptions:
+        - the individual experiment distributions are beta distributed
+        - the metrics are bounded, although the range need not be (0, 1)
+
+    References: Read more:
+        1. [Hill, T. P. (2008). Conflations Of Probability Distributions: An Optimal Method For Consolidating Data From Different Experiments.](http://arxiv.org/abs/0808.1808)
+        2. [Hill, T. P., & Miller, J. (2011). How to combine independent data sets for the same quantity.](https://arxiv.org/abs/1005.4978)
+        3. ['Beta distribution' on Wikipedia](https://en.wikipedia.org/wiki/Beta_distribution)
+
+    Args:
+        estimation_method (str): method for estimating the parameters of the individual experiment distributions. Options are 'mle' for maximum-likelihood estimation, or 'mome' for the method of moments estimator. MLE tends be more efficient but is difficult to estimate
+
+    """
+
     name = "beta"
     full_name = "Beta conflated experiment aggregation"
     aliases = ["beta", "beta_conflation"]

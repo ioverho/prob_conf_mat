@@ -50,6 +50,7 @@ class ExperimentAggregation(metaclass=ABCMeta):
     @property
     @abstractmethod
     def full_name(self):
+        """A human-readable name for this experiment-aggregation method"""
         raise NotImplementedError
 
     @property
@@ -60,6 +61,7 @@ class ExperimentAggregation(metaclass=ABCMeta):
     @property
     @abstractmethod
     def aliases(self):
+        """A list of all valid aliases for this metric. Can be used in configuration files."""
         raise NotImplementedError
 
     @abstractmethod

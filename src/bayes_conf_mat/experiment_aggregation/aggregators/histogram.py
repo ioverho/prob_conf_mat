@@ -7,6 +7,30 @@ from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
 
 
 class HistogramAggregator(ExperimentAggregation):
+    """Samples from a histogram approximate conflation distribution.
+
+    First bins all individual experiment groups, and then computes the product of the probability masses
+    across individual experiments.
+
+    Unlike other methods, this does not make a parametric assumption. However, the resulting distribution can
+    'look' unnatural, and requires overlapping supports within the sample. If any experiment assigns 0
+    probability mass to any bin, the conflated bin will also contain 0 probability mass.
+
+    As such, inter-experiment heterogeneity can be a significant problem.
+
+    Uses [numpy.histogram_bin_edges](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html)
+    to estimate the number of bin edges needed per experiment, and takes the smallest across all experiments
+    for the aggregate distribution.
+
+    Danger: Assumptions:
+        - the individual experiment distributions' supports overlap
+
+    References: Read more:
+        1. [Hill, T. (2008). Conflations Of Probability Distributions: An Optimal Method For Consolidating Data From Different Experiments.](http://arxiv.org/abs/0808.1808)
+        2. [Hill, T., & Miller, J. (2011). How to combine independent data sets for the same quantity.](https://arxiv.org/abs/1005.4978)
+
+    """
+
     name = "histogram"
     full_name = "Histrogram approximated conflation experiment aggregation"
     aliases = ["hist", "histogram"]

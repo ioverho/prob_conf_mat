@@ -3,11 +3,11 @@
 strict: false
 
 extra_css:
-  - _static/custom.css
+  #- _static/custom.css
 
 docs_dir: documentation
 
-site_name: bayes-conf-mat
+site_name: Credibility Matrices
 site_url: https://github.com/ioverho/bayes_conf_mat
 site_description: "TODO: add a description"
 site_author: Ivo Verhoeven
@@ -27,12 +27,15 @@ nav:
       - How To Guides/metric_syntax.md
       - How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
   - References:
-      - References/ExperimentManager.md
-      - References/Experiment.md
+      #- References/ExperimentManager.md
+      #- References/Experiment.md
       - Metrics:
           - References/Metrics/index.md
           - References/Metrics/Metrics.md
           - References/Metrics/Averaging.md
+      - Experiment Aggregation:
+          - References/Experiment Aggregation/index.md
+          - References/Experiment Aggregation/heterogeneity.md
       - References/IO.md
   - Explanation:
       - "Explanation/index.md"
@@ -86,7 +89,7 @@ theme:
     # Search
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/
     # ==========================================================================
-    - search
+    #- search
     # Suggestions
     - search.suggest
     # ==========================================================================
@@ -94,14 +97,19 @@ theme:
     # ==========================================================================
     #- navigation.footer
   palette:
-    # Blatantly stolen from `jaxtyping`
     # TODO: come up with own colour palette
     # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
     # Light mode / dark mode
-    - scheme: arviz
+    - scheme: light
+      primary: black
+      accent: indigo
       toggle:
         icon: material/circle-half-full
         name: Switch to dark mode
+    #- scheme: arviz
+    #  toggle:
+    #    icon: material/circle-half-full
+    #    name: Switch to dark mode
     - scheme: slate
       primary: black
       accent: deep orange
