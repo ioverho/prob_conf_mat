@@ -19,13 +19,16 @@ class ConfMatIOException(Exception):
 
 
 class IOBase(metaclass=ABCMeta):
-    def __init__(self, location: str):
-        self.location = Path(location).resolve()
+    def __init__(self, location: str | None):
+        if location is not None:
+            self.location = Path(location).resolve()
 
-        if not (self.location.exists() and self.location.is_file()):
-            raise ValueError(f"No file found at: {str(self.location)}")
+            if not (self.location.exists() and self.location.is_file()):
+                raise ValueError(f"No file found at: {str(self.location)}")
 
-        self.location = str(self.location)
+            self.location = str(self.location)
+        else:
+            self.location = None
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -81,6 +84,9 @@ class IOBase(metaclass=ABCMeta):
             )
 
     def __call__(self) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
+        return self.load()
+
+    def load(self) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
         conf_mat = self._load()
 
         self._validate_conf_mat(conf_mat=conf_mat)

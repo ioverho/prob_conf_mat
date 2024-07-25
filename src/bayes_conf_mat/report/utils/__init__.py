@@ -1,3 +1,4 @@
+from .summary_table_row import values_to_table_row
 from .forest_plot import forest_plot
 from .experiment_aggregation import aggregation_summary_table
 from .pairwise_comparison_plot import pairwise_comparison_plot

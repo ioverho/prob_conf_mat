@@ -31,7 +31,7 @@ class Experiment:
         # Check if config like object
         if hasattr(confusion_matrix, "items"):
             confusion_matrix_loader = get_io(**confusion_matrix)
-            self.confusion_matrix = confusion_matrix_loader()
+            self.confusion_matrix = confusion_matrix_loader.load()
 
         # If a numpy array, just store it
         elif isinstance(confusion_matrix, np.ndarray):

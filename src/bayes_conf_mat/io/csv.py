@@ -26,8 +26,8 @@ class CSV(IOBase):
 
     def __init__(
         self,
-        location: str,
-        type: str,
+        location: str = None,
+        type: str = None,
         encoding: str = "utf-8",
         newline: str = "\n",
         dialect: str = "excel",

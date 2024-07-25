@@ -1,6 +1,7 @@
 import typing
 from collections import defaultdict, OrderedDict
 from dataclasses import dataclass
+from warnings import warn
 
 import numpy as np
 import jaxtyping as jtyping
@@ -28,8 +29,6 @@ class ExperimentManager:
         experiments (typing.Dict[ str, typing.Dict  |  jtyping.Int[np.ndarray, 'num_classes num_classes'] ]): _description_
         num_samples (typing.Optional[int]): _description_
         seed (typing.Optional[int  |  np.random.BitGenerator]): _description_
-        prevalence_prior (str | int | jtyping.Int[np.ndarray, 'num_classes']): _description_
-        confusion_prior (str | int | jtyping.Int[np.ndarray, 'num_classes num_classes']): _description_
         metrics (typing.Optional[typing.Iterable[str]], optional): _description_. Defaults to ().
         experiment_aggregations (typing.Optional[ typing.Dict[str, typing.Dict[str, str]] ], optional): _description_. Defaults to None.
     """
@@ -37,15 +36,8 @@ class ExperimentManager:
     def __init__(
         self,
         name: str,
-        experiments: typing.Dict[
-            str, typing.Dict | jtyping.Int[np.ndarray, " num_classes num_classes"]
-        ],
         num_samples: typing.Optional[int],
         seed: typing.Optional[int | np.random.BitGenerator],
-        prevalence_prior: str | int | jtyping.Int[np.ndarray, " num_classes"],
-        confusion_prior: str
-        | int
-        | jtyping.Int[np.ndarray, " num_classes num_classes"],
         metrics: typing.Optional[typing.Iterable[str]] = (),
         experiment_aggregations: typing.Optional[
             typing.Dict[str, typing.Dict[str, str]]
@@ -57,10 +49,6 @@ class ExperimentManager:
         # The number of synthetic confusion matrices to sample
         self.num_samples = num_samples
 
-        # The prior strategy to use for each experiment
-        self.prevalence_prior = prevalence_prior
-        self.confusion_prior = confusion_prior
-
         # The manager's RNG
         if isinstance(seed, int) or isinstance(seed, float):
             self.rng = np.random.default_rng(seed=seed)
@@ -68,11 +56,14 @@ class ExperimentManager:
             seed, np.random.Generator
         ):
             self.rng = seed
+        else:
+            raise ValueError(
+                f"Could not construct rng using seed of type `{type(seed)}`"
+            )
 
         # The collection of experiments
         self.num_classes = None
         self.experiments = OrderedDict()
-        self.add_experiments(experiments)
 
         # The collection of metrics
         self.metrics = MetricCollection(metrics)
@@ -90,42 +81,37 @@ class ExperimentManager:
     def num_experiments(self):
         return len(self.experiments)
 
-    # TODO: document method
-    def add_experiments(
+    def add_experiment(
         self,
-        experiments: typing.Dict[
-            str, typing.Dict | jtyping.Int[np.ndarray, " num_classes num_classes"]
-        ],
-    ) -> None:
-        # Each experiment gets its own RNG, spawned from the manager's RNG
-        # In theory, should allow for parallelizing the different experiments
-        indep_rngs = self.rng.spawn(len(experiments))
+        name: str,
+        confusion_matrix: typing.Dict[str, typing.Any] | np.ndarray,
+        prevalence_prior: float | str | jtyping.Float[np.ndarray, " num_classes"] = 0,
+        confusion_prior: float | str | jtyping.Float[np.ndarray, " num_classes"] = 0,
+    ):
+        indep_rng = self.rng.spawn(1)[0]
 
-        temp_experiments = OrderedDict()
-        for (name, confusion_matrix), rng in zip(experiments.items(), indep_rngs):
-            temp_experiments[name] = Experiment(
-                # Provided for the user
-                # Unique to each experiment
-                name=name,
-                confusion_matrix=confusion_matrix,
-                # Shared across experiments
-                prevalence_prior=self.prevalence_prior,
-                confusion_prior=self.confusion_prior,
-                # Provided by the manager
-                rng=rng,
+        new_experiment = Experiment(
+            # Provided for the user
+            # Unique to each experiment
+            name=name,
+            confusion_matrix=confusion_matrix,
+            prevalence_prior=prevalence_prior,
+            confusion_prior=confusion_prior,
+            # Provided by the manager
+            rng=indep_rng,
+        )
+
+        if self.num_classes is None:
+            self.num_classes = new_experiment.num_classes
+        elif new_experiment.num_classes != self.num_classes:
+            raise AttributeError(
+                f"Experiment '{self.name}/{name}' has {new_experiment.num_classes} classes, not the expected {self.num_classes}"
             )
 
-            if self.num_classes is None:
-                self.num_classes = temp_experiments[name].num_classes
-            else:
-                experiment_num_classes = temp_experiments[name].num_classes
-                if experiment_num_classes != self.num_classes:
-                    # TODO: come up with own error class
-                    raise AttributeError(
-                        f"Experiment {name} has {experiment_num_classes} classes, not the expected {self.num_classes}!"
-                    )
+        if self.experiments.get(name, None) is not None:
+            warn(f"Experiment '{self.name}/{name} alread exists. Overwriting.")
 
-        self.experiments.update(temp_experiments)
+        self.experiments[name] = new_experiment
 
     def add_metric(
         self,

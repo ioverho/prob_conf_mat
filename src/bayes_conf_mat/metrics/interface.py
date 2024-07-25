@@ -74,7 +74,7 @@ def get_metric(syntax_string: str) -> callable:
 
     else:
         raise ValueError(
-            f"Metric alias `{metric_name}` not found. Please choose one of: {set(METRIC_REGISTRY.keys())}"  # noqa: E501
+            f"Metric alias must be registered. Currently: {metric_name}. Must be one of {set(METRIC_REGISTRY.keys())}"
         )
 
     # Parse and pass the kwargs for the metric function ========================
@@ -101,7 +101,7 @@ def get_metric(syntax_string: str) -> callable:
             averaging_class = AVERAGING_REGISTRY[averaging_name]
         except KeyError:
             raise ValueError(
-                f"Averaging alias `{averaging_name}` not found. Please choose one of: {set(AVERAGING_REGISTRY.keys())}"  # noqa: E501
+                f"Averaging alias must be registered. Currently: {averaging_name}. Must be one of {set(AVERAGING_REGISTRY.keys())}"
             )
 
         # Parse and pass the kwargs for the metric function ========================

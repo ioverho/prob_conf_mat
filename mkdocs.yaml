@@ -21,7 +21,8 @@ copyright: Copyright &copy; 2024 Ivo Verhoeven
 nav:
   - index.md
   - Getting Started:
-      - "Getting Started/mnist_digits_class.ipynb"
+      - Getting Started/first_steps.ipynb
+      - Getting Started/mnist_digits_class.ipynb
   - How-To:
       - How To Guides/configuration.md
       - How To Guides/metric_syntax.md
@@ -121,7 +122,8 @@ plugins:
   # Search bar
   # https://squidfunk.github.io/mkdocs-material/plugins/search/
   - search
-  - mkdocs-jupyter
+  - mkdocs-jupyter:
+      #no_input: True
   - mkdocstrings:
       handlers:
         python:
