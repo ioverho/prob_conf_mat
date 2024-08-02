@@ -1,15 +1,22 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bayes_conf_mat.experiment_manager import ExperimentManager
+    from bayes_conf_mat.metrics import Metric, AveragedMetric
+    from bayes_conf_mat.experiment import ExperimentResult
+    from bayes_conf_mat.experiment_aggregation.heterogeneity import HeterogeneityResult
+
 import inspect
 import typing
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.metrics import Metric, AveragedMetric
-from bayes_conf_mat.experiment_aggregation.heterogeneity import (
-    estimate_i2,
-    HeterogeneityResult,
-)
+from bayes_conf_mat.experiment_aggregation.heterogeneity import estimate_i2
+
 
 AGGREGATION_REGISTRY = dict()
 
@@ -60,12 +67,16 @@ class ExperimentAggregation(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self):
+    def aliases(self) -> typing.List[str]:
         """A list of all valid aliases for this metric. Can be used in configuration files."""
         raise NotImplementedError
 
     @abstractmethod
-    def aggregate(self):
+    def aggregate(
+        self,
+        experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
+        bounds: typing.Tuple[float, float],
+    ) -> jtyping.Float[np.ndarray, " num_experiments"]:
         raise NotImplementedError
 
     def _mappable_aggregate(self, kwargs: dict):
@@ -73,20 +84,59 @@ class ExperimentAggregation(metaclass=ABCMeta):
 
     def __call__(
         self,
+        experiment_group: ExperimentManager,
         metric: Metric | AveragedMetric,
-        experiment_samples: typing.Annotated[typing.List, "num_experiments"],
-    ) -> typing.Tuple[np.ndarray, HeterogeneityResult]:
+        experiment_results: typing.Annotated[
+            typing.List[ExperimentResult], "num_experiments"
+        ],
+    ) -> typing.Annotated[typing.List[ExperimentAggregationResult], "num_classes"]:
         # Stack the experiment values
-        stacked_experiment_values: jtyping.Float[
-            np.ndarray, " num_experiments num_samples"
-        ] = np.stack([result.values for result in experiment_samples], axis=0)
-
-        aggregated_samples = self.aggregate(
-            stacked_experiment_values, bounds=metric.bounds
+        stacked_experiment_results: jtyping.Float[
+            np.ndarray, " num_samples #num_classes num_experiments"
+        ] = np.stack(
+            [experiment_result.values for experiment_result in experiment_results],
+            axis=-1,
         )
-        aggregation_heterogeneity = estimate_i2(stacked_experiment_values)
 
-        return (aggregated_samples, aggregation_heterogeneity)
+        # For each class, get the aggregated values
+        all_class_aggregated_experiment_result = []
+        all_class_heterogeneity = []
+        for class_label in range(stacked_experiment_results.shape[1]):
+            per_class_stacked_experiment_results: jtyping.Float[
+                np.ndarray, " num_samples num_experiments"
+            ] = stacked_experiment_results[:, class_label, :]
+
+            per_class_aggregated_experiment_result: jtyping.Float[
+                np.ndarray, " num_samples"
+            ] = self.aggregate(
+                per_class_stacked_experiment_results, bounds=metric.bounds
+            )
+
+            all_class_aggregated_experiment_result.append(
+                per_class_aggregated_experiment_result
+            )
+
+            if per_class_stacked_experiment_results.shape[1] > 1:
+                all_class_heterogeneity.append(
+                    estimate_i2(per_class_stacked_experiment_results)
+                )
+            else:
+                all_class_heterogeneity.append(None)
+
+        # Finally, stack everything back together
+        aggregated_experiment_result: jtyping.Float[
+            np.ndarray, " num_samples #num_classes"
+        ] = np.vstack(per_class_aggregated_experiment_result)
+
+        result = ExperimentAggregationResult(
+            experiment_group=experiment_group,
+            aggregator=self,
+            metric=metric,
+            heterogeneity_results=all_class_heterogeneity,
+            values=aggregated_experiment_result,
+        )
+
+        return result
 
     def __repr__(self) -> str:
         return f"ExperimentAggregator({self.name})"
@@ -99,3 +149,22 @@ class ExperimentAggregation(metaclass=ABCMeta):
 
     def __hash__(self):
         return hash(self.name)
+
+
+@dataclass(frozen=True)
+class ExperimentAggregationResult:
+    experiment_group: ExperimentManager
+    aggregator: typing.Type[ExperimentAggregation]
+    metric: typing.Type[Metric] | typing.Type[AveragedMetric]
+    heterogeneity_results: typing.List[HeterogeneityResult]
+    values: jtyping.Float[np.ndarray, " num_samples #num_classes"]
+
+    @property
+    def name(self):
+        return self.experiment_group.name
+
+    def __repr__(self):
+        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}), aggregator={self.aggregator}"
+
+    def __str__(self):
+        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}), aggregator={self.aggregator}"

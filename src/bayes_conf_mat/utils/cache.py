@@ -72,10 +72,16 @@ class NestedCache:
         # Method for setting value
         self._set(dd=self._cache, keys=keys, value=value, i=0)
 
+    def __contains__(self, keys):
+        result = self._get(dd=self._cache, keys=keys, i=0)
+
+        if result is NotInCache:
+            return False
+        else:
+            return True
+
 
 class InMemoryCache(NestedCache):
-    pass
-
     def clean(self):
         self._cache = self.nested_dict()
 

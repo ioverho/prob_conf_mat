@@ -50,10 +50,10 @@ class BetaAggregator(ExperimentAggregation):
 
     def aggregate(
         self,
-        distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
+        experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_experiments, num_samples = distribution_samples.shape
+        num_samples, num_experiments = experiment_samples.shape
 
         if bounds[0] == -float("inf") or bounds[1] == float("inf"):
             raise NotImplementedError(
@@ -89,9 +89,13 @@ class BetaAggregator(ExperimentAggregation):
 
         alphas = []
         betas = []
-        for samples in distribution_samples:
+        for per_experiment_samples in experiment_samples.T:
             alpha, beta, _, _ = scipy.stats.beta.fit(
-                np.clip(samples, a_min=bounds[0] + 1e-9, a_max=bounds[1] - 1e-9),
+                np.clip(
+                    per_experiment_samples,
+                    a_min=bounds[0] + 1e-9,
+                    a_max=bounds[1] - 1e-9,
+                ),
                 method=self.estimation_method,
                 floc=bounds[0],
                 fscale=bounds[1] - bounds[0],

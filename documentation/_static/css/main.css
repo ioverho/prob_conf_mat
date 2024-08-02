@@ -1,0 +1,8 @@
+.md-header {
+    box-shadow: none;
+}
+
+.md-header--shadow {
+    box-shadow: none;
+    transition: none;
+}

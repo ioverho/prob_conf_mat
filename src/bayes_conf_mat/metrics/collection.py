@@ -1,13 +1,15 @@
 import typing
 from collections import deque, OrderedDict
 from graphlib import TopologicalSorter
+from functools import cache
 
 from bayes_conf_mat.metrics.interface import get_metric
 from bayes_conf_mat.metrics.base import RootMetric, Metric, AveragedMetric
 
 
+@cache
 def generate_metric_computation_schedule(
-    metrics: typing.Iterable[str | typing.Type[Metric] | typing.Type[AveragedMetric]],
+    metrics: typing.Tuple[str | typing.Type[Metric] | typing.Type[AveragedMetric]],
 ) -> typing.Generator[typing.Type[Metric] | typing.Type[AveragedMetric], None, None]:
     """Generates a topological ordering of the inserted metrics and their dependencies.
 
@@ -126,12 +128,12 @@ class MetricCollection:
 
         self._metrics.update(((metric_instance, None),))
         self._metrics_by_alias_or_name.update({metric_instance.name: metric_instance})
-        self._metrics_by_alias_or_name.update(
-            {alias: metric_instance for alias in metric_instance.aliases}
-        )
+        #self._metrics_by_alias_or_name.update(
+        #    {alias: metric_instance for alias in metric_instance.aliases}
+        #)
 
     def get_insert_order(self):
-        return list(self._metrics.keys())
+        return tuple(self._metrics.keys())
 
     def get_compute_order(self):
         topologically_sorted = generate_metric_computation_schedule(
@@ -144,7 +146,7 @@ class MetricCollection:
         return self._metrics_by_alias_or_name[key]
 
     def __iter__(self):
-        for metric in tuple(self.get_insert_order()):
+        for metric in self.get_insert_order():
             yield metric
 
     def __len__(self):

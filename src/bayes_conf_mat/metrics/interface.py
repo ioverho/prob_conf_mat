@@ -1,4 +1,5 @@
 import re
+from functools import cache
 
 from bayes_conf_mat.metrics.base import (
     _ROOT_METRICS,
@@ -17,6 +18,7 @@ RESERVED_CHARACTERS = {
 # Reminder: always document regex immediately after writing down...
 NAME_REGEX = re.compile(r"([^\+\@\=]+)[\+\@\=]?")
 ARGUMENT_REGEX = re.compile(r"\+([^\+\@\=]+)\=([^\+\@\=]+)[^\+\@]?")
+UNTERMINATED_ARGUMENT_REGEX = re.compile(r"\+([^\+\@\=]+)")
 
 
 def _parse_kwargs(kwargs):
@@ -44,6 +46,7 @@ def _parse_kwargs(kwargs):
     return kwargs
 
 
+@cache
 def get_metric(syntax_string: str) -> callable:
     """Takes a metric syntax string and returns a metric class instance, potentially with included averaging.
 
@@ -53,6 +56,7 @@ def get_metric(syntax_string: str) -> callable:
     Returns:
         callable: a metric class instance
     """  # noqa: E501
+
     # Split on the averaging
     syntax_components = syntax_string.split("@")
 
@@ -82,6 +86,14 @@ def get_metric(syntax_string: str) -> callable:
     metric_kwargs = dict(metric_kwargs)
     metric_kwargs = _parse_kwargs(metric_kwargs)
 
+    # Check if there are more started kwargs than kwargs with values
+    # If so, assume an unterminated kwargs expression
+    unterminated_kwargs = UNTERMINATED_ARGUMENT_REGEX.findall(metric_string)
+    if len(unterminated_kwargs) != len(metric_kwargs):
+        raise ValueError(
+            f"Found potentially unterminated kwarg in: {metric_string}. Make sure kwargs are written as '+foo=bar'"
+        )
+
     metric_instance = metric_class(**metric_kwargs)
 
     metric_instance._instantiation_name = metric_string
@@ -108,6 +120,14 @@ def get_metric(syntax_string: str) -> callable:
         averaging_kwargs = ARGUMENT_REGEX.findall(averaging_string)
         averaging_kwargs = dict(averaging_kwargs)
         averaging_kwargs = _parse_kwargs(averaging_kwargs)
+
+        # Check if there are more started kwargs than kwargs with values
+        # If so, assume an unterminated kwargs expression
+        unterminated_kwargs = UNTERMINATED_ARGUMENT_REGEX.findall(averaging_string)
+        if len(unterminated_kwargs) != len(averaging_kwargs):
+            raise ValueError(
+                f"Found potentially unterminated kwarg in: {averaging_string}. Make sure kwargs are written as '+foo=bar'"
+            )
 
         averaging_instance = averaging_class(**averaging_kwargs)
 

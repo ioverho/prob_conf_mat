@@ -1,3 +1,4 @@
+from .singleton import SingletonAggregator
 from .beta import BetaAggregator
 from .fe_gaussian import FEGaussianAggregator
 from .re_gaussian import REGaussianAggregator

@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import typing
 from dataclasses import dataclass
 
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment import ExperimentResult
-from bayes_conf_mat.experiment_manager import ExperimentAggregationResult
 from bayes_conf_mat.utils.formatting import fmt
 from bayes_conf_mat.stats import (
     summarize_posterior,
@@ -22,6 +22,7 @@ class PairwiseComparisonResult:
     rhs_name: str
     metric_name: str
 
+    observed_diff: float
     diff_dist: jtyping.Float[np.ndarray, " num_samples"]
     diff_dist_summary: PosteriorSummary
 
@@ -39,7 +40,11 @@ class PairwiseComparisonResult:
     p_bi_sig_interpretation: str
     p_bi_sig_score_interval_width: float
 
+    p_rope_random: float
+    bf_rope: float
+
     p_uni_sig: float
+    # p_uni_sig_interpretation: str
     p_uni_sig_score_interval_width: float
 
     def template_sentence(self, precision: int = 4):
@@ -52,7 +57,7 @@ class PairwiseComparisonResult:
             " greater" if self.diff_dist_summary.median > 0 else " lesser"
         )
         template_sentence += f" than <{self.rhs_name}> could be considered"
-        template_sentence += f" '{self.p_direction_interpretation}' "
+        template_sentence += f" '{self.p_direction_interpretation}'* "
 
         # Existence statistics
         template_sentence += f"(Median {DELTA}={fmt(self.diff_dist_summary.median, precision=precision)}, "
@@ -81,7 +86,17 @@ class PairwiseComparisonResult:
         template_sentence += (
             f"p_ROPE={fmt(self.p_rope, precision=precision, mode='%')})."
         )
-        template_sentence += f"\nBidirectional significance could be considered '{self.p_bi_sig_interpretation}'."
+        template_sentence += f"\nBidirectional significance could be considered '{self.p_bi_sig_interpretation}'*."
+
+        if self.bf_rope is not None:
+            # Bidirectional significance to random
+            template_sentence += f"\nRelative to two random models (p_ROPE,random={fmt(self.p_rope_random, precision=precision, mode='%')}) "
+
+            log_bf_rope = np.log10(self.bf_rope)
+            bf_rope_direction = "less" if np.sign(log_bf_rope) > 0.0 else "more"
+            bf_rope_magnitude = np.power(10, np.abs(log_bf_rope))
+
+            template_sentence += f" significance is {fmt(bf_rope_magnitude, precision=precision, mode='f')} times {bf_rope_direction} likely."
 
         # Unidirectional significance
         template_sentence += (
@@ -97,13 +112,18 @@ class PairwiseComparisonResult:
             f" p_neg={fmt(self.p_sig_neg, precision=precision, mode='%')})."
         )
 
+        template_sentence += (
+            "\n\n* These interpretations are based off of loose guidelines."
+        )
+        # template_sentence += "\nThe interpretation of effect existence and size is complex, and should change according to the application."
+
         return template_sentence
 
     def sensitivity_analysis(self):
         return {
-            "p_direction": self.p_direction_interval_widt,
-            "p_bi_sig": self.p_bi_sig_interval_widt,
-            "p_uni_sig": self.p_uni_sig_interval_widt,
+            "p_direction": self.p_direction_interval_width,
+            "p_bi_sig": self.p_bi_sig_interval_width,
+            "p_uni_sig": self.p_uni_sig_interval_width,
         }
 
 
@@ -144,21 +164,15 @@ def p_rope_interpretation_guideline(p_rope: float):
 
 
 def pairwise_compare(
-    lhs: ExperimentResult | ExperimentAggregationResult,
-    rhs: ExperimentResult | ExperimentAggregationResult,
+    metric: str,
+    diff_dist: jtyping.Float[np.ndarray, " num_samples"],
     ci_probability: float,
     min_sig_diff: float = None,
     lhs_name: typing.Optional[str] = None,
     rhs_name: typing.Optional[str] = None,
+    random_diff_dist: jtyping.Float[np.ndarray, " num_samples"] = None,
+    observed_difference: float = None,
 ):
-    if lhs.metric.name != rhs.metric.name:
-        raise ValueError(
-            f"The metric used to compute lhs and rhs are not the same: {lhs.metric.name} != {rhs.metric.name}"
-        )
-
-    # Compute the difference distribution
-    diff_dist = lhs.values - rhs.values
-
     # Find central tendency of diff dit
     diff_dist_summary = summarize_posterior(diff_dist, ci_probability=ci_probability)
 
@@ -186,12 +200,26 @@ def pairwise_compare(
     p_bi_sig = 1 - p_rope
     p_rope_interpretation = p_rope_interpretation_guideline(p_rope)
 
+    # Compare p_ROPE to random distributions
+    if random_diff_dist is not None:
+        p_bi_sig_random = np.mean(
+            (random_diff_dist < -min_sig_diff) | (random_diff_dist > min_sig_diff)
+        )
+        p_rope_random = 1 - p_bi_sig_random
+        bf_rope = p_rope / p_rope_random
+
+    else:
+        p_bi_sig_random = None
+        p_rope_random = None
+        bf_rope = None
+
     result = PairwiseComparisonResult(
         # Admin
-        lhs_name=lhs.name if lhs_name is None else lhs_name,
-        rhs_name=rhs.name if rhs_name is None else rhs_name,
-        metric_name=lhs.metric.name,
+        lhs_name=lhs_name,
+        rhs_name=rhs_name,
+        metric_name=metric.name,
         # The difference distribution
+        observed_diff=observed_difference,
         diff_dist=diff_dist,
         diff_dist_summary=diff_dist_summary,
         # Existence
@@ -212,6 +240,9 @@ def pairwise_compare(
         p_bi_sig_score_interval_width=wilson_score_interval(
             p=1 - p_rope, n=diff_dist.shape[0]
         ),
+        # Significance relative to random
+        p_rope_random=p_rope_random,
+        bf_rope=bf_rope,
         # Unidirectional significance
         p_uni_sig=p_sig_pos if diff_dist_summary.median > 0 else p_sig_neg,
         p_uni_sig_score_interval_width=wilson_score_interval(

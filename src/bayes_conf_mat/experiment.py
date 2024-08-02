@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import typing
 from dataclasses import dataclass
+from collections import OrderedDict
 
 import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.io import get_io
-from bayes_conf_mat.metrics import RootMetric, Metric, AveragedMetric
+from bayes_conf_mat.metrics import RootMetric, Metric, AveragedMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
 
 _IMPLEMENTED_SAMPLING_METHODS = {"prior", "posterior", "random", "input"}
@@ -247,7 +250,7 @@ class Experiment:
 
         if sampling_method not in _IMPLEMENTED_SAMPLING_METHODS:
             raise ValueError(
-                f"Sampling method must be one of `{_IMPLEMENTED_SAMPLING_METHODS}`"
+                f"Sampling method must be one of `{_IMPLEMENTED_SAMPLING_METHODS}`. Currently: `{sampling_method}`"
             )  # noqa: E501
 
         elif sampling_method == "posterior":
@@ -264,6 +267,65 @@ class Experiment:
 
         return root_metrics
 
+    def sample_metrics(
+        self, metrics: MetricCollection, sampling_method: str, num_samples: int
+    ) -> typing.Mapping[Metric | AveragedMetric, ExperimentResult]:
+        """_summary_
+
+        Args:
+            metrics (MetricCollection): the metrics needed to be computed
+            sampling_method (str): the sampling method used, passed to `sample`
+            num_samples (int): the number of samples to draw, pass to `sample`
+
+        Returns:
+            typing.Mapping[Metric | AveragedMetric, typing.Any]: a mapping from metric instance to an `ExperimentResult` instance
+        """
+
+        # Get the topological ordering of the metrics, such that no metric is computed before
+        # its dependencies are
+        metric_compute_order = metrics.get_compute_order()
+
+        # First have the experiment generate synthetic confusion matrices and needed RootMetrics
+        # typing.Dict[RootMetric, ExperimentResult]
+        intermediate_results = self.sample(
+            sampling_method=sampling_method, num_samples=num_samples
+        )
+
+        # Go through all metrics and dependencies in order
+        for metric in metric_compute_order:
+            # Root metrics have no dependency per-definition
+            # and are already computed automatically
+            if isinstance(metric, RootMetric):
+                continue
+
+            # Filter out all the dependencies for the current metric
+            # Since we allow each metric to define it's own dependencies by name (or alias)
+            # We have to be a little lenient with how we look these up
+            dependencies: typing.Dict[Metric, np.ndarray] = dict()
+            for dependency_name in metric.dependencies:
+                dependency = metric_compute_order[dependency_name]
+
+                dependencies[dependency_name] = intermediate_results[dependency].values
+
+            # Compute the current metric and add it to the dict
+            metric_values = metric(**dependencies)
+
+            # Add the metric values to the intermediate stats dictionary
+            intermediate_results[metric] = ExperimentResult(
+                experiment=self,
+                metric=metric,
+                values=metric_values,
+            )
+
+        results = OrderedDict(
+            [
+                (metric, intermediate_results[metric])
+                for metric in metrics.get_insert_order()
+            ]
+        )
+
+        return results
+
     def __repr__(self) -> str:
         return f"Experiment({self.name})"
 
@@ -273,10 +335,18 @@ class Experiment:
 
 @dataclass(frozen=True)
 class ExperimentResult:
-    experiment: Experiment
-    metric: typing.Type[Metric] | typing.Type[AveragedMetric]
+    """Storage for results from an experiment
 
-    values: jtyping.Float[np.ndarray, " num_samples *num_classes"]
+    Args:
+        experiment (Experiment): the experiment which produced these results
+        metric (typing.Type[Metric | AveragedMetric]): the metric instance that produced these results
+        values (jtyping.Float[np.ndarray, " num_samples #num_classes"]): the actual produced values
+    """
+
+    experiment: Experiment
+    metric: typing.Type[Metric | AveragedMetric]
+
+    values: jtyping.Float[np.ndarray, " num_samples #num_classes"]
 
     @property
     def is_multiclass(self):
@@ -293,3 +363,9 @@ class ExperimentResult:
     @property
     def num_samples(self):
         return self.values.shape[0]
+
+    def __repr__(self):
+        return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
+
+    def __str__(self):
+        return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"

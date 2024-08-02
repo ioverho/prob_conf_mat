@@ -322,7 +322,7 @@ class AveragedMetric(metaclass=ABCMeta):
     def compute_average(self, *args, **kwargs):
         return self.averaging(*args, **kwargs)
 
-    def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples"]:
+    def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         metric_vals = self.compute_metric(
             **{
                 key: value
@@ -340,7 +340,7 @@ class AveragedMetric(metaclass=ABCMeta):
             },
         )
 
-        return aggregated_metric_vals
+        return aggregated_metric_vals[:, np.newaxis]
 
     @property
     def _kwargs(self):

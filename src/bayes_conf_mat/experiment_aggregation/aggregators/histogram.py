@@ -47,15 +47,17 @@ class HistogramAggregator(ExperimentAggregation):
 
     def aggregate(
         self,
-        distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
+        experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_experiments, num_samples = distribution_samples.shape
+        num_samples, num_experiments = experiment_samples.shape
 
         # Find the smallest recommended bin width for all experiments
         min_bin_width = float("inf")
-        for samples in distribution_samples:
-            distribution_bins = np.histogram_bin_edges(samples, bins="auto")
+        for per_experiment_samples in experiment_samples.T:
+            distribution_bins = np.histogram_bin_edges(
+                per_experiment_samples, bins="auto"
+            )
 
             bin_width = distribution_bins[2] - distribution_bins[1]
 
@@ -64,8 +66,8 @@ class HistogramAggregator(ExperimentAggregation):
 
         # Find the support for the aggregated histogram
         # Avoids having lots of zero-count bins
-        min_min = np.min(distribution_samples)
-        max_max = np.max(distribution_samples)
+        min_min = np.min(experiment_samples)
+        max_max = np.max(experiment_samples)
 
         found_bins = np.arange(
             start=max(min_min - min_bin_width, bounds[0]),
@@ -74,14 +76,14 @@ class HistogramAggregator(ExperimentAggregation):
         )
         num_bins = found_bins.shape[0]
 
-        # The pseudo-counts should have `pseudo_count_weight` time the weight of the true samples
+        # The pseudo-counts should have `pseudo_count_weight` times the weight of the true samples
         smoothing_coeff = 1 / num_bins * self.pseudo_count_weight * num_samples
 
         conflated_distribution = np.zeros(shape=(num_bins - 1,))
-        for samples in distribution_samples:
+        for per_experiment_samples in experiment_samples.T:
             # Re-compute the histograms along the support of the aggregated distribution
             binned_distribution, bins = np.histogram(
-                samples,
+                per_experiment_samples,
                 bins=found_bins,
                 range=bounds,
             )

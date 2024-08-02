@@ -3,43 +3,41 @@ import typing
 import uuid
 import warnings
 from pathlib import Path
-from functools import cached_property, reduce
+from functools import cached_property
 from collections import OrderedDict
 
 import numpy as np
-from tabulate import tabulate
 import jaxtyping as jtyping
 
-from bayes_conf_mat.config import Config
-from bayes_conf_mat.experiment import ExperimentResult
-from bayes_conf_mat.experiment_manager import ExperimentManager
-from bayes_conf_mat.significance_testing import pairwise_compare, listwise_comparison
-from bayes_conf_mat.report.utils import (
-    aggregation_summary_table,
-    forest_plot,
-    pairwise_comparison_plot,
-    listwise_comparison_table,
-    expected_reward_table,
-    values_to_table_row,
-)
+from bayes_conf_mat.utils.wrappers import changes_state
 from bayes_conf_mat.utils.cache import InMemoryCache, PickleCache
+from bayes_conf_mat.experiment_manager import ExperimentManager
 from bayes_conf_mat.metrics import (
     MetricCollection,
     Metric,
     AveragedMetric,
 )
 from bayes_conf_mat.io import get_io
-from bayes_conf_mat.visualization import distribution_plot
+from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
+from bayes_conf_mat.reporting import (
+    experiment_summaries,
+    random_experiment_summaries,
+    pairwise_comparison_to_random,
+    pairwise_comparison,
+)
+from bayes_conf_mat.reporting.visualization import (
+    distribution_plot,
+    diff_distribution_plot,
+)
 
-
-def changes_state(method):
-    """Whenever the state of a study changes, make sure to clean the cache"""
-
-    def inner(self, *args, **kwargs):
-        self.cache.clean()
-        return method(self, *args, **kwargs)
-
-    return inner
+# from bayes_conf_mat.report.utils import (
+#    aggregation_summary_table,
+#    forest_plot,
+#    pairwise_comparison_plot,
+#    listwise_comparison_table,
+#    expected_reward_table,
+#    values_to_table_row,
+# )
 
 
 class Study:
@@ -115,6 +113,18 @@ class Study:
         # The experiment group store
         self.experiment_groups = dict()
 
+        # The experiment aggregators store
+        self.metric_to_aggregator = dict()
+
+    def __repr__(self):
+        return f"Study({self.name}, experiment_groups={list(self.experiment_groups.keys())}), metrics={self.metrics}"
+
+    def __str__(self):
+        return f"Study({self.name}, experiment_groups={list(self.experiment_groups.keys())}, metrics={self.metrics})"
+
+    def __len__(self) -> int:
+        return len(self.experiment_groups)
+
     # TODO: document this method
     @changes_state
     def add_experiment(
@@ -159,10 +169,7 @@ class Study:
 
             experiment_group = ExperimentManager(
                 name=experiment_group_name,
-                num_samples=self.num_samples,
                 seed=indep_rng,
-                metrics=(),
-                experiment_aggregations=None,
                 **kwargs,
             )
 
@@ -192,20 +199,339 @@ class Study:
     def add_experiment_aggregation(
         self, metric_name: str, aggregation_config: typing.Dict[str, typing.Any]
     ) -> None:
-        for _, experiment_group in self.experiment_groups.items():
-            experiment_group.add_experiment_aggregation(metric_name, aggregation_config)
+        indep_rng = self.rng.spawn(1)[0]
 
-    def __repr__(self):
-        return f"Study({self.name}, experiment_groups={list(self.experiment_groups.keys())}), metrics={self.metrics}"
+        aggregator = get_experiment_aggregator(rng=indep_rng, **aggregation_config)
 
-    def __str__(self):
-        return f"Study({self.name}, experiment_groups={list(self.experiment_groups.keys())}, metrics={self.metrics})"
+        metric = self.metrics[metric_name]
 
-    def __len__(self) -> int:
-        return len(self.experiment_groups)
+        self.metric_to_aggregator[metric] = aggregator
 
     def clean_cache(self):
         self.cache.clean()
+
+    @cached_property
+    def num_classes(self):
+        all_num_classes = set()
+        for experiment_group in self.experiment_groups.values():
+            all_num_classes.add(experiment_group.num_classes)
+
+        if len(all_num_classes) > 1:
+            raise ValueError(
+                f"Inconsistent number of classes in experiment groups: {all_num_classes}"
+            )
+        else:
+            return list(all_num_classes)[0]
+
+    def _validate_metric_class_label_combination(
+        self, metric: Metric | AveragedMetric, class_label: int
+    ):
+        try:
+            metric = self.metrics[metric]
+        except KeyError:
+            raise KeyError(
+                f"Could not find metric '{metric}' in the metrics collection. Consider adding it using `Study.add_metric`"
+            )
+
+        if metric.is_multiclass:
+            if not ((class_label == 0) or (class_label is None)):
+                warnings.warn("Metric is multiclass, ignoring class label.")
+
+            class_label = 0
+        else:
+            if class_label is None:
+                raise ValueError(
+                    f"Metric '{metric.name}' is not multiclass. You must provide a class label."
+                )
+            elif class_label < 0 or class_label > self.num_classes - 1:
+                raise ValueError(
+                    f"Class label must be in range [0, {self.num_classes - 1}]. Currently {class_label}."
+                )
+
+        return metric, class_label
+
+    def _sample_metrics(self, sampling_method: str):
+        if sampling_method in ["posterior", "prior", "random"]:
+            # Compute metrics for the entire experiment group
+            for experiment_group in self.experiment_groups.values():
+                experiment_group_results = experiment_group.sample_metrics(
+                    metrics=self.metrics,
+                    sampling_method=sampling_method,
+                    num_samples=self.num_samples,
+                    metric_to_aggregator=self.metric_to_aggregator,
+                )
+
+                # Cache the aggregated results
+                for (
+                    metric,
+                    aggregation_result,
+                ) in experiment_group_results.aggregation_result.items():
+                    self.cache.cache(
+                        keys=[
+                            metric.name,
+                            experiment_group.name,
+                            "aggregated",
+                            sampling_method,
+                        ],
+                        value=aggregation_result,
+                    )
+
+                # Cache the individual experiment results
+                for (
+                    metric,
+                    individual_experiment_results,
+                ) in experiment_group_results.individual_experiment_results.items():
+                    for (
+                        experiment,
+                        experiment_result,
+                    ) in individual_experiment_results.items():
+                        self.cache.cache(
+                            keys=[
+                                metric.name,
+                                experiment_group.name,
+                                experiment.name,
+                                sampling_method,
+                            ],
+                            value=experiment_result,
+                        )
+
+        elif sampling_method in ["input"]:
+            # Compute metrics for the entire experiment group
+            for experiment_group in self.experiment_groups.values():
+                for experiment in experiment_group.experiments.values():
+                    experiment_results = experiment.sample_metrics(
+                        metrics=self.metrics,
+                        sampling_method="input",
+                        num_samples=self.num_samples,
+                    )
+
+                    for metric, experiment_result in experiment_results.items():
+                        self.cache.cache(
+                            keys=[
+                                metric.name,
+                                experiment_group.name,
+                                experiment.name,
+                                "input",
+                            ],
+                            value=experiment_result,
+                        )
+
+        else:
+            raise NotImplementedError(
+                f"Sampling method '{sampling_method}' not implemented for `Study._sample_metrics`"
+            )
+
+    def get_metric_samples(
+        self,
+        metric: str,
+        experiment_group: str,
+        sampling_method: str,
+        experiment: str | typing.Literal["aggregated"],
+    ):
+        keys = [metric, experiment_group, experiment, sampling_method]
+
+        if keys in self.cache:
+            result = self.cache.load(keys)
+
+        else:
+            self._sample_metrics(sampling_method=sampling_method)
+
+            result = self.cache.load(keys)
+
+        return result
+
+    # TODO: document this method
+    def report_metric_summaries(
+        self,
+        metric: str,
+        class_label: int | None = None,
+        table_fmt: str = "html",
+        precision: int = 4,
+        **tabulate_kwargs,
+    ) -> str:
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric, class_label=class_label
+        )
+
+        summary_table = experiment_summaries(
+            study=self,
+            metric=metric,
+            class_label=class_label,
+            table_fmt=table_fmt,
+            precision=precision,
+            **tabulate_kwargs,
+        )
+
+        return summary_table
+
+    def report_random_metric_summaries(
+        self,
+        metric: str,
+        class_label: int | None = None,
+        table_fmt: str = "html",
+        precision: int = 4,
+        **tabulate_kwargs,
+    ) -> str:
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric, class_label=class_label
+        )
+
+        summary_table = random_experiment_summaries(
+            study=self,
+            metric=metric,
+            class_label=class_label,
+            table_fmt=table_fmt,
+            precision=precision,
+            **tabulate_kwargs,
+        )
+
+        return summary_table
+
+    def plot_metric_summaries(
+        self,
+        metric: str,
+        class_label: int | None = None,
+        **kwargs,
+    ):
+        """Plots the distrbution of sampled metric values for a particular metric and class combination.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+            observed_values (typing.Dict[str, ExperimentResult]): the observed metric values
+            sampled_values (typing.Dict[str, ExperimentResult]): the sampled metric values
+            metric (Metric | AveragedMetric): the metric
+            method (str, optional): the method for displaying a histogram, provided by Seaborn. Can be either a histogram or KDE. Defaults to "kde".
+            bandwidth (float, optional): the bandwith parameter for the KDE. Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html). Defaults to 1.0.
+            bins (int | typing.List[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
+            normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1]. Otherwise, uses a shared y-axis. Defaults to False.
+            figsize (typing.Tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
+            fontsize (float, optional): fontsize for the experiment name labels. Defaults to 9.
+            axis_fontsize (float, optional): fontsize for the x-axis ticklabels. Defaults to None, in which case the fontsize will be used.
+            edge_colour (str, optional): the colour of the histogram or KDE edge. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
+            area_colour (str, optional): the colour of the histogram or KDE filled area. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "gray".
+            area_alpha (float, optional): the opacity of the histogram or KDE filled area. Corresponds to [matplotlib's `alpha` parameter](). Defaults to 0.5.
+            plot_median_line (bool, optional): whether to plot the median line. Defaults to True.
+            median_line_colour (str, optional): the colour of the median line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
+            median_line_format (str, optional): the format of the median line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "--".
+            plot_hdi_lines (bool, optional): whether to plot the HDI lines. Defaults to True.
+            hdi_lines_colour (str, optional): the colour of the HDI lines. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
+            hdi_line_format (str, optional): the format of the HDI lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
+            plot_obs_point (bool, optional): whether to plot the observed value as a marker. Defaults to True.
+            obs_point_marker (str, optional): the marker type of the observed value. Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers). Defaults to "D".
+            obs_point_colour (str, optional): the colour of the observed marker. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
+            obs_point_size (float, optional): the size of the observed marker. Defaults to None.
+            plot_extrema_lines (bool, optional): whether to plot small lines at the distribution extreme values. Defaults to True.
+            extrema_lines_colour (str, optional): the colour of the extrema lines. Defaults to "black".
+            extrema_lines_format (str, optional): the format of the extrema lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
+            plot_base_line (bool, optional): whether to plot a line at the base of the distribution. Defaults to True.
+            base_lines_colour (str, optional): the colour of the base line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
+            base_lines_format (str, optional): the format of the base line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
+            plot_experiment_name (bool, optional): whether to plot the experiment names as labels. Defaults to True.
+
+        Returns:
+            matplotlib.figure.Figure: the completed figure of the distribution plot
+        """
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric, class_label=class_label
+        )
+
+        fig = distribution_plot(
+            study=self,
+            metric=metric,
+            class_label=class_label,
+            **kwargs,
+        )
+
+        return fig
+
+    def report_comparison_to_random(
+        self,
+        metric: str,
+        class_label: int,
+        min_sig_diff: typing.Optional[float] = None,
+        precision: int = 4,
+        tablefmt: str = "html",
+        **tabulate_kwargs,
+    ) -> str:
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        summary_table = pairwise_comparison_to_random(
+            self,
+            metric=metric,
+            class_label=class_label,
+            min_sig_diff=min_sig_diff,
+            precision=precision,
+            tablefmt=tablefmt,
+            **tabulate_kwargs,
+        )
+
+        return summary_table
+
+    def report_comparison(
+        self,
+        metric: str,
+        class_label: int,
+        experiment_group_a: str,
+        experiment_group_b: str,
+        experiment_a: str | typing.Literal["aggregated"] = "aggregated",
+        experiment_b: str | typing.Literal["aggregated"] = "aggregated",
+        min_sig_diff: typing.Optional[float] = None,
+        precision: int = 4,
+    ) -> None:
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        pairwise_comparison(
+            study=self,
+            metric=metric,
+            class_label=class_label,
+            experiment_group_a=experiment_group_a,
+            experiment_group_b=experiment_group_b,
+            experiment_a=experiment_a,
+            experiment_b=experiment_b,
+            min_sig_diff=min_sig_diff,
+            precision=precision,
+        )
+
+    def plot_comparison(
+        self,
+        metric: str,
+        class_label: int,
+        experiment_group_a: str,
+        experiment_group_b: str,
+        experiment_a: str | typing.Literal["aggregated"] = "aggregated",
+        experiment_b: str | typing.Literal["aggregated"] = "aggregated",
+        min_sig_diff: typing.Optional[float] = None,
+        **kwargs,
+    ) -> str:
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        fig = diff_distribution_plot(
+            study=self,
+            metric=metric,
+            class_label=class_label,
+            experiment_group_a=experiment_group_a,
+            experiment_group_b=experiment_group_b,
+            experiment_a=experiment_a,
+            experiment_b=experiment_b,
+            min_sig_diff=min_sig_diff,
+            **kwargs,
+        )
+
+        return fig
+
+
+# Deprecated code
+"""
 
     def _parse_config(self, config: str | Config, encoding: str = "utf-8"):
         raise NotImplementedError
@@ -252,303 +578,6 @@ class Study:
             instance.add_experiment_aggregation(metric, aggregation_dict)
 
         return instance
-
-    def _sample_metrics(
-        self,
-        sampling_method: str,
-        experiment_group: ExperimentManager,
-        metric_name: typing.Optional[str] = None,
-    ) -> typing.Iterator[
-        typing.Tuple[ExperimentManager, typing.Dict[str, typing.List[ExperimentResult]]]
-    ]:
-        # Try to load from cache
-        cache_result = self.cache.load(
-            ["metric_results", sampling_method, experiment_group.name]
-            + ([] if metric_name is None else [metric_name]),
-            default=None,
-        )
-
-        if cache_result is None:
-            # If we haven't cached these results yet, compute them and cache
-            metric_results = experiment_group.compute_metrics(
-                sampling_method=sampling_method
-            )
-
-            self.cache.cache(
-                ["metric_results", sampling_method, experiment_group.name],
-                value=metric_results,
-            )
-
-            if metric_name is not None:
-                metric_results = metric_results[metric_name]
-
-        else:
-            # Otherwise return the cached results
-            metric_results = cache_result
-
-        return metric_results
-
-    def _sample_agg_metrics(
-        self,
-        sampling_method: str,
-        experiment_group: ExperimentManager,
-        metric_name: typing.Optional[str] = None,
-    ) -> typing.Iterator[
-        typing.Tuple[ExperimentManager, typing.Dict[str, typing.List[ExperimentResult]]]
-    ]:
-        # Try to load from cache
-        cache_result = self.cache.load(
-            ["agg_metric_results", sampling_method, experiment_group.name]
-            + ([] if metric_name is None else [metric_name]),
-            default=None,
-        )
-
-        if cache_result is None:
-            # If we haven't cached these results yet, compute them and cache
-            # Make sure all metrics have been assigned an experiment aggregation method
-            for experiment_group in self.experiment_groups.values():
-                for metric in experiment_group.metrics:
-                    if metric.name not in experiment_group.metric_to_aggregator:
-                        raise ValueError(
-                            f"Metric '{metric.name}' does not have an assigned experiment aggregation method. Add one using the `.add_experiment_aggregation` method."
-                        )
-
-            # First load or compute the metric results (not aggregated)
-            metric_results = self._sample_metrics(
-                sampling_method=sampling_method,
-                experiment_group=experiment_group,
-            )
-
-            agg_metric_results = experiment_group.aggregate_experiments(metric_results)
-
-            self.cache.cache(
-                ["agg_metric_results", sampling_method, experiment_group.name],
-                value=agg_metric_results,
-            )
-
-            if metric_name is not None:
-                agg_metric_results = agg_metric_results[metric_name]
-
-        else:
-            # Otherwise return the cached results
-            agg_metric_results = cache_result
-
-        return agg_metric_results
-
-    def sample_metrics(
-        self,
-        sampling_method: str,
-        aggregated: bool = False,
-    ) -> typing.Iterator[
-        typing.Tuple[ExperimentManager, typing.Dict[str, typing.List[ExperimentResult]]]
-    ]:
-        # Iterate over the experiment groups
-        for _, experiment_group in self.experiment_groups.items():
-            if aggregated:
-                result = self._sample_agg_metrics(
-                    sampling_method=sampling_method,
-                    experiment_group=experiment_group,
-                )
-            else:
-                result = self._sample_metrics(
-                    sampling_method=sampling_method,
-                    experiment_group=experiment_group,
-                )
-
-            yield experiment_group, result
-
-    # TODO: have study control the metric collection passed to experiment groups
-    @cached_property
-    def metrics(self):
-        all_metrics = list()
-        for experiment_group in self.experiment_groups.values():
-            all_metrics.append(set(experiment_group.metrics))
-
-        all_metrics_reduced = reduce(lambda a, b: a | b, all_metrics)
-
-        for experiment_group_metrics in all_metrics:
-            if len(experiment_group_metrics & all_metrics_reduced) != len(
-                all_metrics_reduced
-            ):
-                raise ValueError(
-                    "Inconsistent sets of metrics between experiment groups."
-                )
-
-        return experiment_group.metrics
-
-    @cached_property
-    def num_classes(self):
-        all_num_classes = set()
-        for experiment_group in self.experiment_groups.values():
-            all_num_classes.add(experiment_group.num_classes)
-
-        if len(all_num_classes) > 1:
-            raise ValueError(
-                f"Inconsistent number of classes in experiment groups: {all_num_classes}"
-            )
-        else:
-            return list(all_num_classes)[0]
-
-    def _validate_metric_class_label_combination(
-        self, metric: Metric | AveragedMetric, class_label: int
-    ):
-        if metric.is_multiclass:
-            if not ((class_label == 0) or (class_label is None)):
-                warnings.warn("Metric is multiclass, ignoring class label.")
-
-            class_label = 0
-        else:
-            if class_label is None:
-                raise ValueError(
-                    f"Metric '{metric.name}' is not multiclass. You must provide a class label."
-                )
-            elif class_label < 0 or class_label > self.num_classes - 1:
-                raise ValueError(
-                    f"Class label must be in range [0, {self.num_classes - 1}]. Currently {class_label}."
-                )
-
-        return metric, class_label
-
-    # TODO: document this method
-    def report_metric_summaries(
-        self,
-        metric_name: str,
-        class_label: int | None = None,
-        table_fmt: str = "github",
-        precision: int = 4,
-    ) -> str:
-        try:
-            metric = self.metrics[metric_name]
-        except KeyError:
-            raise KeyError(
-                f"Could not find metric {metric_name} in the metrics collection. Consider adding it using `Study.add_metric`"
-            )
-
-        metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
-        )
-
-        summary_table_rows = []
-        for experiment_group_name, experiment_group in self.experiment_groups.items():
-            point_estimates = self._sample_metrics(
-                sampling_method="input",
-                experiment_group=experiment_group,
-                metric_name=metric_name,
-            )[class_label]
-
-            metric_values = self._sample_metrics(
-                sampling_method="posterior",
-                experiment_group=experiment_group,
-                metric_name=metric_name,
-            )[class_label]
-
-            for experiment_result, experiment_point_estimate in zip(
-                metric_values, point_estimates
-            ):
-                summary_table_row, headers = values_to_table_row(
-                    values=experiment_result.values,
-                    point_estimate=experiment_point_estimate.values,
-                    ci_probability=self.ci_probability,
-                )
-
-                summary_table_rows.append(
-                    [experiment_group_name, experiment_result.experiment.name]
-                    + list(summary_table_row)
-                )
-
-        summary_table = tabulate(
-            tabular_data=summary_table_rows,
-            headers=["Experiment Group", "Experiment"] + headers,
-            floatfmt=f".{precision}f",
-            colalign=["left", "left"] + ["decimal" for _ in headers],
-            tablefmt=table_fmt,
-        )
-
-        return summary_table
-
-    def plot_metric_summaries(
-        self,
-        metric_name: str,
-        class_label: int | None = None,
-        **kwargs,
-    ):
-        """Plots the distrbution of sampled metric values for a particular metric and class combination.
-
-        Args:
-            metric_name (str): the name of the metric
-            class_label (int | None, optional): the class label. Defaults to None.
-            observed_values (typing.Dict[str, ExperimentResult]): the observed metric values
-            sampled_values (typing.Dict[str, ExperimentResult]): the sampled metric values
-            metric (Metric | AveragedMetric): the metric
-            method (str, optional): the method for displaying a histogram, provided by Seaborn. Can be either a histogram or KDE. Defaults to "kde".
-            bandwidth (float, optional): the bandwith parameter for the KDE. Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html). Defaults to 1.0.
-            bins (int | typing.List[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
-            normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1]. Otherwise, uses a shared y-axis. Defaults to False.
-            figsize (typing.Tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
-            fontsize (float, optional): fontsize for the experiment name labels. Defaults to 9.
-            axis_fontsize (float, optional): fontsize for the x-axis ticklabels. Defaults to None, in which case the fontsize will be used.
-            edge_colour (str, optional): the colour of the histogram or KDE edge. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            area_colour (str, optional): the colour of the histogram or KDE filled area. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "gray".
-            area_alpha (float, optional): the opacity of the histogram or KDE filled area. Corresponds to [matplotlib's `alpha` parameter](). Defaults to 0.5.
-            plot_median_line (bool, optional): whether to plot the median line. Defaults to True.
-            median_line_colour (str, optional): the colour of the median line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            median_line_format (str, optional): the format of the median line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "--".
-            plot_hdi_lines (bool, optional): whether to plot the HDI lines. Defaults to True.
-            hdi_lines_colour (str, optional): the colour of the HDI lines. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            hdi_line_format (str, optional): the format of the HDI lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_obs_point (bool, optional): whether to plot the observed value as a marker. Defaults to True.
-            obs_point_marker (str, optional): the marker type of the observed value. Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers). Defaults to "D".
-            obs_point_colour (str, optional): the colour of the observed marker. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            obs_point_size (float, optional): the size of the observed marker. Defaults to None.
-            plot_extrema_lines (bool, optional): whether to plot small lines at the distribution extreme values. Defaults to True.
-            extrema_lines_colour (str, optional): the colour of the extrema lines. Defaults to "black".
-            extrema_lines_format (str, optional): the format of the extrema lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_base_line (bool, optional): whether to plot a line at the base of the distribution. Defaults to True.
-            base_lines_colour (str, optional): the colour of the base line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            base_lines_format (str, optional): the format of the base line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_experiment_name (bool, optional): whether to plot the experiment names as labels. Defaults to True.
-
-        Returns:
-            matplotlib.figure.Figure: the completed figure of the distribution plot
-        """
-        try:
-            metric = self.metrics[metric_name]
-        except KeyError:
-            raise KeyError(
-                f"Could not find metric {metric_name} in the metrics collection. Consider adding it using `Study.add_metric`"
-            )
-
-        metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
-        )
-
-        all_point_values = OrderedDict()
-        all_metric_values = OrderedDict()
-        for _, experiment_group in self.experiment_groups.items():
-            point_values = self._sample_metrics(
-                sampling_method="input",
-                experiment_group=experiment_group,
-                metric_name=metric_name,
-            )[class_label]
-
-            all_point_values[experiment_group] = point_values
-
-            metric_values = self._sample_metrics(
-                sampling_method="posterior",
-                experiment_group=experiment_group,
-                metric_name=metric_name,
-            )[class_label]
-
-            all_metric_values[experiment_group] = metric_values
-
-        fig = distribution_plot(
-            observed_values=all_point_values,
-            sampled_values=all_metric_values,
-            metric=metric,
-            **kwargs,
-        )
-
-        return fig
 
     def report_experiment_aggregation(
         self,
@@ -879,3 +908,4 @@ class Study:
         )
 
         return reward_table
+"""

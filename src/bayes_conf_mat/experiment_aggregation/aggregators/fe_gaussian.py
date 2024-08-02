@@ -45,14 +45,14 @@ class FEGaussianAggregator(ExperimentAggregation):
 
     def aggregate(
         self,
-        distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
+        experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_experiments, num_samples = distribution_samples.shape
+        num_samples, num_experiments = experiment_samples.shape
 
         # Estimate the means and variances for each distribution
-        means = np.mean(distribution_samples, axis=1)
-        variances = np.var(distribution_samples, axis=1, ddof=1)
+        means = np.mean(experiment_samples, axis=0)
+        variances = np.var(experiment_samples, axis=0, ddof=1)
 
         # Compute the aggregated mean and variance
         # i.e. the inverse-variance weighted mean

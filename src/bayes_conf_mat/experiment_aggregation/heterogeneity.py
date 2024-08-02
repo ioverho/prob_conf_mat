@@ -19,7 +19,7 @@ def heterogeneity_DL(
 
     Returns:
         float: estimate of the between-experiment heterogeneity
-    """  # noqa: E501
+    """
 
     num_studies = means.shape[0]
 
@@ -40,7 +40,7 @@ def heterogeneity_PM(
     variances: jtyping.Float[np.ndarray, " num_experiments"],
     init_tau2: float = 0.0,
     atol: float = 1e-5,
-    maxiter: int = 50,
+    maxiter: int = 100,
     use_viechtbauer_correction: bool = False,
 ):
     """Compute the Paule-Mandel estimate of between-experiment heterogeneity.
@@ -60,11 +60,11 @@ def heterogeneity_PM(
         init_tau2 (float, optional): the inital tau2 estimate. Defaults to 0.0.
         atol (float, optional): when to assume convergence. Defaults to 1e-5.
         maxiter (int, optional): the maximum number of iterations needed. Defaults to 50.
-        use_viechtbauer_correction (bool, optional): whether to use the Viechtbauer correction. Defaults to True.
+        use_viechtbauer_correction (bool, optional): whether to use the Viechtbauer correction. Very new. Defaults to False.
 
     Returns:
         float: estimate of the between-experiment heterogeneity
-    """  # noqa: E501
+    """
 
     prev_tau2 = 0.0
     tau2 = init_tau2

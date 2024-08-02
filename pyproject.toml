@@ -10,18 +10,25 @@ readme = "README.md"
 classifiers = ["Programming Language :: Python :: 3"]
 # TODO: add some keywords
 
-requires-python = ">=3.8"
-dependencies = [
-  "numpy",
-  "scipy",
-  "tabulate",
-  "matplotlib",
-  "jaxtyping",
-  "strictyaml",
-]
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "tabulate", "jaxtyping"]
 
 [project.optional-dependencies]
-kde = ["lightkde"]
+viz = ["matplotlib", "seaborn"]
+
+dev = [
+  "ipykernel",
+  "scikit-learn",
+  "ruff",
+  "pytest",
+  "mkdocs",
+  "mkdocs-material[imaging]",
+  "mkdocstrings[python]",
+  "mkdocs-jupyter",
+  "mkdocs-git-revision-date-localized-plugin",
+  "griffe-inherited-docstrings",
+
+]
 
 [project.urls]
 "Homepage" = "https://github.com/ioverho/bayes_conf_mat"

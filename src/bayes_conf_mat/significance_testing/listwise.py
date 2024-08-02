@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 import typing
 from dataclasses import dataclass
 
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_manager import ExperimentAggregationResult
 
 @dataclass(frozen=True)
 class ListwiseComparisonResult:

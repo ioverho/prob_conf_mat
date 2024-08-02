@@ -458,8 +458,9 @@ class Accuracy(Metric):
     def compute_metric(
         self,
         diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        return np.sum(diag_mass, axis=1)
+    ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
+        acc = np.sum(diag_mass, axis=1)
+        return acc[:, np.newaxis]
 
 
 class BalancedAccuracy(Metric):
@@ -501,7 +502,7 @@ class BalancedAccuracy(Metric):
     def _compute_ba(
         self,
         tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+    ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         balanced_accuracy = np.nanmean(
             tpr,
             axis=-1,
@@ -512,12 +513,13 @@ class BalancedAccuracy(Metric):
         self,
         tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
         p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+    ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         ba = self._compute_ba(tpr)
         if self.adjusted:
             chance = 1 / (p_condition != 0).sum(axis=1)
             ba = (ba - chance) / (1 - chance)
-        return ba
+
+        return ba[:, np.newaxis]
 
 
 class MatthewsCorrelationCoefficient(Metric):
@@ -564,7 +566,7 @@ class MatthewsCorrelationCoefficient(Metric):
         diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
         p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
         p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+    ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         marginals_inner_prod = np.einsum("bc, bc->b", p_condition, p_pred)
         numerator = np.sum(diag_mass, axis=1) - marginals_inner_prod
 
@@ -573,7 +575,7 @@ class MatthewsCorrelationCoefficient(Metric):
             * (1 - np.power(p_pred, 2).sum(axis=1))
         )
 
-        return mcc
+        return mcc[:, np.newaxis]
 
 
 class CohensKappa(Metric):
@@ -612,12 +614,14 @@ class CohensKappa(Metric):
         diag_mass: jtyping.Float[np.ndarray, "num_samples num_classes"],
         p_condition: jtyping.Float[np.ndarray, "num_samples num_classes"],
         p_pred: jtyping.Float[np.ndarray, "num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+    ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         p_agreement = np.sum(diag_mass, axis=1)
 
         p_chance = np.einsum("bc, bc->b", p_condition, p_pred)
 
-        return (p_agreement - p_chance) / (1 - p_chance)
+        kappa = (p_agreement - p_chance) / (1 - p_chance)
+
+        return kappa[:, np.newaxis]
 
 
 class F1(Metric):
@@ -951,6 +955,7 @@ class PositiveLikelihoodRatio(Metric):
         tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
         fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        fpr = np.where(fpr == 0, np.min(fpr[fpr != 0.0]), fpr)
         return tpr / fpr
 
 

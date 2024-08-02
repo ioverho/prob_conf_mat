@@ -46,26 +46,26 @@ class GammaAggregator(ExperimentAggregation):
 
     def aggregate(
         self,
-        distribution_samples: jtyping.Float[np.ndarray, " num_experiments num_samples"],
+        experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: typing.Tuple[int],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_experiments, num_samples = distribution_samples.shape
+        num_samples, num_experiments = experiment_samples.shape
 
         # Estimate the 'loc' variable, i.e. the minimum of the support
         # Improves fit to individual experiment distributions
-        # Minmal impact on the conflated distribution
+        # Minimal impact on the conflated distribution
         if self.shifted:
-            loc_estimate = (
-                min(np.min(samples) for samples in distribution_samples) - 1e-9
-            )
+            loc_estimate = np.min(experiment_samples) - 1e-9
         else:
             loc_estimate = bounds[0]
 
         # Estimate the shape and rate for each distribution
         alphas = []
         betas = []
-        for samples in distribution_samples:
-            alpha, _, beta = scipy.stats.gamma.fit(samples, floc=loc_estimate)
+        for per_experiment_samples in experiment_samples.T:
+            alpha, _, beta = scipy.stats.gamma.fit(
+                per_experiment_samples, floc=loc_estimate
+            )
 
             alphas.append(alpha)
             betas.append(beta)
@@ -74,7 +74,7 @@ class GammaAggregator(ExperimentAggregation):
         betas = np.array(betas)
 
         # Estimate the parameters of the conflated distribution
-        conflated_alpha = alphas.sum() - (num_experiments - 1)
+        conflated_alpha = np.sum(alphas) - (num_experiments - 1)
         conflated_beta = 1 / np.sum(1 / betas)
 
         # Redefine the sampling distribution
