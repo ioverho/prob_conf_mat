@@ -950,12 +950,18 @@ class PositiveLikelihoodRatio(Metric):
     sklearn_equivalent = "class_likelihood_ratios"
     aliases = ["plr", "positive_likelihood_ratio"]
 
+    def __init__(self, clamp: bool = False) -> None:
+        super().__init__()
+        self.clamp = clamp
+
     def compute_metric(
         self,
         tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
         fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        fpr = np.where(fpr == 0, np.min(fpr[fpr != 0.0]), fpr)
+        if self.clamp:
+            fpr = np.where(fpr == 0, np.min(fpr[fpr != 0.0]), fpr)
+
         return tpr / fpr
 
 
@@ -991,11 +997,18 @@ class NegativeLikelihoodRatio(Metric):
     sklearn_equivalent = "class_likelihood_ratios"
     aliases = ["negative_likelihood_ratio", "nlr"]
 
+    def __init__(self, clamp: bool = False) -> None:
+        super().__init__()
+        self.clamp = clamp
+
     def compute_metric(
         self,
         fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
         tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        if self.clamp:
+            tnr = np.where(tnr == 0, np.min(tnr[tnr != 0.0]), tnr)
+
         return fnr / tnr
 
 

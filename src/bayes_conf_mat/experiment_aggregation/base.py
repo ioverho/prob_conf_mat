@@ -164,7 +164,7 @@ class ExperimentAggregationResult:
         return self.experiment_group.name
 
     def __repr__(self):
-        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}), aggregator={self.aggregator}"
+        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}, aggregator={self.aggregator})"
 
     def __str__(self):
-        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}), aggregator={self.aggregator}"
+        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}, aggregator={self.aggregator})"

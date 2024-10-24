@@ -11,24 +11,31 @@ classifiers = ["Programming Language :: Python :: 3"]
 # TODO: add some keywords
 
 requires-python = ">=3.10"
-dependencies = ["numpy", "scipy", "tabulate", "jaxtyping"]
+dependencies = ["numpy", "scipy", "tabulate", "jaxtyping>=0.2.31"]
 
 [project.optional-dependencies]
 viz = ["matplotlib", "seaborn"]
 
 dev = [
   "ipykernel",
-  "scikit-learn",
   "ruff",
-  "pytest",
+  "mypy",
+  "scikit-learn",
   "mkdocs",
   "mkdocs-material[imaging]",
   "mkdocstrings[python]",
   "mkdocs-jupyter",
   "mkdocs-git-revision-date-localized-plugin",
   "griffe-inherited-docstrings",
-
+  "pyyaml",
+  "toml",
+  "matplotlib",
+  "seaborn",
 ]
+
+docs = ["ipykernel", "matplotlib", "seaborn"]
+
+test = ["scikit-learn", "pytest"]
 
 [project.urls]
 "Homepage" = "https://github.com/ioverho/bayes_conf_mat"
@@ -37,6 +44,34 @@ dev = [
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
+# Linting - Ruff
+[tool.ruff.lint]
+ignore = ["F722"]
+
 [tool.ruff.lint.per-file-ignores]
 # Ignore `F401` (import violations) and `F403` (undefined names) in all `__init__.py` files
 "__init__.py" = ["F401", "F403"]
+
+# Environment - Pixi
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+bayes_conf_mat = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+viz = { features = ["viz"], solve-group = "default" }
+test = { features = ["test"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+
+[tool.pixi.tasks]
+
+[tool.pixi.feature.test.tasks]
+test = "pytest"
+
+# Type Checking - Mypy
+[tool.mypy]
+plugins = ["numpy.typing.mypy_plugin"]

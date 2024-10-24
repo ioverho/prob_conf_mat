@@ -28,4 +28,6 @@ def get_io(format: str, location: str = None, **kwargs) -> typing.Callable:
 
     io_method = IO_REGISTRY[format](location=location, **kwargs)
 
+    io_method._init_params = dict(format=format, location=location, **kwargs)
+
     return io_method

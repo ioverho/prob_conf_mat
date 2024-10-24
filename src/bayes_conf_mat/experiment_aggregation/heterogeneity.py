@@ -190,6 +190,8 @@ def interpret_i2(i2_score: float):
     Returns:
         str: a rough interpretation of the magnitude of I2
     """  # noqa: E501
+    het_sig = ""
+
     if i2_score < 0.0 or i2_score > 1.0:
         raise ValueError(
             "I^2 should be in the range (0.0, 1.0). Currently out-of-bounds."

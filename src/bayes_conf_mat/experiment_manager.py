@@ -26,7 +26,7 @@ class ExperimentManager:
     def __init__(
         self,
         name: str,
-        seed: typing.Optional[int | np.random.BitGenerator],
+        rng: np.random.Generator,
     ) -> None:
         self.name = name
 
@@ -34,20 +34,11 @@ class ExperimentManager:
         # Import hyperparameters
         # ======================================================================
         # The manager's RNG
-        if isinstance(seed, int) or isinstance(seed, float):
-            self.rng = np.random.default_rng(seed=seed)
-        elif isinstance(seed, np.random.BitGenerator) or isinstance(
-            seed, np.random.Generator
-        ):
-            self.rng = seed
-        else:
-            raise ValueError(
-                f"Could not construct rng using seed of type `{type(seed)}`"
-            )
+        self.rng = rng
 
         # The collection of experiments
         self.num_classes = None
-        self.experiments = OrderedDict()
+        self.experiments: OrderedDict = OrderedDict()
 
     @property
     def num_experiments(self):
@@ -59,7 +50,8 @@ class ExperimentManager:
     def add_experiment(
         self,
         name: str,
-        confusion_matrix: typing.Dict[str, typing.Any] | np.ndarray,
+        confusion_matrix: typing.Dict[str, typing.Any]
+        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
         prevalence_prior: float | str | jtyping.Float[np.ndarray, " num_classes"] = 0,
         confusion_prior: float | str | jtyping.Float[np.ndarray, " num_classes"] = 0,
     ):

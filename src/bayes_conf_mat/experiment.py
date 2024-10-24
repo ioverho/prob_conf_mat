@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing
 from dataclasses import dataclass
 from collections import OrderedDict
+from enum import Enum
 
 import numpy as np
 import jaxtyping as jtyping
@@ -11,7 +12,50 @@ from bayes_conf_mat.io import get_io
 from bayes_conf_mat.metrics import RootMetric, Metric, AveragedMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
 
-_IMPLEMENTED_SAMPLING_METHODS = {"prior", "posterior", "random", "input"}
+
+class SamplingMethod(Enum):
+    POSTERIOR = "posterior"
+    PRIOR = "prior"
+    RANDOM = "random"
+    INPUT = "input"
+
+
+@dataclass(frozen=True)
+class ExperimentResult:
+    """Storage for results from an experiment
+
+    Args:
+        experiment (Experiment): the experiment which produced these results
+        metric (typing.Type[Metric | AveragedMetric]): the metric instance that produced these results
+        values (jtyping.Float[np.ndarray, " num_samples #num_classes"]): the actual produced values
+    """
+
+    experiment: Experiment
+    metric: typing.Type[Metric | AveragedMetric]
+
+    values: jtyping.Float[np.ndarray, " num_samples #num_classes"]
+
+    @property
+    def is_multiclass(self):
+        return self.metric.is_multiclass
+
+    @property
+    def bounds(self):
+        return self.metric.bounds
+
+    @property
+    def num_classes(self):
+        return self.experiment.num_classes
+
+    @property
+    def num_samples(self):
+        return self.values.shape[0]
+
+    def __repr__(self):
+        return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
+
+    def __str__(self):
+        return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
 
 
 # TODO: document this class
@@ -19,9 +63,9 @@ class Experiment:
     def __init__(
         self,
         name: str,
-        confusion_matrix: typing.Dict
-        | jtyping.Int[np.ndarray, " num_classes num_classes"],
         rng: np.random.BitGenerator,
+        confusion_matrix: typing.Dict
+        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
         prevalence_prior: str | int | jtyping.Int[np.ndarray, " num_classes"],
         confusion_prior: str
         | int
@@ -33,27 +77,36 @@ class Experiment:
         # Import the confusion matrix
         # Check if config like object
         if hasattr(confusion_matrix, "items"):
-            confusion_matrix_loader = get_io(**confusion_matrix)
-            self.confusion_matrix = confusion_matrix_loader.load()
+            self.confusion_matrix_loader = get_io(**confusion_matrix)
 
         # If a numpy array, just store it
         elif isinstance(confusion_matrix, np.ndarray):
-            self.confusion_matrix = confusion_matrix
+            self.confusion_matrix_loader = get_io(
+                format="in_memory", data=confusion_matrix
+            )
 
         # If not a numpy array, tries to make it one
         else:
             try:
-                self.confusion_matrix = np.array(confusion_matrix)
+                confusion_matrix = np.array(confusion_matrix)
+                self.confusion_matrix_loader = get_io(
+                    format="in_memory", data=confusion_matrix
+                )
             except Exception as e:
                 raise ValueError(
                     f"Ran into exception when trying to convert {confusion_matrix} into a np.ndarray:\n{e}"
                 )
 
+        # load and validate the confusion matrix
+        self.confusion_matrix = self.confusion_matrix_loader.load()
+
         # The prior strategy used for defining the Dirichlet prior counts
+        self._init_prevalence_prior = prevalence_prior
         self.prevalence_prior = dirichlet_prior(
             prevalence_prior, shape=(self.num_classes,)
         )
 
+        self._init_confusion_prior = confusion_prior
         self.confusion_prior = dirichlet_prior(
             confusion_prior, shape=(self.num_classes, self.num_classes)
         )
@@ -243,42 +296,51 @@ class Experiment:
     # TODO: document this method
     def sample(
         self,
-        sampling_method: str,
+        sampling_method: SamplingMethod,
         num_samples: int,
-    ):
+    ) -> typing.Dict[RootMetric, ExperimentResult]:
+        """Sample synthetic confusion matrices corresponding to this experiment.
+
+        Args:
+            sampling_method (SamplingMethod): the sampling method used to generate the metric values. Must a member of the SamplingMethod enum
+            num_samples (int): the number of synthetic confusion matrices to sample
+
+        Returns:
+            typing.Dict[RootMetric, ExperimentResult]: a dictionary of RootMetric instances
+        """
         root_metrics = dict()
 
-        if sampling_method not in _IMPLEMENTED_SAMPLING_METHODS:
-            raise ValueError(
-                f"Sampling method must be one of `{_IMPLEMENTED_SAMPLING_METHODS}`. Currently: `{sampling_method}`"
-            )  # noqa: E501
-
-        elif sampling_method == "posterior":
-            root_metrics.update(self.sample_posterior(num_samples=num_samples))
-
-        elif sampling_method == "prior":
-            root_metrics.update(self.sample_prior(num_samples=num_samples))
-
-        elif sampling_method == "random":
-            root_metrics.update(self.sample_random_model(num_samples=num_samples))
-
-        elif sampling_method == "input":
-            root_metrics.update(self.sample_input())
+        match sampling_method:
+            case SamplingMethod.POSTERIOR.value:
+                root_metrics.update(self.sample_posterior(num_samples=num_samples))
+            case SamplingMethod.PRIOR.value:
+                root_metrics.update(self.sample_prior(num_samples=num_samples))
+            case SamplingMethod.RANDOM.value:
+                root_metrics.update(self.sample_random_model(num_samples=num_samples))
+            case SamplingMethod.INPUT.value:
+                root_metrics.update(self.sample_input())
+            case _:
+                raise ValueError(
+                    f"Parameter `sampling_method` must be one of {tuple(sm.value for sm in SamplingMethod)}. Currently: {sampling_method}"
+                )
 
         return root_metrics
 
     def sample_metrics(
-        self, metrics: MetricCollection, sampling_method: str, num_samples: int
-    ) -> typing.Mapping[Metric | AveragedMetric, ExperimentResult]:
+        self,
+        metrics: MetricCollection,
+        sampling_method: SamplingMethod,
+        num_samples: int,
+    ) -> typing.Dict[RootMetric | Metric | AveragedMetric, ExperimentResult]:
         """_summary_
 
         Args:
-            metrics (MetricCollection): the metrics needed to be computed
-            sampling_method (str): the sampling method used, passed to `sample`
-            num_samples (int): the number of samples to draw, pass to `sample`
+            metrics (MetricCollection): the metrics needed to be computed on the synthetic confusion matrices
+            sampling_method (SamplingMethod): the sampling method used to generate the metric values. Must a member of the SamplingMethod enum
+            num_samples (int): the number of synthetic confusion matrices to sample
 
         Returns:
-            typing.Mapping[Metric | AveragedMetric, typing.Any]: a mapping from metric instance to an `ExperimentResult` instance
+            typing.Mapping[Metric | AveragedMetric, ExperimentResult]: a mapping from metric instance to an `ExperimentResult` instance
         """
 
         # Get the topological ordering of the metrics, such that no metric is computed before
@@ -331,41 +393,3 @@ class Experiment:
 
     def __str__(self) -> str:
         return f"Experiment({self.name})"
-
-
-@dataclass(frozen=True)
-class ExperimentResult:
-    """Storage for results from an experiment
-
-    Args:
-        experiment (Experiment): the experiment which produced these results
-        metric (typing.Type[Metric | AveragedMetric]): the metric instance that produced these results
-        values (jtyping.Float[np.ndarray, " num_samples #num_classes"]): the actual produced values
-    """
-
-    experiment: Experiment
-    metric: typing.Type[Metric | AveragedMetric]
-
-    values: jtyping.Float[np.ndarray, " num_samples #num_classes"]
-
-    @property
-    def is_multiclass(self):
-        return self.metric.is_multiclass
-
-    @property
-    def bounds(self):
-        return self.metric.bounds
-
-    @property
-    def num_classes(self):
-        return self.experiment.num_classes
-
-    @property
-    def num_samples(self):
-        return self.values.shape[0]
-
-    def __repr__(self):
-        return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
-
-    def __str__(self):
-        return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"

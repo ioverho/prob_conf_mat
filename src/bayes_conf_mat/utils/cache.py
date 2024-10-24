@@ -14,9 +14,12 @@ class NestedCache:
 
     Examples:
         >>> cache = NestedCache()
+
         >>> cache.load(['foo', 'bar'])
-        KeyError: 'Keys ['foo', 'bar'] not in cache'
+        KeyError: "Keys ['foo', 'bar'] not in cache"
+
         >>> cache.cache(['foo', 'bar'], 'baz')
+
         >>> cache.load(['foo', 'bar'])
         'baz'
 
@@ -24,6 +27,7 @@ class NestedCache:
 
     def __init__(self):
         self._cache = self.nested_dict()
+        self.fingerprint = None
 
     def nested_dict(self):
         return defaultdict(self.nested_dict)
@@ -46,7 +50,10 @@ class NestedCache:
         else:
             return self._get(obj, keys=keys, i=i + 1)
 
-    def load(self, keys, default=NotInCache):
+    def load(self, fingerprint: str, keys, default=NotInCache):
+        if fingerprint != self.fingerprint:
+            return default
+
         # Safe method for getting value without altering
         # the cache
         result = self._get(dd=self._cache, keys=keys, i=0)
@@ -68,18 +75,33 @@ class NestedCache:
         else:
             self._set(dd[keys[i]], value=value, keys=keys, i=i + 1)
 
-    def cache(self, keys: typing.List[typing.Any], value):
+    def cache(self, fingerprint: str, keys: typing.List[typing.Any], value):
+        if fingerprint != self.fingerprint:
+            self.clean()
+            self.fingerprint = fingerprint
+
         # Method for setting value
         self._set(dd=self._cache, keys=keys, value=value, i=0)
 
-    def __contains__(self, keys):
+    def clean(self):
+        raise NotImplementedError
+
+    def clear(self):
+        self.clean()
+
+    def empty(self):
+        self.clean()
+
+    def isin(self, fingerprint: str, keys: typing.List[typing.Any]):
+        if fingerprint != self.fingerprint:
+            return False
+
         result = self._get(dd=self._cache, keys=keys, i=0)
 
         if result is NotInCache:
             return False
         else:
             return True
-
 
 class InMemoryCache(NestedCache):
     def clean(self):

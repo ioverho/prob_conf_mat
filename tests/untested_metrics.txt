@@ -1,6 +1,0 @@
-FalseDiscoveryRate
-FalseOmissionRate
-Informedness
-Markedness
-NegativePredictiveValue
-P4

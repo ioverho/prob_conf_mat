@@ -142,4 +142,6 @@ deprecated/
 data/
 .cache
 *.tuna
-deprecated_report/
+deprecated_report/# pixi environments
+.pixi
+*.egg-info

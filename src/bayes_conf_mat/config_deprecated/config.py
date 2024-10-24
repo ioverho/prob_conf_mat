@@ -1,7 +1,8 @@
-from dataclasses import dataclass
+import typing
 from warnings import warn
 from collections import OrderedDict
 from collections.abc import Mapping
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -21,16 +22,15 @@ class ConfigError(Exception):
         super().__init__(*args, **kwargs)
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(kw_only=True)
 class Config:
     name: str
     seed: int
-    num_samples: int
-    ci_probability: float
+    num_samples: int | None = None
+    ci_probability: float | None = None
 
-    experiments: OrderedDict
-
-    metrics: OrderedDict
+    experiments: typing.Optional[OrderedDict] = None
+    metrics: typing.Optional[OrderedDict] = None
 
     def __post_init__(self):
         self._validate_types()
@@ -47,12 +47,11 @@ class Config:
 
     def _validate_types(self):
         for param, expected_param_type in Config.__annotations__.items():
-            if param in ["experiments", "metrics"]:
-                continue
-
             param_val = getattr(self, param)
 
-            if isinstance(param_val, expected_param_type):
+            if param_val is None:
+                continue
+            elif isinstance(param_val, expected_param_type):
                 continue
             else:
                 try:
@@ -72,6 +71,14 @@ class Config:
             )
 
     def _validate_num_samples(self) -> None:
+        if self.num_samples is None:
+            warn(
+                message="Parameter `num_samples` is `None`. Setting to default value of 10000. This value is arbitrary, however, and should be carefully considered.",
+                category=ConfigWarning,
+            )
+
+            self.num_samples = 10000
+
         if self.num_samples <= 0:
             raise ConfigError(
                 f"Parameter `num_samples` must be greater than 0. Currently: {self.num_samples}"
@@ -79,11 +86,19 @@ class Config:
 
         if self.num_samples < 10000:
             warn(
-                message="Parameter `num_samples` should be large to reduce variability. Consider increasing. Currently: {self.num_samples}",
+                message=f"Parameter `num_samples` should be large to reduce variability. Consider increasing. Currently: {self.num_samples}",
                 category=ConfigWarning,
             )
 
     def _validate_ci_probability(self) -> None:
+        if self.ci_probability is None:
+            warn(
+                message="Parameter `ci_probability` is `None`. Setting to default value of 0.95. This value is arbitrary, however, and should be carefully considered.",
+                category=ConfigWarning,
+            )
+
+            self.ci_probability = 0.95
+
         if self.ci_probability < 0.0 or self.ci_probability > 1.0:
             raise ConfigError(
                 f"Parameter `ci_probability` must be within [0.0, 1.0]. Currently: {self.ci_probability}"
@@ -364,3 +379,44 @@ class Config:
     @property
     def num_experiment_groups(self):
         return len(self.experiments)
+
+    def to_dict(self) -> typing.Dict[str, typing.Any]:
+        return self.__dict__
+
+    @classmethod
+    def from_dict(cls, config_dict: typing.Dict[str, typing.Any]) -> typing.Self:
+        required_keys = {"name", "seed"}
+        optional_keys = {"num_samples", "ci_probability", "experiments", "metrics"}
+
+        missing_required_keys = required_keys - config_dict.keys()
+        if len(missing_required_keys) > 0:
+            raise ConfigError(
+                f"Missing the following required keys: {missing_required_keys}"
+            )
+
+        missing_optional_keys = optional_keys - config_dict.keys()
+        if len(missing_optional_keys) > 0:
+            warn(
+                message=f"Missing the following optional keys: {missing_optional_keys}",
+                category=ConfigWarning,
+            )
+
+        parsed_config_dict = dict(
+            name=config_dict["name"],
+            seed=config_dict["seed"],
+            num_samples=config_dict.get("num_samples", None),
+            ci_probability=config_dict.get("ci_probability", None),
+            experiments=config_dict.get("experiments", None),
+            metrics=config_dict.get("metrics", None),
+        )
+
+        unused_keys = set(config_dict.keys() - parsed_config_dict.keys())
+        if len(unused_keys) > 0:
+            warn(
+                message=f"The following keys were ignored: {unused_keys}",
+                category=ConfigWarning,
+            )
+
+        instance = cls(**parsed_config_dict)
+
+        return instance
