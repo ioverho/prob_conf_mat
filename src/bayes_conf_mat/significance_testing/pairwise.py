@@ -50,13 +50,11 @@ class PairwiseComparisonResult:
     def template_sentence(self, precision: int = 4):
         # Build the template sentence
         template_sentence = ""
-        template_sentence += (
-            f"Experiment <{self.lhs_name}>'s <{self.metric_name}> being"
-        )
+        template_sentence += f"Experiment {self.lhs_name}'s {self.metric_name} being"
         template_sentence += (
             " greater" if self.diff_dist_summary.median > 0 else " lesser"
         )
-        template_sentence += f" than <{self.rhs_name}> could be considered"
+        template_sentence += f" than {self.rhs_name} could be considered"
         template_sentence += f" '{self.p_direction_interpretation}'* "
 
         # Existence statistics
@@ -74,7 +72,7 @@ class PairwiseComparisonResult:
 
         # Bidirectional significance
         template_sentence += (
-            f"\nThere is a {fmt(self.p_bi_sig, precision=precision, mode='%')}"
+            f" There is a {fmt(self.p_bi_sig, precision=precision, mode='%')}"
         )
         template_sentence += (
             " probability that this difference is bidirectionally significant"
@@ -86,21 +84,11 @@ class PairwiseComparisonResult:
         template_sentence += (
             f"p_ROPE={fmt(self.p_rope, precision=precision, mode='%')})."
         )
-        template_sentence += f"\nBidirectional significance could be considered '{self.p_bi_sig_interpretation}'*."
-
-        if self.bf_rope is not None:
-            # Bidirectional significance to random
-            template_sentence += f"\nRelative to two random models (p_ROPE,random={fmt(self.p_rope_random, precision=precision, mode='%')}) "
-
-            log_bf_rope = np.log10(self.bf_rope)
-            bf_rope_direction = "less" if np.sign(log_bf_rope) > 0.0 else "more"
-            bf_rope_magnitude = np.power(10, np.abs(log_bf_rope))
-
-            template_sentence += f" significance is {fmt(bf_rope_magnitude, precision=precision, mode='f')} times {bf_rope_direction} likely."
+        template_sentence += f" Bidirectional significance could be considered '{self.p_bi_sig_interpretation}'*."
 
         # Unidirectional significance
         template_sentence += (
-            f"\nThere is a {fmt(self.p_uni_sig, precision=precision, mode='%')}"
+            f" There is a {fmt(self.p_uni_sig, precision=precision, mode='%')}"
         )
         template_sentence += (
             f" probability that this difference is significantly {self.direction}"
@@ -112,10 +100,17 @@ class PairwiseComparisonResult:
             f" p_neg={fmt(self.p_sig_neg, precision=precision, mode='%')})."
         )
 
-        template_sentence += (
-            "\n\n* These interpretations are based off of loose guidelines."
-        )
-        # template_sentence += "\nThe interpretation of effect existence and size is complex, and should change according to the application."
+        if self.bf_rope is not None:
+            # Bidirectional significance to random
+            template_sentence += f" Relative to two random models (p_ROPE,random={fmt(self.p_rope_random, precision=precision, mode='%')})"
+
+            log_bf_rope = np.log10(self.bf_rope)
+            bf_rope_direction = "less" if np.sign(log_bf_rope) > 0.0 else "more"
+            bf_rope_magnitude = np.power(10, np.abs(log_bf_rope))
+
+            template_sentence += f" significance is {fmt(bf_rope_magnitude, precision=precision, mode='f')} times {bf_rope_direction} likely."
+
+        template_sentence += "\n\n* These interpretations are based off of loose guidelines, and should change according to the application."
 
         return template_sentence
 
@@ -201,7 +196,7 @@ def pairwise_compare(
     p_rope_interpretation = p_rope_interpretation_guideline(p_rope)
 
     # Compare p_ROPE to random distributions
-    if random_diff_dist is not None:
+    if random_diff_dist is not None and min_sig_diff > 0.0:
         p_bi_sig_random = np.mean(
             (random_diff_dist < -min_sig_diff) | (random_diff_dist > min_sig_diff)
         )

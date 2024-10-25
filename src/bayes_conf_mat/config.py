@@ -508,14 +508,16 @@ class Config:
                 )
 
             # Validate the metric config =======================================
-            if (metric_config is None or len(metric_config) == 0) and default_config is None:
+            if (
+                metric_config is None or len(metric_config) == 0
+            ) and default_config is None:
                 # If no metric aggregation config has been passed, make sure
                 # there are not more than 1 experiment groups
-                if len(self.experiments) > 1:
+                if max(map(len, self.experiments.values())) > 1:
                     # Check for when requesting to aggregate
                     # Allow for studies where the user does not want to aggregate
                     warnings.warn(
-                        message="There are multiple experiments in `experiments`, but no aggregation method is provided for metric `{metric}`.",
+                        message=f"There is an experiment group with multiple experiments, but no aggregation method is provided for metric `{metric_key}`.",
                         category=ConfigWarning,
                     )
 

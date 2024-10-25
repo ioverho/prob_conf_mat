@@ -3,6 +3,7 @@ import typing
 import warnings
 from collections import OrderedDict
 from functools import cache
+from enum import Enum
 
 import numpy as np
 import jaxtyping as jtyping
@@ -23,6 +24,12 @@ if typing.TYPE_CHECKING:
     import matplotlib
 
 tabulate = lazy_import("tabulate")
+
+
+class DistributionPlottingMethods(Enum):
+    KDE = "kde"
+    HIST = "hist"
+    HISTOGRAM = "histrogram"
 
 
 class Study(Config):
@@ -71,6 +78,7 @@ class Study(Config):
         # The mapping from metric to aggregator
         self._metric_to_aggregator = dict()
 
+    # TODO: document this method
     @classmethod
     def from_dict(
         cls,
@@ -135,7 +143,9 @@ class Study(Config):
         return len(self._experiment_store)
 
     @staticmethod
-    def _split_experiment_name(name, do_warn: bool = False):
+    def _split_experiment_name(
+        name: str, do_warn: bool = False
+    ) -> typing.Tuple[str, str]:
         split_name = name.split("/")
 
         if len(split_name) == 2:
@@ -158,6 +168,24 @@ class Study(Config):
             )
 
         return experiment_group_name, experiment_name
+
+    def _validate_experiment_name(self, name: str) -> str:
+        experiment_group_name, experiment_name = self._split_experiment_name(
+            name=name, do_warn=False
+        )
+
+        name = f"{experiment_group_name}/{experiment_name}"
+
+        if experiment_name == "aggregated":
+            if experiment_group_name not in self._experiment_store:
+                raise ValueError(
+                    f"Experiment group {experiment_group_name} does not (yet) exist."
+                )
+
+        elif name not in self._list_experiments():
+            raise ValueError(f"Experiment {name} does not (yet) exist.")
+
+        return name
 
     def _validate_metric_class_label_combination(
         self, metric: Metric | AveragedMetric, class_label: int
@@ -409,7 +437,7 @@ class Study(Config):
 
         Args:
             metric (str): the name of the metric
-            experiment_name (str): the name of the experiment. Should be passed as 'experiment_group/experiment'. You can also pass 'experiment_group/aggregated' to retrieve the aggregated metric values.
+            experiment_name (str): the name of the experiment. You can also pass 'experiment_group/aggregated' to retrieve the aggregated metric values.
             sampling_method (SamplingMethod): the sampling method used to generate the metric values. Must a member of the SamplingMethod enum
 
         Returns:
@@ -424,6 +452,8 @@ class Study(Config):
 
         """
 
+        # Validate the experiment name before trying to fetch its values
+        experiment_name = self._validate_experiment_name(experiment_name)
         experiment_group_name, experiment_name = self._split_experiment_name(
             experiment_name
         )
@@ -571,7 +601,7 @@ class Study(Config):
         self,
         metric: str,
         class_label: int | None = None,
-        method: str = "kde",
+        method: DistributionPlottingMethods = "kde",
         bandwidth: float = 1.0,
         bins: int | typing.List[int] | str = "auto",
         normalize: bool = False,
@@ -645,8 +675,6 @@ class Study(Config):
             metric=metric, class_label=class_label
         )
 
-        IMPLEMENTED_METHODS = {"kde", "hist", "histogram"}
-
         # Import optional dependencies
         try:
             import matplotlib
@@ -713,69 +741,77 @@ class Study(Config):
                     posterior_summary.hdi[1] - posterior_summary.hdi[0]
                 )
 
-                if method not in IMPLEMENTED_METHODS:
-                    del fig, axes
-                    raise ValueError(
-                        f"Parameter `method` must be one of: {IMPLEMENTED_METHODS}. Currently: {method}"
-                    )
-
-                elif method == "kde":
-                    # Plot the kde
-                    sns.kdeplot(
-                        distribution_samples,
-                        fill=False,
-                        bw_adjust=bandwidth,
-                        ax=axes[i],
-                        color=edge_colour,
-                        clip=metric_bounds,
-                        zorder=2,
-                    )
-
-                    kdeline = axes[i].lines[0]
-
-                    kde_x = kdeline.get_xdata()
-                    kde_y = kdeline.get_ydata()
-
-                    all_min_x.append(kde_x[0])
-                    all_max_x.append(kde_x[-1])
-                    all_max_height.append(np.max(kde_y))
-
-                    if area_colour is not None:
-                        axes[i].fill_between(
-                            kde_x, kde_y, color=area_colour, zorder=0, alpha=area_alpha
+                match method:
+                    case DistributionPlottingMethods.KDE.value:
+                        # Plot the kde
+                        sns.kdeplot(
+                            distribution_samples,
+                            fill=False,
+                            bw_adjust=bandwidth,
+                            ax=axes[i],
+                            color=edge_colour,
+                            clip=metric_bounds,
+                            zorder=2,
                         )
 
-                elif method == "hist" or method == "histogram":
-                    sns.histplot(
-                        distribution_samples,
-                        fill=False,
-                        bins=bins,
-                        stat="density",
-                        element="step",
-                        ax=axes[i],
-                        color=edge_colour,
-                        zorder=2,
-                    )
+                        kdeline = axes[i].lines[0]
 
-                    kdeline = axes[i].lines[0]
+                        kde_x = kdeline.get_xdata()
+                        kde_y = kdeline.get_ydata()
 
-                    kde_x = kdeline.get_xdata()
-                    kde_y = kdeline.get_ydata()
+                        all_min_x.append(kde_x[0])
+                        all_max_x.append(kde_x[-1])
+                        all_max_height.append(np.max(kde_y))
 
-                    all_min_x.append(kde_x[0])
-                    all_max_x.append(kde_x[-1])
-                    all_max_height.append(np.max(kde_y))
+                        if area_colour is not None:
+                            axes[i].fill_between(
+                                kde_x,
+                                kde_y,
+                                color=area_colour,
+                                zorder=0,
+                                alpha=area_alpha,
+                            )
 
-                    kde_x = np.repeat(kde_x, 2)
-                    kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
+                    case (
+                        DistributionPlottingMethods.HIST.value
+                        | DistributionPlottingMethods.HISTOGRAM.value
+                    ):
+                        sns.histplot(
+                            distribution_samples,
+                            fill=False,
+                            bins=bins,
+                            stat="density",
+                            element="step",
+                            ax=axes[i],
+                            color=edge_colour,
+                            zorder=2,
+                        )
 
-                    if area_colour is not None:
-                        axes[i].fill_between(
-                            kde_x,
-                            kde_y,
-                            color=area_colour,
-                            zorder=0,
-                            alpha=area_alpha,
+                        kdeline = axes[i].lines[0]
+
+                        kde_x = kdeline.get_xdata()
+                        kde_y = kdeline.get_ydata()
+
+                        all_min_x.append(kde_x[0])
+                        all_max_x.append(kde_x[-1])
+                        all_max_height.append(np.max(kde_y))
+
+                        kde_x = np.repeat(kde_x, 2)
+                        kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
+
+                        if area_colour is not None:
+                            axes[i].fill_between(
+                                kde_x,
+                                kde_y,
+                                color=area_colour,
+                                zorder=0,
+                                alpha=area_alpha,
+                            )
+
+                    case _:
+                        del fig, axes
+                        raise ValueError(
+                            f"Parameter `method` must be one of {tuple(sm.value for sm in DistributionPlottingMethods)}. Currently: {method}"
                         )
 
                 if plot_obs_point:
@@ -1051,20 +1087,14 @@ class Study(Config):
 
         return summary_table
 
-    def report_comparison(
+    def _pairwise_compare(
         self,
-        metric: str,
+        metric: Metric | AveragedMetric,
         class_label: int,
         experiment_a: str,
         experiment_b: str,
         min_sig_diff: typing.Optional[float] = None,
-        precision: int = 4,
-    ) -> None:
-        metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric,
-            class_label=class_label,
-        )
-
+    ):
         lhs_samples = self.get_metric_samples(
             metric=metric.name,
             experiment_name=experiment_a,
@@ -1117,4 +1147,424 @@ class Study(Config):
             rhs_name=experiment_b,
         )
 
+        return comparison_result
+
+    def report_pairwise_comparison(
+        self,
+        metric: str,
+        experiment_a: str,
+        experiment_b: str,
+        class_label: int = None,
+        min_sig_diff: typing.Optional[float] = None,
+        precision: int = 4,
+    ) -> None:
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        comparison_result = self._pairwise_compare(
+            metric=metric,
+            class_label=class_label,
+            experiment_a=experiment_a,
+            experiment_b=experiment_b,
+            min_sig_diff=min_sig_diff,
+        )
+
         return comparison_result.template_sentence(precision=precision)
+
+    def report_pairwise_comparison_plot(
+        self,
+        metric: str,
+        experiment_a: str,
+        experiment_b: str,
+        class_label: int = None,
+        min_sig_diff: float = None,
+        method: str = "kde",
+        bandwidth: float = 1.0,
+        bins: int | typing.List[int] | str = "auto",
+        figsize: typing.Tuple[float, float] = None,
+        fontsize: float = 9,
+        axis_fontsize: float = None,
+        precision: int = 4,
+        edge_colour="black",
+        plot_min_sig_diff_lines: bool = True,
+        min_sig_diff_lines_colour: str = "black",
+        min_sig_diff_lines_format: str = "-",
+        min_sig_diff_area_colour: str = "gray",
+        min_sig_diff_area_alpha: float = 0.5,
+        neg_sig_diff_area_colour: str = "red",
+        neg_sig_diff_area_alpha: float = 0.5,
+        pos_sig_diff_area_colour: str = "green",
+        pos_sig_diff_area_alpha: float = 0.5,
+        plot_obs_point: bool = True,
+        obs_point_marker: str = "D",
+        obs_point_colour: str = "black",
+        obs_point_size: float = None,
+        plot_median_line: bool = True,
+        median_line_colour: str = "black",
+        median_line_format: str = "--",
+        plot_hdi_lines: bool = False,
+        hdi_lines_colour: str = "black",
+        hdi_lines_format: str = ":",
+        plot_extrema_lines: bool = True,
+        extrema_lines_colour: str = "black",
+        extrema_lines_format: str = "-",
+        extrema_line_height: float = 12,
+        plot_base_line: bool = True,
+        base_lines_colour: str = "black",
+        base_lines_format: str = "-",
+        plot_proportions: bool = True,
+    ) -> matplotlib.figure.Figure:
+        try:
+            # Import optional dependencies
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+
+        except ModuleNotFoundError as e:
+            raise ModuleNotFoundError(
+                f"Visualization requires optional dependencies: [matplotlib, pyplot]. Currently missing: {e}"
+            )
+
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric, class_label=class_label
+        )
+
+        comparison_result = self._pairwise_compare(
+            metric=metric,
+            class_label=class_label,
+            experiment_a=experiment_a,
+            experiment_b=experiment_b,
+            min_sig_diff=min_sig_diff,
+        )
+
+        # Figure out the maximum and minimum of the difference distribution
+        diff_bounds = (
+            metric.bounds[0] - metric.bounds[1],
+            metric.bounds[1] - metric.bounds[0],
+        )
+
+        # Figure instantiation
+        if figsize is None:
+            # Try to set a decent default figure size
+            _figsize = [None, None]
+            _figsize[0] = 6.30
+            _figsize[1] = 2.52
+        else:
+            _figsize = figsize
+
+        fig, ax = plt.subplots(1, 1, figsize=_figsize)
+
+        match method:
+            case DistributionPlottingMethods.KDE.value:
+                # Plot the kde
+                sns.kdeplot(
+                    comparison_result.diff_dist,
+                    ax=ax,
+                    fill=False,
+                    bw_adjust=bandwidth,
+                    color=edge_colour,
+                    clip=diff_bounds,
+                    zorder=2,
+                    clip_on=False,
+                )
+
+                kdeline = ax.lines[0]
+
+                kde_x = kdeline.get_xdata()
+                kde_y = kdeline.get_ydata()
+
+            case (
+                DistributionPlottingMethods.HIST.value
+                | DistributionPlottingMethods.HISTOGRAM.value
+            ):
+                sns.histplot(
+                    comparison_result.diff_dist,
+                    fill=False,
+                    bins=bins,
+                    stat="density",
+                    element="step",
+                    ax=ax,
+                    color=edge_colour,
+                    zorder=2,
+                    clip_on=False,
+                )
+
+                kdeline = ax.lines[0]
+
+                kde_x = kdeline.get_xdata()
+                kde_y = kdeline.get_ydata()
+
+                kde_x = np.repeat(kde_x, 2)
+                kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
+
+            case _:
+                del fig, ax
+                raise ValueError(
+                    f"Parameter `method` must be one of {tuple(sm.value for sm in DistributionPlottingMethods)}. Currently: {method}"
+                )
+
+        # Compute the actual maximum and minimum of the difference distribution
+        min_x = np.min(kde_x)
+        max_x = np.max(kde_x)
+
+        if plot_min_sig_diff_lines:
+            for msd in [
+                -comparison_result.min_sig_diff,
+                comparison_result.min_sig_diff,
+            ]:
+                y_msd = np.interp(
+                    x=msd,
+                    xp=kde_x,
+                    fp=kde_y,
+                )
+
+                ax.vlines(
+                    msd,
+                    0,
+                    y_msd,
+                    color=min_sig_diff_lines_colour,
+                    linestyle=min_sig_diff_lines_format,
+                    zorder=1,
+                )
+
+        # Fill the ROPE
+        rope_xx = np.linspace(
+            -comparison_result.min_sig_diff,
+            comparison_result.min_sig_diff,
+            num=2 * kde_x.shape[0],
+        )
+
+        rope_yy = np.interp(
+            x=rope_xx,
+            xp=kde_x,
+            fp=kde_y,
+        )
+
+        ax.fill_between(
+            x=rope_xx,
+            y1=0,
+            y2=rope_yy,
+            color=min_sig_diff_area_colour,
+            alpha=min_sig_diff_area_alpha,
+            interpolate=True,
+            zorder=0,
+            linewidth=0,
+        )
+
+        # Fill the negatively significant area
+        neg_sig_xx = np.linspace(
+            min_x, -comparison_result.min_sig_diff, num=2 * kde_x.shape[0]
+        )
+
+        neg_sig_yy = np.interp(
+            x=neg_sig_xx,
+            xp=kde_x,
+            fp=kde_y,
+        )
+
+        ax.fill_between(
+            x=neg_sig_xx,
+            y1=0,
+            y2=neg_sig_yy,
+            color=neg_sig_diff_area_colour,
+            alpha=neg_sig_diff_area_alpha,
+            interpolate=True,
+            zorder=0,
+            linewidth=0,
+        )
+
+        # Fill the positively significant area
+        pos_sig_xx = np.linspace(
+            comparison_result.min_sig_diff, max_x, num=2 * kde_x.shape[0]
+        )
+
+        pos_sig_yy = np.interp(
+            x=pos_sig_xx,
+            xp=kde_x,
+            fp=kde_y,
+        )
+
+        ax.fill_between(
+            x=pos_sig_xx,
+            y1=0,
+            y2=pos_sig_yy,
+            color=pos_sig_diff_area_colour,
+            alpha=pos_sig_diff_area_alpha,
+            interpolate=True,
+            zorder=0,
+            linewidth=0,
+        )
+
+        if plot_obs_point:
+            # Add a point for the true point value
+            observed_diff = comparison_result.observed_diff
+
+            if observed_diff is not None:
+                ax.scatter(
+                    observed_diff,
+                    0,
+                    marker=obs_point_marker,
+                    color=obs_point_colour,
+                    s=obs_point_size,
+                    clip_on=False,
+                    zorder=2,
+                )
+            else:
+                warnings.warn(
+                    "Parameter `plot_obs_point` is True, but one of the experiments has no observation (i.e. aggregated). As a result, no observed difference will be shown."
+                )
+
+        if plot_median_line:
+            # Plot median line
+            median_x = comparison_result.diff_dist_summary.median
+
+            y_median = np.interp(
+                x=median_x,
+                xp=kde_x,
+                fp=kde_y,
+            )
+
+            ax.vlines(
+                median_x,
+                0,
+                y_median,
+                color=median_line_colour,
+                linestyle=median_line_format,
+                zorder=1,
+            )
+
+            if plot_hdi_lines:
+                x_hdi_lb = comparison_result.diff_dist_summary.hdi[0]
+
+                y_hdi_lb = np.interp(
+                    x=x_hdi_lb,
+                    xp=kde_x,
+                    fp=kde_y,
+                )
+
+                ax.vlines(
+                    x_hdi_lb,
+                    0,
+                    y_hdi_lb,
+                    color=hdi_lines_colour,
+                    linestyle=hdi_lines_format,
+                    zorder=1,
+                )
+
+                x_hdi_ub = comparison_result.diff_dist_summary.hdi[1]
+
+                y_hdi_ub = np.interp(
+                    x=x_hdi_ub,
+                    xp=kde_x,
+                    fp=kde_y,
+                )
+
+                ax.vlines(
+                    x_hdi_ub,
+                    0,
+                    y_hdi_ub,
+                    color=hdi_lines_colour,
+                    linestyle=hdi_lines_format,
+                    zorder=1,
+                )
+
+        if plot_base_line:
+            # Add base line
+            ax.hlines(
+                0,
+                min_x,
+                max_x,
+                clip_on=False,
+                color=base_lines_colour,
+                ls=base_lines_format,
+                zorder=3,
+            )
+
+        if plot_extrema_lines:
+            standard_length = (
+                ax.transData.inverted().transform([0, extrema_line_height])[1]
+                - ax.transData.inverted().transform([0, 0])[1]
+            )
+
+            # Add lines for the horizontal extrema
+            ax.vlines(
+                min_x,
+                0,
+                standard_length,
+                clip_on=False,
+                color=extrema_lines_colour,
+                ls=extrema_lines_format,
+                zorder=3,
+            )
+            ax.vlines(
+                max_x,
+                0,
+                standard_length,
+                clip_on=False,
+                color=extrema_lines_colour,
+                ls=extrema_lines_format,
+                zorder=3,
+            )
+
+        # Add text labels for the proportion in the different regions
+        cur_ylim = ax.get_ylim()
+        cur_xlim = ax.get_xlim()
+
+        if plot_proportions:
+            if max_x > comparison_result.min_sig_diff:
+                # The proportion in the positively significant region
+                ax.text(
+                    s=f"$p_{{sig}}^{{+}}$\n{fmt(comparison_result.p_sig_pos, precision=precision, mode='%')}\n",
+                    x=0.5 * (cur_xlim[1] + comparison_result.min_sig_diff),
+                    y=cur_ylim[1],
+                    horizontalalignment="center",
+                    verticalalignment="center_baseline",
+                    fontsize=fontsize,
+                    color=pos_sig_diff_area_colour,
+                )
+
+            if min_x < -comparison_result.min_sig_diff:
+                # The proportion in the negatively significant area
+                ax.text(
+                    s=f"$p_{{sig}}^{{-}}$\n{fmt(comparison_result.p_sig_neg, precision=precision, mode='%')}\n",
+                    x=0.5 * (cur_xlim[0] - comparison_result.min_sig_diff),
+                    y=cur_ylim[1],
+                    horizontalalignment="center",
+                    verticalalignment="center_baseline",
+                    fontsize=fontsize,
+                    color=neg_sig_diff_area_colour,
+                )
+
+            # The proportion in the ROPE
+            ax.text(
+                s=f"$p_{{ROPE}}$\n{fmt(comparison_result.p_rope, precision=precision, mode='%')}\n",
+                x=0.0,
+                y=cur_ylim[1],
+                horizontalalignment="center",
+                verticalalignment="center_baseline",
+                fontsize=fontsize,
+                color=min_sig_diff_area_colour,
+            )
+
+        # Remove the y ticks
+        ax.set_yticks([])
+        ax.set_ylabel("")
+
+        # Remove the axis spine
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+
+        ax.set_xlim(
+            min(-comparison_result.min_sig_diff, cur_xlim[0]),
+            max(cur_xlim[1], comparison_result.min_sig_diff),
+        )
+
+        ax.tick_params(
+            axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize
+        )
+
+        fig.tight_layout()
+
+        return fig
