@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 
 from bayes_conf_mat.utils import fmt, lazy_import
-from bayes_conf_mat.significance_testing import pairwise_compare
+from bayes_conf_mat.experiment_comparison import pairwise_compare
 
 if typing.TYPE_CHECKING:
     from bayes_conf_mat.metrics import Metric, AveragedMetric

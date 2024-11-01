@@ -78,9 +78,9 @@ class PairwiseComparisonResult:
             " probability that this difference is bidirectionally significant"
         )
         template_sentence += (
-            f" (ROPE=[{fmt(-self.min_sig_diff, precision=4, mode='f')}, "
+            f" (ROPE=[{fmt(-self.min_sig_diff, precision=precision, mode='f')}, "
         )
-        template_sentence += f"{fmt(self.min_sig_diff, precision=4, mode='f')}], "
+        template_sentence += f"{fmt(self.min_sig_diff, precision=precision, mode='f')}], "
         template_sentence += (
             f"p_ROPE={fmt(self.p_rope, precision=precision, mode='%')})."
         )

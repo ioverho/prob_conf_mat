@@ -14,9 +14,15 @@ from bayes_conf_mat.experiment import ExperimentResult, SamplingMethod
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
 from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregationResult
 from bayes_conf_mat.experiment_manager import ExperimentManager
-from bayes_conf_mat.significance_testing import pairwise_compare
+from bayes_conf_mat.experiment_comparison import pairwise_compare, listwise_compare
 from bayes_conf_mat.stats import summarize_posterior
-from bayes_conf_mat.utils import seed_to_rng, InMemoryCache, fmt, lazy_import
+from bayes_conf_mat.utils import (
+    seed_to_rng,
+    InMemoryCache,
+    fmt,
+    lazy_import,
+    NotInCache,
+)
 
 if typing.TYPE_CHECKING:
     from bayes_conf_mat.metrics import Metric, AveragedMetric
@@ -105,7 +111,7 @@ class Study(Config):
         return instance
 
     def _list_experiments(self) -> typing.List[str]:
-        """Returns a sorted list of all the experiments included in this study."""
+        """Returns a sorted list of all the experiments included in this self."""
 
         all_experiments = []
         for experiment_group, experiment_configs in self.experiments.items():
@@ -194,7 +200,7 @@ class Study(Config):
             metric = self._metrics_store[metric]
         except KeyError:
             raise KeyError(
-                f"Could not find metric '{metric}' in the metrics collection. Consider adding it using `Study.add_metric`"
+                f"Could not find metric '{metric}' in the metrics collection. Consider adding it using `self.add_metric`"
             )
 
         if metric.is_multiclass:
@@ -227,7 +233,7 @@ class Study(Config):
         ] = None,
         **kwargs,
     ) -> None:
-        """Adds an experiment to this study.
+        """Adds an experiment to this self.
 
         Args:
             experiment_name (str): the name of the experiment and experiment group. Should be written as 'experiment_group/experiment'. If the experiment group name is omitted, the experiment gets added to a new experiment group.
@@ -236,7 +242,7 @@ class Study(Config):
             confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
 
         Example:
-            >>> study.add_experiment(
+            >>> self.add_experiment(
             >>>     name="test/test_a",
             >>>     confusion_matrix=[[1, 0], [0, 1]],
             >>>     )
@@ -317,7 +323,7 @@ class Study(Config):
         aggregation: typing.Optional[str] = None,
         **aggregation_kwargs,
     ) -> None:
-        """Adds a metric to the study. If the is more than one experiment in an experiment group, add an aggregation method.
+        """Adds a metric to the self. If the is more than one experiment in an experiment group, add an aggregation method.
 
         Args:
             metric (str | typing.Type[Metric] | typing.Type[AveragedMetric] | typing.Iterable[str  |  typing.Type[Metric]  |  typing.Type[AveragedMetric]]): the metric
@@ -444,21 +450,24 @@ class Study(Config):
             typing.Union[ExperimentResult, ExperimentAggregationResult]
 
         Example:
-            >>> experiment_result = study.get_metric_samples(metric="accuracy", sampling_method="posterior", experiment_name="test/test_a")
+            >>> experiment_result = self.get_metric_samples(metric="accuracy", sampling_method="posterior", experiment_name="test/test_a")
             ExperimentResult(experiment=ExperimentManager(test_a), metric=Metric(accuracy))
 
-            >>> experiment_result = study.get_metric_samples(metric="accuracy", sampling_method="posterior", experiment_name="test/aggregated")
+            >>> experiment_result = self.get_metric_samples(metric="accuracy", sampling_method="posterior", experiment_name="test/aggregated")
             ExperimentAggregationResult(experiment_group=ExperimentManager(test), metric=Metric(accuracy), aggregator=ExperimentAggregator(fe_gaussian))
 
         """
 
+        if isinstance(metric, Metric | AveragedMetric):
+            metric = metric.name
+
         # Validate the experiment name before trying to fetch its values
         experiment_name = self._validate_experiment_name(experiment_name)
-        experiment_group_name, experiment_name = self._split_experiment_name(
+        experiment_group_name, _experiment_name = self._split_experiment_name(
             experiment_name
         )
 
-        keys = [metric, experiment_group_name, experiment_name, sampling_method]
+        keys = [metric, experiment_group_name, _experiment_name, sampling_method]
 
         if self.cache.isin(fingerprint=self.fingerprint, keys=keys):
             result = self.cache.load(fingerprint=self.fingerprint, keys=keys)
@@ -468,7 +477,82 @@ class Study(Config):
 
             result = self.cache.load(fingerprint=self.fingerprint, keys=keys)
 
+        if result is NotInCache:
+            raise ValueError(
+                f"Got a NotInCache for {keys}. Cannot continue. Please report this issue."
+            )
+
         return result
+
+    def _construct_metric_summary_table(
+        self,
+        metric: Metric | AveragedMetric,
+        sampling_method: SamplingMethod,
+        class_label: int | None = None,
+        table_fmt: str = "html",
+        precision: int = 4,
+        include_observed_values: bool = False,
+    ) -> str:
+        table = []
+        for experiment_group_name, experiment_group in self._experiment_store.items():
+            for experiment_name, _ in experiment_group.experiments.items():
+                if include_observed_values:
+                    observed_experiment_result = self.get_metric_samples(
+                        metric=metric.name,
+                        experiment_name=f"{experiment_group_name}/{experiment_name}",
+                        sampling_method="input",
+                    )
+
+                sampled_experiment_result = self.get_metric_samples(
+                    metric=metric.name,
+                    experiment_name=f"{experiment_group_name}/{experiment_name}",
+                    sampling_method=sampling_method,
+                )
+
+                distribution_summary = summarize_posterior(
+                    sampled_experiment_result.values[:, class_label],
+                    ci_probability=self.ci_probability,
+                )
+
+                if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
+                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
+                else:
+                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
+
+                table_row = [
+                    experiment_group_name,
+                    experiment_name,
+                ]
+
+                if include_observed_values:
+                    table_row.append(observed_experiment_result.values[:, class_label])
+
+                table_row += [
+                    distribution_summary.median,
+                    distribution_summary.mode,
+                    hdi_str,
+                    distribution_summary.metric_uncertainty,
+                    distribution_summary.skew,
+                    distribution_summary.kurtosis,
+                ]
+
+                table.append(table_row)
+
+        headers = ["Group", "Experiment"]
+        if include_observed_values:
+            headers += ["Observed"]
+
+        headers += [*distribution_summary.headers]
+
+        table = tabulate.tabulate(
+            tabular_data=table,
+            headers=headers,
+            floatfmt=f".{precision}f",
+            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
+            tablefmt=table_fmt,
+        )
+
+        return table
 
     def report_metric_summaries(
         self,
@@ -492,53 +576,13 @@ class Study(Config):
             metric=metric, class_label=class_label
         )
 
-        table = []
-        for experiment_group_name, experiment_group in self._experiment_store.items():
-            for experiment_name, _ in experiment_group.experiments.items():
-                observed_experiment_result = self.get_metric_samples(
-                    metric=metric.name,
-                    experiment_name=f"{experiment_group_name}/{experiment_name}",
-                    sampling_method="input",
-                )
-
-                sampled_experiment_result = self.get_metric_samples(
-                    metric=metric.name,
-                    experiment_name=f"{experiment_group_name}/{experiment_name}",
-                    sampling_method="posterior",
-                )
-
-                distribution_summary = summarize_posterior(
-                    sampled_experiment_result.values[:, class_label],
-                    ci_probability=self.ci_probability,
-                )
-
-                if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
-                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
-                else:
-                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
-
-                table_row = [
-                    experiment_group_name,
-                    experiment_name,
-                    observed_experiment_result.values[:, class_label],
-                    distribution_summary.median,
-                    distribution_summary.mode,
-                    hdi_str,
-                    distribution_summary.metric_uncertainty,
-                    distribution_summary.skew,
-                    distribution_summary.kurtosis,
-                ]
-
-                table.append(table_row)
-
-        headers = ["Group", "Experiment", "Observed", *distribution_summary.headers]
-
-        table = tabulate.tabulate(
-            tabular_data=table,
-            headers=headers,
-            floatfmt=f".{precision}f",
-            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
-            tablefmt=table_fmt,
+        table = self._construct_metric_summary_table(
+            metric=metric,
+            class_label=class_label,
+            sampling_method="posterior",
+            table_fmt=table_fmt,
+            precision=precision,
+            include_observed_values=True,
         )
 
         return table
@@ -554,47 +598,15 @@ class Study(Config):
             metric=metric, class_label=class_label
         )
 
-        table = []
-        for experiment_group_name, experiment_group in self._experiment_store.items():
-            for experiment_name, _ in experiment_group.experiments.items():
-                sampled_experiment_result = self.get_metric_samples(
-                    metric=metric.name,
-                    experiment_name=f"{experiment_group_name}/{experiment_name}",
-                    sampling_method="random",
-                )
-
-                distribution_summary = summarize_posterior(
-                    sampled_experiment_result.values[:, class_label],
-                    ci_probability=self.ci_probability,
-                )
-
-                if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
-                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
-                else:
-                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
-
-                table_row = [
-                    experiment_group_name,
-                    experiment_name,
-                    distribution_summary.median,
-                    distribution_summary.mode,
-                    hdi_str,
-                    distribution_summary.metric_uncertainty,
-                    distribution_summary.skew,
-                    distribution_summary.kurtosis,
-                ]
-
-                table.append(table_row)
-
-        headers = ["Group", "Experiment", *distribution_summary.headers]
-
-        table = tabulate.tabulate(
-            tabular_data=table,
-            headers=headers,
-            floatfmt=f".{precision}f",
-            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
-            tablefmt=table_fmt,
+        table = self._construct_metric_summary_table(
+            metric=metric,
+            class_label=class_label,
+            sampling_method="random",
+            table_fmt=table_fmt,
+            precision=precision,
+            include_observed_values=False,
         )
+
         return table
 
     def plot_metric_summaries(
@@ -1002,90 +1014,6 @@ class Study(Config):
         fig.tight_layout()
 
         return fig
-
-    def report_comparison_to_random(
-        self,
-        metric: str,
-        class_label: typing.Optional[int] = None,
-        min_sig_diff: typing.Optional[float] = None,
-        precision: int = 4,
-        tablefmt: str = "html",
-    ) -> str:
-        metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric,
-            class_label=class_label,
-        )
-
-        table = []
-        for experiment_group_name, experiment_group in self._experiment_store.items():
-            for experiment_name, experiment in experiment_group.experiments.items():
-                experiment_name = f"{experiment_group.name}/{experiment_name}"
-
-                sampled_values = self.get_metric_samples(
-                    metric=metric.name,
-                    experiment_name=experiment_name,
-                    sampling_method="posterior",
-                ).values[:, class_label]
-
-                sampled_random_values = self.get_metric_samples(
-                    metric=metric.name,
-                    experiment_name=experiment_name,
-                    sampling_method="random",
-                ).values[:, class_label]
-
-                result = pairwise_compare(
-                    metric=metric,
-                    diff_dist=sampled_values - sampled_random_values,
-                    random_diff_dist=None,
-                    ci_probability=self.ci_probability,
-                    min_sig_diff=min_sig_diff,
-                    lhs_name=f"{experiment_group.name}/{experiment_name}",
-                    rhs_name="random",
-                    observed_difference=None,
-                )
-
-                rope = [-result.min_sig_diff, result.min_sig_diff]
-
-                if rope[1] - rope[0] > 1e-4:
-                    rope_str = f"[{fmt(rope[0], precision=precision, mode='f')}, {fmt(rope[1], precision=precision, mode='f')}]"
-                else:
-                    rope_str = f"[{fmt(rope[0], precision=precision, mode='e')}, {fmt(rope[1], precision=precision, mode='e')}]"
-
-                row = [
-                    experiment_group.name,
-                    experiment.name,
-                    result.diff_dist_summary.median,
-                    result.p_direction,
-                    rope_str,
-                    result.p_rope,
-                    result.p_bi_sig,
-                    result.p_sig_pos,
-                    result.p_sig_neg,
-                ]
-
-                table.append(row)
-
-        headers = [
-            "Group",
-            "Experiment",
-            "Median Δ",
-            "$p_{dir}$",
-            "ROPE",
-            "$p_{ROPE}$",
-            "$p_{sig}$",
-            "$p_{sig}^+$",
-            "$p_{sig}^-$",
-        ]
-
-        summary_table = tabulate.tabulate(
-            tabular_data=table,
-            headers=headers,
-            floatfmt=f".{precision}f",
-            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
-            tablefmt=tablefmt,
-        )
-
-        return summary_table
 
     def _pairwise_compare(
         self,
@@ -1568,3 +1496,142 @@ class Study(Config):
         fig.tight_layout()
 
         return fig
+
+    def _pairwise_random_comparison(
+        self,
+        metric: str,
+        class_label: int,
+        experiment: str,
+        min_sig_diff: float = None,
+    ):
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        actual_result = self.get_metric_samples(
+            metric=metric.name,
+            experiment_name=experiment,
+            sampling_method="posterior",
+        ).values[:, class_label]
+
+        random_results = self.get_metric_samples(
+            metric=metric.name,
+            experiment_name=experiment,
+            sampling_method="random",
+        ).values[:, class_label]
+
+        comparison_result = pairwise_compare(
+            metric=metric,
+            diff_dist=actual_result - random_results,
+            random_diff_dist=None,
+            ci_probability=self.ci_probability,
+            min_sig_diff=min_sig_diff,
+            observed_difference=None,
+            lhs_name=experiment,
+            rhs_name="random",
+        )
+
+        return comparison_result
+
+    def report_pairwise_comparison_to_random(
+        self,
+        metric: str,
+        class_label: int | None = None,
+        table_fmt: str = "html",
+        precision: int = 4,
+        min_sig_diff: float = None,
+    ) -> str:
+        records = []
+
+        for experiment in self._list_experiments():
+            random_comparison_result = self._pairwise_random_comparison(
+                metric=metric,
+                class_label=class_label,
+                experiment=experiment,
+                min_sig_diff=min_sig_diff,
+            )
+
+            experiment_group_name, experiment_name = self._split_experiment_name(
+                experiment
+            )
+
+            random_comparison_record = {
+                "Group": experiment_group_name,
+                "Experiment": experiment_name,
+                "Median Δ": random_comparison_result.diff_dist_summary.median,
+                "p_direction": random_comparison_result.p_direction,
+                "ROPE": f"[{fmt(-random_comparison_result.min_sig_diff, precision=precision, mode="f")}, {fmt(random_comparison_result.min_sig_diff, precision=precision, mode="f")}]",
+                "p_ROPE": random_comparison_result.p_rope,
+                "p_sig": random_comparison_result.p_bi_sig,
+            }
+
+            records.append(random_comparison_record)
+
+        table = tabulate.tabulate(
+            tabular_data=records,
+            headers="keys",
+            floatfmt=f".{precision}f",
+            colalign=["left", "left"]
+            + ["decimal" for _ in range(len(records[0].keys()) - 2)],
+            tablefmt=table_fmt,
+        )
+
+        return table
+
+    def report_listwise_comparison(
+        self,
+        metric: str,
+        class_label: typing.Optional[int] = None,
+        table_fmt: str = "html",
+        precision: int = 4,
+    ):
+        """Reports the probability for an experiment to achieve a rank when compared to all other experiments on the same metric.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Leave 0 or None if using a multiclass metric. Defaults to None.
+            table_fmt (str, optional): the format of the table, passed to [tabulate](https://github.com/astanin/python-tabulate#table-format). Defaults to "html".
+            precision (int, optional): the required precision of the presented numbers. Defaults to 4.
+
+        Returns:
+            str: the table as a string
+        """
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric, class_label=class_label
+        )
+
+        # TODO: should this comparison happen for all experiments
+        # or for each experiment group?
+        experiment_values = {
+            experiment: self.get_metric_samples(
+                experiment_name=experiment,
+                metric=metric.name,
+                sampling_method="posterior",
+            ).values[:, class_label]
+            for experiment in self._list_experiments()
+        }
+
+        p_experiment_given_rank_arr = listwise_compare(
+            experiment_values_dict=experiment_values,
+            metric_name=metric.name,
+        ).p_experiment_given_rank
+
+        headers = ["Group", "Experiment"] + [
+            f"Rank {i+1}" for i in range(p_experiment_given_rank_arr.shape[0])
+        ]
+
+        table = tabulate.tabulate(
+            tabular_data=[
+                [*self._split_experiment_name(experiment_names), *row]
+                for row, experiment_names in zip(
+                    p_experiment_given_rank_arr, self._list_experiments()
+                )
+            ],
+            tablefmt=table_fmt,
+            floatfmt=f".{precision}f",
+            headers=headers,
+            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
+        )
+
+        return table

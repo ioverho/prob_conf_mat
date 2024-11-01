@@ -20,19 +20,17 @@ class ListwiseComparisonResult:
     ]
 
 
-def listwise_comparison(
-    experiment_values: typing.List[ExperimentAggregationResult],
-    experiment_names: typing.List[str],
+def listwise_compare(
+    experiment_values_dict: typing.Dict[str, jtyping.Float[np.ndarray, " num_samples"]],
     metric_name: str,
 ):
-    if len(experiment_values) != len(experiment_names):
-        raise ValueError(
-            "The experiment values and names lists must be of the same length."
-        )
+    experiment_names, experiment_values = list(
+        map(list, zip(*list(experiment_values_dict.items())))
+    )
 
     # Stack the experiments into a [num_samples, num_experiments] array
     stacked_metric_values = np.stack(
-        [experiment_result.values for experiment_result in experiment_values],
+        experiment_values,
         axis=1,
     )
 

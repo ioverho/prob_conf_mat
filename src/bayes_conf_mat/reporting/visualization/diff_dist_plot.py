@@ -5,7 +5,7 @@ import warnings
 
 import numpy as np
 
-from bayes_conf_mat.significance_testing import pairwise_compare
+from bayes_conf_mat.experiment_comparison import pairwise_compare
 from bayes_conf_mat.utils import fmt
 
 if typing.TYPE_CHECKING:
