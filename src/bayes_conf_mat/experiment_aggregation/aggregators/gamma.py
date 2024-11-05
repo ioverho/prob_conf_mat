@@ -1,4 +1,5 @@
 import typing
+import warnings
 
 import numpy as np
 import scipy
@@ -16,8 +17,8 @@ class GammaAggregator(ExperimentAggregation):
     ($\\alpha$ is the shape, $\\beta$ the rate parameter) is estimated as:
 
     $$\\begin{aligned}
-        \\tilde{\\alpha}&=\\left[\sum_{i}^{M}\\alpha_{i}\\right]-(M-1) \\\\
-        \\tilde{\\beta}&=\\dfrac{1}{\sum_{i}^{M}\\beta_{i}^{-1}}
+        \\tilde{\\alpha}&=\\left[\\sum_{i}^{M}\\alpha_{i}\\right]-(M-1) \\\\
+        \\tilde{\\beta}&=\\dfrac{1}{\\sum_{i}^{M}\\beta_{i}^{-1}}
     \\end{aligned}$$
 
     where $M$ is the total number of experiments.
@@ -63,8 +64,16 @@ class GammaAggregator(ExperimentAggregation):
         alphas = []
         betas = []
         for per_experiment_samples in experiment_samples.T:
+            finite_samples = per_experiment_samples[np.isfinite(per_experiment_samples)]
+
+            if finite_samples.shape[0] < 0.9 * per_experiment_samples.shape[0]:
+                warnings.warn(
+                    "An experiment sample has more than 10% non-finite values."
+                )
+
             alpha, _, beta = scipy.stats.gamma.fit(
-                per_experiment_samples, floc=loc_estimate
+                finite_samples,
+                floc=loc_estimate,
             )
 
             alphas.append(alpha)

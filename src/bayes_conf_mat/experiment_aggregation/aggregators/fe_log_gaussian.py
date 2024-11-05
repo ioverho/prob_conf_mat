@@ -8,12 +8,12 @@ from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
 from bayes_conf_mat.stats import truncated_sample
 
 
-class FEGaussianAggregator(ExperimentAggregation):
-    """Samples from the Gaussian-conflated distribution, which is equivalent to the
-    Fixed-Effects Meta-Analytical Estimator in frequentist statistics.
+class FELogGaussianAggregator(ExperimentAggregation):
+    """Samples from the Log-Gaussian conflated distribution.
 
-    Uses the inverse variance weighted mean and standard errors. Specifically, the aggregate
-    distribution $\\mathcal{N}(\\tilde{\\mu}, \\tilde{\\sigma})$ is estimated as:
+    Uses the inverse variance weighted mean and standard errors, calculated on the log-transformed
+    samples. Specifically, the aggregate distribution
+    $\\mathcal{N}(\\tilde{\\mu}, \\tilde{\\sigma})$ is estimated as:
 
     $$\\begin{aligned}
         w_{i}&=\\dfrac{\\sigma_{i}^{-2}}{\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
@@ -36,9 +36,9 @@ class FEGaussianAggregator(ExperimentAggregation):
 
     """
 
-    name = "fe_gaussian"
-    full_name = "Fixed-effect Gaussian meta-analytical experiment aggregator"
-    aliases = ["fe", "fixed_effect", "fe_gaussian", "gaussian", "normal", "fe_normal"]
+    name = "fe_log_gaussian"
+    full_name = "Fixed-effect Log Gaussian conflated experiment aggregator"
+    aliases = ["fe_log_gaussian", "log_gaussian", "log_normal"]
 
     def __init__(self, rng: np.random.BitGenerator) -> None:
         super().__init__(rng=rng)
@@ -50,9 +50,11 @@ class FEGaussianAggregator(ExperimentAggregation):
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 
+        transformed_experiment_samples = np.log(experiment_samples)
+
         # Estimate the means and variances for each distribution
-        means = np.mean(experiment_samples, axis=0)
-        variances = np.var(experiment_samples, axis=0, ddof=1)
+        means = np.mean(transformed_experiment_samples, axis=0)
+        variances = np.var(transformed_experiment_samples, axis=0, ddof=1)
 
         # Compute the aggregated mean and variance
         # i.e. the inverse-variance weighted mean
@@ -75,4 +77,8 @@ class FEGaussianAggregator(ExperimentAggregation):
             num_samples=num_samples,
         )
 
-        return conflated_distribution_samples
+        transformed_conflated_distribution_samples = np.exp(
+            conflated_distribution_samples
+        )
+
+        return transformed_conflated_distribution_samples

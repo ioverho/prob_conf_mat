@@ -454,7 +454,7 @@ class Config:
             #! Aggregation key must map to registered aggregation
             #! Aggregation config must be valid
             try:
-                kwargs = dict({k for k in configuration if k != "aggregation"})
+                kwargs = {k: v for k, v in configuration.items() if k != "aggregation"}
                 get_experiment_aggregator(
                     configuration["aggregation"],
                     rng=0,
@@ -550,7 +550,7 @@ class Config:
             "num_samples": self.num_samples,
             "ci_probability": self.ci_probability,
             "experiments": self.experiments,
-            # "metrics": self.metrics,
+            "metrics": self.metrics,
         }
 
         return state_dict

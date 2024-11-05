@@ -8,9 +8,9 @@ from bayes_conf_mat.utils.formatting import fmt
 
 
 def heterogeneity_DL(
-    means,
-    variances,
-):
+    means: jtyping.Float[np.ndarray, " num_experiments"],
+    variances: jtyping.Float[np.ndarray, " num_experiments"],
+) -> float:
     """Compute the DerSimonian-Laird estimate of between-experiment heterogeneity.
 
     Args:
@@ -21,14 +21,14 @@ def heterogeneity_DL(
         float: estimate of the between-experiment heterogeneity
     """
 
-    num_studies = means.shape[0]
+    num_experiments = means.shape[0]
 
     w_fe = 1 / variances
 
     mu_fe = np.sum(w_fe * means) / np.sum(w_fe)
 
     q = np.sum(w_fe * np.power(means - mu_fe, 2))
-    df = num_studies - 1
+    df = num_experiments - 1
     denom = np.sum(w_fe) - (np.sum(np.power(w_fe, 2)) / np.sum(w_fe))
     tau2 = max(0.0, (q - df) / denom)
 
@@ -42,7 +42,7 @@ def heterogeneity_PM(
     atol: float = 1e-5,
     maxiter: int = 100,
     use_viechtbauer_correction: bool = False,
-):
+) -> float:
     """Compute the Paule-Mandel estimate of between-experiment heterogeneity.
 
     Based on the `_fit_tau_iterative` function from `stats_models`.
@@ -68,13 +68,13 @@ def heterogeneity_PM(
 
     prev_tau2 = 0.0
     tau2 = init_tau2
-    num_studies = means.shape[0]
+    num_experiments = means.shape[0]
     patience = maxiter
 
     if use_viechtbauer_correction:
-        root = scipy.stats.chi2(df=num_studies - 1).median()
+        root = scipy.stats.chi2(df=num_experiments - 1).median()
     else:
-        root = num_studies - 1
+        root = num_experiments - 1
 
     while patience > 0:
         # Estimate RE summary stat
@@ -135,7 +135,7 @@ class HeterogeneityResult:
 
 
 def estimate_i2(
-    individual_samples: jtyping.Float[np.ndarray, " num_classes num_samples"],
+    individual_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
 ) -> float:
     """Estimates a generalised I^2 metric, as suggested by Bowden et al. [1], using a Paule-Mandel tau2 estimator.
 
@@ -145,33 +145,32 @@ def estimate_i2(
     [1] Bowden, J., Tierney, J. F., Copas, A. J., & Burdett, S. (2011). Quantifying, displaying and accounting for heterogeneity in the meta-analysis of RCTs using standard and generalised Qstatistics. BMC medical research methodology, 11(1), 1-12.
 
     Args:
-        individual_samples (jtyping.Float[np.ndarray, " num_classes num_samples"])
+        individual_samples (jtyping.Float[np.ndarray, " num_samples num_experiments"])
 
     Returns:
         float: the I^2 estimate
-    """  # noqa: E501
-    num_samples = [samples.shape[0] for samples in individual_samples]
-    means = np.mean(individual_samples, axis=1)
-    variances = np.var(individual_samples, axis=1)
+    """
+
+    means = np.mean(individual_samples, axis=0)
+    variances = np.var(individual_samples, axis=0)
 
     # Pooled intra-experiment variance
-    pooled_var = sum((n - 1) * var for n, var in zip(num_samples, variances)) / (
-        sum(num_samples) - len(num_samples)
-    )
+    # Assuming equal population sizes
+    pooled_var = np.mean(variances)
 
     # Estimate of inter-experiment variance
-    tau2_dl = heterogeneity_DL(means, variances)
-    tau2_pm = heterogeneity_PM(
-        means, variances, init_tau2=tau2_dl, use_viechtbauer_correction=False
+    tau2 = heterogeneity_DL(means, variances)
+    tau2 = heterogeneity_PM(
+        means, variances, init_tau2=tau2, use_viechtbauer_correction=False
     )
 
     # Proportion of variance attributable to inter-experiment variance
-    i2 = tau2_pm / (tau2_pm + pooled_var)
+    i2 = tau2 / (tau2 + pooled_var)
 
     result = HeterogeneityResult(
         i2=i2,
         within_experiment_variance=pooled_var,
-        between_experiment_variance=tau2_pm,
+        between_experiment_variance=tau2,
         i2_interpretation=interpret_i2(i2),
     )
 

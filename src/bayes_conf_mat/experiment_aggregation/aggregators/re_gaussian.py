@@ -55,7 +55,7 @@ class REGaussianAggregator(ExperimentAggregation):
 
     name = "re_gaussian"
     full_name = "Random-effects Gaussian meta-analytical experiment aggregator"
-    aliases = ["re", "random_effect", "re_gaussian"]
+    aliases = ["re", "random_effect", "re_gaussian", "re_normal"]
 
     def __init__(
         self,

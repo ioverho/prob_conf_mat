@@ -965,6 +965,56 @@ class PositiveLikelihoodRatio(Metric):
         return tpr / fpr
 
 
+class LogPositiveLikelihoodRatio(Metric):
+    """Computes the positive likelihood ratio.
+
+    It is defined as
+
+    $$\log\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
+
+    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+
+    Simply put, it is logarithm of the ratio of the probabilities of the model predicting a
+    positive when the condition is positive and negative, respectively.
+
+    Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no true positives, and
+    infinity corresponding to no false positives. Larger values indicate better performance, with a score
+    of 0 corresponding to random performance.
+
+    Examples:
+        - `log_plr`
+        - `lplr`
+        - `log_positive_likelihood_ratio@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Likelihood_ratios_in_diagnostic_testing#positive_likelihood_ratio)
+
+    """
+
+    full_name = "Log Positive Likelihood Ratio"
+    is_multiclass = False
+    bounds = (0.0, float("inf"))
+    dependencies = ("tpr", "fpr")
+    sklearn_equivalent = "class_likelihood_ratios"
+    aliases = ["log_plr", "lplr", "log_positive_likelihood_ratio"]
+
+    def __init__(self, clamp: bool = False) -> None:
+        super().__init__()
+        self.clamp = clamp
+
+    def compute_metric(
+        self,
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        fpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        if self.clamp:
+            fpr = np.where(fpr == 0, np.min(fpr[fpr != 0.0]), fpr)
+
+        lplr = np.log(tpr) - np.log(fpr)
+
+        return lplr
+
+
 class NegativeLikelihoodRatio(Metric):
     """Computes the negative likelihood ratio.
 
@@ -1012,6 +1062,56 @@ class NegativeLikelihoodRatio(Metric):
         return fnr / tnr
 
 
+class LogNegativeLikelihoodRatio(Metric):
+    """Computes the negative likelihood ratio.
+
+    It is defined as
+
+    $$\log \dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
+
+    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+
+    Simply put, it is the logarithm of the ratio of the probabilities of the model predicting a negative when the condition
+    is positive and negative, respectively.
+
+    Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no true positives, and
+    infinity corresponding to no true negatives. Smaller values indicate better performance, with a score
+    of 0 corresponding to random performance.
+
+    Examples:
+        - `log_nlr`
+        - `lnlr`
+        - `log_negative_likelihood_ratio@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Likelihood_ratios_in_diagnostic_testing#negative_likelihood_ratio)
+
+    """
+
+    full_name = "Log Negative Likelihood Ratio"
+    is_multiclass = False
+    bounds = (0.0, float("inf"))
+    dependencies = ("fnr", "tnr")
+    sklearn_equivalent = "class_likelihood_ratios"
+    aliases = ["lnlr", "log_negative_likelihood_ratio", "log_nlr"]
+
+    def __init__(self, clamp: bool = False) -> None:
+        super().__init__()
+        self.clamp = clamp
+
+    def compute_metric(
+        self,
+        fnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        if self.clamp:
+            tnr = np.where(tnr == 0, np.min(tnr[tnr != 0.0]), tnr)
+
+        lnlr = np.log(fnr) - np.log(tnr)
+
+        return lnlr
+
+
 class DiagnosticOddsRatio(Metric):
     """Computes the diagnostic odds ratio.
 
@@ -1037,22 +1137,55 @@ class DiagnosticOddsRatio(Metric):
 
     """
 
-    full_name = "Negative Likelihood Ratio"
+    full_name = "Diagnostic Odds Ratio"
     is_multiclass = False
     bounds = (0.0, float("inf"))
     dependencies = ("nlr", "plr")
     sklearn_equivalent = None
     aliases = ["dor", "diagnostic_odds_ratio"]
 
-    def __init__(self, log_transform: bool = False):
-        self.log_transform = log_transform
+    def compute_metric(
+        self,
+        plr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        nlr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        return plr / nlr
+
+
+class LogDiagnosticOddsRatio(Metric):
+    """Computes the diagnostic odds ratio.
+
+    It is defined as:
+
+    $$\log\dfrac{LR_{+}}{LR_{-}}$$
+
+    where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
+
+    Possible values lie in the range (-$\infty$, $\infty$). Larger values indicate better performance, with a score
+    of 0 corresponding to random performance.
+
+    Examples:
+        - `log_dor`
+        - `ldor`
+        - `log_diagnostic_odds_ratio@macro`
+
+    Note: Read more:
+        1. [Wikipedia](https://en.wikipedia.org/wiki/Diagnostic_odds_ratio)
+
+    """
+
+    full_name = "Log Diagnostic Odds Ratio"
+    is_multiclass = False
+    bounds = (0.0, float("inf"))
+    dependencies = ("nlr", "plr")
+    sklearn_equivalent = None
+    aliases = ["log_dor", "ldor", "log_diagnostic_odds_ratio"]
 
     def compute_metric(
         self,
         plr: jtyping.Float[np.ndarray, "num_samples num_classes"],
         nlr: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        if self.log_transform:
-            return np.log(plr) - np.log(nlr)
-        else:
-            return plr / nlr
+        log_dor = np.log(plr) - np.log(nlr)
+
+        return log_dor
