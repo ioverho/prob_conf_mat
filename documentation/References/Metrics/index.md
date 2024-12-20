@@ -75,6 +75,15 @@ The following lists all implemented metrics, by alias
 | 'jaccard'                          | [`JaccardIndex`](Metrics.md#bayes_conf_mat.metrics._metrics.JaccardIndex)                                     | False        | jaccard_score           |
 | 'jaccard_index'                    | [`JaccardIndex`](Metrics.md#bayes_conf_mat.metrics._metrics.JaccardIndex)                                     | False        | jaccard_score           |
 | 'kappa'                            | [`CohensKappa`](Metrics.md#bayes_conf_mat.metrics._metrics.CohensKappa)                                       | True         | cohen_kappa_score       |
+| 'ldor'                             | [`LogDiagnosticOddsRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
+| 'lnlr'                             | [`LogNegativeLikelihoodRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio)         | False        | class_likelihood_ratios |
+| 'log_diagnostic_odds_ratio'        | [`LogDiagnosticOddsRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
+| 'log_dor'                          | [`LogDiagnosticOddsRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
+| 'log_negative_likelihood_ratio'    | [`LogNegativeLikelihoodRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio)         | False        | class_likelihood_ratios |
+| 'log_nlr'                          | [`LogNegativeLikelihoodRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio)         | False        | class_likelihood_ratios |
+| 'log_plr'                          | [`LogPositiveLikelihoodRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogPositiveLikelihoodRatio)         | False        | class_likelihood_ratios |
+| 'log_positive_likelihood_ratio'    | [`LogPositiveLikelihoodRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogPositiveLikelihoodRatio)         | False        | class_likelihood_ratios |
+| 'lplr'                             | [`LogPositiveLikelihoodRatio`](Metrics.md#bayes_conf_mat.metrics._metrics.LogPositiveLikelihoodRatio)         | False        | class_likelihood_ratios |
 | 'markedness'                       | [`Markedness`](Metrics.md#bayes_conf_mat.metrics._metrics.Markedness)                                         | False        |                         |
 | 'matthews_corrcoef'                | [`MatthewsCorrelationCoefficient`](Metrics.md#bayes_conf_mat.metrics._metrics.MatthewsCorrelationCoefficient) | True         | matthews_corrcoef       |
 | 'matthews_correlation_coefficient' | [`MatthewsCorrelationCoefficient`](Metrics.md#bayes_conf_mat.metrics._metrics.MatthewsCorrelationCoefficient) | True         | matthews_corrcoef       |

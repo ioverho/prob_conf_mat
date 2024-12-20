@@ -11,31 +11,29 @@ classifiers = ["Programming Language :: Python :: 3"]
 # TODO: add some keywords
 
 requires-python = ">=3.10"
-dependencies = ["numpy", "scipy", "tabulate", "jaxtyping>=0.2.31"]
+dependencies = [
+  "numpy",
+  "scipy",
+  "tabulate",
+  "jaxtyping>=0.2.31",
+  "matplotlib",
+  "seaborn",
+]
 
 [project.optional-dependencies]
-viz = ["matplotlib", "seaborn"]
-
 dev = [
-  "ipykernel",
   "ruff",
-  "mypy",
   "scikit-learn",
   "mkdocs",
-  "mkdocs-material[imaging]",
+  "mkdocs-material",
   "mkdocstrings[python]",
   "mkdocs-jupyter",
   "mkdocs-git-revision-date-localized-plugin",
   "griffe-inherited-docstrings",
   "pyyaml",
   "toml",
-  "matplotlib",
-  "seaborn",
+  "pytest",
 ]
-
-docs = ["ipykernel", "matplotlib", "seaborn"]
-
-test = ["scikit-learn", "pytest"]
 
 [project.urls]
 "Homepage" = "https://github.com/ioverho/bayes_conf_mat"
@@ -63,15 +61,12 @@ bayes_conf_mat = { path = ".", editable = true }
 [tool.pixi.environments]
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
-viz = { features = ["viz"], solve-group = "default" }
-test = { features = ["test"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
 
 [tool.pixi.tasks]
 
-[tool.pixi.feature.test.tasks]
+[tool.pixi.feature.dev.tasks]
 test = "pytest"
 
-# Type Checking - Mypy
-[tool.mypy]
-plugins = ["numpy.typing.mypy_plugin"]
+[tool.pixi.feature.dev.dependencies]
+ipykernel = ">=6.29.5,<7"
+pip = ">=24.3.1,<25"

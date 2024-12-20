@@ -27,5 +27,8 @@
 ::: bayes_conf_mat.metrics._metrics.P4
 ::: bayes_conf_mat.metrics._metrics.JaccardIndex
 ::: bayes_conf_mat.metrics._metrics.PositiveLikelihoodRatio
+::: bayes_conf_mat.metrics._metrics.LogPositiveLikelihoodRatio
 ::: bayes_conf_mat.metrics._metrics.NegativeLikelihoodRatio
+::: bayes_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio
 ::: bayes_conf_mat.metrics._metrics.DiagnosticOddsRatio
+::: bayes_conf_mat.metrics._metrics.LogDiagnosticOddsRatio

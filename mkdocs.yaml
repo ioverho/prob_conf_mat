@@ -22,8 +22,9 @@ copyright: Copyright &copy; 2024 Ivo Verhoeven
 nav:
   - index.md
   - Getting Started:
-      - Getting Started/estimating_uncertainty.ipynb
-      - Getting Started/comparing_experiments.ipynb
+      - Getting Started/01_estimating_uncertainty.ipynb
+      - Getting Started/02_comparing_experiments.ipynb
+      - Getting Started/03_aggregating_experiments.ipynb
       #- Getting Started/mnist_digits_class.ipynb
   - How-To:
       - How To Guides/configuration.md

@@ -2,8 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from bayes_conf_mat.config import Config
-from bayes_conf_mat.config.config import ConfigError, ConfigWarning
+from bayes_conf_mat.config import Config, ConfigError, ConfigWarning
 
 
 class TestConfig:
