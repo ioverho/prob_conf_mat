@@ -1,7 +1,7 @@
 import typing
 
 
-def fmt(number: float, precision: int = 4, mode: str = "f"):
+def fmt(number: float, precision: int = 4, mode: str = "f") -> str:
     # Format as float, falling back to scientific notation if too small
     if mode == "f":
         if number != 0.0 and abs(number) <= 1 * (10 ** (-precision)):
@@ -13,7 +13,12 @@ def fmt(number: float, precision: int = 4, mode: str = "f"):
         return f"{number:.{precision}e}"
 
     elif mode == "%":
-        return f"{number*100:2.{precision-2}f}%"
+        return f"{number * 100:2.{precision - 2}f}%"
+
+    else:
+        raise ValueError(
+            f"Parameter mode must be one of 'f', 'e', '%'. Currently: {mode}"
+        )
 
 
 def summary_to_table_row(
