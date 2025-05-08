@@ -1,7 +1,7 @@
 import sys
 import importlib.util
 
-
+# TODO: find an alternative for this function
 def lazy_import(name):
     """Only imports a module when needed.
 

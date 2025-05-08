@@ -3,10 +3,10 @@ import typing
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+from bayes_conf_mat.utils import RNG
 
-
-class HistogramAggregator(ExperimentAggregation):
+class HistogramAggregator(ExperimentAggregator):
     """Samples from a histogram approximate conflation distribution.
 
     First bins all individual experiment groups, and then computes the product of the probability masses
@@ -37,7 +37,7 @@ class HistogramAggregator(ExperimentAggregation):
 
     def __init__(
         self,
-        rng: np.random.BitGenerator,
+        rng: RNG,
         pseudo_count_weight: float = 0.1,
     ) -> None:
         super().__init__(rng=rng)
@@ -48,7 +48,7 @@ class HistogramAggregator(ExperimentAggregation):
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 
@@ -102,7 +102,7 @@ class HistogramAggregator(ExperimentAggregation):
         # Resample the conflated distribution
         # Samples at the midpoint of each bin
         conflated_distribution_samples = self.rng.choice(
-            (bins[:-1] + bins[1:]) / 2,
+            (bins[:-1] + bins[1:]) / 2, # type: ignore
             size=num_samples,
             p=conflated_distribution,
         )

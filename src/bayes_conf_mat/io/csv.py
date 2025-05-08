@@ -1,15 +1,16 @@
+import typing
 import csv
 
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.io.base import IOBase, ConfMatIOException
+from bayes_conf_mat.io.abc import IOMethod, ConfMatIOException
 from bayes_conf_mat.io.utils import pred_cond_to_confusion_matrix
 
 _CSV_TYPES = {"confusion_matrix", "conf_mat", "pred_cond", "cond_pred"}
 
 
-class CSV(IOBase):
+class CSV(IOMethod):
     """Loads in a csv file as a confusion matrix, or a separated list of predictions and conditions.
 
     Args:
@@ -26,15 +27,15 @@ class CSV(IOBase):
 
     def __init__(
         self,
-        location: str = None,
-        type: str = None,
+        location: str,
+        type: typing.Optional[str] = None,
         encoding: str = "utf-8",
         newline: str = "\n",
         dialect: str = "excel",
         delimiter: str = ",",
         lineterminator: str = "\r\n",
     ):
-        super().__init__(location)
+        super().__init__(location=location)
 
         if type not in _CSV_TYPES:
             raise ValueError(f"For CSV, `type` must be one of {_CSV_TYPES}")
@@ -49,7 +50,7 @@ class CSV(IOBase):
     def _load(self) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
         rows = []
         with open(
-            self.location, "r", newline=self.newline, encoding=self.encoding
+            self.location, "r", newline=self.newline, encoding=self.encoding # type: ignore
         ) as f:
             reader = csv.reader(
                 f,

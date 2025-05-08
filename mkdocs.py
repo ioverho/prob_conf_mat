@@ -13,12 +13,12 @@ from bayes_conf_mat.io import IO_REGISTRY
 from bayes_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY
 from bayes_conf_mat.experiment_aggregation import AGGREGATION_REGISTRY
 
-REFERENCES_PART = "References"
-METRICS_AND_AVERAGING_CHAPTER = REFERENCES_PART + "/Metrics"
+REFERENCE_PART = "Reference"
+METRICS_AND_AVERAGING_CHAPTER = REFERENCE_PART + "/Metrics"
 METRICS_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Metrics.md"
 AVERAGING_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Averaging.md"
-IO_SECTION = REFERENCES_PART + "/IO.md"
-EXPERIMENT_AGGREGATION_SECTION = REFERENCES_PART + "/Experiment Aggregation/index.md"
+IO_SECTION = REFERENCE_PART + "/IO.md"
+EXPERIMENT_AGGREGATION_SECTION = REFERENCE_PART + "/Experiment Aggregation/index.md"
 
 
 REPL_STRING = re.compile(r"@@(.+?)@@")

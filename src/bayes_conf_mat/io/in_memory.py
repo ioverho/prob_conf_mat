@@ -1,10 +1,10 @@
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.io.base import IOBase
+from bayes_conf_mat.io.abc import IOMethod
 
 
-class InMemory(IOBase):
+class InMemory(IOMethod):
     """Stores a confusion matrix in memory.
 
     Essentially just a wrapper around an existing confusion matrix.

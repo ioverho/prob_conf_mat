@@ -4,17 +4,17 @@ import scipy
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+from bayes_conf_mat.utils import RNG
 
-
-class BetaAggregator(ExperimentAggregation):
+class BetaAggregator(ExperimentAggregator):
     """Samples from the beta-conflated distribution.
 
     Specifically, the aggregate distribution $\\text{Beta}(\\tilde{\\alpha}, \\tilde{\\beta})$ is estimated as:
 
     $$\\begin{aligned}
-        \\tilde{\\alpha}&=\\left[\sum_{i=1}^{M}\\alpha_{i}\\right]-\\left(M-1\\right) \\\\
-        \\tilde{\\beta}&=\\left[\sum_{i=1}^{M}\\beta_{i}\\right]-\\left(M-1\\right)
+        \\tilde{\\alpha}&=\\left[\\sum_{i=1}^{M}\\alpha_{i}\\right]-\\left(M-1\\right) \\\\
+        \\tilde{\\beta}&=\\left[\\sum_{i=1}^{M}\\beta_{i}\\right]-\\left(M-1\\right)
     \\end{aligned}$$
 
     where $M$ is the total number of experiments.
@@ -40,7 +40,7 @@ class BetaAggregator(ExperimentAggregation):
     aliases = ["beta", "beta_conflation"]
 
     def __init__(
-        self, rng: np.random.BitGenerator, estimation_method: str = "mle"
+        self, rng: RNG, estimation_method: str = "mle"
     ) -> None:
         super().__init__(rng=rng)
 
@@ -51,7 +51,7 @@ class BetaAggregator(ExperimentAggregation):
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 
@@ -107,13 +107,15 @@ class BetaAggregator(ExperimentAggregation):
         conflated_alpha = sum(alphas) - (num_experiments - 1)
         conflated_beta = sum(betas) - (num_experiments - 1)
 
+        # Scipy distributions won't accept the RNG wrapper
+        # So pass rng.rng
         conflated_distribution_samples = scipy.stats.beta.rvs(
             a=conflated_alpha,
             b=conflated_beta,
             size=num_samples,
             loc=bounds[0],
             scale=bounds[1] - bounds[0],
-            random_state=self.rng,
+            random_state=self.rng.rng,
         )
 
         # conflated_distribution_samples = (

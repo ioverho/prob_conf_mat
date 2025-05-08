@@ -4,15 +4,15 @@ import scipy
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.experiment_aggregation.heterogeneity import (
     heterogeneity_DL,
     heterogeneity_PM,
 )
 from bayes_conf_mat.stats import truncated_sample
+from bayes_conf_mat.utils import RNG
 
-
-class REGaussianAggregator(ExperimentAggregation):
+class REGaussianAggregator(ExperimentAggregator):
     """Samples from the Random Effects Meta-Analytical Estimator.
 
     First uses the standard the inverse variance weighted mean and standard errors as model parameters, before
@@ -22,9 +22,9 @@ class REGaussianAggregator(ExperimentAggregation):
     Specifically, starting with a Fixed-Effects model $\\mathcal{N}(\\tilde{\\mu_{\\text{FE}}}, \\tilde{\\sigma_{\\text{FE}}})$,
 
     $$\\begin{aligned}
-        w_{i}&=\\dfrac{\\left(\\sigma_{i}^2+\\tau^2\\right)^{-1}}{\sum_{j}^{M}\\left(\\sigma_{j}^2+\\tau^2\\right)^{-1}} \\\\
-        \\tilde{\\mu}&=\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-        \\tilde{\\sigma^2}&=\\dfrac{1}{\sum_{i}^{M}\\sigma_{i}^{-2}}
+        w_{i}&=\\dfrac{\\left(\\sigma_{i}^2+\\tau^2\\right)^{-1}}{\\sum_{j}^{M}\\left(\\sigma_{j}^2+\\tau^2\\right)^{-1}} \\\\
+        \\tilde{\\mu}&=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
+        \\tilde{\\sigma^2}&=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
     \\end{aligned}$$
 
     where $\\tau$ is the estimated inter-experiment heterogeneity, and $M$ is the total number of experiments.
@@ -59,7 +59,7 @@ class REGaussianAggregator(ExperimentAggregation):
 
     def __init__(
         self,
-        rng: np.random.BitGenerator,
+        rng: RNG,
         paule_mandel_heterogeneity: bool = True,
         hksj_sampling_distribution: bool = False,
     ) -> None:
@@ -70,7 +70,7 @@ class REGaussianAggregator(ExperimentAggregation):
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 

@@ -1,4 +1,5 @@
 from .formatting import fmt
-from .cache import NotInCache, InMemoryCache, PickleCache
+from .cache import NotInCache, InMemoryCache
 from .lazy_import import lazy_import
-from .rng import seed_to_rng
+from .rng import RNG
+from .typing import *

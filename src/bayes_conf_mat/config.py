@@ -1,8 +1,10 @@
+import os
 import typing
 import warnings
 from collections import OrderedDict
 import hashlib
 import pickle
+import time
 
 import numpy as np
 
@@ -10,7 +12,7 @@ from bayes_conf_mat.metrics import get_metric
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
 from bayes_conf_mat.io import get_io
 from bayes_conf_mat.stats import _DIRICHLET_PRIOR_STRATEGIES
-
+from bayes_conf_mat.utils import RNG
 
 class ConfigWarning(Warning):
     def __init__(self, *args, **kwargs) -> None:
@@ -28,38 +30,30 @@ class Config:
         seed: typing.Optional[int] = None,
         num_samples: typing.Optional[int] = None,
         ci_probability: typing.Optional[float] = None,
-        experiments: typing.Optional[
-            typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, typing.Any]]]
-        ] = None,
-        metrics: typing.Optional[
-            typing.Mapping[str, typing.Mapping[str, typing.Any]]
-        ] = None,
-    ):
-        # TODO: use more sensible initial values for these parameters, e.g., empty mappings for experiments and metrics
-        # Generate the slots for these values
-        self._seed = None
-        self._num_samples = None
-        self._ci_probability = None
-        self._experiments = None
-        self._metrics = None
+        experiments: dict[str, dict[str, dict[str, typing.Any]]] = {},
+        metrics: dict[str, dict[str, typing.Any]]  = {},
+    ) -> None:
+        # Set the RNG
+        # Allows for potentially updating the seed
+        self.rng = RNG(seed=None)
 
-        # Now actually set these values, with baked in validation
-        self.seed: int = seed
-        self.num_samples: int = num_samples
-        self.ci_probability: float = ci_probability
-        self.experiments: dict[str, dict[str, dict[str, typing.Any]]] = experiments
-        self.metrics: dict[str, dict[str, typing.Any]] = metrics
+        # Set the initial values
+        self.__setattr__("seed", seed)
+        self.__setattr__("num_samples", num_samples)
+        self.__setattr__("ci_probability", ci_probability)
+        self.__setattr__("experiments", experiments)
+        self.__setattr__("metrics", metrics)
 
     def _validate_type(self, parameter: str, value: typing.Any) -> None:
         # Get the type we're expecting to see for this parameter
-        expected_type: typing.Type = Config.__init__.__annotations__[parameter]
+        expected_type: type = Config.__init__.__annotations__[parameter]
 
         # Check if optional type
         allows_none: bool = isinstance(expected_type, type(typing.Optional[float]))
 
         # If Optional, use non-optional type as expected type
         if allows_none:
-            expected_type = expected_type.__args__[0]
+            expected_type = expected_type.__args__[0] # type: ignore
 
         if (value is None) and allows_none:
             return value
@@ -80,7 +74,17 @@ class Config:
     def seed(self) -> int:
         return self._seed
 
-    def _validate_seed(self, value: int) -> None:
+    def _validate_seed(self, value: int) -> int:
+        if value is None:
+            value = int(time.time() * 256)
+
+            warnings.warn(
+                f"Recieved `None` as seed. Defaulting to fractional seconds: {value}",
+                category=ConfigWarning,
+            )
+
+            self.seed = value
+
         if value < 0:
             raise ConfigError(
                 f"Parameter `seed` must be a positive int. Currently: {self.seed}"
@@ -89,11 +93,12 @@ class Config:
         return value
 
     @seed.setter
-    def seed(self, value: int):
-        value = self._validate_type(parameter="seed", value=value)
-        value = self._validate_seed(value=value)
+    def seed(self, value: int) -> None:
+        value_ = self._validate_type(parameter="seed", value=value)
+        value_ = self._validate_seed(value=value)
 
-        self._seed = value
+        self._seed = value_
+        self.rng.seed = self._seed
 
     @property
     def num_samples(self) -> int:
@@ -122,11 +127,11 @@ class Config:
         return value
 
     @num_samples.setter
-    def num_samples(self, value: int):
-        value = self._validate_type(parameter="num_samples", value=value)
-        value = self._validate_num_samples(value=value)
+    def num_samples(self, value: int) -> None:
+        value_ = self._validate_type(parameter="num_samples", value=value)
+        value_ = self._validate_num_samples(value=value)
 
-        self._num_samples = value
+        self._num_samples = value_
 
     @property
     def ci_probability(self) -> float:
@@ -141,28 +146,28 @@ class Config:
 
             value = 0.95
 
-        if value < 0.0 or value > 1.0:
+        if not (value > 0.0 and value <= 1.0):
             raise ConfigError(
-                f"Parameter `ci_probability` must be within [0.0, 1.0]. Currently: {value}"
+                f"Parameter `ci_probability` must be within (0.0, 1.0]. Currently: {value}"
             )
 
         return value
 
     @ci_probability.setter
-    def ci_probability(self, value: float):
-        value = self._validate_type(parameter="ci_probability", value=value)
-        value = self._validate_ci_probability(value=value)
+    def ci_probability(self, value: float) -> None:
+        value_ = self._validate_type(parameter="ci_probability", value=value)
+        value_ = self._validate_ci_probability(value=value)
 
-        self._ci_probability = value
+        self._ci_probability = value_
 
     @property
-    def experiments(self):
+    def experiments(self) -> dict[str, dict[str, dict[str, typing.Any]]]:
         return self._experiments
 
     def _validate_experiments(
         self,
-        value: typing.Mapping[
-            str, typing.Mapping[str, typing.Mapping[str, typing.Any]]
+        value: dict[
+            str, dict[str, dict[str, typing.Any]]
         ],
     ) -> dict[str, dict[str, dict[str, typing.Any]]]:
         if value is None:
@@ -226,30 +231,34 @@ class Config:
                             f"The key for `{experiment_group_name}/{experiment_name}` must be an instance of `str`, but got `{type(experiment_group_name)}`. While trying to convert, ran into the following exception: {e}"
                         )
 
+                # Put all remaining experiment configuration items into the config
+                # Does not perform validation right now
+                updated_experiment_config.update(experiment_config)
+
                 # ==============================================================
                 # Validate location ============================================
                 # ==============================================================
                 # TODO: check if location is valid/exists??
-                # if (
-                #    "location" not in experiment_config
-                #    and experiment_config.get("format", "") != "in_memory"
-                # ):
-                #    raise ConfigError(
-                #        f"Experiment `{experiment_group_name}/{experiment_name}` must contain a `location` key. Currently: {experiment_config}."
-                #    )
+                #if (
+                #   "location" not in experiment_config
+                #   and experiment_config.get("format", "") != "in_memory"
+                #):
+                #   raise ConfigError(
+                #       f"Experiment `{experiment_group_name}/{experiment_name}` must contain a `location` key. Currently: {experiment_config}."
+                #   )
 
-                # elif isinstance(
-                #    experiment_config.get("location", ""),
-                #    (str | bytes | os.PathLike)
-                #    ):
-                #    updated_experiment_config["location"] = experiment_config[
-                #        "location"
-                #    ]
+                #elif isinstance(
+                #   experiment_config.get("location", ""),
+                #   (str | bytes | os.PathLike)
+                #   ):
+                #   updated_experiment_config["location"] = experiment_config[
+                #       "location"
+                #   ]
 
-                # else:
-                #    raise ConfigError(
-                #        f"Experiment `{experiment_group_name}/{experiment_name}` location is of invalid type. Must be one of {{str, bytes, os.PathLike}}. Currently: {type(experiment_config['location'])}."
-                #    )
+                #else:
+                #   raise ConfigError(
+                #       f"Experiment `{experiment_group_name}/{experiment_name}` location is of invalid type. Must be one of {{str, bytes, os.PathLike}}. Currently: {type(experiment_config['location'])}."
+                #   )
 
                 # ==============================================================
                 # Validate format ==============================================
@@ -381,7 +390,7 @@ class Config:
                     k: v
                     for k, v in experiment_config.items()
                     if k
-                    not in ["location", "format", "prevalence_prior", "confusion_prior"]
+                    not in ["format", "prevalence_prior", "confusion_prior"]
                 }
 
                 for k, v in io_kwargs.items():
@@ -396,7 +405,6 @@ class Config:
                 try:
                     get_io(
                         format=updated_experiment_config["format"],
-                        # location=updated_experiment_config["location"],
                         **updated_io_kwargs,
                     )
                 except Exception as e:
@@ -417,28 +425,28 @@ class Config:
     @experiments.setter
     def experiments(
         self,
-        value: typing.Mapping[
-            str, typing.Mapping[str, typing.Mapping[str, typing.Any]]
+        value: dict[
+            str, dict[str, dict[str, typing.Any]]
         ],
-    ):
+    ) -> None:
         value = self._validate_experiments(value)
 
         self._experiments = value
 
     @property
-    def num_experiments(self):
+    def num_experiments(self) -> int:
         return sum(map(len, self.experiments.values()))
 
     @property
-    def num_experiment_groups(self):
+    def num_experiment_groups(self) -> int:
         return len(self.experiments)
 
     @property
-    def metrics(self) -> typing.Any:
+    def metrics(self) -> dict[str, dict[str, typing.Any]]:
         return self._metrics
 
     def _validate_metrics(
-        self, value: typing.Mapping[str, typing.Mapping[str, typing.Any]]
+        self, value: dict[str, dict[str, typing.Any]]
     ) -> dict[str, dict[str, typing.Any]]:
         def validate_metric_configuration(key: str, configuration: dict) -> None:
             # Empty configuration is allowed
@@ -457,9 +465,10 @@ class Config:
                 kwargs = {k: v for k, v in configuration.items() if k != "aggregation"}
                 get_experiment_aggregator(
                     configuration["aggregation"],
-                    rng=0,
+                    rng=RNG(None),
                     **kwargs,
                 )
+
             except Exception as e:
                 raise ConfigError(
                     f"The aggregation configuration for metric {key} is invalid. Currently: {configuration}. While trying to parse, the following exception was encountered: {e}"
@@ -474,14 +483,15 @@ class Config:
                 f"Metrics configuration must implement the `get` and `items` attributes like a `dict`. Current type: {type(value)}"
             )
 
-        default_config = value.get("__default__", None)
+        default_config = value.get("__default__", dict())
 
-        if default_config is not None:
+        # Validate the default config
+        if len(default_config) != 0:
             validate_metric_configuration("__default__", default_config)
 
         updated_metrics_config = OrderedDict()
         for metric_key, metric_config in value.items():
-            # Do not validate the __default__ metric
+            # Do not validate the __default__ config
             if metric_key == "__default__":
                 continue
 
@@ -491,12 +501,12 @@ class Config:
                     k = str(metric_key)
                 except Exception as e:
                     raise ConfigError(
-                        f"The keys in metrics must of type `str`. Currently: {type(k)}. While trying to convert, the following exception was encountered: {e}"
+                        f"The keys in metrics must of type `str`. Currently: {type(metric_key)}. While trying to convert, the following exception was encountered: {e}"
                     )
 
             if not (hasattr(value, "get") and hasattr(value, "items")):
                 raise ConfigError(
-                    f"Configuration for metric {k} must implement the `get` and `items` attributes like a `dict`. Current type: {type(value)}"
+                    f"Configuration for metric {metric_key} must implement the `get` and `items` attributes like a `dict`. Current type: {type(value)}"
                 )
 
             # Validate the key of the metric config ============================
@@ -504,16 +514,14 @@ class Config:
                 get_metric(metric_key)
             except Exception as e:
                 raise ConfigError(
-                    f"The following metric not a invalid metric syntax string: `{metric_key}`. While trying to parse, the following exception was encountered: {e}"
+                    f"The following metric is an invalid metric syntax string: `{metric_key}`. While trying to parse, the following exception was encountered: {e}"
                 )
 
             # Validate the metric config =======================================
-            if (
-                metric_config is None or len(metric_config) == 0
-            ) and default_config is None:
+            if len(metric_config) == 0 and len(default_config) == 0:
                 # If no metric aggregation config has been passed, make sure
                 # there are not more than 1 experiment groups
-                if max(map(len, self.experiments.values())) > 1:
+                if len(self.experiments) > 0 and max(map(len, self.experiments.values())) > 1:
                     # Check for when requesting to aggregate
                     # Allow for studies where the user does not want to aggregate
                     warnings.warn(
@@ -521,16 +529,16 @@ class Config:
                         category=ConfigWarning,
                     )
 
-                updated_metrics_config[metric_key] = None
+                updated_metrics_config[metric_key] = dict()
 
-            elif (
-                metric_config is None or len(metric_config) == 0
-            ) and default_config is not None:
+            elif len(metric_config) == 0 and len(default_config) != 0:
+                # No metric aggregation config has been passed, but a default
+                # metric aggregation dict does exist
                 updated_metrics_config[metric_key] = default_config
 
             else:
                 # Otherwise, validate each metric aggregation configuration
-                validate_metric_configuration(metric_key, metric_config)
+                validate_metric_configuration(key=metric_key, configuration=metric_config)
 
                 updated_metrics_config[metric_key] = metric_config
 
@@ -538,13 +546,13 @@ class Config:
 
     @metrics.setter
     def metrics(
-        self, value: typing.Mapping[str, typing.Mapping[str, typing.Any]]
-    ) -> dict[str, dict[str, typing.Any]]:
+        self, value: dict[str, dict[str, typing.Any]]
+    ) -> None:
         value = self._validate_metrics(value=value)
 
         self._metrics = value
 
-    def to_dict(self) -> typing.Dict[str, typing.Any]:
+    def to_dict(self) -> dict[str, typing.Any]:
         state_dict = {
             "seed": self.seed,
             "num_samples": self.num_samples,
@@ -556,7 +564,7 @@ class Config:
         return state_dict
 
     @classmethod
-    def from_dict(cls, config_dict: typing.Dict[str, typing.Any]) -> typing.Self:
+    def from_dict(cls, config_dict: dict[str, typing.Any]) -> typing.Self:
         # Currently, there are no required parameters
         # But might change this in the future
         required_keys = dict()
@@ -575,13 +583,13 @@ class Config:
                 category=ConfigWarning,
             )
 
-        parsed_config_dict = dict(
-            seed=config_dict.get("seed", None),
-            num_samples=config_dict.get("num_samples", None),
-            ci_probability=config_dict.get("ci_probability", None),
-            experiments=config_dict.get("experiments", None),
-            metrics=config_dict.get("metrics", None),
-        )
+        parsed_config_dict = dict()
+
+        for parameter in ["seed", "num_samples", "ci_probability", "experiments", "metrics"]:
+            parameter_value = config_dict.get(parameter, None)
+
+            if parameter_value is not None:
+                parsed_config_dict[parameter] = parameter_value
 
         unused_keys = set(config_dict.keys() - parsed_config_dict.keys())
         if len(unused_keys) > 0:

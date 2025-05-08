@@ -1,5 +1,5 @@
 #! The order matters, do not change
-from .base import (
+from .abc import (
     _ROOT_METRICS,
     METRIC_REGISTRY,
     AVERAGING_REGISTRY,

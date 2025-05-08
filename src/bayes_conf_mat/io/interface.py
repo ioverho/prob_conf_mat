@@ -1,9 +1,10 @@
 import typing
+import pathlib
 
-from bayes_conf_mat.io.base import IO_REGISTRY
+from bayes_conf_mat.io.abc import IO_REGISTRY, IOMethod
 
 
-def get_io(format: str, location: str = None, **kwargs) -> typing.Callable:
+def get_io(format: str, location: str | pathlib.Path | None = None, **kwargs) -> IOMethod:
     """Gets a function that matches the IO pattern described.
 
     Does *not* fetch the data yet. To fetch the data (and have the
@@ -19,7 +20,7 @@ def get_io(format: str, location: str = None, **kwargs) -> typing.Callable:
         location (str): the location of the input file. Defaults to `None`, which will raise an error unless the format is `in_memory`
 
     Returns:
-        typing.Callable: the initialized IO function
+        IOBase: an instance of the IO loader
     """
     if format not in IO_REGISTRY:
         raise ValueError(

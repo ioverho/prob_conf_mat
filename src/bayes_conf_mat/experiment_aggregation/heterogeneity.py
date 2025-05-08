@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal
 
 import jaxtyping as jtyping
 import numpy as np
@@ -136,7 +137,7 @@ class HeterogeneityResult:
 
 def estimate_i2(
     individual_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-) -> float:
+) -> HeterogeneityResult:
     """Estimates a generalised I^2 metric, as suggested by Bowden et al. [1], using a Paule-Mandel tau2 estimator.
 
     Measures the amopunt of variance attributable to within-experiment variation vs. between-experiment variation.
@@ -177,7 +178,7 @@ def estimate_i2(
     return result
 
 
-def interpret_i2(i2_score: float):
+def interpret_i2(i2_score: float) -> Literal['insignificant heterogeneity'] | Literal['borderline moderate heterogeneity'] | Literal['moderate heterogeneity'] | Literal['borderline substantial heterogeneity'] | Literal['borderline considerable heterogeneity'] | Literal['considerable heterogeneity'] | Literal[' heterogeneity']:
     """'Interprets I^2 values using the guideline prescribed by the Cochrane Handbook [1]
 
     References:
@@ -188,7 +189,7 @@ def interpret_i2(i2_score: float):
 
     Returns:
         str: a rough interpretation of the magnitude of I2
-    """  # noqa: E501
+    """
     het_sig = ""
 
     if i2_score < 0.0 or i2_score > 1.0:

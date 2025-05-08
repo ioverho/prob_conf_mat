@@ -3,6 +3,9 @@ from __future__ import annotations
 import typing
 from dataclasses import dataclass
 
+if typing.TYPE_CHECKING:
+    from bayes_conf_mat.utils.typing import MetricLike
+
 import numpy as np
 import jaxtyping as jtyping
 
@@ -18,11 +21,11 @@ DELTA = "Δ"
 
 @dataclass(frozen=True)
 class PairwiseComparisonResult:
-    lhs_name: str
-    rhs_name: str
-    metric_name: str
+    lhs_name: typing.Optional[str]
+    rhs_name: typing.Optional[str]
+    metric: MetricLike
 
-    observed_diff: float
+    observed_diff: typing.Optional[float]
     diff_dist: jtyping.Float[np.ndarray, " num_samples"]
     diff_dist_summary: PosteriorSummary
 
@@ -50,7 +53,7 @@ class PairwiseComparisonResult:
     def template_sentence(self, precision: int = 4):
         # Build the template sentence
         template_sentence = ""
-        template_sentence += f"Experiment {self.lhs_name}'s {self.metric_name} being"
+        template_sentence += f"Experiment {self.lhs_name}'s {self.metric.name} being"
         template_sentence += (
             " greater" if self.diff_dist_summary.median > 0 else " lesser"
         )
@@ -58,7 +61,7 @@ class PairwiseComparisonResult:
         template_sentence += f" '{self.p_direction_interpretation}'* "
 
         # Existence statistics
-        template_sentence += f"(Median {DELTA}={fmt(self.diff_dist_summary.median, precision=precision)}, "
+        template_sentence += f"(Median {DELTA}={fmt(float(self.diff_dist_summary.median), precision=precision)}, "
         template_sentence += f"{fmt(self.diff_dist_summary.ci_probability, precision=precision, mode='%')} HDI="
         template_sentence += (
             f"[{fmt(self.diff_dist_summary.hdi[0], precision=4, mode='f')}, "
@@ -114,18 +117,10 @@ class PairwiseComparisonResult:
 
         return template_sentence
 
-    def sensitivity_analysis(self):
-        return {
-            "p_direction": self.p_direction_interval_width,
-            "p_bi_sig": self.p_bi_sig_interval_width,
-            "p_uni_sig": self.p_uni_sig_interval_width,
-        }
-
-
-def pd_interpretation_guideline(pd: float):
+def pd_interpretation_guideline(pd: float) -> typing.Literal['certain'] | typing.Literal['probable'] | typing.Literal['likely'] | typing.Literal['possible'] | typing.Literal['dubious']:
     # https://easystats.github.io/bayestestR/articles/guidelines.html#existence
     if pd < 0.0 or pd > 1.0:
-        raise ValueError(f"Found pd value of {pd}, outside of range.")
+        raise ValueError(f"Encountered pd value of {pd}, outside of range (0, 1).")
     elif pd > 0.999:
         existence = "certain"
     elif pd > 0.99:
@@ -136,14 +131,16 @@ def pd_interpretation_guideline(pd: float):
         existence = "possible"
     elif pd <= 0.95:
         existence = "dubious"
+    else:
+        raise ValueError(f"Encountered pd value of {pd}, somehow outside of range (0, 1).")
 
     return existence
 
 
-def p_rope_interpretation_guideline(p_rope: float):
+def p_rope_interpretation_guideline(p_rope: float) -> typing.Literal['certain'] | typing.Literal['probable'] | typing.Literal['undecided'] | typing.Literal['probably negligible'] | typing.Literal['negligible']:
     # https://easystats.github.io/bayestestR/articles/guidelines.html#significance
     if p_rope < 0.0 or p_rope > 1.0:
-        raise ValueError(f"Found p_rope value of {p_rope}, outside of range.")
+        raise ValueError(f"Encountered p_rope value of {p_rope}, outside of range.")
     elif p_rope < 0.01:
         significance = "certain"
     elif p_rope < 0.025:
@@ -154,34 +151,36 @@ def p_rope_interpretation_guideline(p_rope: float):
         significance = "probably negligible"
     elif p_rope > 0.99:
         significance = "negligible"
+    else:
+        raise ValueError(f"Encountered p_rope value of {p_rope}, somehow outside of range.")
 
     return significance
 
 
 def pairwise_compare(
-    metric: str,
+    metric: MetricLike,
     diff_dist: jtyping.Float[np.ndarray, " num_samples"],
     ci_probability: float,
-    min_sig_diff: float = None,
+    min_sig_diff: typing.Optional[float] = None, # type: ignore
     lhs_name: typing.Optional[str] = None,
     rhs_name: typing.Optional[str] = None,
-    random_diff_dist: jtyping.Float[np.ndarray, " num_samples"] = None,
-    observed_difference: float = None,
-):
+    random_diff_dist: typing.Optional[jtyping.Float[np.ndarray, " num_samples"]] = None,
+    observed_difference: typing.Optional[float] = None,
+) -> PairwiseComparisonResult:
     # Find central tendency of diff dit
     diff_dist_summary = summarize_posterior(diff_dist, ci_probability=ci_probability)
 
     # Probability of existence
     if diff_dist_summary.median > 0:
-        pd = np.mean(diff_dist > 0)
+        pd: float = np.mean(diff_dist > 0) # type: ignore
     else:
-        pd = np.mean(diff_dist < 0)
+        pd: float = np.mean(diff_dist < 0) # type: ignore
 
-    pd_interpretation = pd_interpretation_guideline(pd)
+    pd_interpretation = pd_interpretation_guideline(pd=pd)
 
     # Define a default ROPE
     if min_sig_diff is None:
-        min_sig_diff = 0.1 * np.std(diff_dist)
+        min_sig_diff: float = 0.1 * np.std(diff_dist) # type: ignore
 
     # Count the number of instances within each bin
     # Significantly negative, within ROPE, significantly positive
@@ -212,7 +211,7 @@ def pairwise_compare(
         # Admin
         lhs_name=lhs_name,
         rhs_name=rhs_name,
-        metric_name=metric.name,
+        metric=metric,
         # The difference distribution
         observed_diff=observed_difference,
         diff_dist=diff_dist,
@@ -236,8 +235,8 @@ def pairwise_compare(
             p=1 - p_rope, n=diff_dist.shape[0]
         ),
         # Significance relative to random
-        p_rope_random=p_rope_random,
-        bf_rope=bf_rope,
+        p_rope_random=p_rope_random, # type: ignore
+        bf_rope=bf_rope, # type: ignore
         # Unidirectional significance
         p_uni_sig=p_sig_pos if diff_dist_summary.median > 0 else p_sig_neg,
         p_uni_sig_score_interval_width=wilson_score_interval(

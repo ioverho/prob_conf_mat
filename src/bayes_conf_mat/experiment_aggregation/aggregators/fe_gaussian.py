@@ -4,11 +4,11 @@ import scipy
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample
+from bayes_conf_mat.utils import RNG
 
-
-class FEGaussianAggregator(ExperimentAggregation):
+class FEGaussianAggregator(ExperimentAggregator):
     """Samples from the Gaussian-conflated distribution, which is equivalent to the
     Fixed-Effects Meta-Analytical Estimator in frequentist statistics.
 
@@ -16,9 +16,9 @@ class FEGaussianAggregator(ExperimentAggregation):
     distribution $\\mathcal{N}(\\tilde{\\mu}, \\tilde{\\sigma})$ is estimated as:
 
     $$\\begin{aligned}
-        w_{i}&=\\dfrac{\\sigma_{i}^{-2}}{\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
-        \\tilde{\\mu}&=\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-        \\tilde{\\sigma^2}&=\\dfrac{1}{\sum_{i}^{M}\\sigma_{i}^{-2}}
+        w_{i}&=\\dfrac{\\sigma_{i}^{-2}}{\\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
+        \\tilde{\\mu}&=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
+        \\tilde{\\sigma^2}&=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
     \\end{aligned}$$
 
     where $M$ is the total number of experiments.
@@ -40,13 +40,13 @@ class FEGaussianAggregator(ExperimentAggregation):
     full_name = "Fixed-effect Gaussian meta-analytical experiment aggregator"
     aliases = ["fe", "fixed_effect", "fe_gaussian", "gaussian", "normal", "fe_normal"]
 
-    def __init__(self, rng: np.random.BitGenerator) -> None:
+    def __init__(self, rng: RNG) -> None:
         super().__init__(rng=rng)
 
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 

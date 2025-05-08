@@ -8,21 +8,21 @@ import typing
 
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+from bayes_conf_mat.utils import RNG
 
-
-class SingletonAggregator(ExperimentAggregation):
+class SingletonAggregator(ExperimentAggregator):
     name = "singleton"
     full_name = "Singleton experiment aggregation"
     aliases = ["singleton", "identity"]
 
-    def __init__(self, rng: np.random.BitGenerator) -> None:
+    def __init__(self, rng: RNG) -> None:
         super().__init__(rng=rng)
 
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 

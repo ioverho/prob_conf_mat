@@ -4,6 +4,8 @@ import typing
 import numpy as np
 import jaxtyping as jtyping
 
+from bayes_conf_mat.utils import RNG
+
 _DIRICHLET_PRIOR_STRATEGIES = {
     "bayes-laplace": 1.0,
     "bayes": 1.0,
@@ -17,9 +19,14 @@ _DIRICHLET_PRIOR_STRATEGIES = {
 
 
 def dirichlet_prior(
-    strategy: str | float | int | jtyping.Float[np.ndarray, " ..."],
-    shape: typing.Tuple[int],
-):
+    strategy: str | float | int | jtyping.Float[np.typing.ArrayLike, " ..."],
+    shape: typing.Tuple[int, ...],
+) -> jtyping.Float[np.ndarray, " ..."]:
+    """Creates a prior array for a Dirichlet distribution
+
+    Returns:
+        Float[ndarray, " ..."]: the prior vector
+    """
     if isinstance(strategy, float) or isinstance(strategy, int):
         prior = np.full(shape, fill_value=strategy)
 
@@ -49,7 +56,7 @@ def dirichlet_prior(
 
 
 def dirichlet_sample(
-    rng: np.random.RandomState,
+    rng: RNG,
     alphas: jtyping.Float[np.ndarray, " ..."],
     num_samples: int,
 ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
@@ -61,12 +68,12 @@ def dirichlet_sample(
     Taken from: https://stackoverflow.com/a/15917312
 
     Args:
-        rng (np.random.RandomState)
+        rng (RNG): the random number generator
         alphas (jtyping.Float[np.ndarray, "..."]): the Dirichlet parameters
         num_samples (int): the number of samples to retrieve
 
     Returns:
-        _type_: _description_
+        Float[ndarray, " num_samples ..."]: samples from the specified Dirichlet distribution
 
     """
     # Check if the array is already batched

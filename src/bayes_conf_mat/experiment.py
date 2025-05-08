@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 from dataclasses import dataclass
 from collections import OrderedDict
-from enum import Enum
+from enum import StrEnum
 
 import numpy as np
 import jaxtyping as jtyping
@@ -11,9 +11,9 @@ import jaxtyping as jtyping
 from bayes_conf_mat.io import get_io
 from bayes_conf_mat.metrics import RootMetric, Metric, AveragedMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
+from bayes_conf_mat.utils import RNG, MetricLike
 
-
-class SamplingMethod(Enum):
+class SamplingMethod(StrEnum):
     POSTERIOR = "posterior"
     PRIOR = "prior"
     RANDOM = "random"
@@ -31,53 +31,64 @@ class ExperimentResult:
     """
 
     experiment: Experiment
-    metric: typing.Type[Metric | AveragedMetric]
+    metric: MetricLike
 
     values: jtyping.Float[np.ndarray, " num_samples #num_classes"]
 
     @property
-    def is_multiclass(self):
+    def is_multiclass(self) -> bool:
         return self.metric.is_multiclass
 
     @property
-    def bounds(self):
-        return self.metric.bounds
+    def bounds(self) -> typing.Tuple[float]:
+        return self.metric.bounds # type: ignore
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         return self.experiment.num_classes
 
     @property
-    def num_samples(self):
+    def num_samples(self) -> int:
         return self.values.shape[0]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
 
 
-# TODO: document this class
 class Experiment:
+    """This class represents a single experiment, characterized by a single confusion matrix.
+
+    It is responsible for generating synthetic confusion matrices, and computing metrics on all of these synthetic confusion matrices.
+
+    Args:
+        name (str): the name of this experiment
+        rng (RNG): the numpy RNG
+        confusion_matrix (typing.Dict[str, typing.Any] | Float[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment. Should either be an arraylike or a dictionary with kwargs for a specific IO method.
+        prevalence_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
+        confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
+
+    """
+
     def __init__(
         self,
         name: str,
-        rng: np.random.BitGenerator,
-        confusion_matrix: typing.Dict
+        rng: RNG,
+        confusion_matrix: typing.Dict[str, typing.Any]
         | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
-        prevalence_prior: str | int | jtyping.Int[np.ndarray, " num_classes"],
-        confusion_prior: str
-        | int
-        | jtyping.Int[np.ndarray, " num_classes num_classes"],
+        prevalence_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
+        confusion_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
     ) -> None:
+
         self.name = name
 
         # Argument Validation ==================================================
         # Import the confusion matrix
-        # Check if config like object
+        # Check if Mapping like object
         if hasattr(confusion_matrix, "items"):
-            self.confusion_matrix_loader = get_io(**confusion_matrix)
+            self.confusion_matrix_loader = get_io(**confusion_matrix) # type: ignore
 
         # If a numpy array, just store it
         elif isinstance(confusion_matrix, np.ndarray):
@@ -115,11 +126,11 @@ class Experiment:
         self.rng = rng
 
     @property
-    def num_classes(self):
+    def num_classes(self) -> int:
         return self.confusion_matrix.shape[0]
 
     @property
-    def num_predictions(self):
+    def num_predictions(self) -> int:
         return np.sum(self.confusion_matrix)
 
     def _wrap_sample_result(
@@ -135,8 +146,9 @@ class Experiment:
         p_condition_given_pred: jtyping.Float[
             np.ndarray, " num_samples num_classes num_classes"
         ],
-    ):
-        experiment_sample_result = {
+    ) -> dict[MetricLike, ExperimentResult]:
+
+        experiment_sample_result: dict[MetricLike, ExperimentResult] = {
             RootMetric("norm_confusion_matrix"): ExperimentResult(
                 experiment=self,
                 metric=RootMetric("norm_confusion_matrix"),
@@ -170,16 +182,16 @@ class Experiment:
         self,
         condition_counts: jtyping.Float[np.ndarray, " num_classes"],
         confusion_matrix: jtyping.Float[np.ndarray, " num_classes num_classes"],
-        num_samples: typing.Optional[int] = None,
-    ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes ..."]]:
+        num_samples: int,
+    ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         p_condition = dirichlet_sample(
-            rng=self.rng,
+            rng=self.rng, # type: ignore
             alphas=condition_counts,
             num_samples=num_samples,
         )
 
         p_pred_given_condition = dirichlet_sample(
-            rng=self.rng,
+            rng=self.rng, # type: ignore
             alphas=confusion_matrix,
             num_samples=num_samples,
         )
@@ -202,7 +214,7 @@ class Experiment:
 
     def sample_input(
         self,
-    ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes ..."]]:
+    ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         """For debug purposes: uses the input confusion matrix as the samples.
 
         Essentially just adds a batch dimension to the existing confusion matrix.
@@ -232,8 +244,8 @@ class Experiment:
         return output
 
     def sample_prior(
-        self, num_samples: typing.Optional[int] = None
-    ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes ..."]]:
+        self, num_samples: int
+    ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         return self._sample(
             num_samples=num_samples,
             condition_counts=self.prevalence_prior,
@@ -241,8 +253,8 @@ class Experiment:
         )
 
     def sample_posterior(
-        self, num_samples: typing.Optional[int] = None
-    ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes ..."]]:
+        self, num_samples: int
+    ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         condition_counts = self.confusion_matrix.sum(axis=1)
         posterior_condition_counts = self.prevalence_prior + condition_counts
 
@@ -257,18 +269,15 @@ class Experiment:
         )
 
     def sample_random_model(
-        self, num_samples: typing.Optional[int] = None
-    ) -> typing.Dict[str, jtyping.Float[np.ndarray, " num_samples num_classes ..."]]:
+        self, num_samples: int
+    ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         """Sample from the randomly initialized model distribution.
         It uses the class prevalence from the data, but a random confusion matrix.
         Thus, this should model a random classifier on the used dataset, accounting for class imbalance.
 
         Args:
-            num_samples (typing.Optional[int], optional): _description_. Defaults to None.
-
-        Returns:
-            typing.Dict[str, np.ndarray]: _description_
-        """  # noqa: E501
+            num_samples (int): _description_
+        """
 
         condition_counts = self.confusion_matrix.sum(axis=1)
         posterior_condition_counts = self.prevalence_prior + condition_counts
@@ -298,15 +307,15 @@ class Experiment:
         self,
         sampling_method: SamplingMethod,
         num_samples: int,
-    ) -> typing.Dict[RootMetric, ExperimentResult]:
-        """Sample synthetic confusion matrices corresponding to this experiment.
+    ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
+        """Sample synthetic confusion matrices for this experiment.
 
         Args:
             sampling_method (SamplingMethod): the sampling method used to generate the metric values. Must a member of the SamplingMethod enum
             num_samples (int): the number of synthetic confusion matrices to sample
 
         Returns:
-            typing.Dict[RootMetric, ExperimentResult]: a dictionary of RootMetric instances
+            typing.MutableMapping[MetricLike, ExperimentResult]: a dictionary of RootMetric instances
         """
         root_metrics = dict()
 
@@ -331,8 +340,8 @@ class Experiment:
         metrics: MetricCollection,
         sampling_method: SamplingMethod,
         num_samples: int,
-    ) -> typing.Dict[RootMetric | Metric | AveragedMetric, ExperimentResult]:
-        """_summary_
+    ) -> typing.Dict[MetricLike, ExperimentResult]:
+        """Computes metrics over the synthetic confusion matrices.
 
         Args:
             metrics (MetricCollection): the metrics needed to be computed on the synthetic confusion matrices
@@ -340,7 +349,7 @@ class Experiment:
             num_samples (int): the number of synthetic confusion matrices to sample
 
         Returns:
-            typing.Mapping[Metric | AveragedMetric, ExperimentResult]: a mapping from metric instance to an `ExperimentResult` instance
+            typing.MutableMapping[MetricLike, ExperimentResult]: a mapping from metric instance to an `ExperimentResult` instance
         """
 
         # Get the topological ordering of the metrics, such that no metric is computed before
@@ -349,7 +358,7 @@ class Experiment:
 
         # First have the experiment generate synthetic confusion matrices and needed RootMetrics
         # typing.Dict[RootMetric, ExperimentResult]
-        intermediate_results = self.sample(
+        intermediate_results: typing.MutableMapping[MetricLike, ExperimentResult]  = self.sample(
             sampling_method=sampling_method, num_samples=num_samples
         )
 
@@ -363,7 +372,7 @@ class Experiment:
             # Filter out all the dependencies for the current metric
             # Since we allow each metric to define it's own dependencies by name (or alias)
             # We have to be a little lenient with how we look these up
-            dependencies: typing.Dict[Metric, np.ndarray] = dict()
+            dependencies: typing.Dict[str, np.ndarray] = dict()
             for dependency_name in metric.dependencies:
                 dependency = metric_compute_order[dependency_name]
 

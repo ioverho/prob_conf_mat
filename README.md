@@ -4,6 +4,16 @@ Models a multi-class confusion matrices as a hierarchical Bayesian categorical d
 
 ## Build
 
+### Testing
+
+#### Static Type Checking
+
+```bash
+uv run --extra dev pyright > tests/pyright_report
+```
+
+### Documentation
+
 Run the `mkdocs.py` script to generate automated documentation.
 
 ```bash

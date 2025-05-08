@@ -107,24 +107,24 @@ class InMemoryCache(NestedCache):
     def clean(self):
         self._cache = self.nested_dict()
 
+# TODO: add support for filesystem caching
+# class PickleCache(NestedCache):
+#     def __init__(self):
+#         raise NotImplementedError
 
-class PickleCache(NestedCache):
-    def __init__(self):
-        raise NotImplementedError
+#     def clean(self):
+#         def _clean_directory(dir: Path):
+#             for obj in dir.glob("*"):
+#                 if obj.is_dir():
+#                     _clean_directory(obj)
+#                 else:
+#                     obj.unlink()
 
-    def clean(self):
-        def _clean_directory(dir: Path):
-            for obj in dir.glob("*"):
-                if obj.is_dir():
-                    _clean_directory(obj)
-                else:
-                    obj.unlink()
+#             dir.rmdir()
 
-            dir.rmdir()
+#         if isinstance(self.cache_location, Path) and self.cache_location.exists():
+#             # warnings.warn(f"Cleaning cache dir: {self.cache_location}")
 
-        if isinstance(self.cache_location, Path) and self.cache_location.exists():
-            # warnings.warn(f"Cleaning cache dir: {self.cache_location}")
-
-            _clean_directory(self.cache_location)
-        else:
-            raise ValueError("Could not clean cache dir, does not exist.")
+#             _clean_directory(self.cache_location)
+#         else:
+#             raise ValueError("Could not clean cache dir, does not exist.")

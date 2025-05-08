@@ -1,7 +1,14 @@
+from __future__ import annotations
+
+import typing
+
+if typing.TYPE_CHECKING:
+    from bayes_conf_mat.utils.typing import MetricLike
+
 import re
 from functools import cache
 
-from bayes_conf_mat.metrics.base import (
+from bayes_conf_mat.metrics.abc import (
     _ROOT_METRICS,
     METRIC_REGISTRY,
     AVERAGING_REGISTRY,
@@ -47,7 +54,7 @@ def _parse_kwargs(kwargs):
 
 
 @cache
-def get_metric(syntax_string: str) -> callable:
+def get_metric(syntax_string: str) -> MetricLike:
     """Takes a metric syntax string and returns a metric class instance, potentially with included averaging.
 
     Args:
@@ -137,7 +144,7 @@ def get_metric(syntax_string: str) -> callable:
             averaging=averaging_instance,
         )
 
-        composed_metric_instance._instantiation_name = syntax_string
+        composed_metric_instance._instantiation_name = syntax_string # type: ignore
 
         return composed_metric_instance
 

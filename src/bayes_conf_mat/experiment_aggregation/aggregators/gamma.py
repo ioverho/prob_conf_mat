@@ -6,11 +6,11 @@ import scipy
 import scipy.stats
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample
+from bayes_conf_mat.utils import RNG
 
-
-class GammaAggregator(ExperimentAggregation):
+class GammaAggregator(ExperimentAggregator):
     """Samples from the Gamma-conflated distribution.
 
     Specifically, the aggregate distribution $\\text{Gamma}(\\tilde{\\alpha}, \\tilde{\\beta})$
@@ -40,7 +40,7 @@ class GammaAggregator(ExperimentAggregation):
     full_name = "Gamma conflated experiment aggregator"
     aliases = ["gamma", "gamma_conflation"]
 
-    def __init__(self, rng: np.random.BitGenerator, shifted: bool = False) -> None:
+    def __init__(self, rng: RNG, shifted: bool = False) -> None:
         super().__init__(rng=rng)
 
         self.shifted = shifted
@@ -48,7 +48,7 @@ class GammaAggregator(ExperimentAggregation):
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 

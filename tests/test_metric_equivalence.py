@@ -1,6 +1,8 @@
 from functools import partial
+import os
 from pathlib import Path
 from itertools import product
+import warnings
 
 import pytest
 import numpy as np
@@ -9,6 +11,8 @@ import sklearn
 import sklearn.metrics
 
 from bayes_conf_mat import Study
+from bayes_conf_mat.config import ConfigWarning
+from bayes_conf_mat.io.abc import ConfMatIOWarning
 from bayes_conf_mat.io.utils import confusion_matrix_to_pred_cond
 
 # ==============================================================================
@@ -60,38 +64,21 @@ TEST_CASES_DIR = Path("./tests/data/confusion_matrices")
 # Their combination ============================================================
 all_metrics_to_test = METRICS_TO_SKLEARN.keys()
 
-all_confusion_matrices_to_test = TEST_CASES_DIR.glob("*.csv")
-
-all_test_cases = list(product(all_metrics_to_test, all_confusion_matrices_to_test))
-
+all_confusion_matrices_to_test = list(TEST_CASES_DIR.glob(pattern="*.csv"))
 
 # ==============================================================================
-# The 'arrange' code for pytest
+# Generate all test cases
 # ==============================================================================
-@pytest.fixture
-def test_case(request):
-    def _setup_study(metric: str, conf_mat_fp: str) -> Study:
-        study = Study()
-
-        study.add_metric(metric)
-
-        study.add_experiment(
-            "test/test",
-            confusion_matrix=dict(
-                location=conf_mat_fp,
-                format="csv",
-                type="conf_mat",
-            ),
-        )
-
-        return study
-
+def generate_test_case(metric: str, conf_mat_fp: Path) -> tuple[jtyping.Float[np.ndarray, "1"], jtyping.Float[np.ndarray, "1"]]:
     def _get_our_value(
         metric: str, study: Study
     ) -> jtyping.Float[np.ndarray, " num_classes"]:
-        metric_result = study.get_metric_samples(
-            metric, experiment="test", experiment_group="test", sampling_method="input"
-        )
+        try:
+            metric_result = study.get_metric_samples(
+                metric=metric, experiment_name="test/test", sampling_method="input"
+            )
+        except:
+            raise Exception(study.cache._cache.keys())
 
         our_value = metric_result.values[0]
 
@@ -100,7 +87,8 @@ def test_case(request):
     def _get_sklearn_value(
         metric: str, study: Study
     ) -> jtyping.Float[np.ndarray, " *num_classes"]:
-        conf_mat = study.experiment_groups["test"].experiments["test"].confusion_matrix
+        experiment = study._experiment_store["test"].experiments["test"]
+        conf_mat = experiment.confusion_matrix
 
         pred_cond = confusion_matrix_to_pred_cond(
             confusion_matrix=conf_mat, pred_first=True
@@ -119,9 +107,16 @@ def test_case(request):
 
         return sklearn_value
 
-    metric, conf_mat_fp = request.param
+    study = Study()
 
-    study = _setup_study(metric=metric, conf_mat_fp=conf_mat_fp)
+    study.add_metric(metric=metric)
+
+    study.add_experiment(
+        experiment_name="test/test",
+        location=conf_mat_fp,
+        format="csv",
+        type="conf_mat",
+    )
 
     our_value = _get_our_value(metric=metric, study=study)
 
@@ -129,14 +124,25 @@ def test_case(request):
 
     return our_value, sklearn_value
 
+warnings.filterwarnings(action="ignore", category=ConfigWarning)
+warnings.filterwarnings(action="ignore", category=ConfMatIOWarning)
+warnings.filterwarnings(action="ignore", category=RuntimeWarning)
+
+all_test_cases = []
+for metric, confusion_matrix in product(all_metrics_to_test, all_confusion_matrices_to_test):
+    try:
+        test_case = generate_test_case(metric=metric, conf_mat_fp=confusion_matrix)
+    except Exception as e:
+
+        raise Exception(f"Encountered exception for test case 'metric={metric}, confusion_matrix={confusion_matrix}': {e}")
+
+    all_test_cases.append(test_case)
 
 # ==============================================================================
 # The 'assert' code for pytest
 # ==============================================================================
-@pytest.mark.parametrize("test_case", all_test_cases, indirect=True, ids=str)
-def test_all_cases(test_case):
-    our_value, sklearn_value = test_case
-
+@pytest.mark.parametrize(argnames="our_value, sklearn_value", argvalues=all_test_cases)
+def test_all_cases(our_value, sklearn_value) -> None:
     # Only test if either array has finite values
     if np.all(np.isfinite(our_value)) or np.all(np.isfinite(sklearn_value)):
         assert np.allclose(our_value, sklearn_value), (our_value, sklearn_value)

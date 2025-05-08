@@ -4,11 +4,11 @@ import scipy
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.experiment_aggregation.base import ExperimentAggregation
+from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample
+from bayes_conf_mat.utils import RNG
 
-
-class FELogGaussianAggregator(ExperimentAggregation):
+class FELogGaussianAggregator(ExperimentAggregator):
     """Samples from the Log-Gaussian conflated distribution.
 
     Uses the inverse variance weighted mean and standard errors, calculated on the log-transformed
@@ -16,9 +16,9 @@ class FELogGaussianAggregator(ExperimentAggregation):
     $\\mathcal{N}(\\tilde{\\mu}, \\tilde{\\sigma})$ is estimated as:
 
     $$\\begin{aligned}
-        w_{i}&=\\dfrac{\\sigma_{i}^{-2}}{\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
-        \\tilde{\\mu}&=\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-        \\tilde{\\sigma^2}&=\\dfrac{1}{\sum_{i}^{M}\\sigma_{i}^{-2}}
+        w_{i}&=\\dfrac{\\sigma_{i}^{-2}}{\\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
+        \\tilde{\\mu}&=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
+        \\tilde{\\sigma^2}&=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
     \\end{aligned}$$
 
     where $M$ is the total number of experiments.
@@ -40,13 +40,13 @@ class FELogGaussianAggregator(ExperimentAggregation):
     full_name = "Fixed-effect Log Gaussian conflated experiment aggregator"
     aliases = ["fe_log_gaussian", "log_gaussian", "log_normal"]
 
-    def __init__(self, rng: np.random.BitGenerator) -> None:
+    def __init__(self, rng: RNG) -> None:
         super().__init__(rng=rng)
 
     def aggregate(
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
-        bounds: typing.Tuple[int],
+        bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         num_samples, num_experiments = experiment_samples.shape
 

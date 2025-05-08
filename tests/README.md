@@ -1,28 +1,19 @@
 # Tests
 
-## Commands to run tests
+## Unit Tests
 
-### Run all tests
+### Commands to run tests
 
-```bash
-pixi run -e test test
+#### Run all tests
+
+##### Metrics
+
+Tests the equivalence of the metric computation methods with their sklearn equivalent
+```
+uv run pytest ./tests/test_metric_equivalence.py
 ```
 
-### Run individual tests
-
-If using `pixi`:
-
-```bash
-pixi run -e test python ${MY_FILE}.py
-```
-
-Or using `pytest`:
-
-```bash
-pytest -q python ${MY_FILE}.py
-```
-
-## Metrics that haven't been tested
+**Metrics that haven't been tested**
 
 1. `FalseDiscoveryRate`:
 2. `FalseOmissionRate`:
@@ -30,3 +21,19 @@ pytest -q python ${MY_FILE}.py
 4. `Markedness`:
 5. `NegativePredictiveValue`:
 6. `P4`:
+
+##### IO
+
+Tests the various input output methods
+
+```
+uv run pytest ./tests/test_io.py
+```
+
+## Type Safety
+
+### Static Type Checking
+
+```
+uv run --extra dev pyright > tests/pyright_report
+```

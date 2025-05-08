@@ -10,19 +10,19 @@ from bayes_conf_mat.stats.hdi_estimation import hdi_estimator
 
 @dataclass(frozen=True)
 class PosteriorSummary:
-    median: jtyping.Float[np.ndarray, " num_samples"]
-    mode: jtyping.Float[np.ndarray, " num_samples"]
+    median: float
+    mode: float
     ci_probability: float
-    hdi: typing.Tuple[float, float]
+    hdi: tuple[float, float]
     skew: float
     kurtosis: float
 
     @property
-    def metric_uncertainty(self):
+    def metric_uncertainty(self) -> float:
         return self.hdi[1] - self.hdi[0]
 
     @property
-    def headers(self):
+    def headers(self) -> list[str]:
         return [
             "Median",
             "Mode",
@@ -32,7 +32,7 @@ class PosteriorSummary:
             "Kurt",
         ]
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str, typing.Any]:
         d = {
             "Median": self.median,
             "Mode": self.mode,
@@ -50,10 +50,10 @@ def summarize_posterior(
     ci_probability: float,
 ):
     summary = PosteriorSummary(
-        median=np.median(posterior_samples),
-        mode=histogram_mode_estimator(posterior_samples),
+        median=typing.cast(float, np.median(posterior_samples)),
+        mode=typing.cast(float, histogram_mode_estimator(posterior_samples)),
         ci_probability=ci_probability,
-        hdi=hdi_estimator(posterior_samples, prob=ci_probability),
+        hdi=typing.cast(tuple[float, float], hdi_estimator(posterior_samples, prob=ci_probability)),
         skew=stats.skew(posterior_samples),
         kurtosis=stats.kurtosis(posterior_samples),
     )

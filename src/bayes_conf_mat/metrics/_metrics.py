@@ -1,7 +1,7 @@
 import jaxtyping as jtyping
 import numpy as np
 
-from bayes_conf_mat.metrics.base import Metric
+from bayes_conf_mat.metrics.abc import Metric
 from bayes_conf_mat.stats import numpy_batched_harmonic_mean
 
 
@@ -23,7 +23,7 @@ class DiagMass(Metric):
 
     Not to be confused with the True Positive Rate.
 
-    """  # noqa: E501
+    """
 
     full_name = "Diagonal of Normalized Confusion Matrix"
     is_multiclass = False
@@ -629,7 +629,7 @@ class F1(Metric):
 
     It is defined as:
 
-    $$2\\dfrac{\\text{precision} \cdot \\text{recall}}{\\text{precision} + \\text{recall}}$$
+    $$2\\dfrac{\\text{precision} \\cdot \\text{recall}}{\\text{precision} + \\text{recall}}$$
 
     or simply put, the harmonic mean between precision (PPV) and recall (TPR).
 
@@ -642,7 +642,7 @@ class F1(Metric):
     The $F_{1}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A random
     classifier which predicts a class with a probability $p$, achieves a performance of,
 
-    $$2\\dfrac{\\text{prevalence}\cdot p}{\\text{prevalence}+p}.$$
+    $$2\\dfrac{\\text{prevalence}\\cdot p}{\\text{prevalence}+p}.$$
 
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
     recommend comparing performance not to a random classifier, but the 'always-on' classifier (perfect recall
@@ -688,7 +688,7 @@ class FBeta(Metric):
 
     It is defined as:
 
-    $$(1+\\beta^2)\\dfrac{\\text{precision} \cdot \\text{recall}}{\\beta^2\cdot\\text{precision} + \\text{recall}}$$
+    $$(1+\\beta^2)\\dfrac{\\text{precision} \\cdot \\text{recall}}{\\beta^2\\cdot\\text{precision} + \\text{recall}}$$
 
     or simply put, the weighted harmonic mean between precision (PPV) and recall (TPR).
 
@@ -699,7 +699,7 @@ class FBeta(Metric):
     The $F_{\\beta}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A random
     classifier which predicts a class with a probability $p$, achieves a performance of,
 
-    $$(1+\\beta^2)\\dfrac{\\text{prevalence}\cdot p}{\\beta^2\cdot\\text{prevalence}+p}.$$
+    $$(1+\\beta^2)\\dfrac{\\text{prevalence}\\cdot p}{\\beta^2\\cdot\\text{prevalence}+p}.$$
 
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
     recommend comparing performance not to a random classifier, but the 'always-on' classifier (perfect recall
@@ -882,7 +882,7 @@ class JaccardIndex(Metric):
 
     It is defined as:
 
-    $$\dfrac{TP}{TP+FP+FN}$$
+    $$\\dfrac{TP}{TP+FP+FN}$$
 
     where $TP$ is the count of true positives, $FP$ the count of false positives and $FN$ the count of
     false negatives.
@@ -923,14 +923,14 @@ class PositiveLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
+    $$\\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
 
     Simply put, it is the ratio of the probabilities of the model predicting a positive when the condition
     is positive and negative, respectively.
 
-    Possible values lie in the range [0.0, $\infty$], with 0.0 corresponding to no true positives, and
+    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no true positives, and
     infinity corresponding to no false positives. Larger values indicate better performance, with a score
     of 1 corresponding to random performance.
 
@@ -970,14 +970,14 @@ class LogPositiveLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\log\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
+    $$\\log\\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
 
     Simply put, it is logarithm of the ratio of the probabilities of the model predicting a
     positive when the condition is positive and negative, respectively.
 
-    Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no true positives, and
+    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no true positives, and
     infinity corresponding to no false positives. Larger values indicate better performance, with a score
     of 0 corresponding to random performance.
 
@@ -1020,14 +1020,14 @@ class NegativeLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
+    $$\\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
 
     Simply put, it is the ratio of the probabilities of the model predicting a negative when the condition
     is positive and negative, respectively.
 
-    Possible values lie in the range [0.0, $\infty$], with 0.0 corresponding to no false negatives, and
+    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no false negatives, and
     infinity corresponding to no true negatives. Smaller values indicate better performance, with a score
     of 1 corresponding to random performance.
 
@@ -1067,14 +1067,14 @@ class LogNegativeLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\log \dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
+    $$\\log \\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
 
     Simply put, it is the logarithm of the ratio of the probabilities of the model predicting a negative when the condition
     is positive and negative, respectively.
 
-    Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no true positives, and
+    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no true positives, and
     infinity corresponding to no true negatives. Smaller values indicate better performance, with a score
     of 0 corresponding to random performance.
 
@@ -1117,11 +1117,11 @@ class DiagnosticOddsRatio(Metric):
 
     It is defined as:
 
-    $$\dfrac{LR_{+}}{LR_{-}}$$
+    $$\\dfrac{LR_{+}}{LR_{-}}$$
 
     where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
 
-    Possible values lie in the range [0.0, $\infty$]. Larger values indicate better performance, with a score
+    Possible values lie in the range [0.0, $\\infty$]. Larger values indicate better performance, with a score
     of 1 corresponding to random performance.
 
     To make experiment aggregation easier, you can log transform this metric by specifying
@@ -1157,11 +1157,11 @@ class LogDiagnosticOddsRatio(Metric):
 
     It is defined as:
 
-    $$\log\dfrac{LR_{+}}{LR_{-}}$$
+    $$\\log\\dfrac{LR_{+}}{LR_{-}}$$
 
     where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
 
-    Possible values lie in the range (-$\infty$, $\infty$). Larger values indicate better performance, with a score
+    Possible values lie in the range (-$\\infty$, $\\infty$). Larger values indicate better performance, with a score
     of 0 corresponding to random performance.
 
     Examples:

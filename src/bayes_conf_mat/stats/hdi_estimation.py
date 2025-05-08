@@ -4,7 +4,7 @@ import numpy as np
 import jaxtyping as jtyping
 
 
-def hdi_estimator(samples: jtyping.Float[np.ndarray, " num_samples"], prob: float):
+def hdi_estimator(samples: jtyping.Float[np.ndarray, " num_samples"], prob: float) -> tuple[float, float]:
     # Sort the samples
     sorted_posterior_samples = np.sort(samples)
 
@@ -23,4 +23,4 @@ def hdi_estimator(samples: jtyping.Float[np.ndarray, " num_samples"], prob: floa
     lb = sorted_posterior_samples[idx_min_interval]
     ub = sorted_posterior_samples[n_included + idx_min_interval]
 
-    return (lb, ub)
+    return (lb, ub) # type: ignore

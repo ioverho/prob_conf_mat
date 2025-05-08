@@ -18,7 +18,7 @@ def experiment_summaries(
     precision: int = 4,
     table_fmt: str = "html",
     **tabulate_kwargs,
-):
+) -> str:
     table = []
     for experiment_group_name, experiment_group in study.experiment_groups.items():
         for experiment_name, experiment in experiment_group.experiments.items():
@@ -60,9 +60,9 @@ def experiment_summaries(
 
             table.append(table_row)
 
-    headers = ["Group", "Experiment", "Observed", *distribution_summary.headers]
+    headers = ["Group", "Experiment", "Observed", *distribution_summary.headers]  # type: ignore
 
-    table = tabulate.tabulate(
+    table = tabulate.tabulate( # type: ignore
         tabular_data=table,
         headers=headers,
         floatfmt=f".{precision}f",
@@ -115,9 +115,9 @@ def random_experiment_summaries(
 
             table.append(table_row)
 
-    headers = ["Group", "Experiment", *distribution_summary.headers]
+    headers = ["Group", "Experiment", *distribution_summary.headers] # type: ignore
 
-    table = tabulate.tabulate(
+    table = tabulate.tabulate( # type: ignore
         tabular_data=table,
         headers=headers,
         floatfmt=f".{precision}f",

@@ -30,17 +30,18 @@ nav:
       - How To Guides/configuration.md
       - How To Guides/metric_syntax.md
       - How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
-  - References:
+  - Reference:
       #- References/ExperimentManager.md
       #- References/Experiment.md
+      - Reference/Study.md
       - Metrics:
-          - References/Metrics/index.md
-          - References/Metrics/Metrics.md
-          - References/Metrics/Averaging.md
+          - Reference/Metrics/index.md
+          - Reference/Metrics/Metrics.md
+          - Reference/Metrics/Averaging.md
       - Experiment Aggregation:
-          - References/Experiment Aggregation/index.md
-          - References/Experiment Aggregation/heterogeneity.md
-      - References/IO.md
+          - Reference/Experiment Aggregation/index.md
+          - Reference/Experiment Aggregation/heterogeneity.md
+      - Reference/IO.md
   - Explanation:
       - "Explanation/index.md"
 

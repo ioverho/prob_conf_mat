@@ -18,8 +18,8 @@ class ConfMatIOException(Exception):
     pass
 
 
-class IOBase(metaclass=ABCMeta):
-    def __init__(self, location: str | None):
+class IOMethod(metaclass=ABCMeta):
+    def __init__(self, location: str | None) -> None:
         if location is not None:
             self.location = Path(location).resolve()
 
@@ -30,7 +30,7 @@ class IOBase(metaclass=ABCMeta):
         else:
             self.location = None
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
@@ -50,8 +50,10 @@ class IOBase(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def format(self, *args, **kwargs):
+    def format(self, *args, **kwargs) -> str: # type: ignore
         raise NotImplementedError
+
+    format: str
 
     @abstractmethod
     def _load(self, *args, **kwargs):

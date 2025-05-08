@@ -23,7 +23,7 @@ class ListwiseComparisonResult:
 def listwise_compare(
     experiment_values_dict: typing.Dict[str, jtyping.Float[np.ndarray, " num_samples"]],
     metric_name: str,
-):
+) -> ListwiseComparisonResult:
     experiment_names, experiment_values = list(
         map(list, zip(*list(experiment_values_dict.items())))
     )

@@ -145,3 +145,5 @@ data/
 deprecated_report/# pixi environments
 .pixi
 *.egg-info
+/klad/
+/deprecated/

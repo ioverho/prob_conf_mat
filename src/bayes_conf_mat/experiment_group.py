@@ -10,23 +10,35 @@ import jaxtyping as jtyping
 from bayes_conf_mat.experiment import Experiment, ExperimentResult
 from bayes_conf_mat.metrics import MetricCollection
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
+from bayes_conf_mat.utils import RNG, MetricLike
 
+if typing.TYPE_CHECKING:
+    from bayes_conf_mat.experiment_aggregation import ExperimentAggregator
 
-output_wrapper = namedtuple(
-    "ExperimentManagerOutput",
+ExperimentGroupResult = namedtuple(
+    "ExperimentGroupResult",
     field_names=[
         "aggregation_result",
         "individual_experiment_results",
     ],
 )
 
+class ExperimentGroup:
+    """This class represents a group of related experiments.
 
-# TODO: document class
-class ExperimentManager:
+    The results across experiments can be aggregated to give an average result for the group.
+
+    For example, this could represent the same model evaluated across different folds of the same dataset.
+
+    Args:
+        name (str): the name of this experiment group
+        rng (RNG): the RNG used to control randomness
+    """
+
     def __init__(
         self,
         name: str,
-        rng: np.random.Generator,
+        rng: RNG,
     ) -> None:
         self.name = name
 
@@ -52,11 +64,25 @@ class ExperimentManager:
         name: str,
         confusion_matrix: typing.Dict[str, typing.Any]
         | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
-        prevalence_prior: float | str | jtyping.Float[np.ndarray, " num_classes"] = 0,
-        confusion_prior: float | str | jtyping.Float[np.ndarray, " num_classes"] = 0,
-    ):
+        prevalence_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
+        confusion_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
+    ) -> None:
+        """Add an experiment to this experiment group.
+
+        Each experiment is characterized by a single confusion matrix.
+
+        Args:
+            name (str): the name of this experiment
+            confusion_matrix (typing.Dict[str, typing.Any] | Float[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment. Should either be an arraylike or a dictionary with kwargs for a specific IO method.
+            prevalence_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
+            confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
+
+        """
+
+        # Spawn a new RNG, that is independent of the RNGs used in other experiments of this experiment group
         indep_rng = self.rng.spawn(1)[0]
 
+        # Define the experiment
         new_experiment = Experiment(
             # Provided for the user
             # Unique to each experiment
@@ -68,6 +94,8 @@ class ExperimentManager:
             rng=indep_rng,
         )
 
+        # Check to make sure that the number of classes in the new experiment matches the number of classes in all other experiment
+        # This really is the minimal requirement for an experiment group
         if self.num_classes is None:
             self.num_classes = new_experiment.num_classes
         elif new_experiment.num_classes != self.num_classes:
@@ -75,9 +103,12 @@ class ExperimentManager:
                 f"Experiment '{self.name}/{name}' has {new_experiment.num_classes} classes, not the expected {self.num_classes}"
             )
 
-        if self.experiments.get(name, None) is not None:
-            warn(f"Experiment '{self.name}/{name} alread exists. Overwriting.")
+        # Check if this experiment already exists
+        # Overwrite if so
+        if self.experiments.get(name, None) is not None: # type: ignore
+            warn(message=f"Experiment '{self.name}/{name} alread exists. Overwriting.")
 
+        # Finally, add the experiment to the experiment store
         self.experiments[name] = new_experiment
 
     # TODO: document method
@@ -87,18 +118,13 @@ class ExperimentManager:
         sampling_method: str,
         num_samples: int,
         metric_to_aggregator,
-    ) -> typing.Dict[
-        str,
-        typing.Annotated[
-            typing.List["ExperimentResult"], " num_experiments num_classes"
-        ],
-    ]:
+    ) -> ExperimentGroupResult:
         # Compute metrics for each experiment and store them
-        all_metrics_experiment_results = {
+        all_metrics_experiment_results: typing.Dict[MetricLike, typing.List[ExperimentResult]] = {
             metric: [] for metric in metrics.get_insert_order()
         }
         for _, experiment in self.experiments.items():
-            all_metrics_experiment_result = experiment.sample_metrics(
+            all_metrics_experiment_result: typing.Dict[MetricLike, ExperimentResult] = experiment.sample_metrics(
                 metrics=metrics,
                 sampling_method=sampling_method,
                 num_samples=num_samples,
@@ -111,7 +137,7 @@ class ExperimentManager:
         all_metrics_experiment_aggregation_result = dict()
         for metric, experiment_results in all_metrics_experiment_results.items():
             # Fetch the experiment aggregation method
-            aggregator = metric_to_aggregator.get(metric, None)
+            aggregator: ExperimentAggregator = metric_to_aggregator.get(metric, None)
 
             # Handle missing experiment aggregation methods
             if aggregator is None:
@@ -120,16 +146,17 @@ class ExperimentManager:
                         f"Metric '{metric}' does not have an assigned aggregation method, but experiment group {self} has {len(self)} experiments. Try adding one using `Study.add_experiment_aggregation`."
                     )
                 else:
+                    # We're allowed to pass the group's RNG, because the singleton aggregator is just an identity function
                     aggregator = get_experiment_aggregator(
-                        aggregation="singleton", rng=None
+                        aggregation="singleton", rng=self.rng,
                     )
 
             # Run the aggregation
-            experiment_aggregation_result = aggregator(
+            experiment_aggregation_result: typing.Dict[MetricLike, ExperimentGroupResult] = aggregator(
                 experiment_group=self,
                 metric=metric,
                 experiment_results=experiment_results,
-            )
+            ) # type: ignore
 
             all_metrics_experiment_aggregation_result[metric] = (
                 experiment_aggregation_result
@@ -138,7 +165,7 @@ class ExperimentManager:
         # Clean the output
         # All metrics in insertion order
         # Have a nested dict for the experiment results
-        all_metrics_experiment_results = OrderedDict(
+        all_metrics_experiment_results_cleaned: OrderedDict[MetricLike, typing.Mapping[Experiment, ExperimentResult]] = OrderedDict(
             [
                 (
                     metric,
@@ -151,20 +178,20 @@ class ExperimentManager:
             ]
         )
 
-        all_metrics_experiment_aggregation_result = OrderedDict(
+        all_metrics_experiment_aggregation_result_cleaned: OrderedDict[MetricLike, ExperimentGroupResult]  = OrderedDict(
             [
                 (metric, all_metrics_experiment_aggregation_result[metric])
                 for metric in metrics.get_insert_order()
             ]
         )
 
-        return output_wrapper(
-            aggregation_result=all_metrics_experiment_aggregation_result,
-            individual_experiment_results=all_metrics_experiment_results,
+        return ExperimentGroupResult(
+            aggregation_result=all_metrics_experiment_aggregation_result_cleaned,
+            individual_experiment_results=all_metrics_experiment_results_cleaned,
         )
 
     def __repr__(self) -> str:
-        return f"ExperimentManager({self.name})"
+        return f"ExperimentGroup({self.name})"
 
     def __str__(self) -> str:
-        return f"ExperimentManager({self.name})"
+        return f"ExperimentGroup({self.name})"

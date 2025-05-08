@@ -2,15 +2,17 @@ import typing
 
 import scipy
 import numpy as np
+import jaxtyping as jtyping
 
+from bayes_conf_mat.utils.rng import RNG
 
 def truncated_sample(
-    sampling_distribution: typing.Type[scipy.stats.rv_continuous],
-    bounds: typing.Tuple[int],
-    rng: np.random.BitGenerator,
+    sampling_distribution: scipy.stats.rv_continuous,
+    bounds: tuple[float, float],
+    rng: RNG,
     num_samples: int,
-):
-    u = rng.uniform(0.0, 1.0, size=(num_samples,))
+) -> jtyping.Float[np.ndarray, " num_samples"]:
+    u = rng.uniform(low=0.0, high=1.0, size=(num_samples,))
 
     truncated_u = u * (
         sampling_distribution.cdf(bounds[1]) - sampling_distribution.cdf(bounds[0])

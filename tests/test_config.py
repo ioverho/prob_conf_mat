@@ -1,207 +1,154 @@
-from copy import deepcopy
+import typing
 
 import pytest
+import numpy as np
 
-from bayes_conf_mat.config import Config, ConfigError, ConfigWarning
+from bayes_conf_mat import Study
+from bayes_conf_mat.config import ConfigError, ConfigWarning
 
 
 class TestConfig:
-    # This config should work
     base_config = dict(
-        name="test",
         seed=0,
         num_samples=10000,
-        ci_probability=1.0,
-        experiments={
-            "group_1": {
-                "__default__": {
-                    "prevalence_prior": 0.0,
-                    "confusion_prior": 0.0,
-                    "format": "csv",
-                    "type": "confusion_matrix",
-                },
-                "a": {
-                    "location": "./tests/data/confusion_matrices/sklearn_1.csv",
-                },
-                "b": {
-                    "location": "./tests/data/confusion_matrices/sklearn_1.csv",
-                },
-            },
-            "group_2": {
-                "__default__": {
-                    "prevalence_prior": 1.0,
-                    "confusion_prior": 10.0,
-                    "format": "csv",
-                    "type": "confusion_matrix",
-                },
-                "a": {
-                    "location": "./tests/data/confusion_matrices/sklearn_1.csv",
-                },
-            },
-        },
-        metrics={
-            "__default__": {"aggregation": "hist"},
-            "f1": {},
-            "mcc": {"aggregation": "fe_gaussian"},
-        },
+        ci_probability=0.95,
     )
 
-    def test_base_config(self):
-        Config(**self.base_config)
+    def fetch_base_config(self, parameter: str) -> typing.Dict[str, typing.Any]:
+        return {k: v for k, v in self.base_config.items() if k != parameter}
 
-    def test_seed(self):
-        base_config = deepcopy(self.base_config)
+    def test_seed(self) -> None:
+        # Test a valid seed
+        Study(seed=0, **self.fetch_base_config("seed"))
 
-        # ======================================================================
-        # Type =================================================================
-        # ======================================================================
-        base_config["seed"] = "foo"
+        # Test a negative int
+        with pytest.raises(
+            ConfigError,
+            match="Parameter `seed` must be a positive int.",
+        ):
+            Study(seed=-1, **self.fetch_base_config("seed"))
 
+        # Test a non-convertible non-int class
         with pytest.raises(
             ConfigError,
             match="Parameter `seed` must be an instance of `<class 'int'>`, but got",
         ):
-            Config(**base_config)
+            Study(seed="foo", **self.fetch_base_config("seed"))  # type: ignore
 
-        # ======================================================================
-        # Bounds ===============================================================
-        # ======================================================================
-        base_config["seed"] = -1
+        # Test a convertible non-int class
+        # TODO: make this raise a warning
+        Study(seed=0.1, **self.fetch_base_config("seed")) # type: ignore
 
+        # Test a negative convertible non-int class
         with pytest.raises(
             ConfigError,
-            match="Parameter `seed` must be a positive int",
+            match="Parameter `seed` must be a positive int.",
         ):
-            Config(**base_config)
+            Study(seed=-10.1, **self.fetch_base_config("seed")) # type: ignore
 
-    def test_num_samples(self):
-        base_config = deepcopy(self.base_config)
+        # Test a 'None'
+        with pytest.warns(
+            ConfigWarning,
+            match="Recieved `None` as seed. Defaulting to fractional seconds:",
+        ):
+            Study(seed=None, **self.fetch_base_config("seed"))
 
-        # ======================================================================
-        # Type =================================================================
-        # ======================================================================
-        base_config["num_samples"] = "foo"
+    def test_num_samples(self) -> None:
+        # Test a valid num_samples
+        Study(num_samples=10000, **self.fetch_base_config("num_samples"))
 
+        # Test a low value
+        with pytest.warns(
+            ConfigWarning,
+            match="Parameter `num_samples` should be large to reduce variability",
+        ):
+            Study(num_samples=1, **self.fetch_base_config("num_samples"))
+
+        # Test a negative int
+        with pytest.raises(
+            ConfigError,
+            match="Parameter `num_samples` must be greater than 0. Currently:",
+        ):
+            Study(num_samples=-10000, **self.fetch_base_config("num_samples"))
+
+        # Test a None
+        with pytest.warns(
+            ConfigWarning,
+            match="Parameter `num_samples` is `None`. Setting to default value of 10000.",
+        ):
+            Study(num_samples=None, **self.fetch_base_config("num_samples"))
+
+        # Test a non-convertible non-int class
         with pytest.raises(
             ConfigError,
             match="Parameter `num_samples` must be an instance of `<class 'int'>`, but got",
         ):
-            Config(**base_config)
+            Study(num_samples="foo", **self.fetch_base_config("num_samples"))  # type: ignore
 
-        # ======================================================================
-        # Bounds ===============================================================
-        # ======================================================================
-        base_config["num_samples"] = -1
+        # Test a convertible non-int class
+        Study(num_samples=float(10e5), **self.fetch_base_config("num_samples"))  # type: ignore
+
+        # Test a negative convertible non-int class
+        with pytest.raises(
+            ConfigError,
+            match="Parameter `num_samples` must be greater than 0. Currently:",
+        ):
+            Study(num_samples=float(-10e5), **self.fetch_base_config("num_samples"))  # type: ignore
+
+    def test_ci_probability(self) -> None:
+        # Test a valid num_samples
+        Study(ci_probability=0.95, **self.fetch_base_config("ci_probability"))
+
+        # Test CI probability bounds
+        with pytest.raises(
+            ConfigError,
+            match=r"Parameter `ci_probability` must be within \(0.0, 1.0\]",
+        ):
+            Study(ci_probability=0, **self.fetch_base_config("ci_probability"))
 
         with pytest.raises(
             ConfigError,
-            match="Parameter `num_samples` must be greater than 0",
+            match=r"Parameter `ci_probability` must be within \(0.0, 1.0\]",
         ):
-            Config(**base_config)
+            Study(ci_probability=-0.5, **self.fetch_base_config("ci_probability"))
 
-        base_config["num_samples"] = 1
+        with pytest.raises(
+            ConfigError,
+            match=r"Parameter `ci_probability` must be within \(0.0, 1.0\]",
+        ):
+            Study(ci_probability=1.5, **self.fetch_base_config("ci_probability"))
 
+        # Test a None
         with pytest.warns(
             ConfigWarning,
+            match="Parameter `ci_probability` is `None`. Setting to default value of 0.95",
         ):
-            Config(**base_config)
+            Study(ci_probability=None, **self.fetch_base_config("ci_probability"))
 
-    def test_ci_probability(self):
-        base_config = deepcopy(self.base_config)
-
-        # ======================================================================
-        # Type =================================================================
-        # ======================================================================
-        base_config["ci_probability"] = "foo"
+        # Test a non-convertible non-float class
+        with pytest.raises(
+            ConfigError,
+            match="Parameter `ci_probability` must be an instance of `<class 'float'>`",
+        ):
+            Study(ci_probability="foo", **self.fetch_base_config("ci_probability"))  # type: ignore
 
         with pytest.raises(
             ConfigError,
-            match="Parameter `ci_probability` must be an instance of `<class 'float'>`, but got",
+            match="Parameter `ci_probability` must be an instance of `<class 'float'>`",
         ):
-            Config(**base_config)
+            Study(
+                ci_probability=np.array([[0.95], [0.95]]),  # type: ignore
+                **self.fetch_base_config("ci_probability"),
+            )
 
-        # ======================================================================
-        # Bounds ===============================================================
-        # ======================================================================
-        base_config["ci_probability"] = -1
-
-        with pytest.raises(
-            ConfigError,
-            match="Parameter `ci_probability` must be within [0.0, 1.0]*",
-        ):
-            Config(**base_config)
-
-        base_config["ci_probability"] = 2
-
-        with pytest.raises(
-            ConfigError,
-            match="Parameter `ci_probability` must be within [0.0, 1.0]*",
-        ):
-            Config(**base_config)
-
-    def test_experiments(self):
-        base_config = deepcopy(self.base_config)
-
-        # ======================================================================
-        # Type =================================================================
-        # ======================================================================
-        base_config["experiments"] = [("foo", None)]
-
-        with pytest.raises(
-            ConfigError,
-            match="Experiment group configuration must be a `collections.abc.Mapping` instance",
-        ):
-            Config(**base_config)
-
-        # ======================================================================
-        # Constraints ==========================================================
-        # ======================================================================
-        base_config = deepcopy(self.base_config)
-
-        base_config["experiments"]["group_1"]["a"]["location"] = (
-            "./tests/data/confusion_matrices/this_does_not_exist!!!.csv"
-        )
-
-        with pytest.raises(
-            ConfigError,
-        ):
-            Config(**base_config)
-
-        base_config = deepcopy(self.base_config)
-
-        base_config["experiments"]["group_1"]["a"]["format"] = "foo"
-
-        with pytest.raises(
-            ConfigError,
-            match=" Parameter `aggregation` must be a registered IO method",
-        ):
-            Config(**base_config)
-
-        base_config = deepcopy(self.base_config)
-
-        del base_config["experiments"]["group_1"]["__default__"]["type"]
-
-        with pytest.raises(
-            ConfigError,
-        ):
-            Config(**base_config)
-
-        base_config = deepcopy(self.base_config)
-
-        del base_config["experiments"]["group_1"]["__default__"]["prevalence_prior"]
+        # Test a convertible non-float class
+        Study(ci_probability=np.array(0.95), **self.fetch_base_config("ci_probability"))  # type: ignore
 
         with pytest.warns(
-            ConfigWarning,
+            DeprecationWarning,
+            match="Conversion of an array with ndim > 0 to a scalar is deprecated",
         ):
-            Config(**base_config)
-
-    def test_wrong_metrics(self):
-        base_config = deepcopy(self.base_config)
-
-        base_config["metrics"] = [("foo", None)]
-
-        with pytest.raises(
-            ConfigError,
-            match="The values in metrics must be a `collections.abc.Mapping` instance",
-        ):
-            Config(**base_config)
+            Study(
+                ci_probability=np.array([0.95]),  # type: ignore
+                **self.fetch_base_config("ci_probability"),
+            )

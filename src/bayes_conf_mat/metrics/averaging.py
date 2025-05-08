@@ -1,7 +1,7 @@
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.metrics.base import Averaging
+from bayes_conf_mat.metrics.abc import Averaging
 from bayes_conf_mat.stats import (
     numpy_batched_arithmetic_mean,
     numpy_batched_convex_combination,
