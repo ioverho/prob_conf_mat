@@ -8,10 +8,67 @@ repos:
     -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: check-added-large-files
-#-   repo: local
-#    hooks:
-#    -   id: test_metric_equivalence
-#        name: test_metric_equivalence
-#        language: system
-#        always_run: true
-#        entry: uv run --dev pytest tests/test_metric_equivalence.py
+    -   id: check-ast
+    -   id: check-toml
+-   repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.7.3
+    hooks:
+      - id: uv-lock
+      - id: uv-export
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.11.8
+    hooks:
+    # Run the linter.
+    -   id: ruff
+        types_or: [ python, pyi ]
+    # Run the formatter.
+    -   id: ruff-format
+        types_or: [ python, pyi ]
+-   repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.400
+    hooks:
+    - id: pyright
+-   repo: local
+    hooks:
+    -   id: test_io
+        name: test_io
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_io.py
+    -   id: test_metric_equivalence
+        name: test_metric_equivalence
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_metric_equivalence.py
+    -   id: test_notebooks
+        name: test_notebooks
+        language: system
+        files: \.ipynb$
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_notebooks.py
+    -   id: test_rng
+        name: test_rng
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_rng.py
+-   repo: local
+    hooks:
+    # TODO: make this dynamic
+    # i.e. run only when the python files are newer than the documentation
+    #-   id: update_documentation
+    #    name: update_documentation
+    #    language: python
+    #    types: [python]
+    #    pass_filenames: false
+    #    entry: uv run python mkdocs.py
+    -   id: mkdocs
+        name: mkdocs
+        language: python
+        types: [python]
+        pass_filenames: false
+        entry: uv run mkdocs build

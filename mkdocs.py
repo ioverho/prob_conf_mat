@@ -27,7 +27,7 @@ TEMPLATE_DIR = Path(__file__).parent / "templates"
 
 @dataclass
 class KwargMatch:
-    key: str = None
+    key: typing.Optional[str] = None
     spans: typing.List[typing.Tuple[int, int]] = field(default_factory=lambda: [])
     value: typing.Optional[typing.Any] = None
 
@@ -41,8 +41,8 @@ class KwargMatch:
 
 
 class Template:
-    def __init__(self, file_name: str) -> None:
-        self.file_path = TEMPLATE_DIR / file_name
+    def __init__(self, file_name: str | Path) -> None:
+        self.file_path: Path = TEMPLATE_DIR / file_name
         self.name = self.file_path.stem
 
         self.template = self.file_path.read_text()
@@ -56,7 +56,7 @@ class Template:
     def set(self, key: str, value):
         self.kwargs[key].value = value
 
-    def _format_value(self, value):
+    def _format_value(self, value) -> str:
         if isinstance(value, str):
             return value
         elif isinstance(value, float):
