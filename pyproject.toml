@@ -52,9 +52,10 @@ ignore = ["F722"]
 
 [tool.pyright]
 include = ["src/bayes_conf_mat"]
-exclude = ["**/__pycache__", "src/bayes_conf_mat/reporting"]
+exclude = ["**/__pycache__"]
 
-venvPath = ".venv"
+venvPath = "."
+venv = ".venv"
 
 typeCheckingMode = "standard"
 

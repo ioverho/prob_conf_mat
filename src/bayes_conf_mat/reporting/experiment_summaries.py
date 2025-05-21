@@ -2,13 +2,11 @@ from __future__ import annotations
 import typing
 
 from bayes_conf_mat.stats import summarize_posterior
-from bayes_conf_mat.utils import fmt, lazy_import
+from bayes_conf_mat.utils import fmt
 
 if typing.TYPE_CHECKING:
     from bayes_conf_mat.metrics import Metric, AveragedMetric
     from tabulate import tabulate
-
-tabulate = lazy_import("tabulate")
 
 
 def experiment_summaries(
@@ -19,6 +17,9 @@ def experiment_summaries(
     table_fmt: str = "html",
     **tabulate_kwargs,
 ) -> str:
+    # Import optional dependencies only now
+    import tabulate
+
     table = []
     for experiment_group_name, experiment_group in study.experiment_groups.items():
         for experiment_name, experiment in experiment_group.experiments.items():
@@ -62,7 +63,7 @@ def experiment_summaries(
 
     headers = ["Group", "Experiment", "Observed", *distribution_summary.headers]  # type: ignore
 
-    table = tabulate.tabulate( # type: ignore
+    table = tabulate.tabulate(  # type: ignore
         tabular_data=table,
         headers=headers,
         floatfmt=f".{precision}f",
@@ -115,9 +116,9 @@ def random_experiment_summaries(
 
             table.append(table_row)
 
-    headers = ["Group", "Experiment", *distribution_summary.headers] # type: ignore
+    headers = ["Group", "Experiment", *distribution_summary.headers]  # type: ignore
 
-    table = tabulate.tabulate( # type: ignore
+    table = tabulate.tabulate(  # type: ignore
         tabular_data=table,
         headers=headers,
         floatfmt=f".{precision}f",
