@@ -26,17 +26,17 @@ from bayes_conf_mat.experiment_group import ExperimentGroup
 from bayes_conf_mat.experiment_comparison import pairwise_compare, listwise_compare
 from bayes_conf_mat.stats import summarize_posterior
 from bayes_conf_mat.utils import (
-    RNG,
     InMemoryCache,
     fmt,
-    lazy_import,
     NotInCache,
 )
+
 
 class DistributionPlottingMethods(StrEnum):
     KDE = "kde"
     HIST = "hist"
     HISTOGRAM = "histogram"
+
 
 class Study(Config):
     """This class represents a study, a collection of related experiments and experiment groups. It handles all lower level operations for you.
@@ -63,9 +63,9 @@ class Study(Config):
         num_samples: typing.Optional[int] = None,
         ci_probability: typing.Optional[float] = None,
         experiments: dict[str, dict[str, dict[str, typing.Any]]] = {},
-        metrics: dict[str, dict[str, typing.Any]]  = {},
-        #cache_dir: typing.Optional[str] = None,
-        #overwrite: bool = False,
+        metrics: dict[str, dict[str, typing.Any]] = {},
+        # cache_dir: typing.Optional[str] = None,
+        # overwrite: bool = False,
     ) -> None:
         # Instantiate the config back-end ======================================
         super().__init__(
@@ -77,15 +77,10 @@ class Study(Config):
         )
 
         # Instantiate the caching mechanism ====================================
-        #self.cache_dir = cache_dir
-        #self.overwrite = overwrite
+        # self.cache_dir = cache_dir
+        # self.overwrite = overwrite
 
         self.cache = InMemoryCache()
-
-        # Instantiate the RNG ==================================================
-        # Allow for potentially updating the seed
-        # For example, if using None, config should still be reproducible
-        #self.rng = RNG(seed=seed)
 
         # Instantiate the stores for experiments and metrics ===================
         # The experiment group store
@@ -101,8 +96,6 @@ class Study(Config):
     def from_dict(
         cls,
         config_dict: dict[str, typing.Any],
-        cache_dir: typing.Optional[str] = None,
-        overwrite: bool = False,
     ) -> typing.Self:
         """Creates a study from a dictionary.
 
@@ -119,8 +112,8 @@ class Study(Config):
 
         instance = super().from_dict(config_dict)
 
-        #instance.cache_dir = cache_dir
-        #instance.overwrite = overwrite
+        # instance.cache_dir = cache_dir
+        # instance.overwrite = overwrite
 
         return instance
 
@@ -176,9 +169,7 @@ class Study(Config):
         return len(self._experiment_store)
 
     @staticmethod
-    def _split_experiment_name(
-        name: str, do_warn: bool = False
-    ) -> tuple[str, str]:
+    def _split_experiment_name(name: str, do_warn: bool = False) -> tuple[str, str]:
         """Tries to parse an experiment name string, e.g., "group/experiment"
 
         This enables the user to ignore experiment groups when not convenient.
@@ -232,7 +223,9 @@ class Study(Config):
         return name
 
     def _validate_metric_class_label_combination(
-        self, metric: str | MetricLike, class_label: typing.Optional[int],
+        self,
+        metric: str | MetricLike,
+        class_label: typing.Optional[int],
     ) -> tuple[MetricLike, int]:
         try:
             metric_: MetricLike = self._metrics_store[metric]
@@ -279,7 +272,6 @@ class Study(Config):
             confusion_matrix (Optional[Int[ArrayLike, 'num_classes num_classes']]): the confusion matrix for this experiment. If left as `None`, then the IO kwargs should specify where a confusion matrix might be found
             prevalence_prior (Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
             confusion_prior (Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
-            io_kwargs: various keyword arguments to be passed to an IO method
 
         Example:
             Add an experiment named 'test_a' to experiment group 'test'
@@ -301,10 +293,15 @@ class Study(Config):
         conf_mat_io_config: dict[str, typing.Any] = dict(io_kwargs)
 
         if isinstance(confusion_matrix, (list, tuple, np.ndarray)):
-            conf_mat_io_config.update(dict(format="in_memory", data=confusion_matrix))
+            conf_mat_io_config.update(dict(confusion_matrix=confusion_matrix))
 
         # Create a complete IO config for the confusion matrix
-        conf_mat_io_config.update({"prevalence_prior": prevalence_prior, "confusion_prior": confusion_prior,})
+        conf_mat_io_config.update(
+            {
+                "prevalence_prior": prevalence_prior,
+                "confusion_prior": confusion_prior,
+            }
+        )
 
         # Add the experiment to the config back-end ============================
         cur_experiments = self.experiments
@@ -337,11 +334,7 @@ class Study(Config):
         # Finally, add the experiment to the right experiment group
         experiment_group = self._experiment_store[experiment_group_name].add_experiment(
             name=experiment_name,
-            confusion_matrix={
-                k: v
-                for k, v in experiment_config.items()
-                if k != "prevalence_prior" and k != "confusion_prior"
-            },
+            confusion_matrix=experiment_config["confusion_matrix"],
             prevalence_prior=experiment_config["prevalence_prior"],
             confusion_prior=experiment_config["confusion_prior"],
         )
@@ -364,14 +357,16 @@ class Study(Config):
         if isinstance(metric, Metric) or isinstance(metric, AveragedMetric):
             metric_name: str = metric.name
         else:
-            metric_name: str = metric # type: ignore
+            metric_name: str = metric  # type: ignore
 
         # Retrieve the current set of metrics
         cur_metrics = self.metrics
         if aggregation is None:
             cur_metrics[metric_name] = dict()
         else:
-            cur_metrics[metric_name] = dict(aggregation=aggregation) | aggregation_kwargs
+            cur_metrics[metric_name] = (
+                dict(aggregation=aggregation) | aggregation_kwargs
+            )
 
         # Update the stored set of metrics
         # Applies validation
@@ -505,12 +500,16 @@ class Study(Config):
         keys = [metric, experiment_group_name, _experiment_name, sampling_method]
 
         if self.cache.isin(fingerprint=self.fingerprint, keys=keys):
-            result: ExperimentResult | ExperimentAggregationResult | NotInCache = self.cache.load(fingerprint=self.fingerprint, keys=keys) # type: ignore
+            result: ExperimentResult | ExperimentAggregationResult | NotInCache = (  # type: ignore
+                self.cache.load(fingerprint=self.fingerprint, keys=keys)
+            )
 
         else:
             self._sample_metrics(sampling_method=sampling_method)
 
-            result: ExperimentResult | ExperimentAggregationResult | NotInCache = self.cache.load(fingerprint=self.fingerprint, keys=keys) # type: ignore
+            result: ExperimentResult | ExperimentAggregationResult | NotInCache = (  # type: ignore
+                self.cache.load(fingerprint=self.fingerprint, keys=keys)
+            )
 
         if result is NotInCache:
             raise ValueError(
@@ -543,7 +542,7 @@ class Study(Config):
 
                 distribution_summary = summarize_posterior(
                     sampled_experiment_result.values[:, class_label],
-                    ci_probability=self.ci_probability, # type: ignore
+                    ci_probability=self.ci_probability,  # type: ignore
                 )
 
                 if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
@@ -580,9 +579,9 @@ class Study(Config):
         if include_observed_values:
             headers += ["Observed"]
 
-        headers += [*distribution_summary.headers] # type: ignore
+        headers += [*distribution_summary.headers]  # type: ignore
 
-        table = tabulate.tabulate( # type: ignore
+        table = tabulate.tabulate(  # type: ignore
             tabular_data=table,
             headers=headers,
             floatfmt=f".{precision}f",
@@ -594,8 +593,8 @@ class Study(Config):
 
     def report_metric_summaries(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int] = None, # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         table_fmt: str = "html",
         precision: int = 4,
     ) -> str:
@@ -610,8 +609,6 @@ class Study(Config):
         Returns:
             str: the table as a string
         """
-        import tabulate
-
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
@@ -633,8 +630,8 @@ class Study(Config):
 
     def report_random_metric_summaries(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int] = None, # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         table_fmt: str = "html",
         precision: int = 4,
     ) -> str:
@@ -659,8 +656,8 @@ class Study(Config):
 
     def plot_metric_summaries(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int] = None, # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         method: str = "kde",
         bandwidth: float = 1.0,
         bins: int | list[int] | str = "auto",
@@ -795,7 +792,8 @@ class Study(Config):
 
                 # Get summary statistics
                 posterior_summary = summarize_posterior(
-                    posterior_samples=distribution_samples, ci_probability=self.ci_probability # type: ignore
+                    posterior_samples=distribution_samples,
+                    ci_probability=self.ci_probability,  # type: ignore
                 )
 
                 all_medians.append(posterior_summary.median)
@@ -1055,7 +1053,7 @@ class Study(Config):
 
         # Add the axes back, but only for the bottom plot
         axes[-1].spines["bottom"].set_visible(True)
-        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator()) # type: ignore
+        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
         axes[-1].set_yticks([])
         axes[-1].tick_params(
             axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize
@@ -1118,7 +1116,7 @@ class Study(Config):
             metric=metric,
             diff_dist=lhs_samples - rhs_samples,
             random_diff_dist=lhs_random_samples - rhs_random_samples,
-            ci_probability=self.ci_probability, # type: ignore
+            ci_probability=self.ci_probability,  # type: ignore
             min_sig_diff=min_sig_diff,
             observed_difference=observed_diff,
             lhs_name=experiment_a,
@@ -1129,10 +1127,10 @@ class Study(Config):
 
     def report_pairwise_comparison(
         self,
-        metric: str, # type: ignore
+        metric: str,  # type: ignore
         experiment_a: str,
         experiment_b: str,
-        class_label: typing.Optional[int] = None, # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         min_sig_diff: typing.Optional[float] = None,
         precision: int = 4,
     ) -> str:
@@ -1156,10 +1154,10 @@ class Study(Config):
 
     def report_pairwise_comparison_plot(
         self,
-        metric: str, # type: ignore
+        metric: str,  # type: ignore
         experiment_a: str,
         experiment_b: str,
-        class_label: int = None, # type: ignore
+        class_label: int = None,  # type: ignore
         min_sig_diff: typing.Optional[float] = None,
         method: str = "kde",
         bandwidth: float = 1.0,
@@ -1254,8 +1252,8 @@ class Study(Config):
 
                 kdeline = ax.lines[0]
 
-                kde_x: np.ndarray = kdeline.get_xdata() # type: ignore
-                kde_y: np.ndarray = kdeline.get_ydata() # type: ignore
+                kde_x: np.ndarray = kdeline.get_xdata()  # type: ignore
+                kde_y: np.ndarray = kdeline.get_ydata()  # type: ignore
 
             case (
                 DistributionPlottingMethods.HIST.value
@@ -1275,8 +1273,8 @@ class Study(Config):
 
                 kdeline = ax.lines[0]
 
-                kde_x: np.ndarray = kdeline.get_xdata() # type: ignore
-                kde_y: np.ndarray = kdeline.get_ydata() # type: ignore
+                kde_x: np.ndarray = kdeline.get_xdata()  # type: ignore
+                kde_y: np.ndarray = kdeline.get_ydata()  # type: ignore
 
                 kde_x = np.repeat(kde_x, 2)
                 kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
@@ -1554,8 +1552,8 @@ class Study(Config):
 
     def _pairwise_random_comparison(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int], # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int],  # type: ignore
         experiment: str,
         min_sig_diff: typing.Optional[float] = None,
     ) -> PairwiseComparisonResult:
@@ -1583,7 +1581,7 @@ class Study(Config):
             metric=metric,
             diff_dist=actual_result - random_results,
             random_diff_dist=None,
-            ci_probability=self.ci_probability, # type: ignore
+            ci_probability=self.ci_probability,  # type: ignore
             min_sig_diff=min_sig_diff,
             observed_difference=None,
             lhs_name=experiment,
@@ -1616,8 +1614,12 @@ class Study(Config):
                 experiment
             )
 
-            rope_lb = fmt(-random_comparison_result.min_sig_diff, precision=precision, mode='f')
-            rope_ub = fmt(random_comparison_result.min_sig_diff, precision=precision, mode='f')
+            rope_lb = fmt(
+                -random_comparison_result.min_sig_diff, precision=precision, mode="f"
+            )
+            rope_ub = fmt(
+                random_comparison_result.min_sig_diff, precision=precision, mode="f"
+            )
 
             random_comparison_record = {
                 "Group": experiment_group_name,
@@ -1631,7 +1633,7 @@ class Study(Config):
 
             records.append(random_comparison_record)
 
-        table = tabulate.tabulate( # type: ignore
+        table = tabulate.tabulate(  # type: ignore
             tabular_data=records,
             headers="keys",
             floatfmt=f".{precision}f",
@@ -1644,8 +1646,8 @@ class Study(Config):
 
     def report_listwise_comparison(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int] = None, # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         table_fmt: str = "html",
         precision: int = 4,
     ):
@@ -1687,10 +1689,10 @@ class Study(Config):
         ).p_experiment_given_rank
 
         headers = ["Group", "Experiment"] + [
-            f"Rank {i+1}" for i in range(p_experiment_given_rank_arr.shape[0])
+            f"Rank {i + 1}" for i in range(p_experiment_given_rank_arr.shape[0])
         ]
 
-        table = tabulate.tabulate( # type: ignore
+        table = tabulate.tabulate(  # type: ignore
             tabular_data=[
                 [*self._split_experiment_name(experiment_names), *row]
                 for row, experiment_names in zip(
@@ -1707,8 +1709,8 @@ class Study(Config):
 
     def report_aggregated_metric_summaries(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int] = None, # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         precision: int = 4,
         table_fmt: str = "html",
     ) -> str:
@@ -1724,15 +1726,17 @@ class Study(Config):
 
         table = []
         for experiment_group in list(self.experiments.keys()):
-            experiment_aggregation_result: ExperimentAggregationResult = self.get_metric_samples(
-                metric=metric.name,
-                experiment_name=f"{experiment_group}/aggregated",
-                sampling_method=SamplingMethod.POSTERIOR,
-            ) # type: ignore
+            experiment_aggregation_result: ExperimentAggregationResult = (
+                self.get_metric_samples(
+                    metric=metric.name,
+                    experiment_name=f"{experiment_group}/aggregated",
+                    sampling_method=SamplingMethod.POSTERIOR,
+                )
+            )  # type: ignore
 
             distribution_summary = summarize_posterior(
                 posterior_samples=experiment_aggregation_result.values[:, class_label],
-                ci_probability=self.ci_probability, # type: ignore
+                ci_probability=self.ci_probability,  # type: ignore
             )
 
             if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
@@ -1769,13 +1773,13 @@ class Study(Config):
 
         headers = [
             "Group",
-            *distribution_summary.headers, # type: ignore
+            *distribution_summary.headers,  # type: ignore
             "Var. Within",
             "Var. Between",
             "I2",
         ]
 
-        table = tabulate.tabulate( # type: ignore
+        table = tabulate.tabulate(  # type: ignore
             tabular_data=table,
             headers=headers,
             floatfmt=f".{precision}f",
@@ -1787,9 +1791,9 @@ class Study(Config):
 
     def plot_experiment_aggregation(
         self,
-        metric: str, # type: ignore
+        metric: str,  # type: ignore
         experiment_group: str,
-        class_label: typing.Optional[int] = None, # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         method: str = "kde",
         bandwidth: float = 1.0,
         bins: int | list[int] | str = "auto",
@@ -1870,7 +1874,6 @@ class Study(Config):
             metric=metric, class_label=class_label
         )
 
-
         # Import optional dependencies
         try:
             import matplotlib
@@ -1926,7 +1929,8 @@ class Study(Config):
 
             # Get summary statistics
             posterior_summary = summarize_posterior(
-                distribution_samples, ci_probability=self.ci_probability # type: ignore
+                distribution_samples,
+                ci_probability=self.ci_probability,  # type: ignore
             )
 
             all_hdi_ranges.append(posterior_summary.hdi[1] - posterior_summary.hdi[0])
@@ -2100,7 +2104,8 @@ class Study(Config):
 
         # Get summary statistics
         aggregated_summary = summarize_posterior(
-            agg_distribution_samples, ci_probability=self.ci_probability # type: ignore
+            agg_distribution_samples,
+            ci_probability=self.ci_probability,  # type: ignore
         )
 
         match method:
@@ -2270,7 +2275,7 @@ class Study(Config):
                 ax.hlines(
                     0,
                     max(all_min_x[i], cur_xlim_max),  # type: ignore
-                    min(all_max_x[i], cur_xlim_min), # type: ignore
+                    min(all_max_x[i], cur_xlim_min),  # type: ignore
                     color=base_line_colour,
                     ls=base_line_format,
                     linewidth=base_line_width,
@@ -2321,7 +2326,7 @@ class Study(Config):
 
         # Add the axes back, but only for the bottom plot
         axes[-1].spines["bottom"].set_visible(True)
-        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator()) # type: ignore
+        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
         axes[-1].tick_params(
             axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize
         )
@@ -2340,8 +2345,8 @@ class Study(Config):
     # TODO: document this method
     def plot_forest_plot(
         self,
-        metric: str, # type: ignore
-        class_label: typing.Optional[int] = None, # type: ignore
+        metric: str,  # type: ignore
+        class_label: typing.Optional[int] = None,  # type: ignore
         figsize: typing.Optional[tuple[float, float]] = None,
         fontsize: float = 9.0,
         axis_fontsize: typing.Optional[float] = None,
@@ -2369,7 +2374,6 @@ class Study(Config):
         plot_experiment_info: bool = True,
         precision: int = 4,
     ) -> matplotlib.figure.Figure:
-
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
@@ -2419,7 +2423,7 @@ class Study(Config):
             height_ratios=heights,
             figsize=_figsize,
         )
-        if isinstance(axes, matplotlib.axes._axes.Axes): # type: ignore
+        if isinstance(axes, matplotlib.axes._axes.Axes):  # type: ignore
             axes = np.array([axes])
 
         for i, (experiment_group_name, experiment_group) in enumerate(
@@ -2476,7 +2480,7 @@ class Study(Config):
                 metric=metric.name,
                 experiment_name=f"{experiment_group_name}/aggregated",
                 sampling_method=SamplingMethod.POSTERIOR,
-            ) # type: ignore
+            )  # type: ignore
 
             samples = aggregation_result.values[:, class_label]
 
@@ -2519,7 +2523,9 @@ class Study(Config):
 
             # Add the ytick locations ==================================================
             axes[i].set_ylim(-1 if i == 0 else -0.5, num_experiments + agg_offset + 0.5)
-            axes[i].set_yticks(range(-1 if i == 0 else 0, num_experiments + agg_offset + 1))
+            axes[i].set_yticks(
+                range(-1 if i == 0 else 0, num_experiments + agg_offset + 1)
+            )
 
             # Invert the axis
             axes[i].invert_yaxis()
@@ -2598,7 +2604,7 @@ class Study(Config):
 
                 summary_rows = [summary_to_row(s) for s in all_summaries + [summary]]
 
-                tabulate_str = tabulate.tabulate( # type: ignore
+                tabulate_str = tabulate.tabulate(  # type: ignore
                     tabular_data=summary_rows,
                     headers="keys",
                     colalign=["right"] * 3,

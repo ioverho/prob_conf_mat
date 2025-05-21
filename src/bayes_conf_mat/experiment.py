@@ -8,10 +8,10 @@ from enum import StrEnum
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.io import get_io
-from bayes_conf_mat.metrics import RootMetric, Metric, AveragedMetric, MetricCollection
+from bayes_conf_mat.metrics import RootMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
-from bayes_conf_mat.utils import RNG, MetricLike
+from bayes_conf_mat.utils import RNG, MetricLike, validate_confusion_matrix
+
 
 class SamplingMethod(StrEnum):
     POSTERIOR = "posterior"
@@ -41,7 +41,7 @@ class ExperimentResult:
 
     @property
     def bounds(self) -> typing.Tuple[float]:
-        return self.metric.bounds # type: ignore
+        return self.metric.bounds  # type: ignore
 
     @property
     def num_classes(self) -> int:
@@ -76,40 +76,21 @@ class Experiment:
         self,
         name: str,
         rng: RNG,
-        confusion_matrix: typing.Dict[str, typing.Any]
-        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
-        prevalence_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
-        confusion_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
+        confusion_matrix: jtyping.Float[
+            np.typing.ArrayLike, " num_classes num_classes"
+        ],
+        prevalence_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
+        confusion_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
     ) -> None:
-
         self.name = name
 
         # Argument Validation ==================================================
-        # Import the confusion matrix
-        # Check if Mapping like object
-        if hasattr(confusion_matrix, "items"):
-            self.confusion_matrix_loader = get_io(**confusion_matrix) # type: ignore
-
-        # If a numpy array, just store it
-        elif isinstance(confusion_matrix, np.ndarray):
-            self.confusion_matrix_loader = get_io(
-                format="in_memory", data=confusion_matrix
-            )
-
-        # If not a numpy array, tries to make it one
-        else:
-            try:
-                confusion_matrix = np.array(confusion_matrix)
-                self.confusion_matrix_loader = get_io(
-                    format="in_memory", data=confusion_matrix
-                )
-            except Exception as e:
-                raise ValueError(
-                    f"Ran into exception when trying to convert {confusion_matrix} into a np.ndarray:\n{e}"
-                )
-
         # load and validate the confusion matrix
-        self.confusion_matrix = self.confusion_matrix_loader.load()
+        self.confusion_matrix = validate_confusion_matrix(conf_mat=confusion_matrix)
 
         # The prior strategy used for defining the Dirichlet prior counts
         self._init_prevalence_prior = prevalence_prior
@@ -147,7 +128,6 @@ class Experiment:
             np.ndarray, " num_samples num_classes num_classes"
         ],
     ) -> dict[MetricLike, ExperimentResult]:
-
         experiment_sample_result: dict[MetricLike, ExperimentResult] = {
             RootMetric("norm_confusion_matrix"): ExperimentResult(
                 experiment=self,
@@ -185,13 +165,13 @@ class Experiment:
         num_samples: int,
     ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         p_condition = dirichlet_sample(
-            rng=self.rng, # type: ignore
+            rng=self.rng,  # type: ignore
             alphas=condition_counts,
             num_samples=num_samples,
         )
 
         p_pred_given_condition = dirichlet_sample(
-            rng=self.rng, # type: ignore
+            rng=self.rng,  # type: ignore
             alphas=confusion_matrix,
             num_samples=num_samples,
         )
@@ -357,9 +337,9 @@ class Experiment:
         metric_compute_order = metrics.get_compute_order()
 
         # First have the experiment generate synthetic confusion matrices and needed RootMetrics
-        # typing.Dict[RootMetric, ExperimentResult]
-        intermediate_results: typing.MutableMapping[MetricLike, ExperimentResult]  = self.sample(
-            sampling_method=sampling_method, num_samples=num_samples
+        # dict[RootMetric, ExperimentResult]
+        intermediate_results: typing.MutableMapping[MetricLike, ExperimentResult] = (
+            self.sample(sampling_method=sampling_method, num_samples=num_samples)
         )
 
         # Go through all metrics and dependencies in order

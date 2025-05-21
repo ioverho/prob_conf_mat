@@ -23,6 +23,7 @@ ExperimentGroupResult = namedtuple(
     ],
 )
 
+
 class ExperimentGroup:
     """This class represents a group of related experiments.
 
@@ -62,10 +63,13 @@ class ExperimentGroup:
     def add_experiment(
         self,
         name: str,
-        confusion_matrix: typing.Dict[str, typing.Any]
-        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
-        prevalence_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
-        confusion_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
+        confusion_matrix: jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"],
+        prevalence_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
+        confusion_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
     ) -> None:
         """Add an experiment to this experiment group.
 
@@ -73,7 +77,7 @@ class ExperimentGroup:
 
         Args:
             name (str): the name of this experiment
-            confusion_matrix (typing.Dict[str, typing.Any] | Float[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment. Should either be an arraylike or a dictionary with kwargs for a specific IO method.
+            confusion_matrix (Int[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment.
             prevalence_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
             confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
 
@@ -105,7 +109,7 @@ class ExperimentGroup:
 
         # Check if this experiment already exists
         # Overwrite if so
-        if self.experiments.get(name, None) is not None: # type: ignore
+        if self.experiments.get(name, None) is not None:  # type: ignore
             warn(message=f"Experiment '{self.name}/{name} alread exists. Overwriting.")
 
         # Finally, add the experiment to the experiment store
@@ -120,14 +124,16 @@ class ExperimentGroup:
         metric_to_aggregator,
     ) -> ExperimentGroupResult:
         # Compute metrics for each experiment and store them
-        all_metrics_experiment_results: typing.Dict[MetricLike, typing.List[ExperimentResult]] = {
-            metric: [] for metric in metrics.get_insert_order()
-        }
+        all_metrics_experiment_results: dict[
+            MetricLike, typing.List[ExperimentResult]
+        ] = {metric: [] for metric in metrics.get_insert_order()}
         for _, experiment in self.experiments.items():
-            all_metrics_experiment_result: typing.Dict[MetricLike, ExperimentResult] = experiment.sample_metrics(
-                metrics=metrics,
-                sampling_method=sampling_method,
-                num_samples=num_samples,
+            all_metrics_experiment_result: dict[MetricLike, ExperimentResult] = (
+                experiment.sample_metrics(
+                    metrics=metrics,
+                    sampling_method=sampling_method,
+                    num_samples=num_samples,
+                )
             )
 
             for metric, experiment_result in all_metrics_experiment_result.items():
@@ -148,15 +154,18 @@ class ExperimentGroup:
                 else:
                     # We're allowed to pass the group's RNG, because the singleton aggregator is just an identity function
                     aggregator = get_experiment_aggregator(
-                        aggregation="singleton", rng=self.rng,
+                        aggregation="singleton",
+                        rng=self.rng,
                     )
 
             # Run the aggregation
-            experiment_aggregation_result: typing.Dict[MetricLike, ExperimentGroupResult] = aggregator(
-                experiment_group=self,
-                metric=metric,
-                experiment_results=experiment_results,
-            ) # type: ignore
+            experiment_aggregation_result: dict[MetricLike, ExperimentGroupResult] = (
+                aggregator(
+                    experiment_group=self,
+                    metric=metric,
+                    experiment_results=experiment_results,
+                )
+            )  # type: ignore
 
             all_metrics_experiment_aggregation_result[metric] = (
                 experiment_aggregation_result
@@ -165,7 +174,9 @@ class ExperimentGroup:
         # Clean the output
         # All metrics in insertion order
         # Have a nested dict for the experiment results
-        all_metrics_experiment_results_cleaned: OrderedDict[MetricLike, typing.Mapping[Experiment, ExperimentResult]] = OrderedDict(
+        all_metrics_experiment_results_cleaned: OrderedDict[
+            MetricLike, typing.Mapping[Experiment, ExperimentResult]
+        ] = OrderedDict(
             [
                 (
                     metric,
@@ -178,7 +189,9 @@ class ExperimentGroup:
             ]
         )
 
-        all_metrics_experiment_aggregation_result_cleaned: OrderedDict[MetricLike, ExperimentGroupResult]  = OrderedDict(
+        all_metrics_experiment_aggregation_result_cleaned: OrderedDict[
+            MetricLike, ExperimentGroupResult
+        ] = OrderedDict(
             [
                 (metric, all_metrics_experiment_aggregation_result[metric])
                 for metric in metrics.get_insert_order()

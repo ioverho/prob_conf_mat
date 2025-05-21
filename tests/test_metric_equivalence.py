@@ -1,5 +1,4 @@
 from functools import partial
-import os
 from pathlib import Path
 from itertools import product
 import warnings
@@ -12,8 +11,11 @@ import sklearn.metrics
 
 from bayes_conf_mat import Study
 from bayes_conf_mat.config import ConfigWarning
-from bayes_conf_mat.io.abc import ConfMatIOWarning
-from bayes_conf_mat.io.utils import confusion_matrix_to_pred_cond
+from bayes_conf_mat.utils.io import (
+    load_csv,
+    confusion_matrix_to_pred_cond,
+    ConfMatIOWarning,
+)
 
 # ==============================================================================
 # Setup all test cases
@@ -66,19 +68,19 @@ all_metrics_to_test = METRICS_TO_SKLEARN.keys()
 
 all_confusion_matrices_to_test = list(TEST_CASES_DIR.glob(pattern="*.csv"))
 
+
 # ==============================================================================
 # Generate all test cases
 # ==============================================================================
-def generate_test_case(metric: str, conf_mat_fp: Path) -> tuple[jtyping.Float[np.ndarray, "1"], jtyping.Float[np.ndarray, "1"]]:
+def generate_test_case(
+    metric: str, conf_mat_fp: Path
+) -> tuple[jtyping.Float[np.ndarray, "1"], jtyping.Float[np.ndarray, "1"]]:
     def _get_our_value(
         metric: str, study: Study
     ) -> jtyping.Float[np.ndarray, " num_classes"]:
-        try:
-            metric_result = study.get_metric_samples(
-                metric=metric, experiment_name="test/test", sampling_method="input"
-            )
-        except:
-            raise Exception(study.cache._cache.keys())
+        metric_result = study.get_metric_samples(
+            metric=metric, experiment_name="test/test", sampling_method="input"
+        )
 
         our_value = metric_result.values[0]
 
@@ -111,11 +113,13 @@ def generate_test_case(metric: str, conf_mat_fp: Path) -> tuple[jtyping.Float[np
 
     study.add_metric(metric=metric)
 
+    conf_mat = load_csv(
+        location=conf_mat_fp,
+    )
+
     study.add_experiment(
         experiment_name="test/test",
-        location=conf_mat_fp,
-        format="csv",
-        type="conf_mat",
+        confusion_matrix=conf_mat,
     )
 
     our_value = _get_our_value(metric=metric, study=study)
@@ -124,19 +128,24 @@ def generate_test_case(metric: str, conf_mat_fp: Path) -> tuple[jtyping.Float[np
 
     return our_value, sklearn_value
 
+
 warnings.filterwarnings(action="ignore", category=ConfigWarning)
 warnings.filterwarnings(action="ignore", category=ConfMatIOWarning)
 warnings.filterwarnings(action="ignore", category=RuntimeWarning)
 
 all_test_cases = []
-for metric, confusion_matrix in product(all_metrics_to_test, all_confusion_matrices_to_test):
+for metric, confusion_matrix in product(
+    all_metrics_to_test, all_confusion_matrices_to_test
+):
     try:
         test_case = generate_test_case(metric=metric, conf_mat_fp=confusion_matrix)
     except Exception as e:
-
-        raise Exception(f"Encountered exception for test case 'metric={metric}, confusion_matrix={confusion_matrix}': {e}")
+        raise Exception(
+            f"Encountered exception for test case 'metric={metric}, confusion_matrix={confusion_matrix}': {e}"
+        )
 
     all_test_cases.append(test_case)
+
 
 # ==============================================================================
 # The 'assert' code for pytest

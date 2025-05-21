@@ -9,7 +9,6 @@ from pathlib import Path
 from tabulate import tabulate
 
 from bayes_conf_mat.utils import fmt
-from bayes_conf_mat.io import IO_REGISTRY
 from bayes_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY
 from bayes_conf_mat.experiment_aggregation import AGGREGATION_REGISTRY
 
@@ -17,7 +16,7 @@ REFERENCE_PART = "Reference"
 METRICS_AND_AVERAGING_CHAPTER = REFERENCE_PART + "/Metrics"
 METRICS_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Metrics.md"
 AVERAGING_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Averaging.md"
-IO_SECTION = REFERENCE_PART + "/IO.md"
+# IO_SECTION = REFERENCE_PART + "/IO.md"
 EXPERIMENT_AGGREGATION_SECTION = REFERENCE_PART + "/Experiment Aggregation/index.md"
 
 
@@ -231,28 +230,28 @@ def averaging():
     logger.info(f"Wrote averaging methods to '{AVERAGING_SECTION}'")
 
 
-def io():
-    logger = logging.getLogger(__name__)
+# def io():
+#     logger = logging.getLogger(__name__)
 
-    # Load in the template
-    template = Template(Path("./documentation/_partial/io.md").resolve())
+#     # Load in the template
+#     template = Template(Path("./documentation/_partial/io.md").resolve())
 
-    # Complete the template
-    # Creates a table with some important information as an overview
-    all_io_methods = {str(io_method): io_method for io_method in IO_REGISTRY.values()}
+#     # Complete the template
+#     # Creates a table with some important information as an overview
+#     all_io_methods = {str(io_method): io_method for io_method in IO_REGISTRY.values()}
 
-    template.set(
-        "io_methods_list",
-        value="\n".join(
-            f"::: {io_method.__module__}.{io_method.__name__}"
-            for io_method in all_io_methods.values()
-        ),
-    )
+#     template.set(
+#         "io_methods_list",
+#         value="\n".join(
+#             f"::: {io_method.__module__}.{io_method.__name__}"
+#             for io_method in all_io_methods.values()
+#         ),
+#     )
 
-    # Write the template to a md file
-    Path(f"./documentation/{IO_SECTION}").write_text(str(template), encoding="utf-8")
+#     # Write the template to a md file
+#     Path(f"./documentation/{IO_SECTION}").write_text(str(template), encoding="utf-8")
 
-    logger.info(f"Wrote IO methods to '{IO_SECTION}'")
+#     logger.info(f"Wrote IO methods to '{IO_SECTION}'")
 
 
 def experiment_aggregation():
@@ -301,8 +300,9 @@ if __name__ == "__main__":
     # References/Metrics/index.md
     metrics_and_averaging_overview()
 
+    # TODO: add documentation for IO and utils in general
     # References/IO.md
-    io()
+    # io()
 
     # References/ExperimentAggregation.md
     experiment_aggregation()
