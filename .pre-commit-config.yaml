@@ -47,7 +47,7 @@ repos:
     -   id: test_notebooks
         name: test_notebooks
         language: system
-        files: \.ipynb$
+        types: [python]
         pass_filenames: false
         entry: ./.venv/bin/pytest tests/test_notebooks.py
     -   id: test_rng

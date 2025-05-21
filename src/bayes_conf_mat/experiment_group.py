@@ -63,7 +63,7 @@ class ExperimentGroup:
     def add_experiment(
         self,
         name: str,
-        confusion_matrix: jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"],
+        confusion_matrix: jtyping.Int[np.ndarray, " num_classes num_classes"],
         prevalence_prior: str
         | float
         | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
@@ -77,7 +77,7 @@ class ExperimentGroup:
 
         Args:
             name (str): the name of this experiment
-            confusion_matrix (Int[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment.
+            confusion_matrix (Int[ndarray, 'num_classes num_classes']): the confusion matrix for this experiment.
             prevalence_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
             confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
 
@@ -110,7 +110,9 @@ class ExperimentGroup:
         # Check if this experiment already exists
         # Overwrite if so
         if self.experiments.get(name, None) is not None:  # type: ignore
-            warn(message=f"Experiment '{self.name}/{name} alread exists. Overwriting.")
+            warn(
+                message=f"Experiment '{self.name}/{name}' already exists. Overwriting."
+            )
 
         # Finally, add the experiment to the experiment store
         self.experiments[name] = new_experiment

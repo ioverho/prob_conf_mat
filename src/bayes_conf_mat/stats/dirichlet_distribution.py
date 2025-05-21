@@ -11,10 +11,13 @@ _DIRICHLET_PRIOR_STRATEGIES = {
     "bayes": 1.0,
     "laplace": 1.0,
     "ones": 1.0,
+    "one": 1.0,
     "jeffreys": 0.5,
     "halves": 0.5,
+    "half": 0.5,
     "haldane": 0.0,
     "zeros": 0.0,
+    "zero": 0.0,
 }
 
 
@@ -49,7 +52,7 @@ def dirichlet_prior(
 
         if prior.shape != shape:
             raise ValueError(
-                f"Prior does not match required shape, {prior.shape} != {shape}"
+                f"Prior does not match required shape, {prior.shape} != {shape}. Parsed {prior} of type {type(prior)} from {strategy} fo type {type(strategy)}."
             )
 
     return prior

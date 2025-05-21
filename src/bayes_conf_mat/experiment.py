@@ -10,7 +10,7 @@ import jaxtyping as jtyping
 
 from bayes_conf_mat.metrics import RootMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
-from bayes_conf_mat.utils import RNG, MetricLike, validate_confusion_matrix
+from bayes_conf_mat.utils import RNG, MetricLike
 
 
 class SamplingMethod(StrEnum):
@@ -66,7 +66,7 @@ class Experiment:
     Args:
         name (str): the name of this experiment
         rng (RNG): the numpy RNG
-        confusion_matrix (typing.Dict[str, typing.Any] | Float[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment. Should either be an arraylike or a dictionary with kwargs for a specific IO method.
+        confusion_matrix (Int[ndarray, 'num_classes num_classes']): the confusion matrix for this experiment.
         prevalence_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
         confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
 
@@ -76,9 +76,7 @@ class Experiment:
         self,
         name: str,
         rng: RNG,
-        confusion_matrix: jtyping.Float[
-            np.typing.ArrayLike, " num_classes num_classes"
-        ],
+        confusion_matrix: jtyping.Int[np.ndarray, " num_classes num_classes"],
         prevalence_prior: str
         | float
         | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
@@ -89,18 +87,19 @@ class Experiment:
         self.name = name
 
         # Argument Validation ==================================================
-        # load and validate the confusion matrix
-        self.confusion_matrix = validate_confusion_matrix(conf_mat=confusion_matrix)
+        # Load the confusion matrix
+        # Assume it already has been validated
+        self.confusion_matrix = confusion_matrix
 
         # The prior strategy used for defining the Dirichlet prior counts
         self._init_prevalence_prior = prevalence_prior
         self.prevalence_prior = dirichlet_prior(
-            prevalence_prior, shape=(self.num_classes,)
+            strategy=prevalence_prior, shape=(self.num_classes,)
         )
 
         self._init_confusion_prior = confusion_prior
         self.confusion_prior = dirichlet_prior(
-            confusion_prior, shape=(self.num_classes, self.num_classes)
+            strategy=confusion_prior, shape=(self.num_classes, self.num_classes)
         )
 
         # The RNG

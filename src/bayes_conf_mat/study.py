@@ -254,9 +254,7 @@ class Study(Config):
     def add_experiment(
         self,
         experiment_name: str,
-        confusion_matrix: typing.Optional[
-            jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"]
-        ] = None,
+        confusion_matrix: jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"],
         prevalence_prior: typing.Optional[
             str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"]
         ] = None,
@@ -269,7 +267,7 @@ class Study(Config):
 
         Args:
             experiment_name (str): the name of the experiment and experiment group. Should be written as 'experiment_group/experiment'. If the experiment group name is omitted, the experiment gets added to a new experiment group of the same name.
-            confusion_matrix (Optional[Int[ArrayLike, 'num_classes num_classes']]): the confusion matrix for this experiment. If left as `None`, then the IO kwargs should specify where a confusion matrix might be found
+            confusion_matrix (Int[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment
             prevalence_prior (Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
             confusion_prior (Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
 
@@ -288,20 +286,14 @@ class Study(Config):
         )
 
         # Type checking ========================================================
-        # If passing a list o np.ndarray as the confusion matrix, wraps it into
+        # If passing a list or np.ndarray as the confusion matrix, wraps it into
         # a dict to be fed to an IO method
-        conf_mat_io_config: dict[str, typing.Any] = dict(io_kwargs)
-
-        if isinstance(confusion_matrix, (list, tuple, np.ndarray)):
-            conf_mat_io_config.update(dict(confusion_matrix=confusion_matrix))
-
-        # Create a complete IO config for the confusion matrix
-        conf_mat_io_config.update(
-            {
-                "prevalence_prior": prevalence_prior,
-                "confusion_prior": confusion_prior,
-            }
-        )
+        conf_mat_io_config: dict[str, typing.Any] = {
+            "confusion_matrix": confusion_matrix,
+            "prevalence_prior": prevalence_prior,
+            "confusion_prior": confusion_prior,
+            **io_kwargs,
+        }
 
         # Add the experiment to the config back-end ============================
         cur_experiments = self.experiments
@@ -312,6 +304,7 @@ class Study(Config):
             {experiment_name: conf_mat_io_config}
         )
 
+        # This performs the validation of the experiment config
         self.experiments = cur_experiments
 
         # Add the experiment and experiment_group to the store =================
@@ -329,10 +322,11 @@ class Study(Config):
 
             self._experiment_store[experiment_group_name] = experiment_group
 
+        # This is the updated and validated experiment configuration
         experiment_config = self.experiments[experiment_group_name][experiment_name]
 
         # Finally, add the experiment to the right experiment group
-        experiment_group = self._experiment_store[experiment_group_name].add_experiment(
+        self._experiment_store[experiment_group_name].add_experiment(
             name=experiment_name,
             confusion_matrix=experiment_config["confusion_matrix"],
             prevalence_prior=experiment_config["prevalence_prior"],
