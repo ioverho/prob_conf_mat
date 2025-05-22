@@ -1,12 +1,10 @@
-import typing
-
 import scipy
 import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample
-from bayes_conf_mat.utils import RNG
+
 
 class FEGaussianAggregator(ExperimentAggregator):
     """Samples from the Gaussian-conflated distribution, which is equivalent to the
@@ -36,12 +34,8 @@ class FEGaussianAggregator(ExperimentAggregator):
 
     """
 
-    name = "fe_gaussian"
     full_name = "Fixed-effect Gaussian meta-analytical experiment aggregator"
     aliases = ["fe", "fixed_effect", "fe_gaussian", "gaussian", "normal", "fe_normal"]
-
-    def __init__(self, rng: RNG) -> None:
-        super().__init__(rng=rng)
 
     def aggregate(
         self,

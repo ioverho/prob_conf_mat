@@ -1,10 +1,9 @@
-import typing
-
 import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.utils import RNG
+
 
 class HistogramAggregator(ExperimentAggregator):
     """Samples from a histogram approximate conflation distribution.
@@ -31,7 +30,6 @@ class HistogramAggregator(ExperimentAggregator):
 
     """
 
-    name = "histogram"
     full_name = "Histrogram approximated conflation experiment aggregation"
     aliases = ["hist", "histogram"]
 
@@ -102,7 +100,7 @@ class HistogramAggregator(ExperimentAggregator):
         # Resample the conflated distribution
         # Samples at the midpoint of each bin
         conflated_distribution_samples = self.rng.choice(
-            (bins[:-1] + bins[1:]) / 2, # type: ignore
+            (bins[:-1] + bins[1:]) / 2,  # type: ignore
             size=num_samples,
             p=conflated_distribution,
         )

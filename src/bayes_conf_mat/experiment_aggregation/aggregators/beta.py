@@ -1,11 +1,10 @@
-import typing
-
 import scipy
 import numpy as np
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.utils import RNG
+
 
 class BetaAggregator(ExperimentAggregator):
     """Samples from the beta-conflated distribution.
@@ -35,13 +34,10 @@ class BetaAggregator(ExperimentAggregator):
 
     """
 
-    name = "beta"
     full_name = "Beta conflated experiment aggregation"
     aliases = ["beta", "beta_conflation"]
 
-    def __init__(
-        self, rng: RNG, estimation_method: str = "mle"
-    ) -> None:
+    def __init__(self, rng: RNG, estimation_method: str = "mle") -> None:
         super().__init__(rng=rng)
 
         # Honestly should get rid of this

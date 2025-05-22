@@ -1,4 +1,3 @@
-import typing
 import warnings
 
 import numpy as np
@@ -9,6 +8,7 @@ import jaxtyping as jtyping
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample
 from bayes_conf_mat.utils import RNG
+
 
 class GammaAggregator(ExperimentAggregator):
     """Samples from the Gamma-conflated distribution.
@@ -36,7 +36,6 @@ class GammaAggregator(ExperimentAggregator):
 
     """
 
-    name = "gamma"
     full_name = "Gamma conflated experiment aggregator"
     aliases = ["gamma", "gamma_conflation"]
 

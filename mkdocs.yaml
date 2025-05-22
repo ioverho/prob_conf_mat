@@ -8,16 +8,17 @@ extra_css:
 
 docs_dir: documentation
 
-site_name: Credibility Matrices
+site_name: Bayesian Confusion Matrices
 site_url: https://github.com/ioverho/bayes_conf_mat
-site_description: "TODO: add a description"
+# TODO: add a description
+site_description: ""
 site_author: Ivo Verhoeven
 use_directory_urls: false
 
 repo_url: https://github.com/ioverho/bayes_conf_mat
 repo_name: ioverho/bayes_conf_mat
 
-copyright: Copyright &copy; 2024 Ivo Verhoeven
+copyright: Copyright &copy; 2025 Ivo Verhoeven
 
 nav:
   - index.md
@@ -25,14 +26,17 @@ nav:
       - Getting Started/01_estimating_uncertainty.ipynb
       - Getting Started/02_comparing_experiments.ipynb
       - Getting Started/03_aggregating_experiments.ipynb
-      #- Getting Started/mnist_digits_class.ipynb
+      - Getting Started/04_interfacing_with_the_filesystem.ipynb
   - How-To:
-      - How To Guides/configuration.md
-      - How To Guides/metric_syntax.md
-      - How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
+      - How To Guides/index.md
+      - How To Guides/extending_the_library.md
+      #- How To Guides/configuration.md
+      #- How To Guides/metric_syntax.md
+      #- How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
   - Reference:
       #- References/ExperimentManager.md
       #- References/Experiment.md
+      - Reference/index.md
       - Reference/Study.md
       - Metrics:
           - Reference/Metrics/index.md
@@ -134,7 +138,7 @@ plugins:
           options:
             # Do not add source code as block
             show_source: false
-            heading_level: 3
+            heading_level: 2
             show_root_heading: true
             show_root_members_full_path: false
             # Don't show the entire path of a class
@@ -143,7 +147,7 @@ plugins:
             show_symbol_type_heading: true
             show_symbol_type_toc: true
             docstring_style: google
-            docstring_section_style: spacy # table | list | spacy
+            docstring_section_style: table # table | list | spacy
             # Order by code, not name
             members_order: source
             # Try to keep annotations limited

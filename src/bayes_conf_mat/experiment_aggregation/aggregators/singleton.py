@@ -4,20 +4,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import numpy as np
 
-import typing
-
 import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
-from bayes_conf_mat.utils import RNG
+
 
 class SingletonAggregator(ExperimentAggregator):
-    name = "singleton"
     full_name = "Singleton experiment aggregation"
     aliases = ["singleton", "identity"]
-
-    def __init__(self, rng: RNG) -> None:
-        super().__init__(rng=rng)
 
     def aggregate(
         self,

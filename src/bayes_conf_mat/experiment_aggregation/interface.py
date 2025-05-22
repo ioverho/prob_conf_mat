@@ -1,7 +1,9 @@
-import numpy as np
-
-from bayes_conf_mat.experiment_aggregation.abc import AGGREGATION_REGISTRY, ExperimentAggregator
+from bayes_conf_mat.experiment_aggregation.abc import (
+    AGGREGATION_REGISTRY,
+    ExperimentAggregator,
+)
 from bayes_conf_mat.utils import RNG
+
 
 def get_experiment_aggregator(
     aggregation: str, rng: RNG, **kwargs

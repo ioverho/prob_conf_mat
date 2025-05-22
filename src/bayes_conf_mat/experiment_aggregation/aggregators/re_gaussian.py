@@ -1,5 +1,3 @@
-import typing
-
 import scipy
 import numpy as np
 import jaxtyping as jtyping
@@ -11,6 +9,7 @@ from bayes_conf_mat.experiment_aggregation.heterogeneity import (
 )
 from bayes_conf_mat.stats import truncated_sample
 from bayes_conf_mat.utils import RNG
+
 
 class REGaussianAggregator(ExperimentAggregator):
     """Samples from the Random Effects Meta-Analytical Estimator.
@@ -53,7 +52,6 @@ class REGaussianAggregator(ExperimentAggregator):
         hksj_sampling_distribution (bool): whether to use the Hartung-Knapp-Sidik-Jonkman corrected $t$-distribition as the aggregate sampling distribution. Defaults to False.
     """
 
-    name = "re_gaussian"
     full_name = "Random-effects Gaussian meta-analytical experiment aggregator"
     aliases = ["re", "random_effect", "re_gaussian", "re_normal"]
 

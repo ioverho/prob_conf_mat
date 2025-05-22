@@ -32,20 +32,21 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
     def __init__(self, rng: RNG) -> None:
         self.rng = rng
+        self._init_params = dict()
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
         # Make sure that all aliases are unique
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             if alias in AGGREGATION_REGISTRY:
                 raise ValueError(
                     f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}."  # noqa: E501
                 )
 
         # Register =============================================================
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             AGGREGATION_REGISTRY[alias] = cls
 
         cls._kwargs = {
@@ -55,14 +56,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def name(self) -> str: # type: ignore
-        raise NotImplementedError
-
-    name: str
-
-    @property
-    @abstractmethod
-    def full_name(self) -> str: # type: ignore
+    def full_name(self) -> str:  # type: ignore
         """A human-readable name for this experiment-aggregation method"""
         raise NotImplementedError
 
@@ -70,11 +64,19 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> list[str]: # type: ignore
+    def aliases(self) -> list[str]:  # type: ignore
         """A list of all valid aliases for this metric. Can be used in configuration files."""
         raise NotImplementedError
 
     aliases: list[str]
+
+    @property
+    def name(self) -> str:
+        init_name = self._init_params.get("aggregation", None)
+        if init_name is not None:
+            return init_name
+        else:
+            return self.aliases[0]
 
     @abstractmethod
     def aggregate(
@@ -91,9 +93,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         self,
         experiment_group: ExperimentGroup,
         metric: MetricLike,
-        experiment_results: typing.Annotated[
-            list[ExperimentResult], "num_experiments"
-        ],
+        experiment_results: typing.Annotated[list[ExperimentResult], "num_experiments"],
     ) -> ExperimentAggregationResult:
         # Stack the experiment values
         stacked_experiment_results: jtyping.Float[
@@ -114,7 +114,8 @@ class ExperimentAggregator(metaclass=ABCMeta):
             per_class_aggregated_experiment_result: jtyping.Float[
                 np.ndarray, " num_samples"
             ] = self.aggregate(
-                experiment_samples=per_class_stacked_experiment_results, bounds=metric.bounds # type: ignore
+                experiment_samples=per_class_stacked_experiment_results,
+                bounds=metric.bounds,  # type: ignore
             )
 
             all_class_aggregated_experiment_result.append(
@@ -131,11 +132,11 @@ class ExperimentAggregator(metaclass=ABCMeta):
         # Finally, stack everything back together
         aggregated_experiment_result: jtyping.Float[
             np.ndarray, " num_samples #num_classes"
-        ] = np.vstack(per_class_aggregated_experiment_result) # type: ignore
+        ] = np.vstack(per_class_aggregated_experiment_result)  # type: ignore
 
         result = ExperimentAggregationResult(
             experiment_group=experiment_group,
-            aggregator=self, # type: ignore
+            aggregator=self,  # type: ignore
             metric=metric,
             heterogeneity_results=all_class_heterogeneity,
             values=aggregated_experiment_result,
