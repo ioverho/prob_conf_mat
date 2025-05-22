@@ -10,7 +10,8 @@ from bayes_conf_mat.utils import fmt
 
 if typing.TYPE_CHECKING:
     from bayes_conf_mat.metrics import Metric, AveragedMetric
-    import matplotlib
+    import matplotlib  # noqa: F401
+    from matplotlib.figure import Figure
 
 IMPLEMENTED_METHODS = {"kde", "hist", "histogram"}
 
@@ -26,10 +27,10 @@ def diff_distribution_plot(
     min_sig_diff: typing.Optional[float] = None,
     method: str = "kde",
     bandwidth: float = 1.0,
-    bins: int | typing.List[int] | str = "auto",
-    figsize: typing.Tuple[float, float] = None,
+    bins: int | list[int] | str = "auto",
+    figsize: typing.Optional[tuple[float, float]] = None,
     fontsize: float = 9,
-    axis_fontsize: float = None,
+    axis_fontsize: typing.Optional[float] = None,
     precision: int = 4,
     edge_colour="black",
     plot_min_sig_diff_lines: bool = True,
@@ -44,7 +45,7 @@ def diff_distribution_plot(
     plot_obs_point: bool = True,
     obs_point_marker: str = "D",
     obs_point_colour: str = "black",
-    obs_point_size: float = None,
+    obs_point_size: typing.Optional[float] = None,
     plot_median_line: bool = True,
     median_line_colour: str = "black",
     median_line_format: str = "--",
@@ -59,7 +60,7 @@ def diff_distribution_plot(
     base_lines_colour: str = "black",
     base_lines_format: str = "-",
     plot_proportions: bool = True,
-) -> matplotlib.figure.Figure:
+) -> Figure:
     """Plots the distribution of differences.
 
     Args:
@@ -73,8 +74,8 @@ def diff_distribution_plot(
         min_sig_diff (typing.Optional[float], optional): the minimum value for siginificance. Defaults to 0.1 * stdev.
         method (str, optional): the method for displaying a histogram, provided by Seaborn. Can be either a histogram or KDE. Defaults to "kde".
         bandwidth (float, optional): the bandwith parameter for the KDE. Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html). Defaults to 1.0.
-        bins (int | typing.List[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
-        figsize (typing.Tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
+        bins (int | list[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
+        figsize (tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
         fontsize (float, optional): fontsize for the experiment name labels. Defaults to 9.
         axis_fontsize (float, optional): fontsize for the x-axis ticklabels. Defaults to None, in which case the fontsize will be used.
         edge_colour (str, optional): the colour of the histogram or KDE edge. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
@@ -182,21 +183,13 @@ def diff_distribution_plot(
     # Figure instantiation
     if figsize is None:
         # Try to set a decent default figure size
-        _figsize = [None, None]
-        _figsize[0] = 6.30
-        _figsize[1] = 2.52
+        _figsize = (6.30, 2.52)
     else:
         _figsize = figsize
 
     fig, ax = plt.subplots(1, 1, figsize=_figsize)
 
-    if method not in IMPLEMENTED_METHODS:
-        del fig, ax
-        raise ValueError(
-            f"Parameter `method` must be one of: {IMPLEMENTED_METHODS}. Currently: {method}"
-        )
-
-    elif method == "kde":
+    if method == "kde":
         # Plot the kde
         sns.kdeplot(
             comparison_result.diff_dist,
@@ -235,6 +228,12 @@ def diff_distribution_plot(
         kde_x = np.repeat(kde_x, 2)
         kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
 
+    else:
+        del fig, ax
+        raise ValueError(
+            f"Parameter `method` must be one of: {IMPLEMENTED_METHODS}. Currently: {method}"
+        )
+
     min_x = np.min(kde_x)
     max_x = np.max(kde_x)
 
@@ -242,9 +241,9 @@ def diff_distribution_plot(
         for msd in [-comparison_result.min_sig_diff, comparison_result.min_sig_diff]:
             y_msd = np.interp(
                 x=msd,
-                xp=kde_x,
-                fp=kde_y,
-            )
+                xp=kde_x,  # type: ignore
+                fp=kde_y,  # type: ignore
+            )  # type: ignore
 
             ax.vlines(
                 msd,
@@ -259,14 +258,14 @@ def diff_distribution_plot(
     rope_xx = np.linspace(
         -comparison_result.min_sig_diff,
         comparison_result.min_sig_diff,
-        num=2 * kde_x.shape[0],
+        num=2 * kde_x.shape[0],  # type: ignore
     )
 
     rope_yy = np.interp(
         x=rope_xx,
-        xp=kde_x,
-        fp=kde_y,
-    )
+        xp=kde_x,  # type: ignore
+        fp=kde_y,  # type: ignore
+    )  # type: ignore
 
     ax.fill_between(
         x=rope_xx,
@@ -281,14 +280,16 @@ def diff_distribution_plot(
 
     # Fill the negatively significant area
     neg_sig_xx = np.linspace(
-        min_x, -comparison_result.min_sig_diff, num=2 * kde_x.shape[0]
+        min_x,
+        -comparison_result.min_sig_diff,
+        num=2 * kde_x.shape[0],  # type: ignore
     )
 
     neg_sig_yy = np.interp(
         x=neg_sig_xx,
-        xp=kde_x,
-        fp=kde_y,
-    )
+        xp=kde_x,  # type: ignore
+        fp=kde_y,  # type: ignore
+    )  # type: ignore
 
     ax.fill_between(
         x=neg_sig_xx,
@@ -303,13 +304,15 @@ def diff_distribution_plot(
 
     # Fill the positively significant area
     pos_sig_xx = np.linspace(
-        comparison_result.min_sig_diff, max_x, num=2 * kde_x.shape[0]
+        comparison_result.min_sig_diff,
+        max_x,
+        num=2 * kde_x.shape[0],  # type: ignore
     )
 
-    pos_sig_yy = np.interp(
+    pos_sig_yy = np.interp(  # type: ignore
         x=pos_sig_xx,
-        xp=kde_x,
-        fp=kde_y,
+        xp=kde_x,  # type: ignore
+        fp=kde_y,  # type: ignore
     )
 
     ax.fill_between(
@@ -348,9 +351,9 @@ def diff_distribution_plot(
 
         y_median = np.interp(
             x=median_x,
-            xp=kde_x,
-            fp=kde_y,
-        )
+            xp=kde_x,  # type: ignore
+            fp=kde_y,  # type: ignore
+        )  # type: ignore
 
         ax.vlines(
             median_x,
@@ -366,9 +369,9 @@ def diff_distribution_plot(
 
             y_hdi_lb = np.interp(
                 x=x_hdi_lb,
-                xp=kde_x,
-                fp=kde_y,
-            )
+                xp=kde_x,  # type: ignore
+                fp=kde_y,  # type: ignore
+            )  # type: ignore
 
             ax.vlines(
                 x_hdi_lb,
@@ -383,9 +386,9 @@ def diff_distribution_plot(
 
             y_hdi_ub = np.interp(
                 x=x_hdi_ub,
-                xp=kde_x,
-                fp=kde_y,
-            )
+                xp=kde_x,  # type: ignore
+                fp=kde_y,  # type: ignore
+            )  # type: ignore
 
             ax.vlines(
                 x_hdi_ub,

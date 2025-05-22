@@ -9,11 +9,12 @@
 ##### Metrics
 
 Tests the equivalence of the metric computation methods with their sklearn equivalent
-```
+
+```sh
 uv run pytest ./tests/test_metric_equivalence.py
 ```
 
-**Metrics that haven't been tested**
+###### Metrics that haven't been tested
 
 1. `FalseDiscoveryRate`:
 2. `FalseOmissionRate`:
@@ -26,7 +27,7 @@ uv run pytest ./tests/test_metric_equivalence.py
 
 Tests the various input output methods
 
-```
+```sh
 uv run pytest ./tests/test_io.py
 ```
 
@@ -34,6 +35,6 @@ uv run pytest ./tests/test_io.py
 
 ### Static Type Checking
 
-```
+```sh
 uv run --extra dev pyright > tests/pyright_report
 ```

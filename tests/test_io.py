@@ -1,121 +1,103 @@
-import re
-from pathlib import Path
-
+import numpy as np
 import pytest
 
-from bayes_conf_mat.io import get_io
-from bayes_conf_mat.io.abc import ConfMatIOException, ConfMatIOWarning
+from bayes_conf_mat.utils.io import (
+    validate_confusion_matrix,
+    load_csv,
+    ConfMatIOException,
+    ConfMatIOWarning,
+)
+
 
 class TestCSV:
     def test_file_not_exist(self):
-        with pytest.raises(ValueError, match="No file found at:"):
-            get_io(
-                format="csv",
-                location="fobbarbaz.csv",
-                type="confusion_matrix",
-            ).load()
+        with pytest.raises(FileNotFoundError, match="No such file or directory:"):
+            load_csv(
+                location="foobarbaz.csv",
+            )
 
-    def test_nonexistent_type(self):
-        with pytest.raises(ValueError, match="For CSV, `type` must be one of"):
-            get_io(
-                format="csv",
-                location="./tests/data/confusion_matrices/sklearn_1.csv",
-                type="foobarbaz",
-            ).load()
 
-    def test_incorrect_io_type(self):
-        with pytest.raises(ValueError):
-            get_io(
-                format="csv",
-                location="./tests/data/confusion_matrices/sklearn_face_classification.csv",
-                type="cond_pred",
-            ).load()
+class TestConfMatValidation:
+    def test_dtype_conversion(self) -> None:
+        # Integer should pass directly
+        validate_confusion_matrix(confusion_matrix=[[1, 0], [0, 1]])
 
-    def test_conf_mat_validation(self):
-        test_conf_mats_dir = Path("./tests/data/malformed_confusion_matrices")
+        # Object should fail
+        with pytest.raises(
+            ConfMatIOException,
+            match="The loaded confusion matrix is not of type integer.",
+        ):
+            validate_confusion_matrix(confusion_matrix=[[1, "foo"], [0, 1]])
+
+        # Float should fail
+        with pytest.raises(
+            ConfMatIOException,
+            match="The loaded confusion matrix is not of type integer.",
+        ):
+            validate_confusion_matrix(confusion_matrix=[[1.0, 0], [0, 1]])
+
+        # uint should not fail
+        validate_confusion_matrix(
+            confusion_matrix=np.array([[1, 0], [0, 1]], dtype=np.uint)
+        )
+
+        # complex float should fail
+        with pytest.raises(
+            ConfMatIOException,
+            match="The loaded confusion matrix is not of type integer.",
+        ):
+            validate_confusion_matrix(
+                confusion_matrix=np.array([[1, 0], [0, 1]], dtype=np.complex128)
+            )
+
+        # bool should not fail
+        validate_confusion_matrix(
+            confusion_matrix=np.array([[1, 0], [0, 1]], dtype=np.bool)
+        )
 
         with pytest.raises(
-            ValueError, match="The requested array has an inhomogeneous shape"
+            ConfMatIOException,
+            match="The loaded confusion matrix is not of type integer.",
         ):
-            get_io(
-                format="csv",
-                location=test_conf_mats_dir / "malformed_shape.csv",
-                type="confusion_matrix",
-            ).load()
+            validate_confusion_matrix(confusion_matrix=np.array([[1, 0], [np.inf, 1]]))
 
-        with pytest.raises(ConfMatIOException, match="Row contains values that cannot"):
-            get_io(
-                format="csv",
-                location=test_conf_mats_dir / "nan_values.csv",
-                type="confusion_matrix",
-            ).load()
+    def test_shape(self) -> None:
+        # 2D Square matrix should not fail
+        conf_mat = np.ones((2, 2), dtype=np.int64)
+        validate_confusion_matrix(confusion_matrix=conf_mat)
 
-        with pytest.raises(ConfMatIOException, match="Row contains values that cannot"):
-            get_io(
-                format="csv",
-                location=test_conf_mats_dir / "non_integer_data.csv",
-                type="confusion_matrix",
-            ).load()
+        # Non 2D matrix should fail
+        with pytest.raises(
+            ConfMatIOException, match="The loaded confusion matrix is malformed."
+        ):
+            conf_mat = np.ones((3, 3, 3), dtype=np.int64)
+            validate_confusion_matrix(confusion_matrix=conf_mat)
 
+        # Non square matrix should fail
+        with pytest.raises(
+            ConfMatIOException, match="The loaded confusion matrix is malformed."
+        ):
+            conf_mat = np.ones((2, 4), dtype=np.int64)
+            validate_confusion_matrix(confusion_matrix=conf_mat)
+
+        with pytest.raises(
+            ConfMatIOException, match="The loaded confusion matrix is malformed."
+        ):
+            conf_mat = np.ones((4, 2), dtype=np.int64)
+            validate_confusion_matrix(confusion_matrix=conf_mat)
+
+        with pytest.raises(
+            ConfMatIOException, match="The loaded confusion matrix is malformed."
+        ):
+            conf_mat = np.ones((1, 1), dtype=np.int64)
+            validate_confusion_matrix(confusion_matrix=conf_mat)
+
+    def test_empty(self) -> None:
         with pytest.raises(ConfMatIOException, match="Some rows contain no entries"):
-            get_io(
-                format="csv",
-                location=test_conf_mats_dir / "zero_row_counts.csv",
-                type="confusion_matrix",
-            ).load()
+            validate_confusion_matrix(confusion_matrix=[[0, 0], [0, 1]])
 
-        with pytest.warns(ConfMatIOWarning, match="Some columns contain no entries, meaning model never predicted it."):
-            get_io(
-                format="csv",
-                location=test_conf_mats_dir / "zero_col_counts.csv",
-                type="confusion_matrix",
-            ).load()
-
-class TestInMemory:
-    def test_no_data(self):
-        with pytest.raises(TypeError, match=re.escape("InMemory.__init__() missing 1 required positional argument: 'data'")):
-            get_io(
-                format="in_memory",
-                ).load()
-
-    def test_array_like_conversion(self):
-        with pytest.raises(ConfMatIOException, match="The constructed confusion matrix is not of integer type"):
-            get_io(
-                format="in_memory",
-                data=[[1, "foo"], [0, 1]]
-                ).load()
-
-        with pytest.raises(TypeError, match="In-memory confusion matrix is of invalid type. Must a `np.ArrayLike`."):
-            get_io(
-                format="in_memory",
-                data=[[1, 0], [0, 1], [0, 0, 1]]
-                ).load()
-
-    def test_conf_mat_validation(self):
-        with pytest.raises(
-            ConfMatIOException, match="The constructed confusion matrix is malformed."
+        with pytest.warns(
+            ConfMatIOWarning,
+            match="Some columns contain no entries, meaning model never predicted it.",
         ):
-            get_io(
-                format="in_memory",
-                data=[[1, 0], [0, 1], [0, 1]]
-                ).load()
-
-        with pytest.raises(
-            ConfMatIOException, match="The constructed confusion matrix is malformed."
-        ):
-            get_io(
-                format="in_memory",
-                data=[[1, 0, 1], [0, 1, 0]]
-                ).load()
-
-        with pytest.raises(ConfMatIOException, match="Some rows contain no entries"):
-            get_io(
-                format="in_memory",
-                data=[[0, 0], [0, 1]]
-                ).load()
-
-        with pytest.warns(ConfMatIOWarning, match="Some columns contain no entries, meaning model never predicted it."):
-            get_io(
-                format="in_memory",
-                data=[[0, 1], [0, 1]]
-                ).load()
+            validate_confusion_matrix(confusion_matrix=[[0, 1], [0, 1]])

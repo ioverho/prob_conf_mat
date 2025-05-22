@@ -8,10 +8,10 @@ from enum import StrEnum
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.io import get_io
-from bayes_conf_mat.metrics import RootMetric, Metric, AveragedMetric, MetricCollection
+from bayes_conf_mat.metrics import RootMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
 from bayes_conf_mat.utils import RNG, MetricLike
+
 
 class SamplingMethod(StrEnum):
     POSTERIOR = "posterior"
@@ -41,7 +41,7 @@ class ExperimentResult:
 
     @property
     def bounds(self) -> typing.Tuple[float]:
-        return self.metric.bounds # type: ignore
+        return self.metric.bounds  # type: ignore
 
     @property
     def num_classes(self) -> int:
@@ -66,7 +66,7 @@ class Experiment:
     Args:
         name (str): the name of this experiment
         rng (RNG): the numpy RNG
-        confusion_matrix (typing.Dict[str, typing.Any] | Float[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment. Should either be an arraylike or a dictionary with kwargs for a specific IO method.
+        confusion_matrix (Int[ndarray, 'num_classes num_classes']): the confusion matrix for this experiment.
         prevalence_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
         confusion_prior (typing.Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
 
@@ -76,50 +76,30 @@ class Experiment:
         self,
         name: str,
         rng: RNG,
-        confusion_matrix: typing.Dict[str, typing.Any]
-        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"],
-        prevalence_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
-        confusion_prior: str | float | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
+        confusion_matrix: jtyping.Int[np.ndarray, " num_classes num_classes"],
+        prevalence_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes"] = 0,
+        confusion_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"] = 0,
     ) -> None:
-
         self.name = name
 
         # Argument Validation ==================================================
-        # Import the confusion matrix
-        # Check if Mapping like object
-        if hasattr(confusion_matrix, "items"):
-            self.confusion_matrix_loader = get_io(**confusion_matrix) # type: ignore
-
-        # If a numpy array, just store it
-        elif isinstance(confusion_matrix, np.ndarray):
-            self.confusion_matrix_loader = get_io(
-                format="in_memory", data=confusion_matrix
-            )
-
-        # If not a numpy array, tries to make it one
-        else:
-            try:
-                confusion_matrix = np.array(confusion_matrix)
-                self.confusion_matrix_loader = get_io(
-                    format="in_memory", data=confusion_matrix
-                )
-            except Exception as e:
-                raise ValueError(
-                    f"Ran into exception when trying to convert {confusion_matrix} into a np.ndarray:\n{e}"
-                )
-
-        # load and validate the confusion matrix
-        self.confusion_matrix = self.confusion_matrix_loader.load()
+        # Load the confusion matrix
+        # Assume it already has been validated
+        self.confusion_matrix = confusion_matrix
 
         # The prior strategy used for defining the Dirichlet prior counts
         self._init_prevalence_prior = prevalence_prior
         self.prevalence_prior = dirichlet_prior(
-            prevalence_prior, shape=(self.num_classes,)
+            strategy=prevalence_prior, shape=(self.num_classes,)
         )
 
         self._init_confusion_prior = confusion_prior
         self.confusion_prior = dirichlet_prior(
-            confusion_prior, shape=(self.num_classes, self.num_classes)
+            strategy=confusion_prior, shape=(self.num_classes, self.num_classes)
         )
 
         # The RNG
@@ -147,7 +127,6 @@ class Experiment:
             np.ndarray, " num_samples num_classes num_classes"
         ],
     ) -> dict[MetricLike, ExperimentResult]:
-
         experiment_sample_result: dict[MetricLike, ExperimentResult] = {
             RootMetric("norm_confusion_matrix"): ExperimentResult(
                 experiment=self,
@@ -185,13 +164,13 @@ class Experiment:
         num_samples: int,
     ) -> typing.MutableMapping[MetricLike, ExperimentResult]:
         p_condition = dirichlet_sample(
-            rng=self.rng, # type: ignore
+            rng=self.rng,  # type: ignore
             alphas=condition_counts,
             num_samples=num_samples,
         )
 
         p_pred_given_condition = dirichlet_sample(
-            rng=self.rng, # type: ignore
+            rng=self.rng,  # type: ignore
             alphas=confusion_matrix,
             num_samples=num_samples,
         )
@@ -357,9 +336,9 @@ class Experiment:
         metric_compute_order = metrics.get_compute_order()
 
         # First have the experiment generate synthetic confusion matrices and needed RootMetrics
-        # typing.Dict[RootMetric, ExperimentResult]
-        intermediate_results: typing.MutableMapping[MetricLike, ExperimentResult]  = self.sample(
-            sampling_method=sampling_method, num_samples=num_samples
+        # dict[RootMetric, ExperimentResult]
+        intermediate_results: typing.MutableMapping[MetricLike, ExperimentResult] = (
+            self.sample(sampling_method=sampling_method, num_samples=num_samples)
         )
 
         # Go through all metrics and dependencies in order

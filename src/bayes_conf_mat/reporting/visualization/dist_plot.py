@@ -8,7 +8,8 @@ from bayes_conf_mat.stats import summarize_posterior
 
 if typing.TYPE_CHECKING:
     from bayes_conf_mat.metrics import Metric, AveragedMetric
-    import matplotlib
+    import matplotlib  # noqa: F401
+    from matplotlib.figure import Figure
 
 IMPLEMENTED_METHODS = {"kde", "hist", "histogram"}
 
@@ -19,11 +20,11 @@ def distribution_plot(
     class_label: int,
     method: str = "kde",
     bandwidth: float = 1.0,
-    bins: int | typing.List[int] | str = "auto",
+    bins: int | list[int] | str = "auto",
     normalize: bool = False,
-    figsize: typing.Tuple[float, float] = None,
+    figsize: typing.Optional[tuple[float, float]] = None,
     fontsize: float = 9,
-    axis_fontsize: float = None,
+    axis_fontsize: typing.Optional[float] = None,
     edge_colour: str = "black",
     area_colour: str = "gray",
     area_alpha: float = 0.5,
@@ -36,7 +37,7 @@ def distribution_plot(
     plot_obs_point: bool = True,
     obs_point_marker: str = "D",
     obs_point_colour: str = "black",
-    obs_point_size: float = None,
+    obs_point_size: typing.Optional[float] = None,
     plot_extrema_lines: bool = True,
     extrema_lines_colour: str = "black",
     extrema_lines_format: str = "-",
@@ -47,7 +48,7 @@ def distribution_plot(
     base_line_format: str = "-",
     base_line_width: int = 1,
     plot_experiment_name: bool = True,
-) -> matplotlib.figure.Figure:
+) -> Figure:
     """Plots a distribution.
 
     Args:
@@ -55,9 +56,9 @@ def distribution_plot(
         metric (Metric | AveragedMetric): the metric
         method (str, optional): the method for displaying a histogram, provided by Seaborn. Can be either a histogram or KDE. Defaults to "kde".
         bandwidth (float, optional): the bandwith parameter for the KDE. Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html). Defaults to 1.0.
-        bins (int | typing.List[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
+        bins (int | list[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
         normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1]. Otherwise, uses a shared y-axis. Defaults to False.
-        figsize (typing.Tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
+        figsize (tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
         fontsize (float, optional): fontsize for the experiment name labels. Defaults to 9.
         axis_fontsize (float, optional): fontsize for the x-axis ticklabels. Defaults to None, in which case the fontsize will be used.
         edge_colour (str, optional): the colour of the histogram or KDE edge. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
@@ -101,9 +102,7 @@ def distribution_plot(
 
     if figsize is None:
         # Try to set a decent default figure size
-        _figsize = [None, None]
-        _figsize[0] = 6.29921
-        _figsize[1] = max(0.625 * total_num_experiments, 2.5)
+        _figsize = (6.29921, max(0.625 * total_num_experiments, 2.5))
     else:
         _figsize = figsize
 
@@ -241,9 +240,9 @@ def distribution_plot(
 
                 y_median = np.interp(
                     x=median_x,
-                    xp=kde_x,
-                    fp=kde_y,
-                )
+                    xp=kde_x,  # type: ignore
+                    fp=kde_y,  # type: ignore
+                )  # type: ignore
 
                 axes[i].vlines(
                     median_x,
@@ -259,9 +258,9 @@ def distribution_plot(
 
                 y_hdi_lb = np.interp(
                     x=x_hdi_lb,
-                    xp=kde_x,
-                    fp=kde_y,
-                )
+                    xp=kde_x,  # type: ignore
+                    fp=kde_y,  # type: ignore
+                )  # type: ignore
 
                 axes[i].vlines(
                     x_hdi_lb,
@@ -276,9 +275,9 @@ def distribution_plot(
 
                 y_hdi_ub = np.interp(
                     x=x_hdi_ub,
-                    xp=kde_x,
-                    fp=kde_y,
-                )
+                    xp=kde_x,  # type: ignore
+                    fp=kde_y,  # type: ignore
+                )  # type: ignore
 
                 axes[i].vlines(
                     x_hdi_ub,
@@ -394,7 +393,7 @@ def distribution_plot(
 
     # Add the axes back, but only for the bottom plot
     axes[-1].spines["bottom"].set_visible(True)
-    axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+    axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
     axes[-1].set_yticks([])
     axes[-1].tick_params(
         axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize

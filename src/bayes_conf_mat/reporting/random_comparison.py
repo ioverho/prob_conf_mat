@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import typing
 
-from bayes_conf_mat.utils import fmt, lazy_import
+from bayes_conf_mat.utils import fmt
 from bayes_conf_mat.experiment_comparison import pairwise_compare
 
 if typing.TYPE_CHECKING:
     from bayes_conf_mat.metrics import Metric, AveragedMetric
-
-tabulate = lazy_import("tabulate")
 
 
 def pairwise_comparison_to_random(
@@ -20,6 +18,9 @@ def pairwise_comparison_to_random(
     tablefmt: str = "html",
     **tabulate_kwargs,
 ) -> str:
+    # Import optional dependencies only now
+    import tabulate
+
     table = []
     for experiment_group_name, experiment_group in study.experiment_groups.items():
         for experiment_name, experiment in experiment_group.experiments.items():

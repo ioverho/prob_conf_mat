@@ -100,7 +100,7 @@ theme:
     # ==========================================================================
     # Misc
     # ==========================================================================
-    #- navigation.footer
+    - navigation.footer
   palette:
     # TODO: come up with own colour palette
     # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
@@ -111,10 +111,6 @@ theme:
       toggle:
         icon: material/circle-half-full
         name: Switch to dark mode
-    #- scheme: arviz
-    #  toggle:
-    #    icon: material/circle-half-full
-    #    name: Switch to dark mode
     - scheme: slate
       primary: black
       accent: indigo
