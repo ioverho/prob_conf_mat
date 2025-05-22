@@ -330,13 +330,11 @@ class Config:
 
                 confusion_prior = 0.0
 
-            elif (
-                isinstance(confusion_prior, str)
-                and confusion_prior not in _DIRICHLET_PRIOR_STRATEGIES
-            ):
-                raise ConfigError(
-                    f"Experiment '{experiment_name}'s confusion prior is invalid. Currently: {confusion_prior}. If `str`, must be one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
-                )
+            elif isinstance(confusion_prior, str):
+                if confusion_prior not in _DIRICHLET_PRIOR_STRATEGIES:
+                    raise ConfigError(
+                        f"Experiment '{experiment_name}'s confusion prior is invalid. Currently: {confusion_prior}. If `str`, must be one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
+                    )
 
             # Accept positive integer and float values
             elif isinstance(confusion_prior, int) or isinstance(confusion_prior, float):
@@ -615,11 +613,49 @@ class Config:
         self._metrics = value
 
     def to_dict(self) -> dict[str, typing.Any]:
+        # Necessary to make sure all types are Pythonic
+        updated_experiments_config = dict()
+        for experiment_group_name, experiment_group in self.experiments.items():
+            updated_experiment_group_config = dict()
+            for experiment_name, experiment_config in experiment_group.items():
+                updated_experiment_config = dict()
+
+                updated_experiment_config["confusion_matrix"] = experiment_config[
+                    "confusion_matrix"
+                ].tolist()
+
+                if isinstance(experiment_config["prevalence_prior"], np.ndarray):
+                    updated_experiment_config["prevalence_prior"] = experiment_config[
+                        "prevalence_prior"
+                    ].tolist()
+                else:
+                    updated_experiment_config["prevalence_prior"] = experiment_config[
+                        "prevalence_prior"
+                    ]
+
+                if isinstance(experiment_config["confusion_prior"], np.ndarray):
+                    updated_experiment_config["confusion_prior"] = experiment_config[
+                        "confusion_prior"
+                    ].tolist()
+                else:
+                    updated_experiment_config["confusion_prior"] = experiment_config[
+                        "confusion_prior"
+                    ]
+
+                updated_experiment_group_config[experiment_name] = (
+                    updated_experiment_config
+                )
+
+            updated_experiments_config[experiment_group_name] = (
+                updated_experiment_group_config
+            )
+
+        # Final state dict
         state_dict = {
-            "seed": self.seed,
-            "num_samples": self.num_samples,
-            "ci_probability": self.ci_probability,
-            "experiments": dict(self.experiments),
+            "seed": int(self.seed),
+            "num_samples": int(self.num_samples),
+            "ci_probability": float(self.ci_probability),
+            "experiments": updated_experiments_config,
             "metrics": dict(self.metrics),
         }
 
@@ -627,48 +663,7 @@ class Config:
 
     @classmethod
     def from_dict(cls, config_dict: dict[str, typing.Any]) -> typing.Self:
-        # Currently, there are no required parameters
-        # But might change this in the future
-        required_keys = dict()
-        optional_keys = Config.__init__.__annotations__.keys()
-
-        missing_required_keys = required_keys - config_dict.keys()
-        if len(missing_required_keys) > 0:
-            raise ConfigError(
-                f"Missing the following required keys: {missing_required_keys}"
-            )
-
-        missing_optional_keys = optional_keys - config_dict.keys()
-        if len(missing_optional_keys) > 0:
-            warnings.warn(
-                message=f"Missing the following optional keys: {missing_optional_keys}",
-                category=ConfigWarning,
-            )
-
-        parsed_config_dict = dict()
-
-        for parameter in [
-            "seed",
-            "num_samples",
-            "ci_probability",
-            "experiments",
-            "metrics",
-        ]:
-            parameter_value = config_dict.get(parameter, None)
-
-            if parameter_value is not None:
-                parsed_config_dict[parameter] = parameter_value
-
-        unused_keys = set(config_dict.keys() - parsed_config_dict.keys())
-        if len(unused_keys) > 0:
-            warnings.warn(
-                message=f"The following keys were ignored: {unused_keys}",
-                category=ConfigWarning,
-            )
-
-        instance = cls(**parsed_config_dict)
-
-        return instance
+        raise NotImplementedError
 
     @property
     def fingerprint(self) -> str:

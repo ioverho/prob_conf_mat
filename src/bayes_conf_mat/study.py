@@ -84,9 +84,11 @@ class Study(Config):
 
         # Instantiate the stores for experiments and metrics ===================
         # The experiment group store
+        self._experiments_rng = self.rng.spawn(1)[0]
         self._experiment_store = OrderedDict()
 
         # The collection of metrics
+        self._metrics_rng = self.rng.spawn(1)[0]
         self._metrics_store = MetricCollection()
 
         # The mapping from metric to aggregator
@@ -96,6 +98,7 @@ class Study(Config):
     def from_dict(
         cls,
         config_dict: dict[str, typing.Any],
+        **kwargs,
     ) -> typing.Self:
         """Creates a study from a dictionary.
 
@@ -103,17 +106,31 @@ class Study(Config):
 
         Args:
             config_dict (dict[str, typing.Any]): the dictionary representation of the study configuration.
-            cache_dir (str, optional): the location of the cache. Defaults to None.
-            overwrite (bool, optional): whether to overwrite an existing cache. Defaults to False.
+            kwargs: any additional keyword arguments typically passed to Study's `.__init__` method
 
         Returns:
             typing.Self: an instance of a study
         """
 
-        instance = super().from_dict(config_dict)
+        instance = cls(
+            **{
+                k: v
+                for k, v in config_dict.items()
+                if k not in ("experiments", "metrics")
+            }
+        )
 
-        # instance.cache_dir = cache_dir
-        # instance.overwrite = overwrite
+        for experiment_group_name, experiment_group in config_dict[
+            "experiments"
+        ].items():
+            for experiment_name, experiment_config in experiment_group.items():
+                instance.add_experiment(
+                    experiment_name=f"{experiment_group_name}/{experiment_name}",
+                    **experiment_config,
+                )
+
+        for metric_name, metric_config in config_dict["metrics"].items():
+            instance.add_metric(metric=metric_name, **metric_config)
 
         return instance
 
@@ -160,7 +177,7 @@ class Study(Config):
         return self._compute_num_classes(fingerprint=self.fingerprint)
 
     def __repr__(self) -> str:
-        return f"Study(experiments={self._list_experiments()}), metrics={self._metrics_store}"
+        return f"Study(experiments={self._list_experiments()}), metrics={self._metrics_store})"
 
     def __str__(self) -> str:
         return f"Study(experiments={self._list_experiments()}, metrics={self._metrics_store})"
@@ -313,7 +330,7 @@ class Study(Config):
             # Give the new experiment group its own RNG
             # Should be independent from the self's RNG and all other
             # experimentgroups' RNGs
-            indep_rng = self.rng.spawn(n_children=1)[0]
+            indep_rng = self._experiments_rng.spawn(n_children=1)[0]
 
             experiment_group = ExperimentGroup(
                 name=experiment_group_name,
@@ -371,7 +388,7 @@ class Study(Config):
 
         # Add a cross-experiment aggregator to the metric =====================
         if len(self.metrics[metric_name]) != 0:
-            indep_rng = self.rng.spawn(n_children=1)[0]
+            indep_rng = self._metrics_rng.spawn(n_children=1)[0]
 
             aggregator = get_experiment_aggregator(
                 rng=indep_rng, **self.metrics[metric_name]
@@ -1765,9 +1782,20 @@ class Study(Config):
 
             table.append(table_row)
 
+        if len(table) == 0:
+            warnings.warn(
+                "The table is empty! This can occur if there are no registered experiments yet."
+            )
+            return ""
+
         headers = [
             "Group",
-            *distribution_summary.headers,  # type: ignore
+            "Median",
+            "Mode",
+            "HDI",
+            "MU",
+            "Kurtosis",
+            "Skew",
             "Var. Within",
             "Var. Between",
             "I2",

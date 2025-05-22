@@ -36,7 +36,7 @@ class WeightedAverage(Averaging):
     full_name = "Class Prevalence Weighted Averaging"
     dependencies = ("p_condition",)
     sklearn_equivalent = "weighted"
-    aliases = ["weighted", "weighted_average"]
+    aliases = ["weighted", "weighted_average", "micro", "micro_average"]
 
     def compute_average(
         self,

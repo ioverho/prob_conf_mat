@@ -1,7 +1,6 @@
 # %%
 from __future__ import annotations
 
-import pytest
 import numpy as np
 import scipy.stats as stats
 import itertools
@@ -9,15 +8,15 @@ import itertools
 import jaxtyping as jtyping
 
 # The RNG Class ================================================================
-#from __future__ import annotations
+# from __future__ import annotations
 
 import typing
 
-import numpy as np
 
 class RNG:
-
-    def __init__(self, seed: int | typing.Sequence[int] | None, position: tuple = ()) -> None:
+    def __init__(
+        self, seed: int | typing.Sequence[int] | None, position: tuple = ()
+    ) -> None:
         """A wrapper for Numpy's Generator class, that tracks any spawned child RNGs.
 
         This way, we can change the RNG in a reproducible manner, on the fly.
@@ -32,7 +31,9 @@ class RNG:
         self.position = position
 
         # The current seed sequence
-        self.seed_sequence: np.random.SeedSequence = np.random.SeedSequence(entropy=self._seed, spawn_key=self.position)
+        self.seed_sequence: np.random.SeedSequence = np.random.SeedSequence(
+            entropy=self._seed, spawn_key=self.position
+        )
 
         # The RNG object
         self.rng: np.random.Generator = np.random.default_rng(seed=self.seed_sequence)
@@ -44,7 +45,7 @@ class RNG:
         """Called for failed attribute accesses."""
         return self.rng.__getattribute__(name)
 
-    def spawn(self, n_children: int) -> list[typing.Self]: # type: ignore
+    def spawn(self, n_children: int) -> list[typing.Self]:  # type: ignore
         """Spawns a new independent RNG. It has a position lower in the tree, but shares the seed of its parent.
 
         Args:
@@ -58,9 +59,11 @@ class RNG:
 
         spawned_rngs: list[typing.Self] = []
         for i in range(n_children):
-            new_rng = RNG(seed=self.seed, position=(*self.position, cur_num_children+i))
+            new_rng = RNG(
+                seed=self.seed, position=(*self.position, cur_num_children + i)
+            )
 
-            spawned_rngs.append(new_rng) # type: ignore
+            spawned_rngs.append(new_rng)  # type: ignore
 
         self.children.extend(spawned_rngs)
 
@@ -80,7 +83,9 @@ class RNG:
 
         self._seed = value
 
-        self.seed_sequence = np.random.SeedSequence(entropy=self._seed, spawn_key=self.position)
+        self.seed_sequence = np.random.SeedSequence(
+            entropy=self._seed, spawn_key=self.position
+        )
 
         self.rng = np.random.default_rng(seed=self.seed_sequence)
 
@@ -93,8 +98,8 @@ class RNG:
     def __str__(self) -> str:
         return f"RNG(seed={self.seed}, position={self.position})"
 
-def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG]:
 
+def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG]:
     meta_rng = np.random.default_rng(meta_seed)
 
     tree = [RNG(seed=root_seed)]
@@ -104,12 +109,16 @@ def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG
         node = tree[i]
 
         if len(node.position) == 0:
-            child_nodes = node.spawn(n_children=int(meta_rng.integers(low=2, high=max_children)))
+            child_nodes = node.spawn(
+                n_children=int(meta_rng.integers(low=2, high=max_children))
+            )
 
             tree.extend(child_nodes)
 
         elif len(node.position) < 4:
-            child_nodes = node.spawn(n_children=int(meta_rng.integers(low=0, high=max_children)))
+            child_nodes = node.spawn(
+                n_children=int(meta_rng.integers(low=0, high=max_children))
+            )
 
             tree.extend(child_nodes)
 
@@ -117,17 +126,25 @@ def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG
 
     return tree
 
-def p_independent(node_a: RNG, node_b: RNG, sample_size: int = 10000, num_bins: int = 10) -> float:
+
+def p_independent(
+    node_a: RNG, node_b: RNG, sample_size: int = 10000, num_bins: int = 10
+) -> float:
     node_a_samples = node_a.random(size=(sample_size,))
     node_b_samples = node_b.random(size=(sample_size,))
 
-    bin_counts, _, _ = np.histogram2d(x=node_a_samples, y=node_b_samples, bins=num_bins, range=((0, 1), (0, 1)))
+    bin_counts, _, _ = np.histogram2d(
+        x=node_a_samples, y=node_b_samples, bins=num_bins, range=((0, 1), (0, 1))
+    )
 
-    p = stats.power_divergence(f_obs=bin_counts, axis=None, lambda_=0).pvalue # type: ignore
+    p = stats.power_divergence(f_obs=bin_counts, axis=None, lambda_=0).pvalue  # type: ignore
 
     return p
 
-def num_rejected_hypotheses(p_vals: jtyping.Float[np.ndarray, "num_tests"], alpha: float) -> int:
+
+def num_rejected_hypotheses(
+    p_vals: jtyping.Float[np.ndarray, " num_tests"], alpha: float
+) -> int:
     """Uses Holm–Bonferroni's step-down procedure to count the number of rejected null-hypotheses.
 
     This should correct for the family-wise error rate.
@@ -139,7 +156,9 @@ def num_rejected_hypotheses(p_vals: jtyping.Float[np.ndarray, "num_tests"], alph
     Returns:
         int: the number of hypotheses that should be rejected according to the provided significance level
     """
-    fail_to_reject_null = np.sort(p_vals) > alpha / (p_vals.shape[0] - np.arange(p_vals.shape[0]))
+    fail_to_reject_null = np.sort(p_vals) > alpha / (
+        p_vals.shape[0] - np.arange(p_vals.shape[0])
+    )
 
     if np.any(fail_to_reject_null):
         n_rejected = np.where(fail_to_reject_null)[0][0]
@@ -148,10 +167,10 @@ def num_rejected_hypotheses(p_vals: jtyping.Float[np.ndarray, "num_tests"], alph
 
     return n_rejected
 
+
 # Tests ========================================================================
 class TestRNG:
-
-    all_seeds = np.random.default_rng(0).integers(low=0, high=2 ** 31 -1, size=(10,))
+    all_seeds = np.random.default_rng(0).integers(low=0, high=2**31 - 1, size=(10,))
 
     def test_equivalence_to_numpy(self):
         for seed in self.all_seeds:
@@ -179,7 +198,9 @@ class TestRNG:
 
             all_pvals = []
             for node_a, node_b in itertools.combinations(tree, 2):
-                all_pvals.append(p_independent(node_a, node_b, sample_size=10000, num_bins=100))
+                all_pvals.append(
+                    p_independent(node_a, node_b, sample_size=10000, num_bins=100)
+                )
 
             all_pvals = np.stack(all_pvals)
 
@@ -192,7 +213,9 @@ class TestRNG:
             tree_generator_seed = abs(seed_a - seed_b)
 
             # Sample a tree
-            tree_a = generate_tree(meta_seed=tree_generator_seed, root_seed=seed_a, max_children=4)
+            tree_a = generate_tree(
+                meta_seed=tree_generator_seed, root_seed=seed_a, max_children=4
+            )
 
             samples_a = []
             for node in tree_a:
@@ -201,7 +224,9 @@ class TestRNG:
             samples_a = np.stack(samples_a)
 
             # Sample a second, independent tree
-            tree_b = generate_tree(meta_seed=tree_generator_seed, root_seed=seed_b, max_children=4)
+            tree_b = generate_tree(
+                meta_seed=tree_generator_seed, root_seed=seed_b, max_children=4
+            )
 
             samples_b = []
             for node in tree_b:
