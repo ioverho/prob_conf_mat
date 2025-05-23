@@ -2,13 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="400"
-   height="400"
-   viewBox="0 0 105.83333 105.83333"
+   width="324.67804"
+   height="279.80707"
+   viewBox="0 0 85.904396 74.032285"
    version="1.1"
    id="svg5"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
    sodipodi:docname="binary_confusion_matrix.svg"
+   inkscape:export-filename="binary_confusion_matrix.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,22 +27,23 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="2"
-     inkscape:cx="150.75"
-     inkscape:cy="193"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="221.67798"
+     inkscape:cy="182.7871"
      inkscape:window-width="1920"
-     inkscape:window-height="1027"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-height="1051"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g12506"
+     inkscape:current-layer="g14468"
      showguides="true" />
   <defs
      id="defs2" />
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-6.0282669,-5.9052354)">
     <g
        id="g908">
       <g
@@ -109,7 +113,7 @@
                  id="tspan9054"
                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:Normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
                  x="51.812973"
-                 y="31.726688">FP</tspan></text>
+                 y="31.726688">FN</tspan></text>
             <text
                xml:space="preserve"
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:0.5;font-family:sans-serif;-inkscape-font-specification:Normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
@@ -131,7 +135,7 @@
                  id="tspan9070"
                  style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:Normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.529167"
                  x="25.25281"
-                 y="58.44952">FN</tspan></text>
+                 y="58.44952">FP</tspan></text>
           </g>
           <g
              id="g14247"
@@ -145,14 +149,14 @@
                transform="translate(-12.667117,-2.8431047)"><tspan
                  x="27.295679"
                  y="11.064068"
-                 id="tspan15293"><tspan
+                 id="tspan572"><tspan
                    style="stroke:none"
-                   id="tspan15291"> Positive </tspan></tspan><tspan
+                   id="tspan570"> Positive </tspan></tspan><tspan
                  x="32.396144"
                  y="16.990736"
-                 id="tspan15297"><tspan
+                 id="tspan576"><tspan
                    style="stroke:none"
-                   id="tspan15295">(PP)</tspan></tspan></text>
+                   id="tspan574">(PP)</tspan></tspan></text>
             <text
                xml:space="preserve"
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:Normal;text-align:center;white-space:pre;shape-inside:url(#rect12137);display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
@@ -162,26 +166,26 @@
                transform="translate(-12.66683,-2.8431047)"><tspan
                  x="53.438353"
                  y="11.18754"
-                 id="tspan15301"><tspan
+                 id="tspan580"><tspan
                    style="stroke:none"
-                   id="tspan15299">Negative </tspan></tspan><tspan
+                   id="tspan578">Negative </tspan></tspan><tspan
                  x="58.760683"
                  y="17.361152"
-                 id="tspan15305"><tspan
+                 id="tspan584"><tspan
                    style="stroke:none"
-                   id="tspan15303">(PN)</tspan></tspan></text>
+                   id="tspan582">(PN)</tspan></tspan></text>
           </g>
           <rect
              style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
              id="rect12137"
-             width="26.590625"
+             width="26.590626"
              height="12.435418"
              x="51.044476"
              y="6.6812582" />
           <rect
              style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
              id="rect12143"
-             width="27.648959"
+             width="27.648958"
              height="13.096876"
              x="-2.6659698"
              y="30.030819" />
@@ -197,14 +201,14 @@
                transform="rotate(-90,5.2651801,36.131746)"><tspan
                  x="1.704859"
                  y="34.537149"
-                 id="tspan15309"><tspan
+                 id="tspan588"><tspan
                    style="stroke:none"
-                   id="tspan15307">Positive </tspan></tspan><tspan
+                   id="tspan586">Positive </tspan></tspan><tspan
                  x="7.4263026"
                  y="40.710764"
-                 id="tspan15313"><tspan
+                 id="tspan592"><tspan
                    style="stroke:none"
-                   id="tspan15311">(P)</tspan></tspan></text>
+                   id="tspan590">(P)</tspan></tspan></text>
             <text
                xml:space="preserve"
                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:Normal;text-align:center;white-space:pre;shape-inside:url(#rect12149);display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
@@ -214,19 +218,19 @@
                transform="rotate(-90,5.1115454,62.767174)"><tspan
                  x="-0.346803"
                  y="61.326212"
-                 id="tspan15317"><tspan
+                 id="tspan596"><tspan
                    style="stroke:none"
-                   id="tspan15315"> Negative </tspan></tspan><tspan
+                   id="tspan594"> Negative </tspan></tspan><tspan
                  x="7.3328333"
                  y="67.499826"
-                 id="tspan15321"><tspan
+                 id="tspan600"><tspan
                    style="stroke:none"
-                   id="tspan15319">(N)</tspan></tspan></text>
+                   id="tspan598">(N)</tspan></tspan></text>
           </g>
           <rect
              style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
              id="rect12149"
-             width="28.178126"
+             width="28.178125"
              height="13.493751"
              x="-2.6659698"
              y="56.819801" />

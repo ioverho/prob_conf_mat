@@ -1,9 +1,4 @@
-
-![alt text](../../_static/figures/binary_confusion_matrix.svg)
-
-![alt text](../../_static/figures/multiclass_confusion_matrix.svg)
-
----
+# Metrics
 
 ::: bayes_conf_mat.metrics._metrics.DiagMass
 ::: bayes_conf_mat.metrics._metrics.Prevalence

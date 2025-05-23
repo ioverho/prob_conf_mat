@@ -5,6 +5,7 @@ strict: false
 extra_css:
   - _static/css/main.css
   #- _static/custom.css
+  - https://unpkg.com/katex@0/dist/katex.min.css
 
 docs_dir: documentation
 
@@ -48,6 +49,7 @@ nav:
       - Reference/IO.md
   - Explanation:
       - "Explanation/index.md"
+      - "Explanation/generating_confusion_matrices.md"
 
 theme:
   name: material
@@ -199,6 +201,11 @@ markdown_extensions:
 extra_javascript:
   # MathJax
   # https://squidfunk.github.io/mkdocs-material/reference/math/#mathjax-mkdocsyml
-  - _static/mathjax.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  #- _static/mathjax.js
+  #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  #- https://polyfill.io/v3/polyfill.min.js?features=es6
+  #- https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  #- https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+  - _static/katex.js
+  - https://unpkg.com/katex@0/dist/katex.min.js
+  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

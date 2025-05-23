@@ -2,13 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="400"
-   height="400"
-   viewBox="0 0 105.83333 105.83333"
+   width="252.5649"
+   height="253.05812"
+   viewBox="0 0 66.82446 66.954959"
    version="1.1"
    id="svg12361"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
    sodipodi:docname="multiclass_confusion_matrix.svg"
+   inkscape:export-filename="multiclass_confusion_matrix.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,20 +28,21 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.5554293"
-     inkscape:cx="122.47423"
-     inkscape:cy="253.94918"
+     inkscape:cx="-127.6175"
+     inkscape:cy="206.05244"
      inkscape:window-width="1920"
-     inkscape:window-height="1027"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-height="1051"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g13846" />
+     inkscape:current-layer="g14029" />
   <defs
      id="defs12358" />
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-13.07972,-12.949165)">
     <g
        id="g12506"
        transform="translate(14.297561,9.6239741)">
@@ -52,46 +56,18 @@
       <g
          id="g14029"
          transform="translate(-16.159794,-4.7440295)">
-        <rect
-           style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
-           id="rect234-7"
-           width="26.722916"
-           height="16.801043"
-           x="24.321529"
-           y="6.6812582" />
         <text
            xml:space="preserve"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;line-height:1;font-family:sans-serif;-inkscape-font-specification:Normal;text-align:center;white-space:pre;shape-inside:url(#rect234-7);display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
            x="37.830093"
            y="23.482355"
            id="text8224-7"
-           transform="translate(17.077219,0.70911746)"><tspan
-             x="26.184035"
-             y="10.570178"
-             id="tspan14449"><tspan
+           transform="translate(43.261253,11.821619)"><tspan
+             x="0"
+             y="0"
+             id="tspan461"><tspan
                style="stroke:none"
-               id="tspan14447">Predicted</tspan></tspan></text>
-        <rect
-           style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
-           id="rect12137"
-           width="26.722916"
-           height="16.801043"
-           x="51.044476"
-           y="5.6229248" />
-        <rect
-           style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
-           id="rect12143"
-           width="28.045834"
-           height="16.668751"
-           x="-2.6659698"
-           y="30.030819" />
-        <rect
-           style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
-           id="rect12149"
-           width="28.045834"
-           height="16.668751"
-           x="-2.6659698"
-           y="56.819801" />
+               id="tspan459">Predicted</tspan></tspan></text>
         <g
            id="g13846">
           <g
@@ -689,20 +665,13 @@
            x="37.830093"
            y="23.482355"
            id="text13918"
-           transform="rotate(-90,10.439532,22.522432)"><tspan
-             x="-26.714189"
-             y="30.77721"
-             id="tspan14453"><tspan
+           transform="rotate(-90,39.185252,20.4909)"><tspan
+             x="0"
+             y="0"
+             id="tspan465"><tspan
                style="stroke:none"
-               id="tspan14451">Condition</tspan></tspan></text>
+               id="tspan463">Condition</tspan></tspan></text>
       </g>
-      <rect
-         style="fill:none;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
-         id="rect13920"
-         width="26.722916"
-         height="16.801043"
-         x="-28.36157"
-         y="26.888475" />
     </g>
   </g>
 </svg>
