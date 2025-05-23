@@ -117,6 +117,15 @@ class ExperimentGroup:
         # Finally, add the experiment to the experiment store
         self.experiments[name] = new_experiment
 
+    def __getitem__(self, key: str) -> Experiment:
+        if key not in self.experiments:
+            raise KeyError(
+                f"No experiment with name '{key}' is currently present in experiment group '{self.name}'."
+            )
+
+        else:
+            return self.experiments[key]
+
     # TODO: document method
     def sample_metrics(
         self,

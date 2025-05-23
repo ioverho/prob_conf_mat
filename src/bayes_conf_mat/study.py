@@ -17,12 +17,13 @@ if typing.TYPE_CHECKING:
 import numpy as np
 import jaxtyping as jtyping
 
-from bayes_conf_mat.config import Config, ConfigError, ConfigWarning
+from bayes_conf_mat.config import Config, ConfigWarning
 from bayes_conf_mat.metrics import MetricCollection, Metric, AveragedMetric
 from bayes_conf_mat.experiment import ExperimentResult, SamplingMethod
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
 from bayes_conf_mat.experiment_group import ExperimentGroup
+from bayes_conf_mat.experiment import Experiment
 from bayes_conf_mat.experiment_comparison import pairwise_compare, listwise_compare
 from bayes_conf_mat.stats import summarize_posterior
 from bayes_conf_mat.utils import (
@@ -215,8 +216,8 @@ class Study(Config):
                 )
 
         else:
-            raise ConfigError(
-                f"Received invalid experiment name. Currently: {name}. Must have at most 1 '/' character. Hierarchical experiment groups not (yet) implemented."
+            raise ValueError(
+                f"Received invalid experiment name. Currently: {name}. Must have at most 1 '/' character."
             )
 
         return experiment_group_name, experiment_name
@@ -349,6 +350,37 @@ class Study(Config):
             prevalence_prior=experiment_config["prevalence_prior"],
             confusion_prior=experiment_config["confusion_prior"],
         )
+
+    def __getitem__(self, key: str) -> Experiment | ExperimentGroup:
+        if not isinstance(key, str):
+            raise TypeError(
+                f"Experiment group names must be of type `str`. Received `{key}` of type {type(key)}."
+            )
+
+        if "/" in key:
+            experiment_group_name, experiment_name = self._split_experiment_name(
+                name=key
+            )
+
+            if experiment_group_name not in self._experiment_store:
+                raise KeyError(
+                    f"No experiment group with name {experiment_group_name} is currently present."
+                )
+
+            experiment_group = self._experiment_store[experiment_group_name]
+
+            return experiment_group.__getitem__(experiment_name)
+
+        else:
+            experiment_group_name = key
+
+            if experiment_group_name not in self._experiment_store:
+                raise KeyError(
+                    f"No experiment group with name {experiment_group_name} is currently present in this study."
+                )
+
+            else:
+                return self._experiment_store[experiment_group_name]
 
     def add_metric(
         self,

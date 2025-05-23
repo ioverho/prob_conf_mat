@@ -10,6 +10,7 @@ import sklearn
 import sklearn.metrics
 
 from bayes_conf_mat import Study
+from bayes_conf_mat.experiment import Experiment
 from bayes_conf_mat.config import ConfigWarning
 from bayes_conf_mat.utils.io import (
     load_csv,
@@ -89,7 +90,7 @@ def generate_test_case(
     def _get_sklearn_value(
         metric: str, study: Study
     ) -> jtyping.Float[np.ndarray, " *num_classes"]:
-        experiment = study._experiment_store["test"].experiments["test"]
+        experiment: Experiment = study["test/test"]  # type: ignore
         conf_mat = experiment.confusion_matrix
 
         pred_cond = confusion_matrix_to_pred_cond(

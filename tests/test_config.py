@@ -162,7 +162,7 @@ class TestConfig:
             match="Parameter `ci_probability` must be a float",
         ):
             Study(
-                ci_probability=np.array(0.95),
+                ci_probability=np.array(0.95),  # type: ignore
                 **self.fetch_base_config("ci_probability"),
             )  # type: ignore
 
@@ -218,7 +218,7 @@ class TestConfig:
         )
 
         assert np.all(
-            study._experiment_store["test"].experiments["test"].prevalence_prior == 1.0
+            study["test/test"].prevalence_prior == 1.0  # type: ignore
         )
 
         # Float
@@ -232,7 +232,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study._experiment_store["test"].experiments["test"].prevalence_prior
+            a=study["test/test"].prevalence_prior  # type: ignore
             == 1.0
         )
 
@@ -262,7 +262,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study._experiment_store["test"].experiments["test"].prevalence_prior
+            a=study["test/test"].prevalence_prior  # type: ignore
             == 1.0
         )
 
@@ -277,7 +277,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study._experiment_store["test"].experiments["test"].prevalence_prior
+            a=study["test/test"].prevalence_prior  # type: ignore
             == 1.0
         )
 
@@ -411,7 +411,7 @@ class TestConfig:
         )
 
         assert np.all(
-            study._experiment_store["test"].experiments["test"].confusion_prior == 1.0
+            study["test/test"].confusion_prior == 1.0  # type: ignore
         )
 
         # Float
@@ -425,7 +425,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study._experiment_store["test"].experiments["test"].confusion_prior == 1.0
+            a=study["test/test"].confusion_prior == 1.0  # type: ignore
         )
 
         # Out of bounds numeric
@@ -454,7 +454,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study._experiment_store["test"].experiments["test"].confusion_prior == 1.0
+            a=study["test/test"].confusion_prior == 1.0  # type: ignore
         )
 
         # Needs reshaping
@@ -468,7 +468,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study._experiment_store["test"].experiments["test"].confusion_prior == 1.0
+            a=study["test/test"].confusion_prior == 1.0  # type: ignore
         )
 
         # Malformed - too many columns

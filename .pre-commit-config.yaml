@@ -32,6 +32,18 @@ repos:
     - id: pyright
 -   repo: local
     hooks:
+    -   id: test_config
+        name: test_config
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_config.py
+    -   id: test_extension
+        name: test_extension
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_extension.py
     -   id: test_io
         name: test_io
         language: system
@@ -56,6 +68,12 @@ repos:
         types: [python]
         pass_filenames: false
         entry: ./.venv/bin/pytest tests/test_rng.py
+    -   id: test_study
+        name: test_study
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: ./.venv/bin/pytest tests/test_study.py
 -   repo: local
     hooks:
     # TODO: make this dynamic
