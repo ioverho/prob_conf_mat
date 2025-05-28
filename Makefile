@@ -1,0 +1,68 @@
+.DEFAULT_GOAL := help
+
+##@ Utility
+.PHONY: help
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make <target>\033[36m\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+.PHONY: hello-world
+hello-world: ## Tests uv and make
+	@uv run python -c "print('Hello World!')"
+
+##@ Environment
+.PHONY: install
+install: ## Install default dependencies
+	@uv sync --no-dev --frozen
+
+.PHONY: install-dev
+install-dev: ## Install dev dependencies
+	@uv sync --dev --frozen
+
+.PHONY: upgrade
+upgrade: ## Upgrade installed dependencies
+	@uv lock --refresh --upgrade
+	@uv cache prune
+
+.PHONY: export
+export: ## Export uv to requirements.txt file
+	@uv export --no-dev --output-file ./requirements.txt --format requirements.txt
+
+##@ Testing, Linting & Formatting
+.PHONY: test
+test: ## Runs all tests
+	@uv run --dev pytest
+
+.PHONY: lint
+lint: ## Run linting
+	@uv run --dev ruff check ./src/bayes_conf_mat ./tests
+
+.PHONY: commit
+commit: ## Run pre-commit checks
+	@uv run --dev pre-commit run
+
+##@ Documentation
+.PHONY: mkdocs
+mkdocs: ## Update the docs
+	@uv run --dev python mkdocs.py
+	@uv run --dev mkdocs build
+
+.PHONY: mkdocs-serve
+mkdocs-serve: ## Serve documentation site
+	@uv run mkdocs serve --watch "./documentation" --watch "./src/bayes_conf_mat"
+
+##@ Profiling
+.PHONY: importtime
+importtime: ## Profile import time
+	@uv run --no-dev python -X importtime -c "from bayes_conf_mat import Study" 2> ./tests/logs/import.log
+	@uv run --dev tuna ./tests/logs/import.log
+
+# I'm too nervous to run this...
+# .PHONY: clean
+# clean:  ## Clean up caches and build artifacts
+# 	@rm -rf .cache/
+# 	@rm -rf .pytest_cache/
+# 	@rm -rf .ruff_cache/
+# 	@rm -rf .venv/
+# 	@rm -rf build/
+# 	@rm -rf site/
+# 	@find . -type f -name '*.py[co]' -delete -or -type d -name __pycache__ -delete
