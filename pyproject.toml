@@ -36,6 +36,7 @@ dev = [
     "mkdocstrings[python]>=0.27.0",
     "nbconvert>=7.16.4",
     "nbformat>=5.10.4",
+    "opt-einsum>=3.4.0",
     "pip>=25.0.1",
     "pre-commit>=4.2.0",
     "pyright>=1.1.400",
@@ -43,9 +44,11 @@ dev = [
     "python-markdown-math>=0.9",
     "pyyaml>=6.0.2",
     "ruff>=0.11.5",
+    "scalene>=1.5.51",
     "scikit-learn>=1.6.1",
+    "snakeviz>=2.2.2",
     "toml>=0.10.2",
-    "tuna>=0.5.11",
+    "tqdm>=4.67.1",
 ]
 
 # Ruff
