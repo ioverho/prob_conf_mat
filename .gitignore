@@ -147,3 +147,4 @@ deprecated_report/# pixi environments
 *.egg-info
 /klad/
 /deprecated/
+.ruff_cache
