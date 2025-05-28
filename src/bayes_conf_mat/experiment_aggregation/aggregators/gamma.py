@@ -1,13 +1,19 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
+    from bayes_conf_mat.utils import RNG
+
 import warnings
 
 import numpy as np
 import scipy
 import scipy.stats
-import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample
-from bayes_conf_mat.utils import RNG
 
 
 class GammaAggregator(ExperimentAggregator):

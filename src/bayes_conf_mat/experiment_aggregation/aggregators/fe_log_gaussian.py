@@ -1,6 +1,11 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
 import scipy
 import numpy as np
-import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from bayes_conf_mat.stats import truncated_sample

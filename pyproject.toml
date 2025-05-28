@@ -45,9 +45,17 @@ dev = [
     "ruff>=0.11.5",
     "scikit-learn>=1.6.1",
     "toml>=0.10.2",
+    "tuna>=0.5.11",
 ]
 
-# Linting - Ruff
+# Ruff
+[tool.ruff]
+builtins = ["jtyping"]
+
+line-length = 88
+indent-width = 4
+respect-gitignore = true
+
 [tool.ruff.lint]
 ignore = ["F722"]
 

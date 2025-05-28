@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import typing
-from dataclasses import dataclass
 
 if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
     from bayes_conf_mat.utils.typing import MetricLike
 
+from dataclasses import dataclass
+
 import numpy as np
-import jaxtyping as jtyping
 
 from bayes_conf_mat.utils.formatting import fmt
 from bayes_conf_mat.stats import (

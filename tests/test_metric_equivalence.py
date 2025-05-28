@@ -1,3 +1,11 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
+    from bayes_conf_mat.experiment import Experiment
+
 from functools import partial
 from pathlib import Path
 from itertools import product
@@ -5,12 +13,10 @@ import warnings
 
 import pytest
 import numpy as np
-import jaxtyping as jtyping
 import sklearn
 import sklearn.metrics
 
 from bayes_conf_mat import Study
-from bayes_conf_mat.experiment import Experiment
 from bayes_conf_mat.config import ConfigWarning
 from bayes_conf_mat.utils.io import (
     load_csv,

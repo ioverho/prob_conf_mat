@@ -1,15 +1,17 @@
 from __future__ import annotations
-
 import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
 from dataclasses import dataclass
 
 import numpy as np
-import jaxtyping as jtyping
 
 
 @dataclass(frozen=True)
 class ListwiseComparisonResult:
-    experiment_names: typing.List[str]
+    experiment_names: list[str]
     metric_name: str
 
     p_rank_given_experiment: jtyping.Float[

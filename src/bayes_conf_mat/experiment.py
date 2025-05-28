@@ -6,11 +6,14 @@ from collections import OrderedDict
 from enum import StrEnum
 
 import numpy as np
-import jaxtyping as jtyping
 
 from bayes_conf_mat.metrics import RootMetric, MetricCollection
 from bayes_conf_mat.stats import dirichlet_sample, dirichlet_prior
-from bayes_conf_mat.utils import RNG, MetricLike
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
+    from bayes_conf_mat.utils import RNG, MetricLike
 
 
 class SamplingMethod(StrEnum):

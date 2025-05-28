@@ -1,9 +1,15 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import pathlib
+
+    import jaxtyping as jtyping
+
 import warnings
 import csv
-import pathlib
 
 import numpy as np
-import jaxtyping as jtyping
 
 DEFAULT_DTYPE = np.int64
 

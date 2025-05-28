@@ -1,10 +1,13 @@
+from __future__ import annotations
 import typing
-# from collections.abc import Iterable
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
+    from bayes_conf_mat.utils import RNG
 
 import numpy as np
-import jaxtyping as jtyping
 
-from bayes_conf_mat.utils import RNG
 
 _DIRICHLET_PRIOR_STRATEGIES = {
     "bayes-laplace": 1.0,

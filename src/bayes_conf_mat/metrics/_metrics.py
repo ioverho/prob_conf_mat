@@ -1,4 +1,9 @@
-import jaxtyping as jtyping
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
 import numpy as np
 
 from bayes_conf_mat.metrics.abc import Metric

@@ -1,7 +1,13 @@
-from dataclasses import dataclass
-from typing import Literal
+from __future__ import annotations
+import typing
 
-import jaxtyping as jtyping
+if typing.TYPE_CHECKING:
+    from typing import Literal
+
+    import jaxtyping as jtyping
+
+from dataclasses import dataclass
+
 import numpy as np
 import scipy
 

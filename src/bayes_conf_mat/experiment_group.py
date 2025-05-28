@@ -4,15 +4,15 @@ import typing
 from collections import OrderedDict, namedtuple
 from warnings import warn
 
-import numpy as np
-import jaxtyping as jtyping
-
 from bayes_conf_mat.experiment import Experiment, ExperimentResult
-from bayes_conf_mat.metrics import MetricCollection
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
-from bayes_conf_mat.utils import RNG, MetricLike
 
 if typing.TYPE_CHECKING:
+    import numpy as np
+    import jaxtyping as jtyping
+
+    from bayes_conf_mat.metrics import MetricCollection
+    from bayes_conf_mat.utils import RNG, MetricLike
     from bayes_conf_mat.experiment_aggregation import ExperimentAggregator
 
 ExperimentGroupResult = namedtuple(

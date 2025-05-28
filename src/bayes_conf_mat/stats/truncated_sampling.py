@@ -1,10 +1,13 @@
+from __future__ import annotations
 import typing
 
-import scipy
-import numpy as np
-import jaxtyping as jtyping
+if typing.TYPE_CHECKING:
+    import scipy
+    import numpy as np
+    import jaxtyping as jtyping
 
-from bayes_conf_mat.utils.rng import RNG
+    from bayes_conf_mat.utils.rng import RNG
+
 
 def truncated_sample(
     sampling_distribution: scipy.stats.rv_continuous,

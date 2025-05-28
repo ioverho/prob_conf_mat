@@ -1,12 +1,16 @@
-import inspect
+from __future__ import annotations
 import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
+import inspect
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from inspect import signature
 from itertools import product
 
 import numpy as np
-import jaxtyping as jtyping
 
 # Root metrics are always computed, because they're (almost) always needed as
 # intermediate variables

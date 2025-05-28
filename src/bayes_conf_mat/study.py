@@ -1,27 +1,28 @@
 from __future__ import annotations
 import typing
-import warnings
-from collections import OrderedDict
-from functools import cache
-from enum import StrEnum
-
-from bayes_conf_mat.experiment_comparison.pairwise import PairwiseComparisonResult
 
 if typing.TYPE_CHECKING:
-    from bayes_conf_mat.utils.typing import MetricLike
+    import jaxtyping as jtyping
     import matplotlib
     import matplotlib.figure
     import matplotlib.axes
     import matplotlib.ticker
 
+    from bayes_conf_mat.utils.typing import MetricLike
+    from bayes_conf_mat.experiment_comparison.pairwise import PairwiseComparisonResult
+    from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
+
+import warnings
+from collections import OrderedDict
+from functools import cache
+from enum import StrEnum
+
 import numpy as np
-import jaxtyping as jtyping
 
 from bayes_conf_mat.config import Config, ConfigWarning
 from bayes_conf_mat.metrics import MetricCollection, Metric, AveragedMetric
 from bayes_conf_mat.experiment import ExperimentResult, SamplingMethod
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
-from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
 from bayes_conf_mat.experiment_group import ExperimentGroup
 from bayes_conf_mat.experiment import Experiment
 from bayes_conf_mat.experiment_comparison import pairwise_compare, listwise_compare

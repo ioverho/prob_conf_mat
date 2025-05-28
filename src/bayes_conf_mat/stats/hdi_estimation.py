@@ -1,7 +1,12 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
 import math
 
 import numpy as np
-import jaxtyping as jtyping
 
 
 def hdi_estimator(samples: jtyping.Float[np.ndarray, " num_samples"], prob: float) -> tuple[float, float]:

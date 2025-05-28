@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from bayes_conf_mat.experiment_group import ExperimentGroup
     from bayes_conf_mat.experiment import ExperimentResult
     from bayes_conf_mat.experiment_aggregation.heterogeneity import HeterogeneityResult
+    from bayes_conf_mat.utils import RNG
     from bayes_conf_mat.utils.typing import MetricLike
 
 import inspect
@@ -13,10 +14,8 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
-import jaxtyping as jtyping
 
 from bayes_conf_mat.experiment_aggregation.heterogeneity import estimate_i2
-from bayes_conf_mat.utils import RNG
 
 AGGREGATION_REGISTRY = dict()
 

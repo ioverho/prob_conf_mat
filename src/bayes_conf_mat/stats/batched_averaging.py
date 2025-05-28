@@ -1,3 +1,9 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    import jaxtyping as jtyping
+
 import numpy as np
 import jaxtyping as jtyping
 
