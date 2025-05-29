@@ -1,8 +1,13 @@
+## Abstract Base Class
 
-![alt text](../../_static/figures/binary_confusion_matrix.svg)
+::: bayes_conf_mat.metrics.abc.Metric
+    options:
+        heading_level: 3
 
-![alt text](../../_static/figures/multiclass_confusion_matrix.svg)
+::: bayes_conf_mat.metrics.abc.AveragedMetric
+    options:
+        heading_level: 3
 
----
+## Metric Instances
 
 @@metrics_list@@

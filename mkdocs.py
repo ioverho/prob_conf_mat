@@ -26,9 +26,9 @@ TEMPLATE_DIR = Path(__file__).parent / "templates"
 
 @dataclass
 class KwargMatch:
-    key: typing.Optional[str] = None
-    spans: typing.List[typing.Tuple[int, int]] = field(default_factory=lambda: [])
-    value: typing.Optional[typing.Any] = None
+    key: str | None = None
+    spans: list[tuple[int, int]] = field(default_factory=lambda: [])
+    value: typing.Any | None = None
 
     def __add__(self, other):
         if self.key is None:
@@ -49,7 +49,8 @@ class Template:
         self.kwargs = OrderedDict()
         for match in REPL_STRING.finditer(self.template):
             self.kwargs[match.group(1)] = self.kwargs.get(
-                match.group(1), KwargMatch()
+                match.group(1),
+                KwargMatch(),
             ) + KwargMatch(key=match.group(1), spans=[match.span()])
 
     def set(self, key: str, value):
@@ -58,17 +59,16 @@ class Template:
     def _format_value(self, value) -> str:
         if isinstance(value, str):
             return value
-        elif isinstance(value, float):
+        if isinstance(value, float):
             return fmt(value)
-        elif isinstance(value, int):
+        if isinstance(value, int):
             return f"{value:d}"
-        else:
-            try:
-                return str(value)
-            except Exception as e:
-                raise TypeError(
-                    f"Unable to format {value} of type {type(value)}. Raises {e}"
-                )
+        try:
+            return str(value)
+        except Exception as e:
+            raise TypeError(
+                f"Unable to format {value} of type {type(value)}. Raises {e}",
+            )
 
     def __repr__(self) -> str:
         return f"Template({self.name})"
@@ -99,14 +99,14 @@ class Template:
         return filled_template
 
 
-def metrics_and_averaging_overview():
+def metrics_and_averaging_overview() -> None:
     logger = logging.getLogger(__name__)
 
     # Load in the template
     template = Template(Path("./documentation/_partial/metrics_index.md").resolve())
 
     # Generate a record for each metric alias
-    aliases = sorted(list(METRIC_REGISTRY.items()), key=lambda x: x[0])
+    aliases = sorted(METRIC_REGISTRY.items(), key=lambda x: x[0])
     aliases_index = []
     for i, (alias, metric) in enumerate(aliases):
         aliases_index += [
@@ -117,7 +117,7 @@ def metrics_and_averaging_overview():
                 metric.is_multiclass,
                 # metric.bounds,
                 metric.sklearn_equivalent,
-            ]
+            ],
         ]
 
     # Complete the template
@@ -148,7 +148,7 @@ def metrics_and_averaging_overview():
                 # TODO: check that this works when hosting as well
                 f"[`{avg_method.__name__}`](Averaging.md#{avg_method.__module__}.{avg_method.__name__})",
                 avg_method.sklearn_equivalent,
-            ]
+            ],
         ]
 
     # Complete the template
@@ -168,11 +168,12 @@ def metrics_and_averaging_overview():
 
     # Write the template to a md file
     Path(f"./documentation/{METRICS_AND_AVERAGING_CHAPTER}/index.md").write_text(
-        str(template), encoding="utf-8"
+        str(template),
+        encoding="utf-8",
     )
 
     logger.info(
-        f"Wrote metrics & averaging index to '{METRICS_AND_AVERAGING_CHAPTER}/index.md'"
+        f"Wrote metrics & averaging index to '{METRICS_AND_AVERAGING_CHAPTER}/index.md'",
     )
 
 
@@ -188,15 +189,36 @@ def metrics():
     # Creates a table with some important information as an overview
     template.set(
         "metrics_list",
-        value="\n".join(
-            f"::: {metric.__module__}.{metric.__name__}"
+        value="\n\n".join(
+            (
+                f"::: {metric.__module__}.{metric.__name__}"
+                "\n    options:"
+                "\n        heading_level: 3"
+                "\n        show_root_heading: true"
+                "\n        show_root_toc_entry: true"
+                "\n        show_category_heading: false"
+                "\n        show_symbol_type_toc: true"
+                "\n        summary:"
+                "\n                attributes: false"
+                "\n                functions: false"
+                "\n                modules: false"
+                "\n        members:"
+                "\n                - aliases"
+                "\n                - bounds"
+                "\n                - dependencies"
+                "\n                - is_multiclass"
+                "\n                - sklearn_equivalent"
+                "\n        show_labels: false"
+                "\n        group_by_category: false"
+            )
             for metric in all_metrics.values()
         ),
     )
 
     # Write the template to a md file
     Path(f"./documentation/{METRICS_SECTION}").write_text(
-        str(template), encoding="utf-8"
+        str(template),
+        encoding="utf-8",
     )
 
     logger.info(f"Wrote documentation for '{METRICS_SECTION}'")
@@ -216,15 +238,34 @@ def averaging():
     # Creates a table with some important information as an overview
     template.set(
         "averaging_methods_list",
-        value="\n".join(
-            f"::: {avg_method.__module__}.{avg_method.__name__}"
+        value="\n\n".join(
+            (
+                f"::: {avg_method.__module__}.{avg_method.__name__}"
+                "\n    options:"
+                "\n        heading_level: 3"
+                "\n        show_root_heading: true"
+                "\n        show_root_toc_entry: true"
+                "\n        show_category_heading: false"
+                "\n        show_symbol_type_toc: true"
+                "\n        summary:"
+                "\n                attributes: false"
+                "\n                functions: false"
+                "\n                modules: false"
+                "\n        members:"
+                "\n                - aliases"
+                "\n                - dependencies"
+                "\n                - sklearn_equivalent"
+                "\n        show_labels: false"
+                "\n        group_by_category: false"
+            )
             for avg_method in all_avg_methods.values()
         ),
     )
 
     # Write the template to a md file
     Path(f"./documentation/{AVERAGING_SECTION}").write_text(
-        str(template), encoding="utf-8"
+        str(template),
+        encoding="utf-8",
     )
 
     logger.info(f"Wrote averaging methods to '{AVERAGING_SECTION}'")
@@ -259,7 +300,7 @@ def experiment_aggregation():
 
     # Load in the template
     template = Template(
-        Path("./documentation/_partial/experiment_aggregation.md").resolve()
+        Path("./documentation/_partial/experiment_aggregation.md").resolve(),
     )
 
     # Complete the template
@@ -278,7 +319,8 @@ def experiment_aggregation():
 
     # Write the template to a md file
     Path(f"./documentation/{EXPERIMENT_AGGREGATION_SECTION}").write_text(
-        str(template), encoding="utf-8"
+        str(template),
+        encoding="utf-8",
     )
 
     logger.info(f"Wrote IO methods to '{EXPERIMENT_AGGREGATION_SECTION}")

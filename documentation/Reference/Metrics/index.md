@@ -129,6 +129,8 @@ The following lists all implemented metric averaging methods, by alias
 | 'macro'            | [`MacroAverage`](Averaging.md#bayes_conf_mat.metrics.averaging.MacroAverage)               | macro     |
 | 'macro_average'    | [`MacroAverage`](Averaging.md#bayes_conf_mat.metrics.averaging.MacroAverage)               | macro     |
 | 'mean'             | [`MacroAverage`](Averaging.md#bayes_conf_mat.metrics.averaging.MacroAverage)               | macro     |
+| 'micro'            | [`WeightedAverage`](Averaging.md#bayes_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |
+| 'micro_average'    | [`WeightedAverage`](Averaging.md#bayes_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |
 | 'select'           | [`SelectPositiveClass`](Averaging.md#bayes_conf_mat.metrics.averaging.SelectPositiveClass) | binary    |
 | 'select_positive'  | [`SelectPositiveClass`](Averaging.md#bayes_conf_mat.metrics.averaging.SelectPositiveClass) | binary    |
 | 'weighted'         | [`WeightedAverage`](Averaging.md#bayes_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |

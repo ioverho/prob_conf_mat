@@ -15,19 +15,21 @@ class ListwiseComparisonResult:
     metric_name: str
 
     p_rank_given_experiment: jtyping.Float[
-        np.ndarray, " num_experiments num_experiments"
+        np.ndarray,
+        " num_experiments num_experiments",
     ]
     p_experiment_given_rank: jtyping.Float[
-        np.ndarray, " num_experiments num_experiments"
+        np.ndarray,
+        " num_experiments num_experiments",
     ]
 
 
 def listwise_compare(
-    experiment_values_dict: typing.Dict[str, jtyping.Float[np.ndarray, " num_samples"]],
+    experiment_values_dict: dict[str, jtyping.Float[np.ndarray, " num_samples"]],
     metric_name: str,
 ) -> ListwiseComparisonResult:
     experiment_names, experiment_values = list(
-        map(list, zip(*list(experiment_values_dict.items())))
+        map(list, zip(*list(experiment_values_dict.items()))),
     )
 
     # Stack the experiments into a [num_samples, num_experiments] array
@@ -54,7 +56,9 @@ def listwise_compare(
 
     # Reduce the ranked arrays to the distinct combinations of ranks
     rank_combinations, rank_comb_count = np.unique(
-        ranked_metric_values, return_counts=True, axis=0
+        ranked_metric_values,
+        return_counts=True,
+        axis=0,
     )
 
     # Count the number of times each experiment achieved a certain rank

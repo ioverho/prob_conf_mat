@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from bayes_conf_mat.utils.io import (
+from bayes_conf_mat.io import (
     validate_confusion_matrix,
     load_csv,
     ConfMatIOException,

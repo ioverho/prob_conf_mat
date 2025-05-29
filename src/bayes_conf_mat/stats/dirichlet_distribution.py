@@ -26,20 +26,21 @@ _DIRICHLET_PRIOR_STRATEGIES = {
 
 def dirichlet_prior(
     strategy: str | float | int | jtyping.Float[np.typing.ArrayLike, " ..."],
-    shape: typing.Tuple[int, ...],
+    shape: tuple[int, ...],
 ) -> jtyping.Float[np.ndarray, " ..."]:
-    """Creates a prior array for a Dirichlet distribution
+    """Creates a prior array for a Dirichlet distribution.
 
     Returns:
-        Float[ndarray, " ..."]: the prior vector
+        jtyping.Float[np.ndarray, " ..."]: the prior vector
     """
-    if isinstance(strategy, float) or isinstance(strategy, int):
+    if isinstance(strategy, float | int):
         prior = np.full(shape, fill_value=strategy)
 
     elif isinstance(strategy, str):
         if strategy not in _DIRICHLET_PRIOR_STRATEGIES:
             raise ValueError(
-                f"Prior strategy `{strategy}` not recognized. Choose one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"  # noqa: E501
+                f"Prior strategy `{strategy}` not recognized. "
+                f"Choose one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}",
             )
 
         strategy_fill_value = _DIRICHLET_PRIOR_STRATEGIES[strategy]
@@ -48,14 +49,16 @@ def dirichlet_prior(
     else:
         try:
             prior = np.array(strategy)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise ValueError(
-                f"While trying to convert {strategy} to a numpy array, received the following error:\n{e}"
+                f"While trying to convert {strategy} to a numpy array, "
+                f"received the following error:\n{e}",
             )
 
         if prior.shape != shape:
             raise ValueError(
-                f"Prior does not match required shape, {prior.shape} != {shape}. Parsed {prior} of type {type(prior)} from {strategy} fo type {type(strategy)}."
+                f"Prior does not match required shape, {prior.shape} != {shape}. "
+                f"Parsed {prior} of type {type(prior)} from {strategy} fo type {type(strategy)}.",
             )
 
     return prior
@@ -66,12 +69,18 @@ def dirichlet_sample(
     alphas: jtyping.Float[np.ndarray, " ..."],
     num_samples: int,
 ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
-    """
-    Generate Dirichlet distributed samples from an array of Gamma distributions.
+    """Generate Dirichlet distributed samples from an array of Gamma distributions.
 
-    Unlike the numpy implementation, this can be vectorized.
+    A Dirichlet distribution can be constructed by [dividing a set of Gamma distributions by their sum](https://en.wikipedia.org/wiki/Dirichlet_distribution#Related_distributions).
 
-    Taken from: https://stackoverflow.com/a/15917312
+    For some reason the Numpy implementation of the [Dirichlet distribution](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.dirichlet.html#numpy.random.Generator.dirichlet)
+    is not vectorized, while the implementation of the [Gamma distribution](https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.gamma.html).
+    is.
+
+    Adapted from [StackOverflow](https://stackoverflow.com/a/15917312).
+
+    This function is the performance bottleneck for this package.
+    Need to make sure it's performant.
 
     Args:
         rng (RNG): the random number generator
@@ -79,15 +88,17 @@ def dirichlet_sample(
         num_samples (int): the number of samples to retrieve
 
     Returns:
-        Float[ndarray, " num_samples ..."]: samples from the specified Dirichlet distribution
-
-    """
-    # Check if the array is already batched
-    # And to try to batch it if not
+        jtyping.Float[np.ndarray, " num_samples ..."]: samples from the specified Dirichlet distribution
+    """  # noqa: E501
+    # Broadcast alphas to the desired shape
     alphas = np.broadcast_to(alphas, (num_samples, *alphas.shape))
 
-    r = rng.standard_gamma(alphas)
+    # Generate independent gamma-distributed samples
+    # This bit dominates the run-time
+    arr = rng.standard_gamma(alphas)
 
-    d = r / np.sum(r, axis=-1, keepdims=True)
+    # Normalize the sampled gamma distributed variables
+    # This bit is probably as fast as it can get
+    np.divide(arr, np.einsum("...i->...", arr)[..., np.newaxis], out=arr)
 
-    return d
+    return arr

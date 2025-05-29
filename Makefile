@@ -51,10 +51,10 @@ mkdocs-serve: ## Serve documentation site
 	@uv run mkdocs serve --watch "./documentation" --watch "./src/bayes_conf_mat"
 
 ##@ Profiling
-.PHONY: importtime
-importtime: ## Profile import time
-	@uv run --no-dev python -X importtime -c "from bayes_conf_mat import Study" 2> ./tests/logs/import.log
-	@uv run --dev tuna ./tests/logs/import.log
+#.PHONY: importtime
+#importtime: ## Profile import time
+#	@uv run --no-dev python -X importtime -c "from bayes_conf_mat import Study" 2> ./tests/logs/import.log
+#	@uv run --dev tuna ./tests/logs/import.log
 
 # I'm too nervous to run this...
 # .PHONY: clean

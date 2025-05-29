@@ -76,7 +76,7 @@ class SelectPositiveClass(Averaging):
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         if metric_values.shape[1] < self.positive_class:
             raise IndexError(
-                f"Passed metric values contain fewer classes than 'positive_class' argument: `{self.positive_class}`."  # noqa: E501
+                f"Passed metric values contain fewer classes than 'positive_class' argument: `{self.positive_class}`.",  # noqa: E501
             )
 
         scalar_array = metric_values[:, self.positive_class]

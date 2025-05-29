@@ -9,14 +9,16 @@ import numpy as np
 
 def histogram_mode_estimator(
     samples: jtyping.Float[np.ndarray, " num_samples"],
-    range: typing.Optional[typing.Tuple[float, float]] = None,
-)-> float:
-    bin_counts, bin_edges = np.histogram(samples, bins="auto", range=range)
+    bounds: tuple[float, float] | None = None,
+) -> float:
+    """"Tries to estimate the mode of a distribution from its samples."""
+    bin_counts, bin_edges = np.histogram(samples, bins="auto", range=bounds)
     modal_bin = np.argmax(bin_counts)
 
     mode = (bin_edges[modal_bin] + bin_edges[modal_bin + 1]) / 2
 
     return mode
+
 
 # TODO: remove or integrate KDE mode estimation
 # def kde_mode_estimator(

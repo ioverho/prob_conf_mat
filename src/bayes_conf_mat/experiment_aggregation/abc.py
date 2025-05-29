@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    import jaxtyping as jtyping
+
     from bayes_conf_mat.experiment_group import ExperimentGroup
     from bayes_conf_mat.experiment import ExperimentResult
     from bayes_conf_mat.experiment_aggregation.heterogeneity import HeterogeneityResult
@@ -41,7 +43,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         for alias in cls.aliases:  # type: ignore
             if alias in AGGREGATION_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}."  # noqa: E501
+                    f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}.",  # noqa: E501
                 )
 
         # Register =============================================================
@@ -56,7 +58,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
     @property
     @abstractmethod
     def full_name(self) -> str:  # type: ignore
-        """A human-readable name for this experiment-aggregation method"""
+        """A human-readable name for this experiment-aggregation method."""
         raise NotImplementedError
 
     full_name: str
@@ -74,8 +76,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         init_name = self._init_params.get("aggregation", None)
         if init_name is not None:
             return init_name
-        else:
-            return self.aliases[0]
+        return self.aliases[0]
 
     @abstractmethod
     def aggregate(
@@ -96,7 +97,8 @@ class ExperimentAggregator(metaclass=ABCMeta):
     ) -> ExperimentAggregationResult:
         # Stack the experiment values
         stacked_experiment_results: jtyping.Float[
-            np.ndarray, " num_samples #num_classes num_experiments"
+            np.ndarray,
+            " num_samples #num_classes num_experiments",
         ] = np.stack(
             [experiment_result.values for experiment_result in experiment_results],
             axis=-1,
@@ -107,30 +109,30 @@ class ExperimentAggregator(metaclass=ABCMeta):
         all_class_heterogeneity = []
         for class_label in range(stacked_experiment_results.shape[1]):
             per_class_stacked_experiment_results: jtyping.Float[
-                np.ndarray, " num_samples num_experiments"
+                np.ndarray,
+                " num_samples num_experiments",
             ] = stacked_experiment_results[:, class_label, :]
 
             per_class_aggregated_experiment_result: jtyping.Float[
-                np.ndarray, " num_samples"
+                np.ndarray,
+                " num_samples",
             ] = self.aggregate(
                 experiment_samples=per_class_stacked_experiment_results,
                 bounds=metric.bounds,  # type: ignore
             )
 
             all_class_aggregated_experiment_result.append(
-                per_class_aggregated_experiment_result
+                per_class_aggregated_experiment_result,
             )
 
-            if per_class_stacked_experiment_results.shape[1] > 1:
-                all_class_heterogeneity.append(
-                    estimate_i2(per_class_stacked_experiment_results)
-                )
-            else:
-                all_class_heterogeneity.append(None)
+            all_class_heterogeneity.append(
+                estimate_i2(individual_samples=per_class_stacked_experiment_results),
+            )
 
         # Finally, stack everything back together
         aggregated_experiment_result: jtyping.Float[
-            np.ndarray, " num_samples #num_classes"
+            np.ndarray,
+            " num_samples #num_classes",
         ] = np.vstack(per_class_aggregated_experiment_result)  # type: ignore
 
         result = ExperimentAggregationResult(
@@ -159,7 +161,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
 @dataclass(frozen=True)
 class ExperimentAggregationResult:
     experiment_group: ExperimentGroup
-    aggregator: typing.Type[ExperimentAggregator]
+    aggregator: type[ExperimentAggregator]
     metric: MetricLike
     heterogeneity_results: list[HeterogeneityResult]
     values: jtyping.Float[np.ndarray, " num_samples #num_classes"]

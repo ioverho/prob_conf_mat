@@ -2,11 +2,6 @@
 # Change once documentation is complete
 strict: false
 
-extra_css:
-  - _static/css/main.css
-  #- _static/custom.css
-  - https://unpkg.com/katex@0/dist/katex.min.css
-
 docs_dir: documentation
 
 site_name: Bayesian Confusion Matrices
@@ -24,6 +19,7 @@ copyright: Copyright &copy; 2025 Ivo Verhoeven
 nav:
   - index.md
   - Getting Started:
+      - Getting Started/index.md
       - Getting Started/01_estimating_uncertainty.ipynb
       - Getting Started/02_comparing_experiments.ipynb
       - Getting Started/03_aggregating_experiments.ipynb
@@ -35,10 +31,9 @@ nav:
       #- How To Guides/metric_syntax.md
       #- How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
   - Reference:
-      #- References/ExperimentManager.md
-      #- References/Experiment.md
-      - Reference/index.md
       - Reference/Study.md
+      - Reference/ExperimentGroup.md
+      - Reference/Experiment.md
       - Metrics:
           - Reference/Metrics/index.md
           - Reference/Metrics/Metrics.md
@@ -47,6 +42,7 @@ nav:
           - Reference/Experiment Aggregation/index.md
           - Reference/Experiment Aggregation/heterogeneity.md
       - Reference/IO.md
+      - Reference/Statistics.md
   - Explanation:
       - "Explanation/index.md"
       - "Explanation/generating_confusion_matrices.md"
@@ -58,8 +54,8 @@ theme:
   # TODO: get a nice logo
   logo: _static/logo.png
   favicon: _static/logo.png
+  # GitHub logo, top-right
   icon:
-    # GitHub logo, top-right
     repo: fontawesome/brands/github
   features:
     # Footnotes with tooltip hover
@@ -83,6 +79,10 @@ theme:
     # Add navigation headers to the top
     - navigation.tabs
     - navigation.tabs.sticky
+    # Navigation sections
+    #- navigation.sections
+    # Keep navigation expanded
+    - navigation.expand
     # Section pages
     - navigation.indexes
     # URL matches active anchor
@@ -103,6 +103,7 @@ theme:
     #- search
     # Suggestions
     - search.suggest
+    - search.highlight
     # ==========================================================================
     # Misc
     # ==========================================================================
@@ -111,17 +112,19 @@ theme:
     # TODO: come up with own colour palette
     # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
     # Light mode / dark mode
-    - scheme: light
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: white
       accent: indigo
       toggle:
-        icon: material/circle-half-full
+        icon: material/weather-sunny
         name: Switch to dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       primary: black
       accent: indigo
       toggle:
-        icon: material/circle-half-full
+        icon: material/weather-night
         name: Switch to light mode
 
 plugins:
@@ -140,6 +143,12 @@ plugins:
           options:
             # Do not add source code as block
             show_source: false
+            #extensions:
+            #  # Allows importing documentation from parent class
+            #  - griffe_inherited_docstrings
+            # ==================================================================
+            # Headings
+            # ==================================================================
             heading_level: 2
             show_root_heading: true
             show_root_members_full_path: false
@@ -148,21 +157,41 @@ plugins:
             # Add symbol types, like Github
             show_symbol_type_heading: true
             show_symbol_type_toc: true
+            # ==================================================================
+            # Docstrings
+            # ==================================================================
             docstring_style: google
-            docstring_section_style: table # table | list | spacy
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: list # table | list | spacy
             # Order by code, not name
             members_order: source
-            # Try to keep annotations limited
-            annotations_path: brief
             # Add categories to docstrings
             group_by_category: true
             show_category_heading: true
-            extensions:
-              # Allows importing documentation from parent class
-              - griffe_inherited_docstrings
-  #- git-revision-date-localized:
-  #    enable_creation_date: false
-  #    type: date
+            # ==================================================================
+            # Function signatures
+            # ==================================================================
+            # Set the maximum line length for the signatures
+            line_length: 88
+            # Show signature ===================================================
+            # show_signature: true
+            # Separate the signature from the heading
+            #separate_signature: true
+            # # Show type annotations in signature
+            # show_signature_annotations: true
+            # # Try to keep annotations limited
+            # annotations_path: brief
+            # # Show links to other libraries
+            # signature_crossrefs: true
+            # Hide signature ===================================================
+            show_signature: false
+            separate_signature: false
+            signature_crossrefs: true
+
+  - git-revision-date-localized:
+      enable_creation_date: false
+      type: date
 
 markdown_extensions:
   # Callouts
@@ -172,7 +201,7 @@ markdown_extensions:
   # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#table-of-contents
   - toc:
       permalink: "#"
-      toc_depth: 4
+      toc_depth: 3
   # Footnotes with tooltip hover
   # https://squidfunk.github.io/mkdocs-material/reference/footnotes
   - footnotes
@@ -197,6 +226,14 @@ markdown_extensions:
   # Nested callouts
   # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#superfences
   - pymdownx.superfences
+  # Metadata
+  # https://t.pxeger.com/mkdocs-material/reference/meta-tags/#metadata
+  - meta
+
+extra_css:
+  - _static/css/main.css
+  #- _static/custom.css
+  - https://unpkg.com/katex@0/dist/katex.min.css
 
 extra_javascript:
   # MathJax

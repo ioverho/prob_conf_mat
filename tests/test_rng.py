@@ -22,14 +22,14 @@ def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG
 
         if len(node.position) == 0:
             child_nodes = node.spawn(
-                n_children=int(meta_rng.integers(low=2, high=max_children))
+                n_children=int(meta_rng.integers(low=2, high=max_children)),
             )
 
             tree.extend(child_nodes)
 
         elif len(node.position) < 4:
             child_nodes = node.spawn(
-                n_children=int(meta_rng.integers(low=0, high=max_children))
+                n_children=int(meta_rng.integers(low=0, high=max_children)),
             )
 
             tree.extend(child_nodes)
@@ -40,13 +40,19 @@ def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG
 
 
 def p_independent(
-    node_a: RNG, node_b: RNG, sample_size: int = 10000, num_bins: int = 10
+    node_a: RNG,
+    node_b: RNG,
+    sample_size: int = 10000,
+    num_bins: int = 10,
 ) -> float:
     node_a_samples = node_a.random(size=(sample_size,))
     node_b_samples = node_b.random(size=(sample_size,))
 
     bin_counts, _, _ = np.histogram2d(
-        x=node_a_samples, y=node_b_samples, bins=num_bins, range=((0, 1), (0, 1))
+        x=node_a_samples,
+        y=node_b_samples,
+        bins=num_bins,
+        range=((0, 1), (0, 1)),
     )
 
     p = stats.power_divergence(f_obs=bin_counts, axis=None, lambda_=0).pvalue  # type: ignore
@@ -55,7 +61,8 @@ def p_independent(
 
 
 def num_rejected_hypotheses(
-    p_vals: jtyping.Float[np.ndarray, " num_tests"], alpha: float
+    p_vals: jtyping.Float[np.ndarray, " num_tests"],
+    alpha: float,
 ) -> int:
     """Uses Holm–Bonferroni's step-down procedure to count the number of rejected null-hypotheses.
 
@@ -111,7 +118,7 @@ class TestRNG:
             all_pvals = []
             for node_a, node_b in itertools.combinations(tree, 2):
                 all_pvals.append(
-                    p_independent(node_a, node_b, sample_size=10000, num_bins=100)
+                    p_independent(node_a, node_b, sample_size=10000, num_bins=100),
                 )
 
             all_pvals = np.stack(all_pvals)
@@ -126,7 +133,9 @@ class TestRNG:
 
             # Sample a tree
             tree_a = generate_tree(
-                meta_seed=tree_generator_seed, root_seed=seed_a, max_children=4
+                meta_seed=tree_generator_seed,
+                root_seed=seed_a,
+                max_children=4,
             )
 
             samples_a = []
@@ -137,7 +146,9 @@ class TestRNG:
 
             # Sample a second, independent tree
             tree_b = generate_tree(
-                meta_seed=tree_generator_seed, root_seed=seed_b, max_children=4
+                meta_seed=tree_generator_seed,
+                root_seed=seed_b,
+                max_children=4,
             )
 
             samples_b = []

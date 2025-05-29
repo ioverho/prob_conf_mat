@@ -35,35 +35,46 @@ from bayes_conf_mat.utils import (
 
 
 class DistributionPlottingMethods(StrEnum):
+    """The set of implemented distribution plotting methods."""
+
     KDE = "kde"
     HIST = "hist"
     HISTOGRAM = "histogram"
 
 
 class Study(Config):
-    """This class represents a study, a collection of related experiments and experiment groups. It handles all lower level operations for you.
+    """This class represents a study, a collection of related experiments and experiment groups.
 
-    You can use it to organize your experiments, compute and cache metrics, request analyses or figures, etc.
+    It handles all lower level operations for you.
+
+    You can use it to organize your experiments, compute and cache metrics, request analyses or
+    figures, etc.
 
     Experiment groups should be directly comparable across groups.
 
     For example, a series of different models evaluated on the same dataset.
 
     Args:
-        seed (int, optional): the random seed used to initialise the RNG. Defaults to the current time, in fractional seconds.
-        num_samples (int, optional): the number of syntehtic confusion matrices to sample. A higher value is better, but more computationally expensive. Defaults to 10000, the minimum recommended value.
-        ci_probability (float, optional): the size of the credibility intervals to compute. Defaults to 0.95, which is an arbitrary value, and should be carefully considered.
-        experiments (dict[str, dict[str, dict[str, typing.Any]]], optional): a nested dict that contains (1) the experiment group name, (2) the experiment name, (3) and finally any IO/prior hyperparameters. Defaults to an empty dict.
-        metrics (dict[str, dict[str, typing.Any]], optional): a nested dict that contains (1) the metric as metric syntax strings, (2) and any metric aggregation parameters. Defaults to an empty dict.
-        cache_dir (str, optional): the location of the cache. Defaults to None.
-        overwrite (bool, optional): whether to overwrite an existing cache. Defaults to False.
+        seed (int, optional): the random seed used to initialise the RNG. Defaults to the current
+            time, in fractional seconds.
+        num_samples (int, optional): the number of syntehtic confusion matrices to sample. A higher
+            value is better, but more computationally expensive. Defaults to 10000, the minimum
+            recommended value.
+        ci_probability (float, optional): the size of the credibility intervals to compute.
+            Defaults to 0.95, which is an arbitrary value, and should be carefully considered.
+        experiments (dict[str, dict[str, dict[str, typing.Any]]], optional): a nested dict that
+            contains (1) the experiment group name, (2) the experiment name, (3) and finally any
+            IO/prior hyperparameters. Defaults to an empty dict.
+        metrics (dict[str, dict[str, typing.Any]], optional): a nested dict that contains (1) the
+            metric as metric syntax strings, (2) and any metric aggregation parameters. Defaults to
+            an empty dict.
     """
 
     def __init__(
         self,
-        seed: typing.Optional[int] = None,
-        num_samples: typing.Optional[int] = None,
-        ci_probability: typing.Optional[float] = None,
+        seed: int | None = None,
+        num_samples: int | None = None,
+        ci_probability: float | None = None,
         experiments: dict[str, dict[str, dict[str, typing.Any]]] = {},
         metrics: dict[str, dict[str, typing.Any]] = {},
         # cache_dir: typing.Optional[str] = None,
@@ -89,6 +100,13 @@ class Study(Config):
         self._experiments_rng = self.rng.spawn(1)[0]
         self._experiment_store = OrderedDict()
 
+        for experiment_group_name, experiment_group in experiments.items():
+            for experiment_name, experiment_config in experiment_group.items():
+                self.add_experiment(
+                    experiment_name=f"{experiment_group_name}/{experiment_name}",
+                    **experiment_config,
+                )
+
         # The collection of metrics
         self._metrics_rng = self.rng.spawn(1)[0]
         self._metrics_store = MetricCollection()
@@ -96,57 +114,56 @@ class Study(Config):
         # The mapping from metric to aggregator
         self._metric_to_aggregator = dict()
 
+        for metric_name, metric_config in metrics.items():
+            self.add_metric(metric=metric_name, **metric_config)
+
+    def to_dict(self) -> dict[str, typing.Any]:
+        """Returns the configuration of this Study as a Pythonic dict.
+
+        Returns:
+            dict[str, typing.Any]: the configuration dict, necessary to recreate this Study
+        """
+        state_dict = super().to_dict()
+
+        return state_dict
+
     @classmethod
     def from_dict(
         cls,
         config_dict: dict[str, typing.Any],
         **kwargs,
     ) -> typing.Self:
-        """Creates a study from a dictionary.
+        """Creates a Study from a dictionary.
 
         Keys and values should match pattern of output from Study.to_dict.
 
         Args:
-            config_dict (dict[str, typing.Any]): the dictionary representation of the study configuration.
+            config_dict (dict[str, typing.Any]): the dictionary representation of the study
+                configuration.
             kwargs: any additional keyword arguments typically passed to Study's `.__init__` method
 
         Returns:
             typing.Self: an instance of a study
         """
-
-        instance = cls(
-            **{
-                k: v
-                for k, v in config_dict.items()
-                if k not in ("experiments", "metrics")
-            }
-        )
-
-        for experiment_group_name, experiment_group in config_dict[
-            "experiments"
-        ].items():
-            for experiment_name, experiment_config in experiment_group.items():
-                instance.add_experiment(
-                    experiment_name=f"{experiment_group_name}/{experiment_name}",
-                    **experiment_config,
-                )
-
-        for metric_name, metric_config in config_dict["metrics"].items():
-            instance.add_metric(metric=metric_name, **metric_config)
+        instance = cls(**config_dict, **kwargs)
 
         return instance
 
-    def _list_experiments(self) -> list[str]:
-        """Returns a sorted list of all the experiments included in this self."""
-
+    @cache
+    def _list_experiments(self, fingerprint) -> list[str]:
+        """Returns a sorted list of all the experiments included in this Study."""
         all_experiments = []
         for experiment_group, experiment_configs in self.experiments.items():
             for experiment_name, _ in experiment_configs.items():
                 all_experiments.append(f"{experiment_group}/{experiment_name}")
 
-        sorted(all_experiments)
+        all_experiments = sorted(all_experiments)
 
         return all_experiments
+
+    def all_experiments(self) -> list[str]:
+        """Returns a list with the names of all Experiments in this Study."""
+        return self._list_experiments(fingerprint=self.fingerprint)
 
     @cache
     def _compute_num_classes(self, fingerprint) -> int:
@@ -157,39 +174,48 @@ class Study(Config):
         Returns:
             int: the number of classes
         """
-
         all_num_classes = set()
         for experiment_group in self._experiment_store.values():
             all_num_classes.add(experiment_group.num_classes)
 
         if len(all_num_classes) > 1:
             raise ValueError(
-                f"Inconsistent number of classes in experiment groups: {all_num_classes}"
+                f"Inconsistent number of classes in experiment groups: {all_num_classes}",
             )
 
         return next(iter(all_num_classes))
 
+    def __repr__(self) -> str:  # noqa: D105
+        return f"Study(experiments={self.all_experiments()}), metrics={self._metrics_store})"
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"Study(experiments={self.all_experiments()}, metrics={self._metrics_store})"
+
     @property
     def num_classes(self) -> int:
-        """Returns the number of classes used in experiments in this study.
-
-        Returns:
-            int: the number of classes
-        """
+        """Returns the number of classes used in experiments in this study."""
         return self._compute_num_classes(fingerprint=self.fingerprint)
 
-    def __repr__(self) -> str:
-        return f"Study(experiments={self._list_experiments()}), metrics={self._metrics_store})"
-
-    def __str__(self) -> str:
-        return f"Study(experiments={self._list_experiments()}, metrics={self._metrics_store})"
-
-    def __len__(self) -> int:
+    @property
+    def num_experiment_groups(self) -> int:
+        """Returns the number of ExperimentGroups in this Study."""
         return len(self._experiment_store)
 
+    def __len__(self) -> int:
+        """Alias for the `num_experiment_groups` property.
+
+        Returns the number of ExperimentGroups in this Study.
+        """
+        return len(self._experiment_store)
+
+    @property
+    def num_experiments(self) -> int:
+        """Returns the total number of Experiments in this Study."""
+        return len(self.all_experiments())
+
     @staticmethod
-    def _split_experiment_name(name: str, do_warn: bool = False) -> tuple[str, str]:
-        """Tries to parse an experiment name string, e.g., "group/experiment"
+    def _split_experiment_name(name: str, *, do_warn: bool = False) -> tuple[str, str]:
+        """Tries to parse an experiment name string, e.g., "group/experiment".
 
         This enables the user to ignore experiment groups when not convenient.
 
@@ -212,20 +238,26 @@ class Study(Config):
 
             if do_warn:
                 warnings.warn(
-                    f"Received experiment without experiment group: {experiment_name}. Adding to its own experiment group. To specify an experiment group, pass a string formatted as 'group/name'.",
+                    (
+                        f"Received experiment without experiment group: {experiment_name}. Adding "
+                        f"to its own experiment group. To specify an experiment group, pass a "
+                        f"string formatted as 'group/name'."
+                    ),
                     category=ConfigWarning,
                 )
 
         else:
             raise ValueError(
-                f"Received invalid experiment name. Currently: {name}. Must have at most 1 '/' character."
+                f"Received invalid experiment name. Currently: {name}. "
+                f"Must have at most 1 '/' character.",
             )
 
         return experiment_group_name, experiment_name
 
     def _validate_experiment_name(self, name: str) -> str:
         experiment_group_name, experiment_name = self._split_experiment_name(
-            name=name, do_warn=False
+            name=name,
+            do_warn=False,
         )
 
         name = f"{experiment_group_name}/{experiment_name}"
@@ -233,10 +265,10 @@ class Study(Config):
         if experiment_name == "aggregated":
             if experiment_group_name not in self._experiment_store:
                 raise ValueError(
-                    f"Experiment group {experiment_group_name} does not (yet) exist."
+                    f"Experiment group {experiment_group_name} does not (yet) exist.",
                 )
 
-        elif name not in self._list_experiments():
+        elif name not in self.all_experiments():
             raise ValueError(f"Experiment {name} does not (yet) exist.")
 
         return name
@@ -244,13 +276,14 @@ class Study(Config):
     def _validate_metric_class_label_combination(
         self,
         metric: str | MetricLike,
-        class_label: typing.Optional[int],
+        class_label: int | None,
     ) -> tuple[MetricLike, int]:
         try:
             metric_: MetricLike = self._metrics_store[metric]
         except KeyError:
             raise KeyError(
-                f"Could not find metric '{metric}' in the metrics collection. Consider adding it using `self.add_metric`"
+                f"Could not find metric '{metric}' in the metrics collection. "
+                f"Consider adding it using `self.add_metric`",
             )
 
         if metric_.is_multiclass:
@@ -261,11 +294,12 @@ class Study(Config):
         else:
             if class_label is None:
                 raise ValueError(
-                    f"Metric '{metric_.name}' is not multiclass. You must provide a class label."
+                    f"Metric '{metric_.name}' is not multiclass. You must provide a class label.",
                 )
-            elif class_label < 0 or class_label > self.num_classes - 1:
+            if class_label < 0 or class_label > self.num_classes - 1:
                 raise ValueError(
-                    f"Study only has {self.num_classes} classes. Class label must be in range [0, {self.num_classes - 1}]. Currently {class_label}."
+                    f"Study only has {self.num_classes} classes. Class label must be in range "
+                    f"[0, {self.num_classes - 1}]. Currently {class_label}.",
                 )
 
         return metric_, class_label
@@ -274,34 +308,53 @@ class Study(Config):
         self,
         experiment_name: str,
         confusion_matrix: jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"],
-        prevalence_prior: typing.Optional[
-            str | float | jtyping.Float[np.typing.ArrayLike, " num_classes"]
-        ] = None,
-        confusion_prior: typing.Optional[
-            str | float | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"]
-        ] = None,
+        prevalence_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes"]
+        | None = None,
+        confusion_prior: str
+        | float
+        | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"]
+        | None = None,
         **io_kwargs,
     ) -> None:
         """Adds an experiment to this study.
 
         Args:
-            experiment_name (str): the name of the experiment and experiment group. Should be written as 'experiment_group/experiment'. If the experiment group name is omitted, the experiment gets added to a new experiment group of the same name.
-            confusion_matrix (Int[ArrayLike, 'num_classes num_classes']): the confusion matrix for this experiment
-            prevalence_prior (Optional[str | float | Float[ArrayLike, ' num_classes'] ], optional): the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's prior.
-            confusion_prior (Optional[str | float | Float[ArrayLike, ' num_classes num_classes'] ], optional): the prior over the confusion counts for this experiments. Defaults to 0, Haldane's prior.
+            experiment_name (str): the name of the experiment and experiment group. Should be
+                written as 'experiment_group/experiment'. If the experiment group name is omitted,
+                    the experiment gets added to a new experiment group of the same name.
+            confusion_matrix (Int[ArrayLike, 'num_classes num_classes']): the confusion matrix for
+                this experiment
+            prevalence_prior (str | float | Float[ArrayLike, ' num_classes'], optional):
+                the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's
+                prior.
+            confusion_prior (str | float | Float[ArrayLike, ' num_classes num_classes'], optional):
+                the prior over the confusion counts for this experiments. Defaults to 0, Haldane's
+                prior.
+            **io_kwargs: any additional keyword arguments that are needed for confusion matrix I/O
 
-        Example:
+        Examples:
             Add an experiment named 'test_a' to experiment group 'test'
+
             >>> self.add_experiment(
-                name="test/test_a",
-                confusion_matrix=[[1, 0], [0, 1]],
-            )
+            ...     name="test/test_a",
+            ...     confusion_matrix=[[1, 0], [0, 1]],
+            ... )
+
+            Add an experiment named 'test_a' to experiment group 'test', with some specific prior.
+
+            >>> self.add_experiment(
+            ...     name="test/test_a",
+            ...     confusion_matrix=[[1, 0], [0, 1]],
+            ...     prevalence_prior=[1, 1],
+            ...     confusion_prior="half",
+            ... )
 
         """
-
         # Parse experiment group and experiment name ===========================
         experiment_group_name, experiment_name = self._split_experiment_name(
-            experiment_name
+            experiment_name,
         )
 
         # Type checking ========================================================
@@ -320,7 +373,7 @@ class Study(Config):
             cur_experiments[experiment_group_name] = dict()
 
         cur_experiments[experiment_group_name].update(
-            {experiment_name: conf_mat_io_config}
+            {experiment_name: conf_mat_io_config},
         )
 
         # This performs the validation of the experiment config
@@ -353,52 +406,63 @@ class Study(Config):
         )
 
     def __getitem__(self, key: str) -> Experiment | ExperimentGroup:
+        """Gets an ExperimentGroup or Experiment by name.
+
+        Args:
+            key (str): the name of the ExperimentGroup or the Experiment. Experiment names must
+                be in the '{EXPERIMENT_GROUP}/{EXPERIMENT}' format
+
+        Returns:
+            Experiment | ExperimentGroup: _description_
+        """
         if not isinstance(key, str):
             raise TypeError(
-                f"Experiment group names must be of type `str`. Received `{key}` of type {type(key)}."
+                f"Experiment group names must be of type `str`."
+                f"Received `{key}` of type {type(key)}.",
             )
 
         if "/" in key:
             experiment_group_name, experiment_name = self._split_experiment_name(
-                name=key
+                name=key,
             )
 
             if experiment_group_name not in self._experiment_store:
                 raise KeyError(
-                    f"No experiment group with name {experiment_group_name} is currently present."
+                    f"No experiment group with name {experiment_group_name} is currently present.",
                 )
 
             experiment_group = self._experiment_store[experiment_group_name]
 
             return experiment_group.__getitem__(experiment_name)
 
-        else:
-            experiment_group_name = key
+        experiment_group_name = key
 
-            if experiment_group_name not in self._experiment_store:
-                raise KeyError(
-                    f"No experiment group with name {experiment_group_name} is currently present in this study."
-                )
+        if experiment_group_name not in self._experiment_store:
+            raise KeyError(
+                f"No experiment group with name {experiment_group_name} is currently present in "
+                "this study.",
+            )
 
-            else:
-                return self._experiment_store[experiment_group_name]
+        return self._experiment_store[experiment_group_name]
 
     def add_metric(
         self,
         metric: str | MetricLike,
-        aggregation: typing.Optional[str] = None,
+        aggregation: str | None = None,
         **aggregation_kwargs,
     ) -> None:
-        """Adds a metric to the self. If the is more than one experiment in an experiment group, add an aggregation method.
+        """Adds a metric to the study.
+
+        If there are more than one Experiment in an ExperimentGroup, an aggregation method
+        is required.
 
         Args:
             metric (str | MetricLike): the metric to be added
             aggregation (str, optional): the name of the aggregation method. Defaults to None.
             aggregation_kwargs: keyword arguments passed to the `get_experiment_aggregator` function
         """
-
         # Try to figure out the metric name
-        if isinstance(metric, Metric) or isinstance(metric, AveragedMetric):
+        if isinstance(metric, Metric | AveragedMetric):
             metric_name: str = metric.name
         else:
             metric_name: str = metric  # type: ignore
@@ -424,11 +488,12 @@ class Study(Config):
             indep_rng = self._metrics_rng.spawn(n_children=1)[0]
 
             aggregator = get_experiment_aggregator(
-                rng=indep_rng, **self.metrics[metric_name]
+                rng=indep_rng,
+                **self.metrics[metric_name],
             )
             self._metric_to_aggregator[self._metrics_store[metric]] = aggregator
 
-    def _sample_metrics(self, sampling_method: str):
+    def _sample_metrics(self, sampling_method: str) -> None:
         match sampling_method:
             case (
                 SamplingMethod.POSTERIOR.value
@@ -504,7 +569,9 @@ class Study(Config):
 
             case _:
                 raise ValueError(
-                    f"Parameter `sampling_method` must be one of {tuple(sm.value for sm in SamplingMethod)}. Currently: {sampling_method}"
+                    f"Parameter `sampling_method` must be one of "
+                    f"{tuple(sm.value for sm in SamplingMethod)}. "
+                    f"Currently: {sampling_method}",
                 )
 
     def get_metric_samples(
@@ -512,33 +579,51 @@ class Study(Config):
         metric: str | MetricLike,
         experiment_name: str,
         sampling_method: str,
-    ) -> typing.Union[ExperimentResult, ExperimentAggregationResult]:
+    ) -> ExperimentResult | ExperimentAggregationResult:
         """Loads or computes samples for a metric, belonging to an experiment.
 
         Args:
             metric (str | MetricLike): the name of the metric
-            experiment_name (str): the name of the experiment. You can also pass 'experiment_group/aggregated' to retrieve the aggregated metric values.
-            sampling_method (str): the sampling method used to generate the metric values. Must a member of the SamplingMethod enum
+            experiment_name (str): the name of the experiment. You can also pass
+                'experiment_group/aggregated' to retrieve the aggregated metric values.
+            sampling_method (str): the sampling method used to generate the metric values. Must a
+                member of the SamplingMethod enum
 
         Returns:
             typing.Union[ExperimentResult, ExperimentAggregationResult]
 
-        Example:
-            >>> experiment_result = self.get_metric_samples(metric="accuracy", sampling_method="posterior", experiment_name="test/test_a")
+        Examples:
+            Get the accuracy scores for experiment 'test/test_a' for synthetic confusion matrices
+            sampled from the posterior predictive distribution.
+
+            >>> experiment_result = self.get_metric_samples(
+            ...     metric="accuracy",
+            ...     sampling_method="posterior",
+            ...     experiment_name="test/test_a",
+            ... )
             ExperimentResult(experiment=ExperimentGroup(test_a), metric=Metric(accuracy))
 
-            >>> experiment_result = self.get_metric_samples(metric="accuracy", sampling_method="posterior", experiment_name="test/aggregated")
-            ExperimentAggregationResult(experiment_group=ExperimentGroup(test), metric=Metric(accuracy), aggregator=ExperimentAggregator(fe_gaussian))
+            Similarly, get the accuracy scores, but now aggregated across an entire ExperimentGroup
+
+            >>> experiment_result = self.get_metric_samples(
+            ...     metric="accuracy",
+            ...     sampling_method="posterior",
+            ...     experiment_name="test/aggregated",
+            ... )
+            ExperimentAggregationResult(
+                experiment_group=ExperimentGroup(test),
+                metric=Metric(accuracy),
+                aggregator=ExperimentAggregator(fe_gaussian)
+                )
 
         """
-
         if isinstance(metric, Metric | AveragedMetric):
             metric = metric.name
 
         # Validate the experiment name before trying to fetch its values
         experiment_name = self._validate_experiment_name(experiment_name)
         experiment_group_name, _experiment_name = self._split_experiment_name(
-            experiment_name
+            experiment_name,
         )
 
         keys = [metric, experiment_group_name, _experiment_name, sampling_method]
@@ -557,10 +642,9 @@ class Study(Config):
 
         if result is NotInCache:
             raise ValueError(
-                f"Got a NotInCache for {keys}. Cannot continue. Please report this issue."
+                f"Got a NotInCache for {keys}. Cannot continue. Please report this issue.",
             )
-        else:
-            result: ExperimentResult | ExperimentAggregationResult
+        result: ExperimentResult | ExperimentAggregationResult
 
         return result
 
@@ -568,7 +652,8 @@ class Study(Config):
         self,
         metric: MetricLike,
         sampling_method: str,
-        class_label: typing.Optional[int] = None,
+        *,
+        class_label: int | None = None,
         table_fmt: str = "html",
         precision: int = 4,
         include_observed_values: bool = False,
@@ -590,9 +675,15 @@ class Study(Config):
                 )
 
                 if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
-                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
+                    hdi_str = (
+                        f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, "
+                        f"{fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
+                    )
                 else:
-                    hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
+                    hdi_str = (
+                        f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, "
+                        f"{fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
+                    )
 
                 table_row = [
                     experiment_group_name,
@@ -638,27 +729,50 @@ class Study(Config):
     def report_metric_summaries(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int] = None,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         table_fmt: str = "html",
         precision: int = 4,
     ) -> str:
-        """Generates a table with summary statistics for all experiments
+        """Generates a table with summary statistics for all experiments.
 
         Args:
             metric (str): the name of the metric
-            class_label (typing.Optional[int], optional): the class label. Leave 0 or None if using a multiclass metric. Defaults to None.
-            table_fmt (str, optional): the format of the table, passed to [tabulate](https://github.com/astanin/python-tabulate#table-format). Defaults to "html".
-            precision (int, optional): the required precision of the presented numbers. Defaults to 4.
+            class_label (typing.Optional[int], optional): the class label. Leave 0 or None if using
+                a multiclass metric. Defaults to None.
+
+        Keyword Args:
+            table_fmt (str, optional): the format of the table, passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to "html".
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
 
         Returns:
             str: the table as a string
-        """
+
+        Examples:
+            Return the a table with summary statistics of the metric distribution
+
+            >>> print(
+            ...     study.report_metric_summaries(
+            ...         metric="acc", class_label=0, table_fmt="github"
+            ...     )
+            ... )
+
+            ```
+            | Group   | Experiment   |   Observed |   Median |   Mode |        95.0% HDI |     MU |   Skew |    Kurt |
+            |---------|--------------|------------|----------|--------|------------------|--------|--------|---------|
+            | GROUP   | EXPERIMENT   |     0.5000 |   0.4999 | 0.4921 | [0.1863, 0.8227] | 0.6365 | 0.0011 | -0.5304 |
+            ```
+        """  # noqa: E501
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         table = self._construct_metric_summary_table(
@@ -675,16 +789,50 @@ class Study(Config):
     def report_random_metric_summaries(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int] = None,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         table_fmt: str = "html",
         precision: int = 4,
     ) -> str:
+        """Provides a table with metric results from a simulated random classifier.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (typing.Optional[int], optional): the class label. Leave 0 or None if using
+                a multiclass metric. Defaults to None.
+
+        Keyword Args:
+            table_fmt (str, optional): the format of the table, passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to "html".
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
+
+        Returns:
+            str: the table as a string
+
+        Examples:
+            Return the a table with summary statistics of the metric distribution
+
+            >>> print(
+            ...     study.report_random_metric_summaries(
+            ...         metric="acc", class_label=0, table_fmt="github"
+            ...     )
+            ... )
+
+            ```
+            | Group   | Experiment   |   Median |   Mode |        95.0% HDI |     MU |    Skew |    Kurt |
+            |---------|--------------|----------|--------|------------------|--------|---------|---------|
+            | GROUP   | EXPERIMENT   |   0.4994 | 0.5454 | [0.1778, 0.8126] | 0.6348 | -0.0130 | -0.5623 |
+            ```
+        """  # noqa: E501
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         table = self._construct_metric_summary_table(
@@ -701,14 +849,15 @@ class Study(Config):
     def plot_metric_summaries(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int] = None,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         method: str = "kde",
         bandwidth: float = 1.0,
         bins: int | list[int] | str = "auto",
         normalize: bool = False,
-        figsize: typing.Optional[tuple[float, float]] = None,
+        figsize: tuple[float, float] | None = None,
         fontsize: float = 9.0,
-        axis_fontsize: typing.Optional[float] = None,
+        axis_fontsize: float | None = None,
         edge_colour: str = "black",
         area_colour: str = "gray",
         area_alpha: float = 0.5,
@@ -723,51 +872,98 @@ class Study(Config):
         obs_point_colour: str = "black",
         obs_point_size: float | None = None,
         plot_extrema_lines: bool = True,
-        extrema_lines_colour: str = "black",
-        extrema_lines_format: str = "-",
+        extrema_line_colour: str = "black",
+        extrema_line_format: str = "-",
         extrema_line_height: float = 12,
-        extrema_lines_width: float = 1,
+        extrema_line_width: float = 1,
         plot_base_line: bool = True,
         base_line_colour: str = "black",
         base_line_format: str = "-",
         base_line_width: int = 1,
         plot_experiment_name: bool = True,
     ) -> matplotlib.figure.Figure:
-        """Plots the distrbution of sampled metric values for a particular metric and class combination.
+        """Plots the distrbution of sampled metric values for a metric and class combination.
 
         Args:
             metric (str): the name of the metric
             class_label (int | None, optional): the class label. Defaults to None.
-            observed_values (dict[str, ExperimentResult]): the observed metric values
-            sampled_values (dict[str, ExperimentResult]): the sampled metric values
-            metric (Metric | AveragedMetric): the metric
-            method (str, optional): the method for displaying a histogram, provided by Seaborn. Can be either a histogram or KDE. Defaults to "kde".
-            bandwidth (float, optional): the bandwith parameter for the KDE. Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html). Defaults to 1.0.
-            bins (int | list[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
-            normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1]. Otherwise, uses a shared y-axis. Defaults to False.
-            figsize (tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
-            fontsize (float, optional): fontsize for the experiment name labels. Defaults to 9.
-            axis_fontsize (float, optional): fontsize for the x-axis ticklabels. Defaults to None, in which case the fontsize will be used.
-            edge_colour (str, optional): the colour of the histogram or KDE edge. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            area_colour (str, optional): the colour of the histogram or KDE filled area. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "gray".
-            area_alpha (float, optional): the opacity of the histogram or KDE filled area. Corresponds to [matplotlib's `alpha` parameter](). Defaults to 0.5.
+
+        Keyword Args:
+            method (str, optional): the method for displaying a histogram, provided by Seaborn.
+                Can be either a histogram or KDE.
+                Defaults to "kde".
+            bandwidth (float, optional): the bandwith parameter for the KDE.
+                Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html).
+                Defaults to 1.0.
+            bins (int | list[int] | str, optional): the number of bins to use in the histrogram.
+                Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges).
+                Defaults to "auto".
+            normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1].
+                Otherwise, uses a shared y-axis.
+                Defaults to False.
+            figsize (tuple[float, float], optional): the figure size, in inches.
+                Corresponds to matplotlib's `figsize` parameter.
+                Defaults to None, in which case a decent default value will be approximated.
+            fontsize (float, optional): fontsize for the experiment name labels.
+                Defaults to 9.
+            axis_fontsize (float, optional): fontsize for the x-axis ticklabels.
+                Defaults to None, in which case the fontsize will be used.
+            edge_colour (str, optional): the colour of the histogram or KDE edge.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            area_colour (str, optional): the colour of the histogram or KDE filled area.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "gray".
+            area_alpha (float, optional): the opacity of the histogram or KDE filled area.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to 0.5.
             plot_median_line (bool, optional): whether to plot the median line. Defaults to True.
-            median_line_colour (str, optional): the colour of the median line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            median_line_format (str, optional): the format of the median line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "--".
+            median_line_colour (str, optional): the colour of the median line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            median_line_format (str, optional): the format of the median line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "--".
             plot_hdi_lines (bool, optional): whether to plot the HDI lines. Defaults to True.
-            hdi_lines_colour (str, optional): the colour of the HDI lines. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            hdi_line_format (str, optional): the format of the HDI lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_obs_point (bool, optional): whether to plot the observed value as a marker. Defaults to True.
-            obs_point_marker (str, optional): the marker type of the observed value. Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers). Defaults to "D".
-            obs_point_colour (str, optional): the colour of the observed marker. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
+            hdi_lines_colour (str, optional): the colour of the HDI lines.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            hdi_line_format (str, optional): the format of the HDI lines.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            plot_obs_point (bool, optional): whether to plot the observed value as a marker.
+                Defaults to True.
+            obs_point_marker (str, optional): the marker type of the observed value.
+                Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers).
+                Defaults to "D".
+            obs_point_colour (str, optional): the colour of the observed marker.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
             obs_point_size (float, optional): the size of the observed marker. Defaults to None.
-            plot_extrema_lines (bool, optional): whether to plot small lines at the distribution extreme values. Defaults to True.
-            extrema_lines_colour (str, optional): the colour of the extrema lines. Defaults to "black".
-            extrema_lines_format (str, optional): the format of the extrema lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_base_line (bool, optional): whether to plot a line at the base of the distribution. Defaults to True.
-            base_lines_colour (str, optional): the colour of the base line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            base_lines_format (str, optional): the format of the base line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_experiment_name (bool, optional): whether to plot the experiment names as labels. Defaults to True.
+            plot_extrema_lines (bool, optional): whether to plot small lines at the distribution
+                extreme values. Defaults to True.
+            extrema_line_colour (str, optional): the colour of the extrema lines.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            extrema_line_format (str, optional): the format of the extrema lines.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            extrema_line_height (float, optional): the maximum height of the extrema lines.
+                Defaults to 12.
+            extrema_line_width (float, optional): the width of the extrema line.
+                Defaults to 1.
+            plot_base_line (bool, optional): whether to plot a line at the base of the distribution.
+                Defaults to True.
+            base_line_colour (str, optional): the colour of the base line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            base_line_format (str, optional): the format of the base line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            base_line_width (int, optional): the width of the base line.
+                Defaults to 1.
+            plot_experiment_name (bool, optional): whether to plot the experiment names as labels.
+                Defaults to True.
 
         Returns:
             matplotlib.figure.Figure: the completed figure of the distribution plot
@@ -777,7 +973,8 @@ class Study(Config):
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         # Import optional dependencies
@@ -788,10 +985,11 @@ class Study(Config):
 
         except ModuleNotFoundError as e:
             raise ModuleNotFoundError(
-                f"Visualization requires optional dependencies: [matplotlib, pyplot]. Currently missing: {e}"
+                f"Visualization requires optional dependencies: [matplotlib, pyplot]. "
+                f"Currently missing: {e}",
             )
 
-        total_num_experiments = len(self._list_experiments())
+        total_num_experiments = len(self.all_experiments())
 
         if figsize is None:
             # Try to set a decent default figure size
@@ -800,7 +998,10 @@ class Study(Config):
             _figsize = figsize
 
         fig, axes = plt.subplots(
-            total_num_experiments, 1, figsize=_figsize, sharey=(not normalize)
+            total_num_experiments,
+            1,
+            figsize=_figsize,
+            sharey=(not normalize),
         )
 
         if total_num_experiments == 1:
@@ -842,7 +1043,7 @@ class Study(Config):
 
                 all_medians.append(posterior_summary.median)
                 all_hdi_ranges.append(
-                    posterior_summary.hdi[1] - posterior_summary.hdi[0]
+                    posterior_summary.hdi[1] - posterior_summary.hdi[0],
                 )
 
                 match method:
@@ -915,7 +1116,9 @@ class Study(Config):
                     case _:
                         del fig, axes
                         raise ValueError(
-                            f"Parameter `method` must be one of {tuple(sm.value for sm in DistributionPlottingMethods)}. Currently: {method}"
+                            f"Parameter `method` must be one of "
+                            f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
+                            f"Currently: {method}",
                         )
 
                 if plot_obs_point:
@@ -1066,9 +1269,9 @@ class Study(Config):
                         all_min_x[i],
                         0,
                         standard_length,
-                        color=extrema_lines_colour,
-                        ls=extrema_lines_format,
-                        linewidth=extrema_lines_width,
+                        color=extrema_line_colour,
+                        ls=extrema_line_format,
+                        linewidth=extrema_line_width,
                         zorder=3,
                         clip_on=False,
                     )
@@ -1078,10 +1281,10 @@ class Study(Config):
                         all_max_x[i],
                         0,
                         standard_length,
-                        color=extrema_lines_colour,
-                        ls=extrema_lines_format,
+                        color=extrema_line_colour,
+                        ls=extrema_line_format,
                         zorder=3,
-                        linewidth=extrema_lines_width,
+                        linewidth=extrema_line_width,
                         clip_on=False,
                     )
 
@@ -1100,7 +1303,8 @@ class Study(Config):
         axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
         axes[-1].set_yticks([])
         axes[-1].tick_params(
-            axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize
+            axis="x",
+            labelsize=axis_fontsize if axis_fontsize is not None else fontsize,
         )
 
         fig.tight_layout()
@@ -1113,7 +1317,7 @@ class Study(Config):
         class_label: int,
         experiment_a: str,
         experiment_b: str,
-        min_sig_diff: typing.Optional[float] = None,
+        min_sig_diff: float | None = None,
     ) -> PairwiseComparisonResult:
         lhs_samples = self.get_metric_samples(
             metric=metric.name,
@@ -1152,7 +1356,7 @@ class Study(Config):
                 sampling_method=SamplingMethod.INPUT,
             ).values[:, class_label]
 
-            observed_diff = lhs_observed - rhs_observed
+            observed_diff = float(lhs_observed - rhs_observed)
         else:
             observed_diff = None
 
@@ -1172,18 +1376,65 @@ class Study(Config):
     def report_pairwise_comparison(
         self,
         metric: str,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         experiment_a: str,
         experiment_b: str,
-        class_label: typing.Optional[int] = None,  # type: ignore
-        min_sig_diff: typing.Optional[float] = None,
+        min_sig_diff: float | None = None,
         precision: int = 4,
     ) -> str:
+        """Reports on the comparison between two Experiments or ExperimentGroups.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment_a (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            experiment_b (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            min_sig_diff (float | None, optional): the minimal difference which is considered
+                significant. Defaults to 0.1 * std.
+            precision (int, optional): the precision of floats used when printing. Defaults to 4.
+
+        Returns:
+            str: a description of the significance of the difference between
+                `experiment_a` and `experiment_b`
+
+        Examples:
+            Report on the difference in accuracy between experiments 'EXPERIMENT_A' and
+            'EXPERIMENT_B', with a minimum significance difference of 0.03.
+
+            >>> study.report_pairwise_comparison(
+            ...     metric="acc",
+            ...     class_label=0,
+            ...     experiment_a="GROUP/EXPERIMENT_A",
+            ...     experiment_b="GROUP/EXPERIMENT_B",
+            ...     min_sig_diff=0.03,
+            ... )
+
+            ```
+            Experiment GROUP/EXPERIMENT_A's acc being lesser than GROUP/EXPERIMENT_B could be considered 'dubious'* (Median Δ=-0.0002, 95.00% HDI=[-0.0971, 0.0926], p_direction=50.13%).
+
+            There is a 53.11% probability that this difference is bidirectionally significant (ROPE=[-0.0300, 0.0300], p_ROPE=46.89%).
+
+            Bidirectional significance could be considered 'undecided'*.
+
+            There is a 26.27% probability that this difference is significantly negative (p_pos=26.84%, p_neg=26.27%).
+
+            Relative to two random models (p_ROPE,random=36.56%) significance is 1.2825 times less likely.
+
+            * These interpretations are based off of loose guidelines, and should change according to the application.
+            ```
+        """  # noqa: E501
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         comparison_result = self._pairwise_compare(
@@ -1196,26 +1447,27 @@ class Study(Config):
 
         return comparison_result.template_sentence(precision=precision)
 
-    def report_pairwise_comparison_plot(
+    def plot_pairwise_comparison(
         self,
         metric: str,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         experiment_a: str,
         experiment_b: str,
-        class_label: int = None,  # type: ignore
-        min_sig_diff: typing.Optional[float] = None,
+        min_sig_diff: float | None = None,
         method: str = "kde",
         bandwidth: float = 1.0,
         bins: int | list[int] | str = "auto",
-        figsize: typing.Optional[tuple[float, float]] = None,
+        figsize: tuple[float, float] | None = None,
         fontsize: float = 9,
-        axis_fontsize: typing.Optional[float] = None,
+        axis_fontsize: float | None = None,
         precision: int = 4,
         edge_colour="black",
         plot_min_sig_diff_lines: bool = True,
         min_sig_diff_lines_colour: str = "black",
         min_sig_diff_lines_format: str = "-",
-        min_sig_diff_area_colour: str = "gray",
-        min_sig_diff_area_alpha: float = 0.5,
+        rope_area_colour: str = "gray",
+        rope_area_alpha: float = 0.5,
         neg_sig_diff_area_colour: str = "red",
         neg_sig_diff_area_alpha: float = 0.5,
         pos_sig_diff_area_colour: str = "green",
@@ -1223,22 +1475,132 @@ class Study(Config):
         plot_obs_point: bool = True,
         obs_point_marker: str = "D",
         obs_point_colour: str = "black",
-        obs_point_size: typing.Optional[float] = None,
+        obs_point_size: float | None = None,
         plot_median_line: bool = True,
         median_line_colour: str = "black",
         median_line_format: str = "--",
-        plot_hdi_lines: bool = False,
-        hdi_lines_colour: str = "black",
-        hdi_lines_format: str = ":",
         plot_extrema_lines: bool = True,
-        extrema_lines_colour: str = "black",
-        extrema_lines_format: str = "-",
+        extrema_line_colour: str = "black",
+        extrema_line_format: str = "-",
         extrema_line_height: float = 12,
+        extrema_line_width: float = 1.0,
         plot_base_line: bool = True,
-        base_lines_colour: str = "black",
-        base_lines_format: str = "-",
+        base_line_colour: str = "black",
+        base_line_format: str = "-",
+        base_line_width: float = 1.0,
         plot_proportions: bool = True,
     ) -> matplotlib.figure.Figure:
+        """Plots the distribution of the difference between two experiments.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment_a (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            experiment_b (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            min_sig_diff (float | None, optional): the minimal difference which is considered
+                significant. Defaults to 0.1 * std.
+            method (str, optional): the method for displaying a histogram, provided by Seaborn.
+                Can be either a histogram or KDE.
+                Defaults to "kde".
+            bandwidth (float, optional): the bandwith parameter for the KDE.
+                Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html).
+                Defaults to 1.0.
+            bins (int | list[int] | str, optional): the number of bins to use in the histrogram.
+                Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges).
+                Defaults to "auto".
+            figsize (tuple[float, float], optional): the figure size, in inches.
+                Corresponds to matplotlib's `figsize` parameter.
+                Defaults to None, in which case a decent default value will be approximated.
+            fontsize (float, optional): fontsize for the experiment name labels.
+                Defaults to 9.
+            axis_fontsize (float, optional): fontsize for the x-axis ticklabels.
+                Defaults to None, in which case the fontsize will be used.
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
+            edge_colour (str, optional): the colour of the histogram or KDE edge.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            plot_min_sig_diff_lines (bool, optional): whether to plot the borders of the ROPE, the
+                lines of minimal significance.
+                Defaults to True.
+            min_sig_diff_lines_colour (str, optional): the colour of the
+                lines of minimal significance.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            min_sig_diff_lines_format (str, optional): the format of the
+                lines of minimal significance.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            rope_area_colour (str, optional): the colour of the ROPE area.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "gray".
+            rope_area_alpha (float, optional): the opacity of the ROPE area.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to 0.5.
+            neg_sig_diff_area_colour (str, optional): the colour of the negatively significant area.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "red".
+            neg_sig_diff_area_alpha (float, optional): the opacity of the
+                negatively significant area.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to 0.5.
+            pos_sig_diff_area_colour (str, optional): the colour of the positively significant area.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "green".
+            pos_sig_diff_area_alpha (float, optional): the opacity of the
+                positively significant area.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to 0.5.
+            plot_obs_point (bool, optional): whether to plot the observed value as a marker.
+                Defaults to True.
+            obs_point_marker (str, optional): the marker type of the observed value.
+                Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers).
+                Defaults to "D".
+            obs_point_colour (str, optional): the colour of the observed marker.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            obs_point_size (float, optional): the size of the observed marker. Defaults to None.
+            plot_median_line (bool, optional): whether to plot the median line. Defaults to True.
+            median_line_colour (str, optional): the colour of the median line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            median_line_format (str, optional): the format of the median line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "--".
+            plot_extrema_lines (bool, optional): _description_. Defaults to True.
+            plot_extrema_lines (bool, optional): whether to plot small lines at the distribution
+                extreme values. Defaults to True.
+            extrema_line_colour (str, optional): the colour of the extrema lines.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            extrema_line_format (str, optional): the format of the extrema lines.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            extrema_line_width (float, optional): the width of the extrema lines.
+                Defaults to 1.
+            extrema_line_height (float, optional): the maximum height of the extrema lines.
+                Defaults to 12.
+            plot_base_line (bool, optional): whether to plot a line at the base of the distribution.
+                Defaults to True.
+            base_line_colour (str, optional): the colour of the base line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            base_line_format (str, optional): the format of the base line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            base_line_width (float, optional): the width of the base line.
+                Defaults to 1.
+            plot_proportions (bool, optional): whether to plot the proportions of the data under
+                the three areas as text.
+                Defaults to True.
+
+        Returns:
+            matplotlib.figure.Figure: the Matplotlib Figure represenation of the plot
+        """
         try:
             # Import optional dependencies
             import matplotlib.pyplot as plt
@@ -1246,7 +1608,8 @@ class Study(Config):
 
         except ModuleNotFoundError as e:
             raise ModuleNotFoundError(
-                f"Visualization requires optional dependencies: [matplotlib, pyplot]. Currently missing: {e}"
+                f"Visualization requires optional dependencies: [matplotlib, pyplot]. "
+                f"Currently missing: {e}",
             )
 
         # Typehint the metric and class_label variables
@@ -1254,7 +1617,8 @@ class Study(Config):
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         comparison_result = self._pairwise_compare(
@@ -1272,11 +1636,8 @@ class Study(Config):
         )
 
         # Figure instantiation
-        if figsize is None:
-            # Try to set a decent default figure size
-            _figsize = (6.30, 2.52)
-        else:
-            _figsize = figsize
+        # Try to set a decent default figure size
+        _figsize = (6.30, 2.52) if figsize is None else figsize
 
         fig, ax = plt.subplots(1, 1, figsize=_figsize)
 
@@ -1326,7 +1687,9 @@ class Study(Config):
             case _:
                 del fig, ax
                 raise ValueError(
-                    f"Parameter `method` must be one of {tuple(sm.value for sm in DistributionPlottingMethods)}. Currently: {method}"
+                    f"Parameter `method` must be one of "
+                    f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
+                    f"Currently: {method}",
                 )
 
         # Compute the actual maximum and minimum of the difference distribution
@@ -1370,8 +1733,8 @@ class Study(Config):
             x=rope_xx,
             y1=0,
             y2=rope_yy,
-            color=min_sig_diff_area_colour,
-            alpha=min_sig_diff_area_alpha,
+            color=rope_area_colour,
+            alpha=rope_area_alpha,
             interpolate=True,
             zorder=0,
             linewidth=0,
@@ -1379,7 +1742,9 @@ class Study(Config):
 
         # Fill the negatively significant area
         neg_sig_xx = np.linspace(
-            min_x, -comparison_result.min_sig_diff, num=2 * kde_x.shape[0]
+            min_x,
+            -comparison_result.min_sig_diff,
+            num=2 * kde_x.shape[0],
         )
 
         neg_sig_yy = np.interp(
@@ -1401,7 +1766,9 @@ class Study(Config):
 
         # Fill the positively significant area
         pos_sig_xx = np.linspace(
-            comparison_result.min_sig_diff, max_x, num=2 * kde_x.shape[0]
+            comparison_result.min_sig_diff,
+            max_x,
+            num=2 * kde_x.shape[0],
         )
 
         pos_sig_yy = np.interp(
@@ -1437,7 +1804,9 @@ class Study(Config):
                 )
             else:
                 warnings.warn(
-                    "Parameter `plot_obs_point` is True, but one of the experiments has no observation (i.e. aggregated). As a result, no observed difference will be shown."
+                    "Parameter `plot_obs_point` is True, but one of the experiments "
+                    "has no observation (i.e. aggregated). "
+                    "As a result, no observed difference will be shown.",
                 )
 
         if plot_median_line:
@@ -1459,41 +1828,6 @@ class Study(Config):
                 zorder=1,
             )
 
-            if plot_hdi_lines:
-                x_hdi_lb = comparison_result.diff_dist_summary.hdi[0]
-
-                y_hdi_lb = np.interp(
-                    x=x_hdi_lb,
-                    xp=kde_x,
-                    fp=kde_y,
-                )
-
-                ax.vlines(
-                    x_hdi_lb,
-                    0,
-                    y_hdi_lb,
-                    color=hdi_lines_colour,
-                    linestyle=hdi_lines_format,
-                    zorder=1,
-                )
-
-                x_hdi_ub = comparison_result.diff_dist_summary.hdi[1]
-
-                y_hdi_ub = np.interp(
-                    x=x_hdi_ub,
-                    xp=kde_x,
-                    fp=kde_y,
-                )
-
-                ax.vlines(
-                    x_hdi_ub,
-                    0,
-                    y_hdi_ub,
-                    color=hdi_lines_colour,
-                    linestyle=hdi_lines_format,
-                    zorder=1,
-                )
-
         if plot_base_line:
             # Add base line
             ax.hlines(
@@ -1501,8 +1835,9 @@ class Study(Config):
                 min_x,
                 max_x,
                 clip_on=False,
-                color=base_lines_colour,
-                ls=base_lines_format,
+                color=base_line_colour,
+                ls=base_line_format,
+                linewidth=base_line_width,
                 zorder=3,
             )
 
@@ -1518,8 +1853,9 @@ class Study(Config):
                 0,
                 standard_length,
                 clip_on=False,
-                color=extrema_lines_colour,
-                ls=extrema_lines_format,
+                color=extrema_line_colour,
+                ls=extrema_line_format,
+                linewidth=extrema_line_width,
                 zorder=3,
             )
             ax.vlines(
@@ -1527,8 +1863,9 @@ class Study(Config):
                 0,
                 standard_length,
                 clip_on=False,
-                color=extrema_lines_colour,
-                ls=extrema_lines_format,
+                color=extrema_line_colour,
+                ls=extrema_line_format,
+                linewidth=extrema_line_width,
                 zorder=3,
             )
 
@@ -1539,8 +1876,13 @@ class Study(Config):
         if plot_proportions:
             if max_x > comparison_result.min_sig_diff:
                 # The proportion in the positively significant region
+                p_sig_pos_str = fmt(
+                    comparison_result.p_sig_pos,
+                    precision=precision,
+                    mode="%",
+                )
                 ax.text(
-                    s=f"$p_{{sig}}^{{+}}$\n{fmt(comparison_result.p_sig_pos, precision=precision, mode='%')}\n",
+                    s=f"$p_{{sig}}^{{+}}$\n{p_sig_pos_str}\n",
                     x=0.5 * (cur_xlim[1] + comparison_result.min_sig_diff),
                     y=cur_ylim[1],
                     horizontalalignment="center",
@@ -1551,8 +1893,13 @@ class Study(Config):
 
             if min_x < -comparison_result.min_sig_diff:
                 # The proportion in the negatively significant area
+                p_sig_neg_str = fmt(
+                    comparison_result.p_sig_neg,
+                    precision=precision,
+                    mode="%",
+                )
                 ax.text(
-                    s=f"$p_{{sig}}^{{-}}$\n{fmt(comparison_result.p_sig_neg, precision=precision, mode='%')}\n",
+                    s=f"$p_{{sig}}^{{-}}$\n{p_sig_neg_str}\n",
                     x=0.5 * (cur_xlim[0] - comparison_result.min_sig_diff),
                     y=cur_ylim[1],
                     horizontalalignment="center",
@@ -1569,7 +1916,7 @@ class Study(Config):
                 horizontalalignment="center",
                 verticalalignment="center_baseline",
                 fontsize=fontsize,
-                color=min_sig_diff_area_colour,
+                color=rope_area_colour,
             )
 
         # Remove the y ticks
@@ -1587,7 +1934,8 @@ class Study(Config):
         )
 
         ax.tick_params(
-            axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize
+            axis="x",
+            labelsize=axis_fontsize if axis_fontsize is not None else fontsize,
         )
 
         fig.tight_layout()
@@ -1597,16 +1945,17 @@ class Study(Config):
     def _pairwise_random_comparison(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int],  # type: ignore
+        class_label: int | None,  # type: ignore
         experiment: str,
-        min_sig_diff: typing.Optional[float] = None,
+        min_sig_diff: float | None = None,
     ) -> PairwiseComparisonResult:
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         actual_result = self.get_metric_samples(
@@ -1638,15 +1987,55 @@ class Study(Config):
         self,
         metric: str,
         class_label: int | None = None,
+        *,
+        min_sig_diff: float | None = None,
         table_fmt: str = "html",
         precision: int = 4,
-        min_sig_diff: typing.Optional[float] = None,
     ) -> str:
+        """Reports on the comparison between an Experiments or ExperimentGroups
+        and a simulated random classifier.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            min_sig_diff (float | None, optional): the minimal difference which is considered
+                significant. Defaults to 0.1 * std.
+            table_fmt (str, optional): the format of the table, passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to "html".
+            precision (int, optional): the precision of floats used when printing. Defaults to 4.
+
+        Returns:
+            str: a description of the significance of the difference between
+                `experiment_a` and `experiment_b`
+
+        Examples:
+            Report on the difference in accuracy to that of a random classifier
+
+            >>> print(
+            ...     study.report_pairwise_comparison_to_random(
+            ...         metric="acc",
+            ...         class_label=0,
+            ...         table_fmt="github",
+            ...     )
+            ... )
+
+            ```
+            | Group   | Experiment   |   Median Δ |   p_direction |              ROPE |   p_ROPE |   p_sig |
+            |---------|--------------|------------|---------------|-------------------|----------|---------|
+            | GROUP   | EXPERIMENT_A |     0.3235 |        1.0000 | [-0.0056, 0.0056] |   0.0000 |  1.0000 |
+            | GROUP   | EXPERIMENT_B |     0.3231 |        1.0000 | [-0.0056, 0.0056] |   0.0000 |  1.0000 |
+            ```
+        """  # noqa: D205, E501
         import tabulate
 
         records = []
 
-        for experiment in self._list_experiments():
+        for experiment in self.all_experiments():
             random_comparison_result = self._pairwise_random_comparison(
                 metric=metric,
                 class_label=class_label,
@@ -1655,14 +2044,18 @@ class Study(Config):
             )
 
             experiment_group_name, experiment_name = self._split_experiment_name(
-                experiment
+                experiment,
             )
 
             rope_lb = fmt(
-                -random_comparison_result.min_sig_diff, precision=precision, mode="f"
+                -random_comparison_result.min_sig_diff,
+                precision=precision,
+                mode="f",
             )
             rope_ub = fmt(
-                random_comparison_result.min_sig_diff, precision=precision, mode="f"
+                random_comparison_result.min_sig_diff,
+                precision=precision,
+                mode="f",
             )
 
             random_comparison_record = {
@@ -1691,21 +2084,47 @@ class Study(Config):
     def report_listwise_comparison(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int] = None,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         table_fmt: str = "html",
         precision: int = 4,
-    ):
-        """Reports the probability for an experiment to achieve a rank when compared to all other experiments on the same metric.
+    ) -> str:
+        """Reports the probability for an experiment achieving a rank when compared to all other
+        experiments on the same metric.
 
         Args:
             metric (str): the name of the metric
-            class_label (int | None, optional): the class label. Leave 0 or None if using a multiclass metric. Defaults to None.
-            table_fmt (str, optional): the format of the table, passed to [tabulate](https://github.com/astanin/python-tabulate#table-format). Defaults to "html".
-            precision (int, optional): the required precision of the presented numbers. Defaults to 4.
+            class_label (int | None, optional): the class label. Leave 0 or None if using a
+                multiclass metric. Defaults to None.
+
+        Keyword Args:
+            table_fmt (str, optional): the format of the table, passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to "html".
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
 
         Returns:
             str: the table as a string
-        """
+
+        Examples:
+            Prints the probability of all experiments achieving a particular rank when
+            compared against all others.
+            >>> print(
+            ...     study.report_listwise_comparison(
+            ...         metric="acc",
+            ...         class_label=0,
+            ...         table_fmt="github",
+            ...     ),
+            ... )
+
+            ```
+            | Group   | Experiment   |   Rank 1 |   Rank 2 |
+            |---------|--------------|----------|----------|
+            | GROUP   | EXPERIMENT_A |   0.4987 |   0.5013 |
+            | GROUP   | EXPERIMENT_B |   0.5013 |   0.4987 |
+            ```
+        """  # noqa: D205
         import tabulate
 
         # Typehint the metric and class_label variables
@@ -1713,7 +2132,8 @@ class Study(Config):
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         # TODO: should this comparison happen for all experiments
@@ -1724,7 +2144,7 @@ class Study(Config):
                 metric=metric.name,
                 sampling_method=SamplingMethod.POSTERIOR,
             ).values[:, class_label]
-            for experiment in self._list_experiments()
+            for experiment in self.all_experiments()
         }
 
         p_experiment_given_rank_arr = listwise_compare(
@@ -1740,7 +2160,8 @@ class Study(Config):
             tabular_data=[
                 [*self._split_experiment_name(experiment_names), *row]
                 for row, experiment_names in zip(
-                    p_experiment_given_rank_arr, self._list_experiments()
+                    p_experiment_given_rank_arr,
+                    self.all_experiments(),
                 )
             ],
             tablefmt=table_fmt,
@@ -1754,10 +2175,45 @@ class Study(Config):
     def report_aggregated_metric_summaries(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int] = None,  # type: ignore
-        precision: int = 4,
+        class_label: int | None = None,  # type: ignore
+        *,
         table_fmt: str = "html",
+        precision: int = 4,
     ) -> str:
+        """Reports on the aggregation of Experiments in all ExperimentGroups.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            table_fmt (str, optional): the format of the table, passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to "html".
+            precision (int, optional): the precision of floats used when printing. Defaults to 4.
+
+
+        Returns:
+            str: the table with experiment aggregation statistics as a string
+
+        Examples:
+            Report on the aggregated accuracy scores for each ExperimentGroup in this Study
+
+            >>> print(
+            ...     study.report_aggregated_metric_summaries(
+            ...         metric="acc",
+            ...         class_label=0,
+            ...         table_fmt="github",
+            ...     ),
+            ... )
+
+            ```
+            | Group   |   Median |   Mode |              HDI |     MU |   Kurtosis |    Skew |   Var. Within |   Var. Between |     I2 |
+            |---------|----------|--------|------------------|--------|------------|---------|---------------|----------------|--------|
+            | GROUP   |   0.7884 | 0.7835 | [0.7413, 0.8411] | 0.0997 |    -0.0121 | -0.0161 |        0.0013 |         0.0019 | 59.04% |
+            ```
+
+        """  # noqa: E501
         import tabulate
 
         # Typehint the metric and class_label variables
@@ -1765,7 +2221,8 @@ class Study(Config):
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         table = []
@@ -1784,9 +2241,15 @@ class Study(Config):
             )
 
             if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
-                hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
+                hdi_str = (
+                    f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='f')}, "
+                    f"{fmt(distribution_summary.hdi[1], precision=precision, mode='f')}]"
+                )
             else:
-                hdi_str = f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, {fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
+                hdi_str = (
+                    f"[{fmt(distribution_summary.hdi[0], precision=precision, mode='e')}, "
+                    f"'{fmt(distribution_summary.hdi[1], precision=precision, mode='e')}]"
+                )
 
             heterogeneity_result = experiment_aggregation_result.heterogeneity_results[
                 class_label
@@ -1817,7 +2280,7 @@ class Study(Config):
 
         if len(table) == 0:
             warnings.warn(
-                "The table is empty! This can occur if there are no registered experiments yet."
+                "The table is empty! This can occur if there are no registered experiments yet.",
             )
             return ""
 
@@ -1847,15 +2310,16 @@ class Study(Config):
     def plot_experiment_aggregation(
         self,
         metric: str,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
         experiment_group: str,
-        class_label: typing.Optional[int] = None,  # type: ignore
         method: str = "kde",
         bandwidth: float = 1.0,
         bins: int | list[int] | str = "auto",
         normalize: bool = False,
-        figsize: typing.Optional[tuple[float, float]] = None,
+        figsize: tuple[float, float] | None = None,
         fontsize: float = 9.0,
-        axis_fontsize: typing.Optional[float] = None,
+        axis_fontsize: float | None = None,
         edge_colour: str = "black",
         area_colour: str = "gray",
         area_alpha: float = 0.5,
@@ -1868,65 +2332,119 @@ class Study(Config):
         plot_obs_point: bool = True,
         obs_point_marker: str = "D",
         obs_point_colour: str = "black",
-        obs_point_size: typing.Optional[float] = None,
+        obs_point_size: float | None = None,
         plot_extrema_lines: bool = True,
-        extrema_lines_colour: str = "black",
-        extrema_lines_format: str = "-",
+        extrema_line_colour: str = "black",
+        extrema_line_format: str = "-",
         extrema_line_height: float = 12.0,
-        extrema_lines_width: float = 1.0,
+        extrema_line_width: float = 1.0,
         plot_base_line: bool = True,
         base_line_colour: str = "black",
         base_line_format: str = "-",
         base_line_width: int = 1,
         plot_experiment_name: bool = True,
     ) -> matplotlib.figure.Figure:
-        """Plots the distrbution of sampled metric values for a specific experiment group, with the aggregated distribution, for a particular metric and class combination.
+        """Plots the distrbution of sampled metric values for a specific experiment group, with the
+        aggregated distribution, for a particular metric and class combination.
 
         Args:
             metric (str): the name of the metric
-            experiment_group (str): the name of the experiment group
             class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment_group (str): the name of the experiment group
             observed_values (dict[str, ExperimentResult]): the observed metric values
             sampled_values (dict[str, ExperimentResult]): the sampled metric values
             metric (Metric | AveragedMetric): the metric
-            method (str, optional): the method for displaying a histogram, provided by Seaborn. Can be either a histogram or KDE. Defaults to "kde".
-            bandwidth (float, optional): the bandwith parameter for the KDE. Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html). Defaults to 1.0.
-            bins (int | list[int] | str, optional): the number of bins to use in the histrogram. Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges). Defaults to "auto".
-            normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1]. Otherwise, uses a shared y-axis. Defaults to False.
-            figsize (tuple[float, float], optional): the figure size, in inches. Corresponds to matplotlib's `figsize` parameter. Defaults to None, in which case a decent default value will be approximated.
-            fontsize (float, optional): fontsize for the experiment name labels. Defaults to 9.
-            axis_fontsize (float, optional): fontsize for the x-axis ticklabels. Defaults to None, in which case the fontsize will be used.
-            edge_colour (str, optional): the colour of the histogram or KDE edge. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            area_colour (str, optional): the colour of the histogram or KDE filled area. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "gray".
-            area_alpha (float, optional): the opacity of the histogram or KDE filled area. Corresponds to [matplotlib's `alpha` parameter](). Defaults to 0.5.
-            plot_median_line (bool, optional): whether to plot the median line. Defaults to True.
-            median_line_colour (str, optional): the colour of the median line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            median_line_format (str, optional): the format of the median line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "--".
-            plot_hdi_lines (bool, optional): whether to plot the HDI lines. Defaults to True.
-            hdi_lines_colour (str, optional): the colour of the HDI lines. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            hdi_line_format (str, optional): the format of the HDI lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_obs_point (bool, optional): whether to plot the observed value as a marker. Defaults to True.
-            obs_point_marker (str, optional): the marker type of the observed value. Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers). Defaults to "D".
-            obs_point_colour (str, optional): the colour of the observed marker. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            obs_point_size (float, optional): the size of the observed marker. Defaults to None.
-            plot_extrema_lines (bool, optional): whether to plot small lines at the distribution extreme values. Defaults to True.
-            extrema_lines_colour (str, optional): the colour of the extrema lines. Defaults to "black".
-            extrema_lines_format (str, optional): the format of the extrema lines. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_base_line (bool, optional): whether to plot a line at the base of the distribution. Defaults to True.
-            base_lines_colour (str, optional): the colour of the base line. Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def). Defaults to "black".
-            base_lines_format (str, optional): the format of the base line. Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html). Defaults to "-".
-            plot_experiment_name (bool, optional): whether to plot the experiment names as labels. Defaults to True.
+            method (str, optional): the method for displaying a histogram, provided by Seaborn.
+                Can be either a histogram or KDE.
+                Defaults to "kde".
+            bandwidth (float, optional): the bandwith parameter for the KDE.
+                Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html).
+                Defaults to 1.0.
+            bins (int | list[int] | str, optional): the number of bins to use in the histrogram.
+                Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges).
+                Defaults to "auto".
+            normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1].
+                Otherwise, uses a shared y-axis.
+                Defaults to False.
+            figsize (tuple[float, float], optional): the figure size, in inches.
+                Corresponds to matplotlib's `figsize` parameter.
+                Defaults to None, in which case a decent default value will be approximated.
+            fontsize (float, optional): fontsize for the experiment name labels.
+                Defaults to 9.
+            axis_fontsize (float, optional): fontsize for the x-axis ticklabels.
+                Defaults to None, in which case the fontsize will be used.
+            edge_colour (str, optional): the colour of the histogram or KDE edge.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            area_colour (str, optional): the colour of the histogram or KDE filled area.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "gray".
+            area_alpha (float, optional): the opacity of the histogram or KDE filled area.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to 0.5.
+            plot_median_line (bool, optional): whether to plot the median line.
+                Defaults to True.
+            median_line_colour (str, optional): the colour of the median line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            median_line_format (str, optional): the format of the median line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "--".
+            plot_hdi_lines (bool, optional): whether to plot the HDI lines.
+                Defaults to True.
+            hdi_lines_colour (str, optional): the colour of the HDI lines.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            hdi_line_format (str, optional): the format of the HDI lines.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            plot_obs_point (bool, optional): whether to plot the observed value as a marker.
+                Defaults to True.
+            obs_point_marker (str, optional): the marker type of the observed value.
+                Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers).
+                Defaults to "D".
+            obs_point_colour (str, optional): the colour of the observed marker.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            obs_point_size (float, optional): the size of the observed marker.
+                Defaults to None.
+            plot_extrema_lines (bool, optional): whether to plot small lines at the
+                distribution extreme values.
+                Defaults to True.
+            extrema_line_colour (str, optional): the colour of the extrema lines.
+                Defaults to "black".
+            extrema_line_format (str, optional): the format of the extrema lines.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            extrema_line_width (float, optional): the width of the extrema lines.
+                Defaults to 1.
+            extrema_line_height (float, optional): the maximum height of the extrema lines.
+                Defaults to 12.
+            plot_base_line (bool, optional): whether to plot a line at the base of the distribution.
+                Defaults to True.
+            base_line_colour (str, optional): the colour of the base line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            base_line_format (str, optional): the format of the base line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            base_line_width (float, optional): the width of the base line.
+                Defaults to 1.
+            plot_experiment_name (bool, optional): whether to plot the experiment names as labels.
+                Defaults to True.
 
         Returns:
             matplotlib.figure.Figure: the completed figure of the distribution plot
-        """
-
+        """  # noqa: D205
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         # Import optional dependencies
@@ -1937,7 +2455,10 @@ class Study(Config):
 
         except ModuleNotFoundError as e:
             raise ModuleNotFoundError(
-                f"Visualization requires optional dependencies: [matplotlib, pyplot]. Currently missing: {e}"
+                (
+                    f"Visualization requires optional dependencies: [matplotlib, pyplot]. "
+                    f"Currently missing: {e}",
+                ),
             )
 
         total_num_experiments = len(self._experiment_store[experiment_group]) + 1
@@ -1949,7 +2470,10 @@ class Study(Config):
             _figsize = figsize
 
         fig, axes = plt.subplots(
-            total_num_experiments, 1, figsize=_figsize, sharey=(not normalize)
+            total_num_experiments,
+            1,
+            figsize=_figsize,
+            sharey=(not normalize),
         )
 
         if total_num_experiments == 1:
@@ -1957,15 +2481,13 @@ class Study(Config):
 
         metric_bounds = metric.bounds
 
-        i = 0
-
         all_min_x = []
         all_max_x = []
         all_max_height = []
         all_hdi_ranges = []
-        for experiment_name, _ in self._experiment_store[
-            experiment_group
-        ].experiments.items():
+        for i, (experiment_name, _) in enumerate(
+            iterable=self._experiment_store[experiment_group].experiments.items(),
+        ):
             if plot_experiment_name:
                 # Set the axis title
                 # Needs to happen before KDE
@@ -2060,7 +2582,11 @@ class Study(Config):
                 case _:
                     del fig, axes
                     raise ValueError(
-                        f"Parameter `method` must be one of {tuple(sm.value for sm in DistributionPlottingMethods)}. Currently: {method}"
+                        (
+                            f"Parameter `method` must be one of "
+                            f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
+                            f"Currently: {method}"
+                        ),
                     )
 
             if plot_obs_point:
@@ -2134,8 +2660,6 @@ class Study(Config):
                     linestyle=hdi_line_format,
                     zorder=1,
                 )
-
-            i += 1
 
         # ==============================================================================
         # Plot the aggregated distribution
@@ -2233,7 +2757,11 @@ class Study(Config):
             case _:
                 del fig, axes
                 raise ValueError(
-                    f"Parameter `method` must be one of {tuple(sm.value for sm in DistributionPlottingMethods)}. Currently: {method}"
+                    (
+                        f"Parameter `method` must be one of "
+                        f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
+                        f"Currently: {method}"
+                    ),
                 )
 
         if plot_median_line:
@@ -2309,10 +2837,10 @@ class Study(Config):
         )
 
         cur_xlim_min = aggregated_summary.median - np.abs(
-            grand_min_x - aggregated_summary.median
+            grand_min_x - aggregated_summary.median,
         )
         cur_xlim_max = aggregated_summary.median + np.abs(
-            grand_max_x - aggregated_summary.median
+            grand_max_x - aggregated_summary.median,
         )
 
         for ax in axes:
@@ -2350,9 +2878,9 @@ class Study(Config):
                         all_min_x[i],
                         0,
                         standard_length,
-                        color=extrema_lines_colour,
-                        ls=extrema_lines_format,
-                        linewidth=extrema_lines_width,
+                        color=extrema_line_colour,
+                        ls=extrema_line_format,
+                        linewidth=extrema_line_width,
                         zorder=3,
                         clip_on=False,
                     )
@@ -2362,10 +2890,10 @@ class Study(Config):
                         all_max_x[i],
                         0,
                         standard_length,
-                        color=extrema_lines_colour,
-                        ls=extrema_lines_format,
+                        color=extrema_line_colour,
+                        ls=extrema_line_format,
                         zorder=3,
-                        linewidth=extrema_lines_width,
+                        linewidth=extrema_line_width,
                         clip_on=False,
                     )
 
@@ -2383,7 +2911,8 @@ class Study(Config):
         axes[-1].spines["bottom"].set_visible(True)
         axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
         axes[-1].tick_params(
-            axis="x", labelsize=axis_fontsize if axis_fontsize is not None else fontsize
+            axis="x",
+            labelsize=axis_fontsize if axis_fontsize is not None else fontsize,
         )
 
         axes[-1].set_xlabel(metric.full_name, fontsize=fontsize)
@@ -2397,25 +2926,25 @@ class Study(Config):
 
         return fig
 
-    # TODO: document this method
     def plot_forest_plot(
         self,
         metric: str,  # type: ignore
-        class_label: typing.Optional[int] = None,  # type: ignore
-        figsize: typing.Optional[tuple[float, float]] = None,
+        class_label: int | None = None,  # type: ignore
+        *,
+        figsize: tuple[float, float] | None = None,
         fontsize: float = 9.0,
-        axis_fontsize: typing.Optional[float] = None,
+        axis_fontsize: float | None = None,
         fontname: str = "monospace",
         median_marker: str = "s",
         median_marker_edge_colour: str = "black",
-        median_marker_face_colour: str = "white",
+        median_marker_face_colour: str = "black",
         median_marker_size: float = 7,
         median_marker_line_width: float = 1.5,
         agg_offset: int = 1,
         agg_median_marker: str = "D",
         agg_median_marker_edge_colour: str = "black",
         agg_median_marker_face_colour: str = "white",
-        agg_median_marker_size: float = 10,
+        agg_median_marker_size: float = 9,
         agg_median_marker_line_width: float = 1.5,
         hdi_lines_colour: str = "black",
         hdi_lines_format: str = "-",
@@ -2429,12 +2958,108 @@ class Study(Config):
         plot_experiment_info: bool = True,
         precision: int = 4,
     ) -> matplotlib.figure.Figure:
+        """Plots the distributions for a metric for each Experiment and aggregated ExperimentGroup.
+
+        Uses a [forest plot](https://en.wikipedia.org/wiki/Forest_plot) format.
+
+        The median and HDIs of individual Experiment distributions are plotted as squares, and the
+        aggregate distribution is plotted as a diamond below it. Also provides summary statistics
+        bout each distribution, and the aggregation.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            figsize (tuple[float, float], optional): the figure size, in inches.
+                Corresponds to matplotlib's `figsize` parameter.
+                Defaults to None, in which case a decent default value will be approximated.
+            fontsize (float, optional): fontsize for the experiment name labels.
+                Defaults to 9.
+            axis_fontsize (float, optional): fontsize for the x-axis ticklabels.
+                Defaults to None, in which case the fontsize will be used.
+            fontname (str, optional): the name of the font used.
+                Corresponds to [matplotlib's font `family` parameter](https://matplotlib.org/stable/users/explain/text/text_props.html#text-props).
+                Defaults to "monospace".
+            median_marker (str, optional): the marker type of the median value marker of the
+                individual Experiment distributions.
+                Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers).
+                Defaults to "s".
+            median_marker_edge_colour (str, optional): the colour of the
+                individual Experiment median markers' edges.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            median_marker_face_colour (str, optional): the colour of the
+                individual Experiment median markers.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "white".
+            median_marker_size (float, optional): the size of the individual
+                Experiment median markers.
+                Defaults to None.
+            median_marker_line_width (float, optional): the width of the aggregated median line.
+                Defaults to 1.5.
+            agg_offset (int, optional): the number of empty rows between the last
+                Experiment and the aggregated row.
+                Defaults to 1.
+            agg_median_marker (str, optional): the marker type of the median value marker of the
+                aggregated distribution.
+                Corresponds to [matplotlib's `marker` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/marker_reference.html#unfilled-markers).
+                Defaults to "D".
+            agg_median_marker_edge_colour (str, optional): the colour of the
+                aggregated median markers' edges.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            agg_median_marker_face_colour (str, optional): the colour of the
+                aggregated median marker.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "white".
+            agg_median_marker_size (float, optional): the size of the individual
+                aggregated median marker.
+                Defaults to 10.
+            agg_median_marker_line_width (float, optional): the width of the
+                aggregated median marker.
+                Defaults to 1.5.
+            hdi_lines_colour (str, optional): the colour of the HDI lines.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            hdi_lines_format (str, optional): the format of the HDI lines.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "-".
+            hdi_lines_width (int, optional): the width of the HDI lines.
+                Defaults to 1.
+            plot_agg_median_line (bool, optional): whether to plot the a line through the
+                aggregated median through all other Experiments in the ExperimentGroup.
+                Defaults to True.
+            agg_median_line_colour (str, optional): the colour of the aggregated median line.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+            agg_median_line_format (str, optional): the format of the aggregated median line.
+                Corresponds to [matplotlib's `linestyle` parameter](https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html).
+                Defaults to "--".
+            agg_median_line_width (float, optional): the width of the aggregated median line.
+                Defaults to 1.0.
+            plot_experiment_name (bool, optional): whether to plot the name of the
+                individual Experiments.
+                Defaults to True.
+            experiment_name_padding (int, optional): the padding between the experiment names and
+                the forest plot.
+                Defaults to 0.
+            plot_experiment_info (bool, optional): whether to plot statistics of the individual and
+                aggregated distributions.
+                Defaults to True.
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
+
+        Returns:
+            matplotlib.figure.Figure: the Matplotlib Figure represenation of the forest plot
+        """
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
 
         metric, class_label = self._validate_metric_class_label_combination(
-            metric=metric, class_label=class_label
+            metric=metric,
+            class_label=class_label,
         )
 
         # Import optional dependencies
@@ -2445,7 +3070,10 @@ class Study(Config):
 
         except ModuleNotFoundError as e:
             raise ModuleNotFoundError(
-                f"Visualization requires optional dependencies: [matplotlib, pyplot]. Currently missing: {e}"
+                (
+                    f"Visualization requires optional dependencies: [matplotlib, pyplot]. "
+                    f"Currently missing: {e}"
+                ),
             )
 
         if axis_fontsize is None:
@@ -2453,14 +3081,14 @@ class Study(Config):
 
         # Figure out a decent default figsize
         total_num_experiments = (
-            len(self._list_experiments()) + 2 * len(self.experiments) + 1
+            len(self.all_experiments()) + 2 * len(self.experiments) + 1
         )
 
-        if figsize is None:
-            # Try to set a decent default figure size
-            _figsize = (6.3, max(0.28 * total_num_experiments, 2.5))
-        else:
-            _figsize = figsize
+        _figsize = (
+            (6.3, max(0.28 * total_num_experiments, 2.5))
+            if figsize is None
+            else figsize
+        )
 
         # Get the height ratios of each experiment group subplot
         heights = [
@@ -2482,14 +3110,14 @@ class Study(Config):
             axes = np.array([axes])
 
         for i, (experiment_group_name, experiment_group) in enumerate(
-            self._experiment_store.items()
+            self._experiment_store.items(),
         ):
             num_experiments = 0
             all_experiment_names = []
             all_summaries = []
             # Get boxpstats for each individual experiment =============================
             for ii, (experiment_name, experiment) in enumerate(
-                experiment_group.experiments.items()
+                experiment_group.experiments.items(),
             ):
                 all_experiment_names.append(experiment_name)
 
@@ -2500,7 +3128,8 @@ class Study(Config):
                 ).values[:, class_label]
 
                 summary = summarize_posterior(
-                    posterior_samples=samples, ci_probability=self._ci_probability
+                    posterior_samples=samples,
+                    ci_probability=self._ci_probability,
                 )
 
                 all_summaries.append(summary)
@@ -2540,7 +3169,8 @@ class Study(Config):
             samples = aggregation_result.values[:, class_label]
 
             summary = summarize_posterior(
-                posterior_samples=samples, ci_probability=self._ci_probability
+                posterior_samples=samples,
+                ci_probability=self._ci_probability,
             )
 
             # Median
@@ -2579,7 +3209,7 @@ class Study(Config):
             # Add the ytick locations ==================================================
             axes[i].set_ylim(-1 if i == 0 else -0.5, num_experiments + agg_offset + 0.5)
             axes[i].set_yticks(
-                range(-1 if i == 0 else 0, num_experiments + agg_offset + 1)
+                range(-1 if i == 0 else 0, num_experiments + agg_offset + 1),
             )
 
             # Invert the axis
@@ -2587,7 +3217,8 @@ class Study(Config):
 
             # Add experiment labels to left axis =======================================
             if plot_experiment_name:
-                aggregator_name = self._metric_to_aggregator[metric].name
+                # aggregator_name = self._metric_to_aggregator[metric].name
+                aggregator_name = "Aggregate"
 
                 longest_experiment_name = max(
                     15,
@@ -2595,10 +3226,18 @@ class Study(Config):
                     max(map(len, all_experiment_names)),
                 )
 
+                i2_string = fmt(
+                    number=aggregation_result.heterogeneity_results[class_label].i2,
+                    precision=precision,
+                    mode="%",
+                )
                 all_experiment_labels = (
                     (
                         [
-                            f"{'Experiment Name':<{longest_experiment_name}}{'':{experiment_name_padding}}"
+                            (
+                                f"{'Experiment Name':<{longest_experiment_name}}"
+                                f"{'':{experiment_name_padding}}"
+                            ),
                         ]
                         if i == 0
                         else []
@@ -2609,8 +3248,12 @@ class Study(Config):
                     ]
                     + [""] * agg_offset
                     + [
-                        f"{aggregator_name:<{longest_experiment_name}}{'':{experiment_name_padding}}"
-                        + f"\nI2={fmt(aggregation_result.heterogeneity_results[class_label].i2, precision=precision, mode='%'):<{longest_experiment_name}}{'':{experiment_name_padding}}"
+                        (
+                            f"{aggregator_name:<{longest_experiment_name}}"
+                            f"{'':{experiment_name_padding}}"
+                            f"\nI2={i2_string:<{longest_experiment_name}}"
+                            f"{'':{experiment_name_padding}}"
+                        ),
                     ]
                 )
 
@@ -2647,9 +3290,15 @@ class Study(Config):
 
                 def summary_to_row(summary):
                     if summary.hdi[1] - summary.hdi[0] > 1e-4:
-                        hdi_str = f"[{fmt(summary.hdi[0], precision=precision, mode='f')}, {fmt(summary.hdi[1], precision=precision, mode='f')}]"
+                        hdi_str = (
+                            f"[{fmt(summary.hdi[0], precision=precision, mode='f')}, "
+                            f"{fmt(summary.hdi[1], precision=precision, mode='f')}]"
+                        )
                     else:
-                        hdi_str = f"[{fmt(summary.hdi[0], precision=precision, mode='e')}, {fmt(summary.hdi[1], precision=precision, mode='e')}]"
+                        hdi_str = (
+                            f"[{fmt(summary.hdi[0], precision=precision, mode='e')}, "
+                            f"{fmt(summary.hdi[1], precision=precision, mode='e')}]"
+                        )
 
                     return {
                         "Median": summary.median,

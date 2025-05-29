@@ -27,7 +27,6 @@ def heterogeneity_DL(
     Returns:
         float: estimate of the between-experiment heterogeneity
     """
-
     num_experiments = means.shape[0]
 
     w_fe = 1 / variances
@@ -62,8 +61,8 @@ def heterogeneity_PM(
         2. optionally, we apply the Viechtbauer correction to the root. Instead of converging to the mean, converge to the median
 
     Args:
-        means (jtyping.Float[np.ndarray, " num_experiments"]): the experiment means
-        variances (jtyping.Float[np.ndarray, " num_experiments"]): the experiment variances
+        means (Float[np.ndarray, " num_experiments"]): the experiment means
+        variances (Float[np.ndarray, " num_experiments"]): the experiment variances
         init_tau2 (float, optional): the inital tau2 estimate. Defaults to 0.0.
         atol (float, optional): when to assume convergence. Defaults to 1e-5.
         maxiter (int, optional): the maximum number of iterations needed. Defaults to 50.
@@ -72,7 +71,6 @@ def heterogeneity_PM(
     Returns:
         float: estimate of the between-experiment heterogeneity
     """
-
     prev_tau2 = 0.0
     tau2 = init_tau2
     num_experiments = means.shape[0]
@@ -152,11 +150,20 @@ def estimate_i2(
     [1] Bowden, J., Tierney, J. F., Copas, A. J., & Burdett, S. (2011). Quantifying, displaying and accounting for heterogeneity in the meta-analysis of RCTs using standard and generalised Qstatistics. BMC medical research methodology, 11(1), 1-12.
 
     Args:
-        individual_samples (jtyping.Float[np.ndarray, " num_samples num_experiments"])
+        individual_samples (Float[np.ndarray, " num_samples num_experiments"])
 
     Returns:
         float: the I^2 estimate
     """
+    if individual_samples.shape[1] == 1:
+        result = HeterogeneityResult(
+            i2=1.0,
+            within_experiment_variance=float(np.var(individual_samples)),
+            between_experiment_variance=0.0,
+            i2_interpretation=interpret_i2(i2_score=0.0),
+        )
+
+        return result
 
     means = np.mean(individual_samples, axis=0)
     variances = np.var(individual_samples, axis=0)
@@ -168,7 +175,10 @@ def estimate_i2(
     # Estimate of inter-experiment variance
     tau2 = heterogeneity_DL(means, variances)
     tau2 = heterogeneity_PM(
-        means, variances, init_tau2=tau2, use_viechtbauer_correction=False
+        means,
+        variances,
+        init_tau2=tau2,
+        use_viechtbauer_correction=False,
     )
 
     # Proportion of variance attributable to inter-experiment variance
@@ -184,7 +194,17 @@ def estimate_i2(
     return result
 
 
-def interpret_i2(i2_score: float) -> Literal['insignificant heterogeneity'] | Literal['borderline moderate heterogeneity'] | Literal['moderate heterogeneity'] | Literal['borderline substantial heterogeneity'] | Literal['borderline considerable heterogeneity'] | Literal['considerable heterogeneity'] | Literal[' heterogeneity']:
+def interpret_i2(
+    i2_score: float,
+) -> (
+    Literal["insignificant heterogeneity"]
+    | Literal["borderline moderate heterogeneity"]
+    | Literal["moderate heterogeneity"]
+    | Literal["borderline substantial heterogeneity"]
+    | Literal["borderline considerable heterogeneity"]
+    | Literal["considerable heterogeneity"]
+    | Literal[" heterogeneity"]
+):
     """'Interprets I^2 values using the guideline prescribed by the Cochrane Handbook [1]
 
     References:
@@ -200,9 +220,9 @@ def interpret_i2(i2_score: float) -> Literal['insignificant heterogeneity'] | Li
 
     if i2_score < 0.0 or i2_score > 1.0:
         raise ValueError(
-            "I^2 should be in the range (0.0, 1.0). Currently out-of-bounds."
+            "I^2 should be in the range (0.0, 1.0). Currently out-of-bounds.",
         )
-    elif i2_score < 0.3:
+    if i2_score < 0.3:
         het_sig = "insignificant"
     elif i2_score >= 0.3 and i2_score < 0.4:
         het_sig = "borderline moderate"

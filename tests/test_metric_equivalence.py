@@ -18,7 +18,7 @@ import sklearn.metrics
 
 from bayes_conf_mat import Study
 from bayes_conf_mat.config import ConfigWarning
-from bayes_conf_mat.utils.io import (
+from bayes_conf_mat.io import (
     load_csv,
     confusion_matrix_to_pred_cond,
     ConfMatIOWarning,
@@ -61,7 +61,9 @@ METRICS_TO_SKLEARN = {
     )[1],
     **{
         f"fbeta+beta={beta}": partial(
-            sklearn.metrics.fbeta_score, average=None, beta=beta
+            sklearn.metrics.fbeta_score,
+            average=None,
+            beta=beta,
         )
         for beta in [0.0, 0.5, 1.0, 2.0]
     },
@@ -80,13 +82,17 @@ all_confusion_matrices_to_test = list(TEST_CASES_DIR.glob(pattern="*.csv"))
 # Generate all test cases
 # ==============================================================================
 def generate_test_case(
-    metric: str, conf_mat_fp: Path
-) -> tuple[jtyping.Float[np.ndarray, "1"], jtyping.Float[np.ndarray, "1"]]:
+    metric: str,
+    conf_mat_fp: Path,
+) -> tuple[jtyping.Float[np.ndarray, 1], jtyping.Float[np.ndarray, 1]]:
     def _get_our_value(
-        metric: str, study: Study
+        metric: str,
+        study: Study,
     ) -> jtyping.Float[np.ndarray, " num_classes"]:
         metric_result = study.get_metric_samples(
-            metric=metric, experiment_name="test/test", sampling_method="input"
+            metric=metric,
+            experiment_name="test/test",
+            sampling_method="input",
         )
 
         our_value = metric_result.values[0]
@@ -94,13 +100,15 @@ def generate_test_case(
         return our_value
 
     def _get_sklearn_value(
-        metric: str, study: Study
+        metric: str,
+        study: Study,
     ) -> jtyping.Float[np.ndarray, " *num_classes"]:
         experiment: Experiment = study["test/test"]  # type: ignore
         conf_mat = experiment.confusion_matrix
 
         pred_cond = confusion_matrix_to_pred_cond(
-            confusion_matrix=conf_mat, pred_first=True
+            confusion_matrix=conf_mat,
+            pred_first=True,
         )
 
         # Need to binarize the cond_pred array, otherwise sklearn complains
@@ -142,13 +150,14 @@ warnings.filterwarnings(action="ignore", category=RuntimeWarning)
 
 all_test_cases = []
 for metric, confusion_matrix in product(
-    all_metrics_to_test, all_confusion_matrices_to_test
+    all_metrics_to_test,
+    all_confusion_matrices_to_test,
 ):
     try:
         test_case = generate_test_case(metric=metric, conf_mat_fp=confusion_matrix)
     except Exception as e:
         raise Exception(
-            f"Encountered exception for test case 'metric={metric}, confusion_matrix={confusion_matrix}': {e}"
+            f"Encountered exception for test case 'metric={metric}, confusion_matrix={confusion_matrix}': {e}",
         )
 
     all_test_cases.append(test_case)

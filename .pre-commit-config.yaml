@@ -38,43 +38,43 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_config.py
+        entry: uv run --dev pytest tests/test_config.py
     -   id: test_extension
         name: test_extension
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_extension.py
+        entry: uv run --dev pytest tests/test_extension.py
     -   id: test_io
         name: test_io
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_io.py
+        entry: uv run --dev pytest tests/test_io.py
     -   id: test_metric_equivalence
         name: test_metric_equivalence
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_metric_equivalence.py
+        entry: uv run --dev pytest tests/test_metric_equivalence.py
     -   id: test_notebooks
         name: test_notebooks
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_notebooks.py
+        entry: uv run --dev pytest tests/test_notebooks.py
     -   id: test_rng
         name: test_rng
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_rng.py
+        entry: uv run --dev pytest tests/test_rng.py
     -   id: test_study
         name: test_study
         language: system
         types: [python]
         pass_filenames: false
-        entry: ./.venv/bin/pytest tests/test_study.py
+        entry: uv run --dev pytest tests/test_study.py
 -   repo: local
     hooks:
     # TODO: make this dynamic
@@ -90,4 +90,4 @@ repos:
         language: python
         types: [python]
         pass_filenames: false
-        entry: uv run mkdocs build
+        entry: uv run --dev mkdocs build

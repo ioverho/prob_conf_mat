@@ -77,7 +77,7 @@ class FELogGaussianAggregator(ExperimentAggregator):
         )
 
         transformed_conflated_distribution_samples = np.exp(
-            conflated_distribution_samples
+            conflated_distribution_samples,
         )
 
         return transformed_conflated_distribution_samples

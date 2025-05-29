@@ -13,14 +13,14 @@ from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 
 
 class BetaAggregator(ExperimentAggregator):
-    """Samples from the beta-conflated distribution.
+    r"""Samples from the beta-conflated distribution.
 
-    Specifically, the aggregate distribution $\\text{Beta}(\\tilde{\\alpha}, \\tilde{\\beta})$ is estimated as:
+    Specifically, the aggregate distribution $\text{Beta}(\tilde{\alpha}, \tilde{\beta})$ is estimated as:
 
-    $$\\begin{aligned}
-        \\tilde{\\alpha}&=\\left[\\sum_{i=1}^{M}\\alpha_{i}\\right]-\\left(M-1\\right) \\\\
-        \\tilde{\\beta}&=\\left[\\sum_{i=1}^{M}\\beta_{i}\\right]-\\left(M-1\\right)
-    \\end{aligned}$$
+    $$\begin{aligned}
+        \tilde{\alpha}&=\left[\sum_{i=1}^{M}\alpha_{i}\right]-\left(M-1\right) \\
+        \tilde{\beta}&=\left[\sum_{i=1}^{M}\beta_{i}\right]-\left(M-1\right)
+    \end{aligned}$$
 
     where $M$ is the total number of experiments.
 
@@ -59,7 +59,7 @@ class BetaAggregator(ExperimentAggregator):
 
         if bounds[0] == -float("inf") or bounds[1] == float("inf"):
             raise NotImplementedError(
-                "Beta aggregation does not (yet) support metrics with infite bounds."
+                "Beta aggregation does not (yet) support metrics with infite bounds.",
             )
 
         # Tranform the data to lie in the bounds of the beta distribution

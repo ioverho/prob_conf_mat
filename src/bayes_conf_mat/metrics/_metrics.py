@@ -40,7 +40,8 @@ class DiagMass(Metric):
     def compute_metric(
         self,
         norm_confusion_matrix: jtyping.Float[
-            np.ndarray, " num_samples num_classes num_classes"
+            np.ndarray,
+            " num_samples num_classes num_classes",
         ],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
         diag_mass = np.diagonal(
@@ -149,7 +150,8 @@ class TruePositiveRate(Metric):
     def compute_metric(
         self,
         p_pred_given_condition: jtyping.Float[
-            np.ndarray, " num_samples num_classes num_classes"
+            np.ndarray,
+            " num_samples num_classes num_classes",
         ],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
         true_positive_rate = np.diagonal(
@@ -266,7 +268,8 @@ class FalseDiscoveryRate(Metric):
     def compute_metric(
         self,
         positive_predictive_value: jtyping.Float[
-            np.ndarray, " num_samples num_classes"
+            np.ndarray,
+            " num_samples num_classes",
         ],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
         false_discovery_rate = 1 - positive_predictive_value
@@ -577,7 +580,7 @@ class MatthewsCorrelationCoefficient(Metric):
 
         mcc = numerator / np.sqrt(
             (1 - np.power(p_condition, 2).sum(axis=1))
-            * (1 - np.power(p_pred, 2).sum(axis=1))
+            * (1 - np.power(p_pred, 2).sum(axis=1)),
         )
 
         return mcc[:, np.newaxis]

@@ -287,11 +287,11 @@ class Averaging(metaclass=ABCMeta):
 
 
 class AveragedMetric(metaclass=ABCMeta):
-    """The base class for the composition of any instance of `Metric` with any instance of `Averaging`
+    """The abstract base class for the composition of any instance of `Metric` with any instance of `Averaging`.
 
     Args:
-        metric (Metric)
-        averaging (Averaging)
+        metric (Metric): a binary metric
+        averaging (Averaging): an averaging method
     """
 
     def __init__(self, metric: Metric, averaging: Averaging):
@@ -310,6 +310,12 @@ class AveragedMetric(metaclass=ABCMeta):
 
     @property
     def aliases(self) -> typing.Sequence[str]:
+        """A list of all valid aliases for this metric.
+
+        Constructed from the product of the all aliases of the Metric and Averaging methods.
+
+        Can be used when creating metric syntax strings.
+        """
         return [
             f"{lhs}@{rhs}"
             for lhs, rhs in product(self.base_metric.aliases, self.averaging.aliases) # type: ignore
@@ -321,14 +327,29 @@ class AveragedMetric(metaclass=ABCMeta):
 
     @property
     def is_multiclass(self) -> typing.Literal[True]:
+        """Whether or not this metric computes a value for each class individually, or for all classes at once.
+
+        An AveragedMetric is *always* multiclass.
+        """
         return True
 
     @property
     def bounds(self) -> tuple[float, float]:
+        """A tuple of the minimum and maximum possible value for this metric to take. Can be infinite."""
         return self.base_metric.bounds # type: ignore
 
     @property
     def dependencies(self) -> typing.Sequence[str]:
+        """All metrics upon which this AveragedMetric depends.
+
+        Constructed from the union of all Metric and AveragingMethod dependencies.
+
+        Used to generate a computation schedule, such that no metric is calculated before its dependencies.
+
+        The dependencies **must** match the `compute_metric` signature.
+
+        This is checked during class definition.
+        """
         dependencies = (
             *self.base_metric.dependencies, # type: ignore
             *self.averaging.dependencies, # type: ignore
@@ -338,6 +359,7 @@ class AveragedMetric(metaclass=ABCMeta):
 
     @property
     def sklearn_equivalent(self) -> str | None:
+        """The `sklearn` equivalent function, if applicable"""
         sklearn_equivalent = self.base_metric.sklearn_equivalent
         if self.averaging.sklearn_equivalent is not None:
             sklearn_equivalent = (

@@ -1,34 +1,38 @@
-import typing
-import warnings
 from collections import OrderedDict
 import hashlib
 import pickle
 import time
+import typing
+import warnings
 
 import numpy as np
 
 from bayes_conf_mat.metrics import get_metric
 from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
+from bayes_conf_mat.io import validate_confusion_matrix
 from bayes_conf_mat.stats import _DIRICHLET_PRIOR_STRATEGIES
-from bayes_conf_mat.utils import RNG, validate_confusion_matrix
+from bayes_conf_mat.utils import RNG
 
 
+# TODO: document this class
 class ConfigWarning(Warning):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
 
+# TODO: document this class
 class ConfigError(Exception):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
 
+# TODO: document this class
 class Config:
     def __init__(
         self,
-        seed: typing.Optional[int] = None,
-        num_samples: typing.Optional[int] = None,
-        ci_probability: typing.Optional[float] = None,
+        seed: int | None = None,
+        num_samples: int | None = None,
+        ci_probability: float | None = None,
         experiments: dict[str, dict[str, dict[str, typing.Any]]] = {},
         metrics: dict[str, dict[str, typing.Any]] = {},
     ) -> None:
@@ -48,23 +52,25 @@ class Config:
         expected_type: type = Config.__init__.__annotations__[parameter]
 
         # Check if optional type
-        allows_none: bool = isinstance(expected_type, type(typing.Optional[float]))
+        allows_none: bool = isinstance(expected_type, type(float | None))
 
         # If Optional, use non-optional type as expected type
         if allows_none:
             expected_type = expected_type.__args__[0]  # type: ignore
 
-        if (value is None) and allows_none:
-            return value
-        elif isinstance(value, expected_type):
+        if (value is None) and allows_none or isinstance(value, expected_type):
             return value
 
         # Try to convert to the correct value
         try:
             value = expected_type(value)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise ConfigError(
-                f"Parameter `{parameter}` must be an instance of `{expected_type}`, but got `{type(value)}`. While trying to convert, the following exception was encountered: {e}"
+                (
+                    f"Parameter `{parameter}` must be an instance of `{expected_type}`, "
+                    f"but got `{type(value)}`."
+                    f"While trying to convert, the following exception was encountered: {e}"
+                ),
             )
 
         return value
@@ -91,19 +97,26 @@ class Config:
                     value = int(value)
 
                     warnings.warn(
-                        f"Parameter `seed` must be a positive integer. Received: {initial_value_type}. Parsed as: {value}",
+                        (
+                            f"Parameter `seed` must be a positive integer. "
+                            f"Received: {initial_value_type}. Parsed as: {value}"
+                        ),
                         category=ConfigWarning,
                     )
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise TypeError(
-                        f"Parameter `seed` must be a positive integer. Currently: {type(value)}. While trying to convert encountered the following exception: {e}"
+                        (
+                            f"Parameter `seed` must be a positive integer. "
+                            f"Currently: {type(value)}. While trying to convert"
+                            f"encountered the following exception: {e}"
+                        ),
                     )
 
         # Validate seed value
         if value < 0:
             raise ConfigError(
-                f"Parameter `seed` must be a positive integer. Currently: {value}."
+                f"Parameter `seed` must be a positive integer. Currently: {value}.",
             )
 
         return value
@@ -123,7 +136,11 @@ class Config:
         # Handle default parameter
         if value is None:
             warnings.warn(
-                message="Parameter `num_samples` is `None`. Setting to default value of 10000. This value is arbitrary, however, and should be carefully considered.",
+                message=(
+                    "Parameter `num_samples` is `None`. "
+                    "Setting to default value of 10000. "
+                    "This value is arbitrary, however, and should be carefully considered."
+                ),
                 category=ConfigWarning,
             )
 
@@ -137,25 +154,35 @@ class Config:
                     value = int(value)
 
                     warnings.warn(
-                        f"Parameter `num_samples` must be a strictly positive integer. Received: {initial_value_type}. Parsed as: {value}",
+                        (
+                            f"Parameter `num_samples` must be a strictly positive integer. "
+                            f"Received: {initial_value_type}. Parsed as: {value}"
+                        ),
                         category=ConfigWarning,
                     )
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise TypeError(
-                        f"Parameter `num_samples` must be a strictly positive integer. Currently: {type(value)}. While trying to convert encountered the following exception: {e}"
+                        (
+                            f"Parameter `num_samples` must be a strictly positive integer. "
+                            f"Currently: {type(value)}. While trying to convert encountered "
+                            f"the following exception: {e}"
+                        ),
                     )
 
         # Validate num_samples value
         if value <= 0:
             raise ConfigError(
-                f"Parameter `num_samples` must be greater than 0. Currently: {value}"
+                f"Parameter `num_samples` must be greater than 0. Currently: {value}",
             )
 
         # TODO: consider increasing the recommended value to from 10e+4 to 10e+5
         if value < 10000:
             warnings.warn(
-                message=f"Parameter `num_samples` should be large to reduce variability. Consider increasing. Currently: {value}",
+                message=(
+                    f"Parameter `num_samples` should be large to reduce variability. "
+                    f"Consider increasing. Currently: {value}"
+                ),
                 category=ConfigWarning,
             )
 
@@ -175,7 +202,10 @@ class Config:
         # Handle default parameter
         if value is None:
             warnings.warn(
-                message="Parameter `ci_probability` is `None`. Setting to default value of 0.95. This value is arbitrary, however, and should be carefully considered.",
+                message=(
+                    "Parameter `ci_probability` is `None`. Setting to default value of 0.95. "
+                    "This value is arbitrary, however, and should be carefully considered."
+                ),
                 category=ConfigWarning,
             )
 
@@ -189,19 +219,26 @@ class Config:
                     value = float(value)
 
                     warnings.warn(
-                        f"Parameter `ci_probability` must be a float. Received: {initial_value_type}. Parsed as: {value}",
+                        (
+                            f"Parameter `ci_probability` must be a float. "
+                            f"Received: {initial_value_type}. Parsed as: {value}"
+                        ),
                         category=ConfigWarning,
                     )
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise TypeError(
-                        f"Parameter `ci_probability` must be a float. Currently: {type(value)}. While trying to convert encountered the following exception: {e}"
+                        (
+                            "Parameter `ci_probability` must be a float. "
+                            f"Currently: {type(value)}. "
+                            f"While trying to convert encountered the following exception: {e}"
+                        ),
                     )
 
         # Validate ci_probability value
         if not (value > 0.0 and value <= 1.0):
             raise ConfigError(
-                f"Parameter `ci_probability` must be within (0.0, 1.0]. Currently: {value}"
+                f"Parameter `ci_probability` must be within (0.0, 1.0]. Currently: {value}",
             )
 
         return value
@@ -221,7 +258,8 @@ class Config:
         value: dict[str, dict[str, dict[str, typing.Any]]] | None,
     ) -> dict[str, dict[str, dict[str, typing.Any]]]:
         def _validate_single_experiment(
-            experiment_name: str, experiment_config: dict[str, typing.Any]
+            experiment_name: str,
+            experiment_config: dict[str, typing.Any],
         ) -> dict[str, typing.Any]:
             updated_experiment_config = dict()
 
@@ -231,13 +269,12 @@ class Config:
             # ==========================================================================
             if "confusion_matrix" not in experiment_config:
                 raise ConfigError(
-                    f"Experiment '{experiment_name}' has no confusion matrix. Please add one."
+                    f"Experiment '{experiment_name}' has no confusion matrix. Please add one.",
                 )
-            else:
-                confusion_matrix = experiment_config["confusion_matrix"]
+            confusion_matrix = experiment_config["confusion_matrix"]
 
             confusion_matrix = validate_confusion_matrix(
-                confusion_matrix=confusion_matrix
+                confusion_matrix=confusion_matrix,
             )
 
             updated_experiment_config["confusion_matrix"] = confusion_matrix
@@ -247,16 +284,15 @@ class Config:
             # Expected type: str | float | Float[ArrayLike,'num_classes']
             # ==========================================================================
             # First check if the key is in there, and fall back to standard default if not
-            if "prevalence_prior" not in experiment_config:
-                prevalence_prior = None
-
-            else:
-                prevalence_prior = experiment_config["prevalence_prior"]
+            prevalence_prior = experiment_config.get("prevalence_prior", None)
 
             # Handle default parameter
             if prevalence_prior is None:
                 warnings.warn(
-                    f"Experiment '{experiment_name}'s prevalence prior is `None`. Defaulting to the 0 (Haldane) prior.",
+                    (
+                        f"Experiment '{experiment_name}'s prevalence prior is `None`. "
+                        f"Defaulting to the 0 (Haldane) prior."
+                    ),
                     category=ConfigWarning,
                 )
 
@@ -266,25 +302,36 @@ class Config:
             elif isinstance(prevalence_prior, str):
                 if prevalence_prior not in _DIRICHLET_PRIOR_STRATEGIES:
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s prevalence prior is invalid. Currently: {prevalence_prior}. If `str`, must be one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
+                        (
+                            f"Experiment '{experiment_name}'s prevalence prior is invalid. "
+                            f"Currently: {prevalence_prior}. If `str`, must be one of: "
+                            f"{set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
+                        ),
                     )
 
             # Accept positive integer and float values
-            elif isinstance(prevalence_prior, int) or isinstance(
-                prevalence_prior, float
-            ):
+            elif isinstance(prevalence_prior, int | float):
                 if prevalence_prior < 0:
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s prevalence prior is invalid. Currently: {prevalence_prior}. If numeric, must be greater than 0."
+                        (
+                            f"Experiment '{experiment_name}'s prevalence prior is invalid. "
+                            f"Currently: {prevalence_prior}. If numeric, must be greater than 0."
+                        ),
                     )
 
             # Try to convert anything else to a numpy array
             else:
                 try:
                     prevalence_prior = np.array(prevalence_prior, dtype=np.float64)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s prevalence prior is invalid. Expecting a type of str | float | Float[ArrayLike,'num_classes']. Currently: {type(prevalence_prior)}. While trying to convert to `np.ndarray`, the following exception was encountered: {e}"
+                        (
+                            f"Experiment '{experiment_name}'s prevalence prior is invalid. "
+                            f"Expecting a type of str | float | Float[ArrayLike,'num_classes']. "
+                            f"Currently: {type(prevalence_prior)}. "
+                            f"While trying to convert to `np.ndarray`, the following exception "
+                            f"was encountered: {e}"
+                        ),
                     )
 
                 # Additional numpy array validation
@@ -295,17 +342,26 @@ class Config:
                 ):
                     try:
                         prevalence_prior = prevalence_prior.reshape(
-                            (confusion_matrix.shape[0],)
+                            (confusion_matrix.shape[0],),
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         raise ConfigError(
-                            f"Experiment '{experiment_name}'s prevalence prior is malformed. Expecting a 1D vector with length equal to the number of classes in the experiment. Current shape: {prevalence_prior.shape}. Expecting shape: {(confusion_matrix.shape[0],)}. While trying to reshape, encountered the following exception: {e}"
+                            (
+                                f"Experiment '{experiment_name}'s prevalence prior is malformed. "
+                                f"Expecting a 1D vector with length equal to the number of classes "
+                                f"in the experiment. Current shape: {prevalence_prior.shape}. "
+                                f"Expecting shape: {(confusion_matrix.shape[0],)}. "
+                                f"While trying to reshape, encountered the following exception: {e}"
+                            ),
                         )
 
                 # Check that values are all positive
                 if not np.all(prevalence_prior > 0.0):
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s prevalence prior is invalid. If providing an arraylike of values, all values must be positive."
+                        (
+                            f"Experiment '{experiment_name}'s prevalence prior is invalid. "
+                            f"If providing an arraylike of values, all values must be positive."
+                        ),
                     )
 
             updated_experiment_config["prevalence_prior"] = prevalence_prior
@@ -315,16 +371,15 @@ class Config:
             # Expected type: str | float | Float[ArrayLike,'num_classes num_classes']
             # ==========================================================================
             # First check if the key is in there, and fall back to standard default if not
-            if "confusion_prior" not in experiment_config:
-                confusion_prior = None
-
-            else:
-                confusion_prior = experiment_config["confusion_prior"]
+            confusion_prior = experiment_config.get("confusion_prior", None)
 
             # Handle default parameter value
             if confusion_prior is None:
                 warnings.warn(
-                    f"Experiment '{experiment_name}'s confusion prior is `None`. Defaulting to the 0 (Haldane) prior.",
+                    (
+                        f"Experiment '{experiment_name}'s confusion prior is `None`. "
+                        f"Defaulting to the 0 (Haldane) prior."
+                    ),
                     category=ConfigWarning,
                 )
 
@@ -333,22 +388,34 @@ class Config:
             elif isinstance(confusion_prior, str):
                 if confusion_prior not in _DIRICHLET_PRIOR_STRATEGIES:
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s confusion prior is invalid. Currently: {confusion_prior}. If `str`, must be one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
+                        (
+                            f"Experiment '{experiment_name}'s confusion prior is invalid. "
+                            f"Currently: {confusion_prior}. If `str`, must be one of: "
+                            f"{set(_DIRICHLET_PRIOR_STRATEGIES.keys())}",
+                        ),
                     )
 
             # Accept positive integer and float values
-            elif isinstance(confusion_prior, int) or isinstance(confusion_prior, float):
+            elif isinstance(confusion_prior, int | float):
                 if confusion_prior < 0:
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s confusion prior is invalid. Currently: {confusion_prior}. If numeric, must be greater than 0."
+                        (
+                            f"Experiment '{experiment_name}'s confusion prior is invalid. "
+                            f"Currently: {confusion_prior}. If numeric, must be greater than 0."
+                        ),
                     )
 
             else:
                 try:
                     confusion_prior = np.array(confusion_prior, dtype=np.float64)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s confusion prior is invalid. Expecting a type of str | float | Float[ArrayLike,'num_classes']. Currently: {type(confusion_prior)}. While trying to convert to `np.ndarray`, the following exception was encountered: {e}"
+                        (
+                            f"Experiment '{experiment_name}'s confusion prior is invalid. "
+                            f"Expecting a type of str | float | Float[ArrayLike,'num_classes']. "
+                            f"Currently: {type(confusion_prior)}. While trying to convert to "
+                            f"`np.ndarray`, the following exception was encountered: {e}"
+                        ),
                     )
 
                 # Check shape against confusion matrix
@@ -360,17 +427,27 @@ class Config:
                 ):
                     try:
                         confusion_prior = confusion_prior.reshape(
-                            confusion_matrix.shape
+                            confusion_matrix.shape,
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         raise ConfigError(
-                            f"Experiment '{experiment_name}'s confusion prior is malformed. Expecting a square 2D matrix with length equal to the number of classes in the experiment. Current shape: {confusion_prior.shape}. Expecting shape: {confusion_matrix.shape}. While trying to reshape, encountered the following exception: {e}"
+                            (
+                                f"Experiment '{experiment_name}'s confusion prior is malformed. "
+                                f"Expecting a square 2D matrix with length equal to the number of "
+                                f"classes in the experiment. "
+                                f"Current shape: {confusion_prior.shape}. "
+                                f"Expecting shape: {confusion_matrix.shape}. "
+                                f"While trying to reshape, encountered the following exception: {e}"
+                            ),
                         )
 
                 # Check that values are all positive
                 if not np.all(confusion_prior > 0.0):
                     raise ConfigError(
-                        f"Experiment '{experiment_name}'s confusion prior is invalid. If providing an arraylike of values, all values must be positive."
+                        (
+                            f"Experiment '{experiment_name}'s confusion prior is invalid. "
+                            f"If providing an arraylike of values, all values must be positive."
+                        ),
                     )
 
             updated_experiment_config["confusion_prior"] = confusion_prior
@@ -387,7 +464,11 @@ class Config:
 
             if len(kwargs) != 0:
                 warnings.warn(
-                    f"Experiment '{experiment_name}'s received the following superfluous parameters: {set(kwargs.keys())}. These are currently just ignored.",
+                    (
+                        f"Experiment '{experiment_name}'s received the following "
+                        f"superfluous parameters: {set(kwargs.keys())}. "
+                        f"These are currently just ignored."
+                    ),
                     category=ConfigWarning,
                 )
 
@@ -396,17 +477,17 @@ class Config:
             return updated_experiment_config
 
         # Handle default value
-        if value is None:
-            experiments_config = dict()
-        else:
-            experiments_config = value
+        experiments_config = dict() if value is None else value
 
         # Duck type to make sure it matches dict protocol
         if not (
             hasattr(experiments_config, "get") and hasattr(experiments_config, "items")
         ):
             raise ConfigError(
-                f"The experiments configuration must implement the `get` and `items` attributes like a `dict`. Current type: {type(value)}"
+                (
+                    f"The experiments configuration must implement the `get` and `items` "
+                    f"attributes like a `dict`. Current type: {type(value)}"
+                ),
             )
 
         updated_experiments_config = dict()
@@ -420,9 +501,13 @@ class Config:
             if not isinstance(experiment_group_name, str):
                 try:
                     experiment_group_name = str(experiment_group_name)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise ConfigError(
-                        f"Experiment group `{experiment_group_name}` must be an instance of `str`, but got `{type(experiment_group_name)}`. While trying to convert, ran into the following exception: {e}"
+                        (
+                            f"Experiment group `{experiment_group_name}` must be an instance of "
+                            f"`str`, but got `{type(experiment_group_name)}`. "
+                            f"While trying to convert, ran into the following exception: {e}"
+                        ),
                     )
 
             # Duck type to make sure it matches dict protocol
@@ -430,7 +515,10 @@ class Config:
                 hasattr(experiment_group, "get") and hasattr(experiment_group, "items")
             ):
                 raise ConfigError(
-                    f"The experiment group configuration must implement the `get` and `items` attributes like a `dict`. Currently: {type(experiment_group)}"
+                    (
+                        f"The experiment group configuration must implement the `get` and `items` "
+                        f"attributes like a `dict`. Currently: {type(experiment_group)}"
+                    ),
                 )
 
             # ==================================================================
@@ -448,9 +536,14 @@ class Config:
                 if not isinstance(experiment_name, str):
                     try:
                         experiment_name = str(experiment_name)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         raise ConfigError(
-                            f"The key for `{experiment_group_name}/{experiment_name}` must be an instance of `str`, but got `{type(experiment_group_name)}`. While trying to convert, ran into the following exception: {e}"
+                            (
+                                f"The key for `{experiment_group_name}/{experiment_name}` "
+                                f"must be an instance of `str`, but got "
+                                f"`{type(experiment_group_name)}`. "
+                                f"While trying to convert, ran into the following exception: {e}"
+                            ),
                         )
 
                 # ==============================================================
@@ -467,12 +560,16 @@ class Config:
                 )
 
                 confusion_matrix_shapes.add(
-                    updated_experiment_config["confusion_matrix"].shape
+                    updated_experiment_config["confusion_matrix"].shape,
                 )
 
             if len(confusion_matrix_shapes) != 1:
                 raise ConfigError(
-                    f"Experiment group '{experiment_group_name}' has incongruent confusion matrices. Found shapes: {confusion_matrix_shapes}"
+                    (
+                        f"Experiment group '{experiment_group_name}' has "
+                        f"incongruent confusion matrices. "
+                        f"Found shapes: {confusion_matrix_shapes}"
+                    ),
                 )
 
             updated_experiments_config[experiment_group_name] = (
@@ -503,17 +600,21 @@ class Config:
         return self._metrics
 
     def _validate_metrics(
-        self, value: dict[str, dict[str, typing.Any]]
+        self,
+        value: dict[str, dict[str, typing.Any]],
     ) -> dict[str, dict[str, typing.Any]]:
         def validate_metric_configuration(key: str, configuration: dict) -> None:
             # Empty configuration is allowed
             if len(configuration) == 0:
-                return None
+                return
 
             #! If non-empty, must contain an aggregation key
             if "aggregation" not in configuration:
                 raise ConfigError(
-                    f"The metric configuration for {key} must contain an `aggregation` key. Currently: {configuration}"
+                    (
+                        f"The metric configuration for {key} must contain an `aggregation` key. "
+                        f"Currently: {configuration}"
+                    ),
                 )
 
             #! Aggregation key must map to registered aggregation
@@ -526,9 +627,13 @@ class Config:
                     **kwargs,
                 )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 raise ConfigError(
-                    f"The aggregation configuration for metric {key} is invalid. Currently: {configuration}. While trying to parse, the following exception was encountered: {e}"
+                    (
+                        f"The aggregation configuration for metric {key} is invalid. "
+                        f"Currently: {configuration}. "
+                        f"While trying to parse, the following exception was encountered: {e}"
+                    ),
                 )
 
         # If not yet initialized, initialize to an empty dictionary
@@ -537,7 +642,11 @@ class Config:
 
         if not (hasattr(value, "get") and hasattr(value, "items")):
             raise ConfigError(
-                f"Metrics configuration must implement the `get` and `items` attributes like a `dict`. Current type: {type(value)}"
+                (
+                    f"Metrics configuration must implement the `get` and `items` "
+                    f"attributes like a `dict`. "
+                    f"Current type: {type(value)}"
+                ),
             )
 
         default_config = value.get("__default__", dict())
@@ -556,22 +665,33 @@ class Config:
             if not isinstance(metric_key, str):
                 try:
                     metric_key = str(metric_key)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     raise ConfigError(
-                        f"The keys in metrics must of type `str`. Currently: {type(metric_key)}. While trying to convert, the following exception was encountered: {e}"
+                        (
+                            f"The keys in metrics must of type `str`. "
+                            f"Currently: {type(metric_key)}. "
+                            f"While trying to convert, the following exception was encountered: {e}"
+                        ),
                     )
 
             if not (hasattr(value, "get") and hasattr(value, "items")):
                 raise ConfigError(
-                    f"Configuration for metric {metric_key} must implement the `get` and `items` attributes like a `dict`. Current type: {type(value)}"
+                    (
+                        f"Configuration for metric {metric_key} must implement the "
+                        f"`get` and `items` attributes like a `dict`. "
+                        f"Current type: {type(value)}"
+                    ),
                 )
 
             # Validate the key of the metric config ============================
             try:
                 get_metric(metric_key)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 raise ConfigError(
-                    f"The following metric is an invalid metric syntax string: `{metric_key}`. While trying to parse, the following exception was encountered: {e}"
+                    (
+                        f"The following metric is an invalid metric syntax string: `{metric_key}`. "
+                        f"While trying to parse, the following exception was encountered: {e}"
+                    ),
                 )
 
             # Validate the metric config =======================================
@@ -585,7 +705,10 @@ class Config:
                     # Check for when requesting to aggregate
                     # Allow for studies where the user does not want to aggregate
                     warnings.warn(
-                        message=f"There is an experiment group with multiple experiments, but no aggregation method is provided for metric `{metric_key}`.",
+                        message=(
+                            f"There is an experiment group with multiple experiments, "
+                            f"but no aggregation method is provided for metric `{metric_key}`."
+                        ),
                         category=ConfigWarning,
                     )
 
@@ -599,7 +722,8 @@ class Config:
             else:
                 # Otherwise, validate each metric aggregation configuration
                 validate_metric_configuration(
-                    key=metric_key, configuration=metric_config
+                    key=metric_key,
+                    configuration=metric_config,
                 )
 
                 updated_metrics_config[metric_key] = metric_config
@@ -613,6 +737,7 @@ class Config:
         self._metrics = value
 
     def to_dict(self) -> dict[str, typing.Any]:
+        """Returns the Config as a Pythonic dict."""
         # Necessary to make sure all types are Pythonic
         updated_experiments_config = dict()
         for experiment_group_name, experiment_group in self.experiments.items():
@@ -670,9 +795,9 @@ class Config:
         hasher = hashlib.sha256()
         hasher.update(pickle.dumps(self.to_dict()))
 
-        hash = hasher.hexdigest()
+        fingerprint = hasher.hexdigest()
 
-        return hash
+        return fingerprint
 
     def __hash__(self) -> int:
         return self.fingerprint.__hash__()

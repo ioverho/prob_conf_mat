@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from bayes_conf_mat import Study
-from bayes_conf_mat.utils.io import load_csv
+from bayes_conf_mat.io import load_csv
 
 if __name__ == "__main__":
     study = Study(

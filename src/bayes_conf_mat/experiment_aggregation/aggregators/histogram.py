@@ -60,7 +60,8 @@ class HistogramAggregator(ExperimentAggregator):
         min_bin_width = float("inf")
         for per_experiment_samples in experiment_samples.T:
             distribution_bins = np.histogram_bin_edges(
-                per_experiment_samples, bins="auto"
+                per_experiment_samples,
+                bins="auto",
             )
 
             bin_width = distribution_bins[2] - distribution_bins[1]
@@ -94,13 +95,13 @@ class HistogramAggregator(ExperimentAggregator):
 
             # Estimate the bin probabilities
             log_p_hat = np.log(binned_distribution + smoothing_coeff) - np.log(
-                num_samples + smoothing_coeff * num_bins
+                num_samples + smoothing_coeff * num_bins,
             )
 
             conflated_distribution += log_p_hat
 
         conflated_distribution = np.exp(
-            conflated_distribution - np.logaddexp.reduce(conflated_distribution)
+            conflated_distribution - np.logaddexp.reduce(conflated_distribution),
         )
 
         # Resample the conflated distribution
@@ -113,11 +114,15 @@ class HistogramAggregator(ExperimentAggregator):
 
         # Jitter the values so they fall off the bin midpoints
         bin_noise = self.rng.uniform(
-            low=-min_bin_width / 2, high=min_bin_width / 2, size=num_samples
+            low=-min_bin_width / 2,
+            high=min_bin_width / 2,
+            size=num_samples,
         )
 
         conflated_distribution_samples = np.clip(
-            conflated_distribution_samples + bin_noise, a_min=bounds[0], a_max=bounds[1]
+            conflated_distribution_samples + bin_noise,
+            a_min=bounds[0],
+            a_max=bounds[1],
         )
 
         return conflated_distribution_samples
