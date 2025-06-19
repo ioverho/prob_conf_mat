@@ -52,3 +52,82 @@ class TestStudy:
             ValueError,
         ):
             study["foo/bar/baz"]
+
+    def test_init(self):
+        # First experiment, then metric
+        study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        study.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[1, 0], [0, 1]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        study.add_metric(metric="acc", aggregation="fe_gaussian")
+
+        # First metric, then experiment
+        study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        study.add_metric(metric="acc", aggregation="fe_gaussian")
+
+        study.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[1, 0], [0, 1]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        # Experiment in __init__
+        study = Study(
+            seed=0,
+            num_samples=10000,
+            ci_probability=0.95,
+            experiments={
+                "test": {
+                    "test": {
+                        "confusion_matrix": [[1, 0], [0, 1]],
+                        "prevalence_prior": 0,
+                        "confusion_prior": 0,
+                    },
+                },
+            },
+        )
+
+        study.add_metric(metric="acc", aggregation="fe_gaussian")
+
+        # Metric in __init__
+        study = Study(
+            seed=0,
+            num_samples=10000,
+            ci_probability=0.95,
+            metrics={
+                "acc": {"aggregation": "fe_gaussian"},
+            },
+        )
+
+        study.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[1, 0], [0, 1]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        # Experiment and metric in __init__
+        study = Study(
+            seed=0,
+            num_samples=10000,
+            ci_probability=0.95,
+            experiments={
+                "test": {
+                    "test": {
+                        "confusion_matrix": [[1, 0], [0, 1]],
+                        "prevalence_prior": 0,
+                        "confusion_prior": 0,
+                    },
+                },
+            },
+            metrics={
+                "acc": {"aggregation": "fe_gaussian"},
+            },
+        )

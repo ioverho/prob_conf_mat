@@ -12,7 +12,7 @@ import itertools
 
 from prob_conf_mat.utils import RNG
 
-ALL_SEEDS = np.random.default_rng(0).integers(low=0, high=2**31 - 1, size=(10,))
+ALL_SEEDS = np.random.default_rng(seed=0).integers(low=0, high=2**31 - 1, size=(10,))
 
 
 def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG]:

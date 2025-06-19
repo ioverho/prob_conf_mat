@@ -13,15 +13,12 @@ import numpy as np
 
 class ConfMatIOWarning(Warning):
     """Some warning to highlight potential undesirable behaviour due to IO."""
-
-    pass
+    ...
 
 
 class ConfMatIOError(Exception):
     """While trying to perform confusion matrix IO, some exception was encountered."""
-
-    pass
-
+    ...
 
 def load_csv(
     location: str | pathlib.Path,
@@ -155,6 +152,13 @@ def validate_confusion_matrix(
     if not np.all(np.isfinite(confusion_matrix)):
         raise ConfMatIOError(
             f"The loaded confusion matrix has non-finite elements. "
+            f"Confusion matrix: {confusion_matrix}",
+        )
+
+    #! All values must be positive
+    if not np.all(confusion_matrix >= 0):
+        raise ConfMatIOError(
+            f"The loaded confusion matrix has negative elements. "
             f"Confusion matrix: {confusion_matrix}",
         )
 

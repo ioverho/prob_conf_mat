@@ -129,3 +129,16 @@ class TestConfMatValidation:
             match="Some columns contain no entries, meaning model never predicted it.",
         ):
             validate_confusion_matrix(confusion_matrix=[[0, 1], [0, 1]])
+
+    def test_value_bounds(self) -> None:
+        with pytest.raises(
+            ConfMatIOError,
+            #match="The loaded confusion matrix has non-finite elements.",
+        ):
+            validate_confusion_matrix(confusion_matrix=[[1, np.nan], [0, 1]])
+
+        with pytest.raises(
+            ConfMatIOError,
+            match="The loaded confusion matrix has negative elements.",
+        ):
+            validate_confusion_matrix(confusion_matrix=[[1, -1], [0, 1]])

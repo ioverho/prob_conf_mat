@@ -15,6 +15,7 @@ _DIRICHLET_PRIOR_STRATEGIES = {
     "laplace": 1.0,
     "ones": 1.0,
     "one": 1.0,
+    "jeffrey": 0.5,
     "jeffreys": 0.5,
     "halves": 0.5,
     "half": 0.5,
@@ -34,6 +35,11 @@ def dirichlet_prior(
         jtyping.Float[np.ndarray, " ..."]: the prior vector
     """
     if isinstance(strategy, float | int):
+        if strategy < 0:
+            raise ValueError(
+                f"A Dirichlet prior must contain positive values. Received: {strategy}",
+            )
+
         prior = np.full(shape, fill_value=strategy)
 
     elif isinstance(strategy, str):
@@ -48,7 +54,8 @@ def dirichlet_prior(
 
     else:
         try:
-            prior = np.array(strategy)
+            # TODO: control dtype
+            prior = np.array(strategy, dtype=np.float32)
         except Exception as e:  # noqa: BLE001
             raise ValueError(
                 f"While trying to convert {strategy} to a numpy array, "
