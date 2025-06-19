@@ -10,7 +10,7 @@ import numpy as np
 import scipy.stats as stats
 import itertools
 
-from bayes_conf_mat.utils import RNG
+from prob_conf_mat.utils import RNG
 
 ALL_SEEDS = np.random.default_rng(0).integers(low=0, high=2**31 - 1, size=(10,))
 

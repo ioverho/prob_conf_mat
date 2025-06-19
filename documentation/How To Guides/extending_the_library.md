@@ -1,6 +1,6 @@
 # Extend the Library
 
-While we aim to keep `bayes_conf_mat` comprehensive enough to cover most use-cases, it's not possible for the library to be complete. For that reason, we have made it possible to easily extend the library with your own metrics, averaging methods and experiment aggregators.
+While we aim to keep `prob_conf_mat` comprehensive enough to cover most use-cases, it's not possible for the library to be complete. For that reason, we have made it possible to easily extend the library with your own metrics, averaging methods and experiment aggregators.
 
 We do this with a metaclass system that:
 
@@ -16,13 +16,13 @@ In this guide, we outline some basic steps to help you implement these yourself.
 1. First import the base class, `Metric`, as:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Metric
+    from prob_conf_mat.metrics.abc import Metric
     ```
 
 2. Then define your class:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Metric
+    from prob_conf_mat.metrics.abc import Metric
 
     class FowlkesMallows(Metric):
     ```
@@ -38,7 +38,7 @@ In this guide, we outline some basic steps to help you implement these yourself.
     For example:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Metric
+    from prob_conf_mat.metrics.abc import Metric
 
     class FowlkesMallows(Metric):
         full_name = "Fowlkes Mallows Index"
@@ -54,7 +54,7 @@ In this guide, we outline some basic steps to help you implement these yourself.
     The [Fowlkes-Mallows index](https://en.wikipedia.org/wiki/Fowlkes%E2%80%93Mallows_index) is defined as the square root of the product of the precision and recall, so we would define it as follows:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Metric
+    from prob_conf_mat.metrics.abc import Metric
 
     class FowlkesMallows(Metric):
         full_name = "Fowlkes Mallows Index"
@@ -85,13 +85,13 @@ study.add_metric("fowlkes_mallows")
 1. First import the base class, `Averaging`, as:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Averaging
+    from prob_conf_mat.metrics.abc import Averaging
     ```
 
 2. Define your class:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Averaging
+    from prob_conf_mat.metrics.abc import Averaging
 
     class Take2ndClass(Averaging):
     ```
@@ -105,7 +105,7 @@ study.add_metric("fowlkes_mallows")
     For example:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Averaging
+    from prob_conf_mat.metrics.abc import Averaging
 
     class Take2ndClass(Averaging):
         full_name = "Takes 2nd Class Value"
@@ -118,7 +118,7 @@ study.add_metric("fowlkes_mallows")
 4. Finally, implement the `compute_average` method. Note that the input is always an array of `Float[ndarray, " num_samples num_classes"]`, and it should output an array of dimensions `jtyping.Float[np.ndarray, " num_samples 1"]`:
 
     ```python
-    from bayes_conf_mat.metrics.abc import Averaging
+    from prob_conf_mat.metrics.abc import Averaging
 
     class Take2ndClass(Averaging):
         full_name = "Takes 2nd Class Value"
@@ -177,13 +177,13 @@ A similar pattern was used in defining experiment aggregation methods.
 1. First, import the base class
 
     ```python
-    from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+    from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
     ```
 
 2. Define your class:
 
     ```python
-    from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+    from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 
     class Take1stExperiment(ExperimentAggregator):
     ```
@@ -195,7 +195,7 @@ A similar pattern was used in defining experiment aggregation methods.
     For example:
 
     ```python
-    from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+    from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 
     class Take1stExperiment(ExperimentAggregator):
         full_name: str = "Always Takes 1st Experiment Result as Aggregate"
@@ -205,7 +205,7 @@ A similar pattern was used in defining experiment aggregation methods.
 4. Finally, implement the `aggregate` method. The first argument, `experiment_samples`, is always an array of `Float[ndarray, " num_samples num_experiments"]`, and it should output an array of dimensions `jtyping.Float[np.ndarray, " num_samples"]`. The signature should also take a `bounds: tuple[float, float]` argument, to allow for resampling. So, for example:
 
     ```python
-    from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+    from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 
     class Take1stExperiment(ExperimentAggregator):
         full_name: str = "Always Takes 1st Experiment Result as Aggregate"
@@ -232,8 +232,8 @@ If you have additional parameters you need to define, or you want the experiment
 Unlike before, the parent class has a defined `__init__` method that you will need to adhere to. Specifically, the first argument should always be the RNG, and this should be passed to `super()`. For example,
 
 ```python
-from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
-from bayes_conf_mat.utils.rng import RNG
+from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+from prob_conf_mat.utils.rng import RNG
 
 class Take1stExperiment(ExperimentAggregator):
     ...

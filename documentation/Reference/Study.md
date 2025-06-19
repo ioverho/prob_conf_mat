@@ -1,7 +1,7 @@
 <!-- LTeX: enabled=false -->
 # Study
 
-::: bayes_conf_mat.study.Study
+::: prob_conf_mat.study.Study
     options:
         members:
             - num_classes
@@ -10,41 +10,41 @@
 
 ## Configuration
 
-::: bayes_conf_mat.study.Study.to_dict
+::: prob_conf_mat.study.Study.to_dict
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.from_dict
+::: prob_conf_mat.study.Study.from_dict
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.add_experiment
+::: prob_conf_mat.study.Study.add_experiment
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.__getitem__
+::: prob_conf_mat.study.Study.__getitem__
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.add_metric
+::: prob_conf_mat.study.Study.add_metric
     options:
         heading_level: 3
 
 ## Estimating Uncertainty
 
-::: bayes_conf_mat.study.Study.get_metric_samples
+::: prob_conf_mat.study.Study.get_metric_samples
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.report_metric_summaries
+::: prob_conf_mat.study.Study.report_metric_summaries
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.report_random_metric_summaries
+::: prob_conf_mat.study.Study.report_random_metric_summaries
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.plot_metric_summaries
+::: prob_conf_mat.study.Study.plot_metric_summaries
     options:
         heading_level: 3
 
@@ -70,15 +70,15 @@ study.plot_metric_summaries(
 
 ## Comparing Experiments
 
-::: bayes_conf_mat.study.Study.report_pairwise_comparison
+::: prob_conf_mat.study.Study.report_pairwise_comparison
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.report_pairwise_comparison_to_random
+::: prob_conf_mat.study.Study.report_pairwise_comparison_to_random
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.plot_pairwise_comparison
+::: prob_conf_mat.study.Study.plot_pairwise_comparison
     options:
         heading_level: 3
 
@@ -105,17 +105,17 @@ study.plot_pairwise_comparison(
     alt="A plot of the distribution of the difference of two metrics">
 </img>
 
-::: bayes_conf_mat.study.Study.report_listwise_comparison
+::: prob_conf_mat.study.Study.report_listwise_comparison
     options:
         heading_level: 3
 
 ## Aggregating Experiments
 
-::: bayes_conf_mat.study.Study.report_aggregated_metric_summaries
+::: prob_conf_mat.study.Study.report_aggregated_metric_summaries
     options:
         heading_level: 3
 
-::: bayes_conf_mat.study.Study.plot_experiment_aggregation
+::: prob_conf_mat.study.Study.plot_experiment_aggregation
     options:
         heading_level: 3
 
@@ -140,7 +140,7 @@ study.plot_experiment_aggregation(
     alt="A plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 
-::: bayes_conf_mat.study.Study.plot_forest_plot
+::: prob_conf_mat.study.Study.plot_forest_plot
     options:
         heading_level: 3
 
@@ -164,7 +164,7 @@ study.plot_forest_plot(
     alt="A forest plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 
-::: bayes_conf_mat.config.Config
+::: prob_conf_mat.config.Config
     options:
         members:
             - fingerprint

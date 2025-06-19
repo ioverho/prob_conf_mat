@@ -1,8 +1,8 @@
 import pytest
 
-from bayes_conf_mat.study import Study
-from bayes_conf_mat.experiment_group import ExperimentGroup
-from bayes_conf_mat.experiment import Experiment
+from prob_conf_mat.study import Study
+from prob_conf_mat.experiment_group import ExperimentGroup
+from prob_conf_mat.experiment import Experiment
 
 
 class TestStudy:

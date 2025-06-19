@@ -4,15 +4,15 @@ strict: false
 
 docs_dir: documentation
 
-site_name: Bayesian Confusion Matrices
-site_url: https://github.com/ioverho/bayes_conf_mat
+site_name: Probabilistic Confusion Matrices
+site_url: https://github.com/ioverho/prob_conf_mat
 # TODO: add a description
 site_description: ""
 site_author: Ivo Verhoeven
 use_directory_urls: false
 
-repo_url: https://github.com/ioverho/bayes_conf_mat
-repo_name: ioverho/bayes_conf_mat
+repo_url: https://github.com/ioverho/prob_conf_mat
+repo_name: ioverho/prob_conf_mat
 
 copyright: Copyright &copy; 2025 Ivo Verhoeven
 
@@ -52,8 +52,8 @@ theme:
   language: en
   # Project logo, top-left
   # TODO: get a nice logo
-  logo: _static/logo.png
-  favicon: _static/logo.png
+  logo: _static/logo_square.svg
+  favicon: _static/logo_square.svg
   # GitHub logo, top-right
   icon:
     repo: fontawesome/brands/github

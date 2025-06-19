@@ -1,16 +1,16 @@
 ## Abstract Base Class
 
-::: bayes_conf_mat.metrics.abc.Metric
+::: prob_conf_mat.metrics.abc.Metric
     options:
         heading_level: 3
 
-::: bayes_conf_mat.metrics.abc.AveragedMetric
+::: prob_conf_mat.metrics.abc.AveragedMetric
     options:
         heading_level: 3
 
 ## Metric Instances
 
-::: bayes_conf_mat.metrics._metrics.DiagMass
+::: prob_conf_mat.metrics._metrics.DiagMass
     options:
         heading_level: 3
         show_root_heading: true
@@ -30,7 +30,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.Prevalence
+::: prob_conf_mat.metrics._metrics.Prevalence
     options:
         heading_level: 3
         show_root_heading: true
@@ -50,7 +50,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.ModelBias
+::: prob_conf_mat.metrics._metrics.ModelBias
     options:
         heading_level: 3
         show_root_heading: true
@@ -70,7 +70,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.TruePositiveRate
+::: prob_conf_mat.metrics._metrics.TruePositiveRate
     options:
         heading_level: 3
         show_root_heading: true
@@ -90,7 +90,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.FalseNegativeRate
+::: prob_conf_mat.metrics._metrics.FalseNegativeRate
     options:
         heading_level: 3
         show_root_heading: true
@@ -110,7 +110,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.PositivePredictiveValue
+::: prob_conf_mat.metrics._metrics.PositivePredictiveValue
     options:
         heading_level: 3
         show_root_heading: true
@@ -130,7 +130,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.FalseDiscoveryRate
+::: prob_conf_mat.metrics._metrics.FalseDiscoveryRate
     options:
         heading_level: 3
         show_root_heading: true
@@ -150,7 +150,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.FalsePositiveRate
+::: prob_conf_mat.metrics._metrics.FalsePositiveRate
     options:
         heading_level: 3
         show_root_heading: true
@@ -170,7 +170,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.TrueNegativeRate
+::: prob_conf_mat.metrics._metrics.TrueNegativeRate
     options:
         heading_level: 3
         show_root_heading: true
@@ -190,7 +190,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.FalseOmissionRate
+::: prob_conf_mat.metrics._metrics.FalseOmissionRate
     options:
         heading_level: 3
         show_root_heading: true
@@ -210,7 +210,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.NegativePredictiveValue
+::: prob_conf_mat.metrics._metrics.NegativePredictiveValue
     options:
         heading_level: 3
         show_root_heading: true
@@ -230,7 +230,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.Accuracy
+::: prob_conf_mat.metrics._metrics.Accuracy
     options:
         heading_level: 3
         show_root_heading: true
@@ -250,7 +250,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.BalancedAccuracy
+::: prob_conf_mat.metrics._metrics.BalancedAccuracy
     options:
         heading_level: 3
         show_root_heading: true
@@ -270,7 +270,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.MatthewsCorrelationCoefficient
+::: prob_conf_mat.metrics._metrics.MatthewsCorrelationCoefficient
     options:
         heading_level: 3
         show_root_heading: true
@@ -290,7 +290,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.CohensKappa
+::: prob_conf_mat.metrics._metrics.CohensKappa
     options:
         heading_level: 3
         show_root_heading: true
@@ -310,7 +310,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.F1
+::: prob_conf_mat.metrics._metrics.F1
     options:
         heading_level: 3
         show_root_heading: true
@@ -330,7 +330,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.FBeta
+::: prob_conf_mat.metrics._metrics.FBeta
     options:
         heading_level: 3
         show_root_heading: true
@@ -350,7 +350,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.Informedness
+::: prob_conf_mat.metrics._metrics.Informedness
     options:
         heading_level: 3
         show_root_heading: true
@@ -370,7 +370,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.Markedness
+::: prob_conf_mat.metrics._metrics.Markedness
     options:
         heading_level: 3
         show_root_heading: true
@@ -390,7 +390,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.P4
+::: prob_conf_mat.metrics._metrics.P4
     options:
         heading_level: 3
         show_root_heading: true
@@ -410,7 +410,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.JaccardIndex
+::: prob_conf_mat.metrics._metrics.JaccardIndex
     options:
         heading_level: 3
         show_root_heading: true
@@ -430,7 +430,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.PositiveLikelihoodRatio
+::: prob_conf_mat.metrics._metrics.PositiveLikelihoodRatio
     options:
         heading_level: 3
         show_root_heading: true
@@ -450,7 +450,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.LogPositiveLikelihoodRatio
+::: prob_conf_mat.metrics._metrics.LogPositiveLikelihoodRatio
     options:
         heading_level: 3
         show_root_heading: true
@@ -470,7 +470,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.NegativeLikelihoodRatio
+::: prob_conf_mat.metrics._metrics.NegativeLikelihoodRatio
     options:
         heading_level: 3
         show_root_heading: true
@@ -490,7 +490,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio
+::: prob_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio
     options:
         heading_level: 3
         show_root_heading: true
@@ -510,7 +510,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.DiagnosticOddsRatio
+::: prob_conf_mat.metrics._metrics.DiagnosticOddsRatio
     options:
         heading_level: 3
         show_root_heading: true
@@ -530,7 +530,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics._metrics.LogDiagnosticOddsRatio
+::: prob_conf_mat.metrics._metrics.LogDiagnosticOddsRatio
     options:
         heading_level: 3
         show_root_heading: true

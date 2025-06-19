@@ -1,6 +1,6 @@
 ## Abstract Base Class
 
-::: bayes_conf_mat.metrics.abc.Averaging
+::: prob_conf_mat.metrics.abc.Averaging
     options:
         heading_level: 3
         members:

@@ -1,7 +1,7 @@
 <!-- LTeX: enabled=false -->
 # Experiment
 
-::: bayes_conf_mat.experiment.Experiment
+::: prob_conf_mat.experiment.Experiment
     options:
         members:
             - num_classes
@@ -13,14 +13,14 @@
 
 ## Sampling
 
-::: bayes_conf_mat.experiment.Experiment.sample
+::: prob_conf_mat.experiment.Experiment.sample
     options:
         heading_level: 3
 
-::: bayes_conf_mat.experiment.Experiment.sample_metrics
+::: prob_conf_mat.experiment.Experiment.sample_metrics
     options:
         heading_level: 3
 
-::: bayes_conf_mat.experiment.ExperimentResult
+::: prob_conf_mat.experiment.ExperimentResult
     options:
         heading_level: 2

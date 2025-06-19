@@ -2,7 +2,7 @@ import pathlib
 import numpy as np
 import pytest
 
-from bayes_conf_mat.io import (
+from prob_conf_mat.io import (
     validate_confusion_matrix,
     load_csv,
     ConfMatIOWarning,

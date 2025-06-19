@@ -57,7 +57,7 @@ num_samples: 10000
 *Type*: `scalar:str` | `scalar:float`, positive | `sequence:float`, positive
 
 The prior used for the prevalence distribution, i.e., the proportional occurrence of a condition. The type must be one of:
-    - a `scalar:str`, corresponding to an [implemented prior strategy](../../src/bayes_conf_mat/stats/dirichlet_distribution.py)
+    - a `scalar:str`, corresponding to an [implemented prior strategy](../../src/prob_conf_mat/stats/dirichlet_distribution.py)
     - a `scalar:float`, resulting in a constant vector of that value
     - a `sequence:float` (e.g., a YAML list of floats), in which case the full prior should be specified. The list *must* contain the same number of columns as there are classes in the confusion matrix
 
@@ -81,7 +81,7 @@ prevalence_prior:
 *Type*: `scalar:str` | `scalar:float`, positive | `sequence:sequence:float`, positive
 
 The prior used for the confusion distribution, i.e., the proportional occurrence of a prediction given a condition. The type must be one of:
-    - a `scalar:str`, corresponding to an [implemented prior strategy](../src/bayes_conf_mat/stats/dirichlet_distribution.py)
+    - a `scalar:str`, corresponding to an [implemented prior strategy](../src/prob_conf_mat/stats/dirichlet_distribution.py)
     - a `scalar:float`, resulting in a constant matrix of that value
     - a `sequence:sequence:float` (e.g. a YAML list of lists), in which case the full prior should be specified. The list *must* contain the same number of columns *and* columns as there are classes in the confusion matrix
 

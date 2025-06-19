@@ -8,9 +8,9 @@ from pathlib import Path
 
 from tabulate import tabulate
 
-from bayes_conf_mat.utils import fmt
-from bayes_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY
-from bayes_conf_mat.experiment_aggregation import AGGREGATION_REGISTRY
+from prob_conf_mat.utils import fmt
+from prob_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY
+from prob_conf_mat.experiment_aggregation import AGGREGATION_REGISTRY
 
 REFERENCE_PART = "Reference"
 METRICS_AND_AVERAGING_CHAPTER = REFERENCE_PART + "/Metrics"

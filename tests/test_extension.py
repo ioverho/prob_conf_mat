@@ -1,11 +1,11 @@
 import numpy as np
 
-from bayes_conf_mat import Study
-from bayes_conf_mat.metrics import get_metric
-from bayes_conf_mat.metrics.abc import Metric, Averaging
-from bayes_conf_mat.experiment_aggregation import get_experiment_aggregator
-from bayes_conf_mat.experiment_aggregation.abc import ExperimentAggregator
-from bayes_conf_mat.utils.rng import RNG
+from prob_conf_mat import Study
+from prob_conf_mat.metrics import get_metric
+from prob_conf_mat.metrics.abc import Metric, Averaging
+from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
+from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
+from prob_conf_mat.utils.rng import RNG
 
 
 class TestExtension:
