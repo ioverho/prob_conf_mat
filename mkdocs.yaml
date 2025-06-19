@@ -52,7 +52,7 @@ theme:
   language: en
   # Project logo, top-left
   # TODO: get a nice logo
-  logo: _static/logo_square.svg
+  logo: _static/logo_rectangle.svg
   favicon: _static/logo_square.svg
   # GitHub logo, top-right
   icon:

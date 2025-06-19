@@ -9,6 +9,19 @@ help:  ## Display this help
 hello-world: ## Tests uv and make
 	@uv run python -c "import prob_conf_mat; print('Hello World!')"
 
+.PHONY: clean
+clean:  ## Clean up caches and build artifacts
+	@rm -rf .venv/
+	@rm -rf .__pycache__/
+	@rm -rf .cache/
+	@rm -rf .pytest_cache/
+	@rm -rf .ruff_cache/
+	@rm -rf build/
+	@rm -rf site/
+	@rm -rf .coverage
+# I don't trust this enough to actually run it
+# 	@find . -type f -name '*.py[co]' -delete -or -type d -name __pycache__ -delete
+
 ##@ Environment
 .PHONY: install
 install: ## Install default dependencies
@@ -50,28 +63,17 @@ commit: ## Run pre-commit checks
 	@uv run --dev pre-commit run
 
 ##@ Documentation
-.PHONY: mkdocs
-mkdocs: ## Update the docs
+.PHONY: docs-build
+docs-build: ## Update the docs
 	@uv run --dev python mkdocs.py
 	@uv run --dev mkdocs build
 
-.PHONY: mkdocs-serve
-mkdocs-serve: ## Serve documentation site
+.PHONY: docs-serve
+docs-serve: ## Serve documentation site
 	@uv run mkdocs serve --watch "./documentation" --watch "./src/prob_conf_mat"
 
-##@ Profiling
+#@ Profiling
 #.PHONY: importtime
 #importtime: ## Profile import time
 #	@uv run --no-dev python -X importtime -c "from prob_conf_mat import Study" 2> ./tests/logs/import.log
 #	@uv run --dev tuna ./tests/logs/import.log
-
-# I'm too nervous to run this...
-# .PHONY: clean
-# clean:  ## Clean up caches and build artifacts
-# 	@rm -rf .cache/
-# 	@rm -rf .pytest_cache/
-# 	@rm -rf .ruff_cache/
-# 	@rm -rf .venv/
-# 	@rm -rf build/
-# 	@rm -rf site/
-# 	@find . -type f -name '*.py[co]' -delete -or -type d -name __pycache__ -delete

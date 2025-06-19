@@ -1,8 +1,8 @@
 <div style="text-align: center;" align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangular.svg">
-  <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangular.svg">
-  <img alt="Logo" src="documentation/_static/logo_rectangular.svg" width="150px">
+  <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangle.svg">
+  <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangle.svg">
+  <img alt="Logo" src="documentation/_static/logo_rectangle.svg" width="150px">
 </picture>
 <div style="text-align: center;" align="center">
 
