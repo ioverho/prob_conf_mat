@@ -2,7 +2,7 @@
 name = "bayes-conf-mat"
 version = "0.1.0"
 description = ""
-authors = [{ name = "Ivo Verhoeven", email = "i.o.verhoeven@uva.nl" }]
+authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 # TODO: check out the other available classifiers
@@ -40,6 +40,7 @@ dev = [
     "opt-einsum>=3.4.0",
     "pip>=25.0.1",
     "pre-commit>=4.2.0",
+    "pyright>=1.1.402",
     "pytest>=8.3.4",
     "python-markdown-math>=0.9",
     "pyyaml>=6.0.2",

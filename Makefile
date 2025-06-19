@@ -27,7 +27,7 @@ upgrade: ## Upgrade installed dependencies
 export: ## Export uv to requirements.txt file
 	@uv export --no-dev --output-file ./requirements.txt --format requirements.txt
 
-##@ Testing, Linting & Formatting
+##@ Testing, Linting, Typing & Formatting
 .PHONY: test
 test: ## Runs all tests
 	@uv run --dev pytest
@@ -40,6 +40,10 @@ coverage: ## Checks test coverage
 .PHONY: lint
 lint: ## Run linting
 	@uv run --dev ruff check ./src/bayes_conf_mat ./tests
+
+.PHONY: type
+type: ## Run static typechecking
+	@uv run --dev pyright > ./tests/logs/pyright/report
 
 .PHONY: commit
 commit: ## Run pre-commit checks
