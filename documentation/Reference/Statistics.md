@@ -6,7 +6,7 @@ A module dedicated to generating samples and computing summary statistics from s
 
 Vectorized computation of various averages using a consistent interface.
 
-::: bayes_conf_mat.stats.batched_averaging
+::: prob_conf_mat.stats.batched_averaging
     options:
         heading_level: 3
         show_root_heading: false
@@ -23,7 +23,7 @@ Optimized sampling of batched samples from independent Dirichlet distributions.
 
 These functions tend to be a performance bottleneck, and should be as optimized as much as possible.
 
-::: bayes_conf_mat.stats.dirichlet_distribution
+::: prob_conf_mat.stats.dirichlet_distribution
     options:
         heading_level: 3
         show_root_heading: false
@@ -38,7 +38,7 @@ These functions tend to be a performance bottleneck, and should be as optimized 
 
 Tries to find the Highest Density Interval (HDI) of a posterior distribution from its samples.
 
-::: bayes_conf_mat.stats.hdi_estimation
+::: prob_conf_mat.stats.hdi_estimation
     options:
         heading_level: 3
         show_root_heading: false
@@ -53,7 +53,7 @@ Tries to find the Highest Density Interval (HDI) of a posterior distribution fro
 
 Tries to find the mode of a distribution from its samples.
 
-::: bayes_conf_mat.stats.mode_estimation
+::: prob_conf_mat.stats.mode_estimation
     options:
         heading_level: 3
         show_root_heading: false
@@ -68,7 +68,7 @@ Tries to find the mode of a distribution from its samples.
 
 Computes various summary statistics about a distribution from its samples.
 
-::: bayes_conf_mat.stats.summary
+::: prob_conf_mat.stats.summary
     options:
         heading_level: 3
         show_root_heading: false
@@ -85,7 +85,7 @@ Draws bounded samples from unbounded Scipy distributions.
 
 This is necessary when making parametric assumptions about the distribution of metrics that have minimum and maximum values.
 
-::: bayes_conf_mat.stats.truncated_sampling
+::: prob_conf_mat.stats.truncated_sampling
     options:
         heading_level: 3
         show_root_heading: false

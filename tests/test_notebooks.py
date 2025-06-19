@@ -6,7 +6,7 @@ import pytest
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
-NOTEBOOK_DIR = Path("/home/ioverho/bayes_conf_mat/documentation/Getting Started")
+NOTEBOOK_DIR = Path("/home/ioverho/prob_conf_mat/documentation/Getting Started")
 SKIP_NOTEBOOKS = []
 TIMEOUT = 600
 

@@ -7,7 +7,7 @@ help:  ## Display this help
 
 .PHONY: hello-world
 hello-world: ## Tests uv and make
-	@uv run python -c "print('Hello World!')"
+	@uv run python -c "import prob_conf_mat; print('Hello World!')"
 
 ##@ Environment
 .PHONY: install
@@ -39,7 +39,7 @@ coverage: ## Checks test coverage
 
 .PHONY: lint
 lint: ## Run linting
-	@uv run --dev ruff check ./src/bayes_conf_mat ./tests
+	@uv run --dev ruff check ./src/prob_conf_mat ./tests
 
 .PHONY: type
 type: ## Run static typechecking
@@ -57,12 +57,12 @@ mkdocs: ## Update the docs
 
 .PHONY: mkdocs-serve
 mkdocs-serve: ## Serve documentation site
-	@uv run mkdocs serve --watch "./documentation" --watch "./src/bayes_conf_mat"
+	@uv run mkdocs serve --watch "./documentation" --watch "./src/prob_conf_mat"
 
 ##@ Profiling
 #.PHONY: importtime
 #importtime: ## Profile import time
-#	@uv run --no-dev python -X importtime -c "from bayes_conf_mat import Study" 2> ./tests/logs/import.log
+#	@uv run --no-dev python -X importtime -c "from prob_conf_mat import Study" 2> ./tests/logs/import.log
 #	@uv run --dev tuna ./tests/logs/import.log
 
 # I'm too nervous to run this...

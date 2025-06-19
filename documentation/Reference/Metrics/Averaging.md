@@ -1,6 +1,6 @@
 ## Abstract Base Class
 
-::: bayes_conf_mat.metrics.abc.Averaging
+::: prob_conf_mat.metrics.abc.Averaging
     options:
         heading_level: 3
         members:
@@ -11,7 +11,7 @@
 
 ## Metric Instances
 
-::: bayes_conf_mat.metrics.averaging.MacroAverage
+::: prob_conf_mat.metrics.averaging.MacroAverage
     options:
         heading_level: 3
         show_root_heading: true
@@ -29,7 +29,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics.averaging.WeightedAverage
+::: prob_conf_mat.metrics.averaging.WeightedAverage
     options:
         heading_level: 3
         show_root_heading: true
@@ -47,7 +47,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics.averaging.SelectPositiveClass
+::: prob_conf_mat.metrics.averaging.SelectPositiveClass
     options:
         heading_level: 3
         show_root_heading: true
@@ -65,7 +65,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics.averaging.HarmonicMean
+::: prob_conf_mat.metrics.averaging.HarmonicMean
     options:
         heading_level: 3
         show_root_heading: true
@@ -83,7 +83,7 @@
         show_labels: false
         group_by_category: false
 
-::: bayes_conf_mat.metrics.averaging.GeometricMean
+::: prob_conf_mat.metrics.averaging.GeometricMean
     options:
         heading_level: 3
         show_root_heading: true

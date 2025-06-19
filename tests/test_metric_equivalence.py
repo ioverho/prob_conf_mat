@@ -4,7 +4,7 @@ import typing
 if typing.TYPE_CHECKING:
     import jaxtyping as jtyping
 
-    from bayes_conf_mat.experiment import Experiment
+    from prob_conf_mat.experiment import Experiment
 
 from functools import partial
 from pathlib import Path
@@ -15,8 +15,8 @@ import numpy as np
 import sklearn
 import sklearn.metrics
 
-from bayes_conf_mat import Study
-from bayes_conf_mat.io import (
+from prob_conf_mat import Study
+from prob_conf_mat.io import (
     load_csv,
     confusion_matrix_to_pred_cond,
 )

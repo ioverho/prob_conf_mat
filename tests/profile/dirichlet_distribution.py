@@ -10,7 +10,7 @@ import numpy as np
 from opt_einsum import contract
 from tqdm import tqdm
 
-from bayes_conf_mat.utils.rng import RNG
+from prob_conf_mat.utils.rng import RNG
 
 
 def normalize_array_baseline(  # noqa

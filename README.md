@@ -46,7 +46,7 @@ bayes-conf-mat v0.1.0
 This project was developed using [`uv`](https://docs.astral.sh/uv/). To install the development environment, simply clone this github repo:
 
 ```bash
-git clone https://github.com/ioverho/bayes_conf_mat.git
+git clone https://github.com/ioverho/prob_conf_mat.git
 ```
 
 And then run the `uv sync --dev` command:
@@ -56,11 +56,6 @@ uv sync --dev
 ```
 
 The development dependencies should automatically install into the `.venv` folder.
-
-## Documentation
-
-<!-- Link to the documentation here -->
-<!-- Include table with some quick start tutorials -->
 
 ## Quick Start
 
@@ -73,6 +68,34 @@ study = pcm.Study(
     ci_probability=0.95,
 )
 ```
+
+<!-- Add experiment -->
+<!-- Add metric -->
+<!-- Request summary -->
+
+| Group   | Experiment   |   Observed |   Median |   Mode |        95.0% HDI |     MU |    Skew |   Kurt |
+|---------|--------------|------------|----------|--------|------------------|--------|---------|--------|
+| test    | test         |     1.0000 |   0.8820 | 0.9106 | [0.7428, 0.9710] | 0.2283 | -0.9474 | 1.2644 |
+
+<!-- Plot something -->
+
+## Documentation
+
+<!-- Link to the documentation here -->
+<!-- Include table with some quick start tutorials -->
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
+
+The documentation is broadly divided into 4 sections:
+
+1. **Getting Started**: a collection of small tutorials to help new users get started
+2. **How To**: more expansive guides on how to achieve specific things
+3. **Reference**: in-depth information about how to interface with the library
+4. **Explanation**: explanations about *why* things are the way they are
+
+|                 | Learning        | Coding        |
+| --------------- | --------------- | ------------- |
+| **Practical**   | Getting Started | How-To Guides |
+| **Theoretical** | Explanation     | Reference     |
 
 ## Development
 

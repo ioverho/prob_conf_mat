@@ -1,5 +1,5 @@
 [project]
-name = "bayes-conf-mat"
+name = "prob-conf-mat"
 version = "0.1.0"
 description = ""
 authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/ioverho/bayes_conf_mat"
+"Homepage" = "https://github.com/ioverho/prob_conf_mat"
 
 [build-system]
 requires = ["hatchling"]

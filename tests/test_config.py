@@ -3,8 +3,8 @@ import typing
 import pytest
 import numpy as np
 
-from bayes_conf_mat import Study
-from bayes_conf_mat.config import ConfigError, ConfigWarning
+from prob_conf_mat import Study
+from prob_conf_mat.config import ConfigError, ConfigWarning
 
 
 class TestConfig:
