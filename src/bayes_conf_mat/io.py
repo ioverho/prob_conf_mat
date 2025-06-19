@@ -12,10 +12,14 @@ import numpy as np
 
 
 class ConfMatIOWarning(Warning):
+    """Some warning to highlight potential undesirable behaviour due to IO."""
+
     pass
 
 
-class ConfMatIOException(Exception):
+class ConfMatIOError(Exception):
+    """While trying to perform confusion matrix IO, some exception was encountered."""
+
     pass
 
 
@@ -60,14 +64,20 @@ def load_csv(
             try:
                 row_vals = list(map(int, row))
             except ValueError:
-                raise ConfMatIOException(
+                raise ConfMatIOError(
                     f"Row contains values that cannot be converted to int: "
                     f"Row number: {i}. File: {location}",
                 )
 
             rows.append(row_vals)
 
-    arr = np.array(rows, dtype=dtype)
+    try:
+        arr = np.array(rows, dtype=dtype)
+    except Exception as e:  # noqa: BLE001
+        raise ConfMatIOError(
+            f"Could not convert loaded csv to a confusion matrix."
+            f"Encountered the following exception: {e}",
+        )
 
     return arr
 
@@ -97,14 +107,14 @@ def validate_confusion_matrix(
         try:
             confusion_matrix = np.array(object=confusion_matrix)
         except Exception as e:  # noqa: BLE001
-            raise ConfMatIOException(
+            raise ConfMatIOError(
                 f"While trying to convert a confusion matrix to a numpy array, "
                 f"encountered the following exception: {e}.",
             )
 
     #! Must be 2-dimensional
     if not (len(confusion_matrix.shape) == 2):
-        raise ConfMatIOException(
+        raise ConfMatIOError(
             f"The loaded confusion matrix is malformed. "
             f"Shape: {confusion_matrix.shape}. "
             f"A confusion matrix should have exactly 2 dimensions. "
@@ -113,7 +123,7 @@ def validate_confusion_matrix(
 
     #! Must be square
     if not (confusion_matrix.shape[0] == confusion_matrix.shape[1]):
-        raise ConfMatIOException(
+        raise ConfMatIOError(
             f"The loaded confusion matrix is malformed. "
             f"Shape: {confusion_matrix.shape}. "
             f"A confusion matrix should be square. "
@@ -122,7 +132,7 @@ def validate_confusion_matrix(
 
     #! Must have at least 2 classes
     if confusion_matrix.shape[0] == 1 or confusion_matrix.shape[1] == 1:
-        raise ConfMatIOException(
+        raise ConfMatIOError(
             f"The loaded confusion matrix is malformed. "
             f"Shape: {confusion_matrix.shape}. "
             f"A confusion matrix should have at least 2 classes. "
@@ -135,7 +145,7 @@ def validate_confusion_matrix(
         try:
             confusion_matrix = confusion_matrix.astype(dtype=dtype, casting="safe")
         except Exception as e:  # noqa: BLE001
-            raise ConfMatIOException(
+            raise ConfMatIOError(
                 f"The loaded confusion matrix is not of type integer. "
                 f"While trying to convert, encounterted the following exception: {e}. "
                 f"Confusion matrix: {confusion_matrix}",
@@ -143,7 +153,7 @@ def validate_confusion_matrix(
 
     #! All values must be finite
     if not np.all(np.isfinite(confusion_matrix)):
-        raise ConfMatIOException(
+        raise ConfMatIOError(
             f"The loaded confusion matrix has non-finite elements. "
             f"Confusion matrix: {confusion_matrix}",
         )
@@ -152,7 +162,7 @@ def validate_confusion_matrix(
     cond_counts = confusion_matrix.sum(axis=1)
     if not np.all(cond_counts > 0):
         offenders = np.where(cond_counts == 0)[0].tolist()
-        raise ConfMatIOException(
+        raise ConfMatIOError(
             f"Some rows contain no entries, meaning condition does not exist. "
             f"Rows: {offenders}. "
             f"Confusion matrix: {confusion_matrix}",

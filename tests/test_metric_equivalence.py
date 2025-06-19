@@ -9,7 +9,6 @@ if typing.TYPE_CHECKING:
 from functools import partial
 from pathlib import Path
 from itertools import product
-import warnings
 
 import pytest
 import numpy as np
@@ -17,11 +16,9 @@ import sklearn
 import sklearn.metrics
 
 from bayes_conf_mat import Study
-from bayes_conf_mat.config import ConfigWarning
 from bayes_conf_mat.io import (
     load_csv,
     confusion_matrix_to_pred_cond,
-    ConfMatIOWarning,
 )
 
 # ==============================================================================
@@ -77,14 +74,22 @@ all_metrics_to_test = METRICS_TO_SKLEARN.keys()
 
 all_confusion_matrices_to_test = list(TEST_CASES_DIR.glob(pattern="*.csv"))
 
+all_args_to_test = list(
+    product(
+        all_confusion_matrices_to_test,
+        all_metrics_to_test,
+    ),
+)
+
 
 # ==============================================================================
-# Generate all test cases
+# The 'assert' code for pytest
 # ==============================================================================
-def generate_test_case(
-    metric: str,
-    conf_mat_fp: Path,
-) -> tuple[jtyping.Float[np.ndarray, 1], jtyping.Float[np.ndarray, 1]]:
+@pytest.mark.parametrize(
+    argnames="conf_mat_fp,metric",
+    argvalues=all_args_to_test,
+)
+def test_metric_equivalence(conf_mat_fp, metric) -> None:
     def _get_our_value(
         metric: str,
         study: Study,
@@ -117,14 +122,32 @@ def generate_test_case(
 
         sklearn_func = METRICS_TO_SKLEARN[metric]
 
-        if metric == "cohen_kappa":
-            sklearn_value = sklearn_func(y1=pred_cond[:, 0], y2=pred_cond[:, 1])
-        else:
-            sklearn_value = sklearn_func(y_pred=pred_cond[:, 0], y_true=pred_cond[:, 1])
+        match metric:
+            # For some reason cohen's kappa has a different function signature
+            case "cohen_kappa":
+                sklearn_value = sklearn_func(y1=pred_cond[:, 0], y2=pred_cond[:, 1])
+            case "dor@binary+positive_class=0":
+                # Catch zero division error, these aren't compared anyways
+                try:
+                    sklearn_value = sklearn_func(
+                        y_pred=pred_cond[:, 0],
+                        y_true=pred_cond[:, 1],
+                    )
+                except ZeroDivisionError:
+                    sklearn_value = np.array(np.nan)
+            case _:
+                sklearn_value = sklearn_func(
+                    y_pred=pred_cond[:, 0],
+                    y_true=pred_cond[:, 1],
+                )
 
         return sklearn_value
 
-    study = Study()
+    study = Study(
+        seed=0,
+        num_samples=10000,
+        ci_probability=0.95,
+    )
 
     study.add_metric(metric=metric)
 
@@ -135,39 +158,14 @@ def generate_test_case(
     study.add_experiment(
         experiment_name="test/test",
         confusion_matrix=conf_mat,
+        prevalence_prior=0,
+        confusion_prior=0,
     )
 
     our_value = _get_our_value(metric=metric, study=study)
 
     sklearn_value = _get_sklearn_value(metric=metric, study=study)
 
-    return our_value, sklearn_value
-
-
-warnings.filterwarnings(action="ignore", category=ConfigWarning)
-warnings.filterwarnings(action="ignore", category=ConfMatIOWarning)
-warnings.filterwarnings(action="ignore", category=RuntimeWarning)
-
-all_test_cases = []
-for metric, confusion_matrix in product(
-    all_metrics_to_test,
-    all_confusion_matrices_to_test,
-):
-    try:
-        test_case = generate_test_case(metric=metric, conf_mat_fp=confusion_matrix)
-    except Exception as e:
-        raise Exception(
-            f"Encountered exception for test case 'metric={metric}, confusion_matrix={confusion_matrix}': {e}",
-        )
-
-    all_test_cases.append(test_case)
-
-
-# ==============================================================================
-# The 'assert' code for pytest
-# ==============================================================================
-@pytest.mark.parametrize(argnames="our_value, sklearn_value", argvalues=all_test_cases)
-def test_all_cases(our_value, sklearn_value) -> None:
     # Only test if either array has finite values
     if np.all(np.isfinite(our_value)) or np.all(np.isfinite(sklearn_value)):
         assert np.allclose(our_value, sklearn_value), (our_value, sklearn_value)

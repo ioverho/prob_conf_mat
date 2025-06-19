@@ -32,6 +32,11 @@ export: ## Export uv to requirements.txt file
 test: ## Runs all tests
 	@uv run --dev pytest
 
+.PHONY: coverage
+coverage: ## Checks test coverage
+	@uv run --dev coverage run -m pytest
+	@uv run --dev coverage html
+
 .PHONY: lint
 lint: ## Run linting
 	@uv run --dev ruff check ./src/bayes_conf_mat ./tests

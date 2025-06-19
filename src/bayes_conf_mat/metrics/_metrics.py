@@ -278,7 +278,8 @@ class FalseDiscoveryRate(Metric):
 
 
 class FalsePositiveRate(Metric):
-    """Computes the False Positive Rate, the probability of false alarm.
+    r"""Computes the False Positive Rate, the probability of false alarm.
+
     Also known as the fall-out.
 
     It is defined as the ratio of falsely predicted positives to condition negatives:
@@ -472,7 +473,7 @@ class Accuracy(Metric):
 
 
 class BalancedAccuracy(Metric):
-    """Computes the balanced accuracy score.
+    r"""Computes the balanced accuracy score.
 
     It is defined as the the arithmetic average of the per-class true-positive rate:
 
@@ -503,7 +504,7 @@ class BalancedAccuracy(Metric):
     sklearn_equivalent = "balanced_accuracy_score"
     aliases = ["ba", "balanced_accuracy"]
 
-    def __init__(self, adjusted: bool = False) -> None:
+    def __init__(self, *, adjusted: bool = False) -> None:
         super().__init__()
         self.adjusted = adjusted
 
@@ -587,7 +588,7 @@ class MatthewsCorrelationCoefficient(Metric):
 
 
 class CohensKappa(Metric):
-    """Computes the multiclass Cohen's Kappa coefficient.
+    r"""Computes the multiclass Cohen's Kappa coefficient.
 
     Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
     be used to quantify the quality of a predictor.
@@ -633,7 +634,7 @@ class CohensKappa(Metric):
 
 
 class F1(Metric):
-    """Computes the univariate $F_{1}$-score.
+    r"""Computes the univariate $F_{1}$-score.
 
     It is defined as:
 
@@ -641,8 +642,8 @@ class F1(Metric):
 
     or simply put, the harmonic mean between precision (PPV) and recall (TPR).
 
-    It is an exceedingly common metric used to evaluate machine learning performance. It is closely related
-    to the Precision-Recall curve, an anlysis with varying thresholds.
+    It is an exceedingly common metric used to evaluate machine learning performance. It is closely
+    related to the Precision-Recall curve, an anlysis with varying thresholds.
 
     The 1 in the name from an unseen $\\beta$ parameter that weights precision and recall.
     See the `FBeta` metric.
@@ -653,8 +654,8 @@ class F1(Metric):
     $$2\\dfrac{\\text{prevalence}\\cdot p}{\\text{prevalence}+p}.$$
 
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
-    recommend comparing performance not to a random classifier, but the 'always-on' classifier (perfect recall
-    but poor precision). See the `F1Gain` metric.
+    recommend comparing performance not to a random classifier, but the 'always-on' classifier
+    (perfect recall but poor precision). See the `F1Gain` metric.
 
     Examples:
         - `f1`
@@ -689,7 +690,7 @@ class F1(Metric):
 
 
 class FBeta(Metric):
-    """Computes the univariate $F_{\\beta}$-score.
+    r"""Computes the univariate $F_{\\beta}$-score.
 
     Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
     be used to quantify the quality of a predictor.
@@ -700,18 +701,18 @@ class FBeta(Metric):
 
     or simply put, the weighted harmonic mean between precision (PPV) and recall (TPR).
 
-    The value of $\\beta$ determines to which degree a user deems recall more important than precision. Larger
-    values (x > 1) weight recall more, whereas lower values weight precision more. A value of 1 corresponds to
-    equal weighting, see the `F1` metric.
+    The value of $\\beta$ determines to which degree a user deems recall more important than
+    precision. Larger values (x > 1) weight recall more, whereas lower values weight precision more.
+    A value of 1 corresponds to equal weighting, see the `F1` metric.
 
-    The $F_{\\beta}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A random
-    classifier which predicts a class with a probability $p$, achieves a performance of,
+    The $F_{\\beta}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A
+    random classifier which predicts a class with a probability $p$, achieves a performance of,
 
     $$(1+\\beta^2)\\dfrac{\\text{prevalence}\\cdot p}{\\beta^2\\cdot\\text{prevalence}+p}.$$
 
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
-    recommend comparing performance not to a random classifier, but the 'always-on' classifier (perfect recall
-    but poor precision). See the `FBetaGain` metric.
+    recommend comparing performance not to a random classifier, but the 'always-on' classifier
+    (perfect recall but poor precision). See the `FBetaGain` metric.
 
     Examples:
         - `fbeta+beta=2`
@@ -720,7 +721,7 @@ class FBeta(Metric):
     Note: Read more:
         1. [sklearn](https://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-f-measure-metrics)
         2. [Wikipedia](https://en.wikipedia.org/wiki/F-score)
-    """
+    """  # noqa: E501
 
     full_name = "FBeta-score"
     is_multiclass = False
@@ -753,13 +754,14 @@ class FBeta(Metric):
 
 
 class Informedness(Metric):
-    """Computes the Informedness metric, also known Youden's J.
+    r"""Computes the Informedness metric, also known Youden's J.
 
     It is defined as:
 
     $$\\text{sensitivity}+\\text{specificity}-1$$
 
-    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+    where sensitivity is the True Positive Rate (TPR), and specificity is the
+    True Negative Rate (TNR).
 
     Values fall in the range [-1, 1], with higher values corresponding to better performance and 0
     corresponding to random performance.
@@ -792,7 +794,7 @@ class Informedness(Metric):
 
 
 class Markedness(Metric):
-    """Computes the markedness metric, also known as $\\Delta p$
+    r"""Computes the markedness metric, also known as $\\Delta p$.
 
     It is defined as:
 
@@ -829,25 +831,25 @@ class Markedness(Metric):
 
 
 class P4(Metric):
-    """Computes the P4 metric.
+    r"""Computes the P4 metric.
 
     It is defined as:
 
     $$4\\left(\\dfrac{1}{\\text{precision}}+\\dfrac{1}{\\text{recall}}+\\dfrac{1}{\\text{specificity}}+\\dfrac{1}{NPV}\\right)^{-1}$$
 
-    where precision corresponds to the Positive Predictive Value (PPV), recall to the True Positive Rate (TPR),
-    and specificity to the True Negative Rate (TNR). Put otherwise, it is the harmonic mean of the 4 listed
-    metrics.
+    where precision corresponds to the Positive Predictive Value (PPV), recall to the
+    True Positive Rate (TPR), and specificity to the True Negative Rate (TNR). Put otherwise, it is
+    the harmonic mean of the 4 listed metrics.
 
-    Introduced in 2022 by [Sitarz](https://arxiv.org/abs/2210.11997), it is meant to extend the properties of
-    the F1, Markedness and Informedness metrics. It is one of few defined metrics that incorporates the
-    Negative Predictive Value.
+    Introduced in 2022 by [Sitarz](https://arxiv.org/abs/2210.11997), it is meant to extend the
+    properties of the F1, Markedness and Informedness metrics. It is one of few defined metrics
+    that incorporates the Negative Predictive Value.
 
-    Possible values lie in the range [0, 1], with a score of 0 implying one of the intermediate metrics is 0,
-    and a 1 requiring perfect classification.
+    Possible values lie in the range [0, 1], with a score of 0 implying one of the intermediate
+    metrics is 0, and a 1 requiring perfect classification.
 
-    Relative to MCC, the author notes different behaviour at extreme values, but otherwise the metrics are
-    meant to provide a similar amount of information with a single value.
+    Relative to MCC, the author notes different behaviour at extreme values, but otherwise the
+    metrics are meant to provide a similar amount of information with a single value.
 
     Examples:
         - `p4`
@@ -886,20 +888,20 @@ class P4(Metric):
 
 
 class JaccardIndex(Metric):
-    """Computes the Jaccard Index, also known as the threat score.
+    r"""Computes the Jaccard Index, also known as the threat score.
 
     It is defined as:
 
     $$\\dfrac{TP}{TP+FP+FN}$$
 
-    where $TP$ is the count of true positives, $FP$ the count of false positives and $FN$ the count of
-    false negatives.
+    where $TP$ is the count of true positives, $FP$ the count of false positives and $FN$ the count
+    of false negatives.
 
-    Alternatively, it may be defined as the area of overlap between predicted and conditions, divided by the
-    area of all predicted and condition positives.
+    Alternatively, it may be defined as the area of overlap between predicted and conditions,
+    divided by the area of all predicted and condition positives.
 
-    Due to the alternative definition, it is commonly used when labels are not readily present, for example in
-    evaluating clustering performance.
+    Due to the alternative definition, it is commonly used when labels are not readily present, for
+    example in evaluating clustering performance.
 
     Examples:
         - `jaccard`
@@ -927,20 +929,21 @@ class JaccardIndex(Metric):
 
 
 class PositiveLikelihoodRatio(Metric):
-    """Computes the positive likelihood ratio.
+    r"""Computes the positive likelihood ratio.
 
     It is defined as
 
     $$\\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
 
-    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+    where sensitivity is the True Positive Rate (TPR), and specificity is the
+    True Negative Rate (TNR).
 
-    Simply put, it is the ratio of the probabilities of the model predicting a positive when the condition
-    is positive and negative, respectively.
+    Simply put, it is the ratio of the probabilities of the model predicting a positive when the
+    condition is positive and negative, respectively.
 
-    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no true positives, and
-    infinity corresponding to no false positives. Larger values indicate better performance, with a score
-    of 1 corresponding to random performance.
+    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no true positives,
+    and infinity corresponding to no false positives. Larger values indicate better performance,
+    with a score of 1 corresponding to random performance.
 
     Examples:
         - `plr`
@@ -958,7 +961,7 @@ class PositiveLikelihoodRatio(Metric):
     sklearn_equivalent = "class_likelihood_ratios"
     aliases = ["plr", "positive_likelihood_ratio"]
 
-    def __init__(self, clamp: bool = False) -> None:
+    def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
         self.clamp = clamp
 
@@ -974,20 +977,21 @@ class PositiveLikelihoodRatio(Metric):
 
 
 class LogPositiveLikelihoodRatio(Metric):
-    """Computes the positive likelihood ratio.
+    r"""Computes the positive likelihood ratio.
 
     It is defined as
 
     $$\\log\\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
 
-    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+    where sensitivity is the True Positive Rate (TPR), and specificity is the
+    True Negative Rate (TNR).
 
     Simply put, it is logarithm of the ratio of the probabilities of the model predicting a
     positive when the condition is positive and negative, respectively.
 
-    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no true positives, and
-    infinity corresponding to no false positives. Larger values indicate better performance, with a score
-    of 0 corresponding to random performance.
+    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no
+    true positives, and infinity corresponding to no false positives. Larger values indicate better
+    performance, with a score of 0 corresponding to random performance.
 
     Examples:
         - `log_plr`
@@ -1001,12 +1005,12 @@ class LogPositiveLikelihoodRatio(Metric):
 
     full_name = "Log Positive Likelihood Ratio"
     is_multiclass = False
-    bounds = (0.0, float("inf"))
+    bounds = (-float("inf"), float("inf"))
     dependencies = ("tpr", "fpr")
     sklearn_equivalent = "class_likelihood_ratios"
     aliases = ["log_plr", "lplr", "log_positive_likelihood_ratio"]
 
-    def __init__(self, clamp: bool = False) -> None:
+    def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
         self.clamp = clamp
 
@@ -1024,20 +1028,21 @@ class LogPositiveLikelihoodRatio(Metric):
 
 
 class NegativeLikelihoodRatio(Metric):
-    """Computes the negative likelihood ratio.
+    r"""Computes the negative likelihood ratio.
 
     It is defined as
 
     $$\\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
 
-    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+    where sensitivity is the True Positive Rate (TPR), and specificity is the
+    True Negative Rate(TNR).
 
-    Simply put, it is the ratio of the probabilities of the model predicting a negative when the condition
-    is positive and negative, respectively.
+    Simply put, it is the ratio of the probabilities of the model predicting a negative when the
+    condition is positive and negative, respectively.
 
-    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no false negatives, and
-    infinity corresponding to no true negatives. Smaller values indicate better performance, with a score
-    of 1 corresponding to random performance.
+    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no false negatives,
+    and infinity corresponding to no true negatives. Smaller values indicate better performance,
+    with a score of 1 corresponding to random performance.
 
     Examples:
         - `nlr`
@@ -1055,7 +1060,7 @@ class NegativeLikelihoodRatio(Metric):
     sklearn_equivalent = "class_likelihood_ratios"
     aliases = ["negative_likelihood_ratio", "nlr"]
 
-    def __init__(self, clamp: bool = False) -> None:
+    def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
         self.clamp = clamp
 
@@ -1071,20 +1076,21 @@ class NegativeLikelihoodRatio(Metric):
 
 
 class LogNegativeLikelihoodRatio(Metric):
-    """Computes the negative likelihood ratio.
+    r"""Computes the negative likelihood ratio.
 
     It is defined as
 
     $$\\log \\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
 
-    where sensitivity is the True Positive Rate (TPR), and specificity is the True Negative Rate (TNR).
+    where sensitivity is the True Positive Rate (TPR), and specificity is the
+    True Negative Rate (TNR).
 
-    Simply put, it is the logarithm of the ratio of the probabilities of the model predicting a negative when the condition
-    is positive and negative, respectively.
+    Simply put, it is the logarithm of the ratio of the probabilities of the model predicting a
+    negative when the condition is positive and negative, respectively.
 
-    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no true positives, and
-    infinity corresponding to no true negatives. Smaller values indicate better performance, with a score
-    of 0 corresponding to random performance.
+    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no
+    true positives, and infinity corresponding to no true negatives. Smaller values indicate better
+    performance, with a score of 0 corresponding to random performance.
 
     Examples:
         - `log_nlr`
@@ -1098,12 +1104,12 @@ class LogNegativeLikelihoodRatio(Metric):
 
     full_name = "Log Negative Likelihood Ratio"
     is_multiclass = False
-    bounds = (0.0, float("inf"))
+    bounds = (-float("inf"), float("inf"))
     dependencies = ("fnr", "tnr")
     sklearn_equivalent = "class_likelihood_ratios"
     aliases = ["lnlr", "log_negative_likelihood_ratio", "log_nlr"]
 
-    def __init__(self, clamp: bool = False) -> None:
+    def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
         self.clamp = clamp
 
@@ -1121,7 +1127,7 @@ class LogNegativeLikelihoodRatio(Metric):
 
 
 class DiagnosticOddsRatio(Metric):
-    """Computes the diagnostic odds ratio.
+    r"""Computes the diagnostic odds ratio.
 
     It is defined as:
 
@@ -1129,15 +1135,14 @@ class DiagnosticOddsRatio(Metric):
 
     where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
 
-    Possible values lie in the range [0.0, $\\infty$]. Larger values indicate better performance, with a score
-    of 1 corresponding to random performance.
+    Possible values lie in the range [0.0, $\\infty$]. Larger values indicate better performance,
+    with a score of 1 corresponding to random performance.
 
     To make experiment aggregation easier, you can log transform this metric by specifying
     `log_transform=true`. This makes the sampling distribution essentially Gaussian.
 
     Examples:
         - `dor`
-        - `dor+log_transform=true`
         - `diagnostic_odds_ratio@macro`
 
     Note: Read more:
@@ -1161,7 +1166,7 @@ class DiagnosticOddsRatio(Metric):
 
 
 class LogDiagnosticOddsRatio(Metric):
-    """Computes the diagnostic odds ratio.
+    r"""Computes the diagnostic odds ratio.
 
     It is defined as:
 
@@ -1169,8 +1174,8 @@ class LogDiagnosticOddsRatio(Metric):
 
     where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
 
-    Possible values lie in the range (-$\\infty$, $\\infty$). Larger values indicate better performance, with a score
-    of 0 corresponding to random performance.
+    Possible values lie in the range (-$\\infty$, $\\infty$). Larger values indicate better
+    performance, with a score of 0 corresponding to random performance.
 
     Examples:
         - `log_dor`
@@ -1184,7 +1189,7 @@ class LogDiagnosticOddsRatio(Metric):
 
     full_name = "Log Diagnostic Odds Ratio"
     is_multiclass = False
-    bounds = (0.0, float("inf"))
+    bounds = (-float("inf"), float("inf"))
     dependencies = ("nlr", "plr")
     sklearn_equivalent = None
     aliases = ["log_dor", "ldor", "log_diagnostic_odds_ratio"]
@@ -1197,3 +1202,46 @@ class LogDiagnosticOddsRatio(Metric):
         log_dor = np.log(plr) - np.log(nlr)
 
         return log_dor
+
+
+class PrevalenceThreshold(Metric):
+    r"""Computes the prevalence threshold.
+
+    It is defined as:
+
+    $$\frac{\sqrt{\text{TPR}\cdot(1-\text{TNR})}+\text{TNR}-1}{\text{TPR}+\text{TNR}-1}$$
+
+    where $\text{TPR}$ and $\text{TNR}$ are the true positive and negative rates, respectively.
+
+    Possible values lie in the range (0, 1). Larger values indicate *worse* performance, with a
+    score of 0 corresponding to perfect classification, and a score of 1 to perfect
+    misclassifcation.
+
+    It representents the inflection point in a sensitivity and specificity curve (ROC), beyond which
+    a classifiers positive predictive value drops sharply. See [Balayla (2020)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0240215#sec002)
+    for more information.
+
+    Examples:
+        - `pt`
+        - `prevalence_threshold`
+
+    """
+
+    full_name = "Prevalence Threshold"
+    is_multiclass = False
+    bounds = (0, 1)
+    dependencies = ("tpr", "tnr")
+    sklearn_equivalent = None
+    aliases = ["prev_thresh", "pt", "prevalence_threshold"]
+
+    def compute_metric(
+        self,
+        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        tnr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+        numerator = np.sqrt(tpr * (1 - tnr)) + tnr - 1
+        denominator = tpr + tnr - 1
+
+        pt = numerator / denominator
+
+        return pt

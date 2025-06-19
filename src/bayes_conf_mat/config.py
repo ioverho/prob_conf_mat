@@ -47,34 +47,6 @@ class Config:
         self.__setattr__("experiments", experiments)
         self.__setattr__("metrics", metrics)
 
-    def _validate_type(self, parameter: str, value: typing.Any) -> None:
-        # Get the type we're expecting to see for this parameter
-        expected_type: type = Config.__init__.__annotations__[parameter]
-
-        # Check if optional type
-        allows_none: bool = isinstance(expected_type, type(float | None))
-
-        # If Optional, use non-optional type as expected type
-        if allows_none:
-            expected_type = expected_type.__args__[0]  # type: ignore
-
-        if (value is None) and allows_none or isinstance(value, expected_type):
-            return value
-
-        # Try to convert to the correct value
-        try:
-            value = expected_type(value)
-        except Exception as e:  # noqa: BLE001
-            raise ConfigError(
-                (
-                    f"Parameter `{parameter}` must be an instance of `{expected_type}`, "
-                    f"but got `{type(value)}`."
-                    f"While trying to convert, the following exception was encountered: {e}"
-                ),
-            )
-
-        return value
-
     @property
     def seed(self) -> int:
         return self._seed
@@ -123,7 +95,7 @@ class Config:
 
     @seed.setter
     def seed(self, value: int | None) -> None:
-        value_ = self._validate_seed(value=value)
+        value_: int = self._validate_seed(value=value)
 
         self._seed = value_
         self.rng.seed = self._seed

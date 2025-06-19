@@ -24,7 +24,7 @@ def test_notebook_execution(notebook: Path) -> None:
     # Change the working directory to that of the notebook
     os.chdir(notebook.parent)
 
-    with open(file=notebook_abs_fp) as f:
+    with notebook_abs_fp.open() as f:
         nb = nbformat.read(fp=f, as_version=4)
 
     ep = ExecutePreprocessor(timeout=TIMEOUT)

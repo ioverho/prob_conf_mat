@@ -465,7 +465,7 @@ class Study(Config):
         if isinstance(metric, Metric | AveragedMetric):
             metric_name: str = metric.name
         else:
-            metric_name: str = metric  # type: ignore
+            metric_name: str = typing.cast("str", metric)
 
         # Retrieve the current set of metrics
         cur_metrics = self.metrics

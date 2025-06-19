@@ -1,6 +1,8 @@
 from __future__ import annotations
 import typing
 
+import pytest
+
 if typing.TYPE_CHECKING:
     import jaxtyping as jtyping
 
@@ -9,6 +11,8 @@ import scipy.stats as stats
 import itertools
 
 from bayes_conf_mat.utils import RNG
+
+ALL_SEEDS = np.random.default_rng(0).integers(low=0, high=2**31 - 1, size=(10,))
 
 
 def generate_tree(meta_seed: int, root_seed: int, max_children: int) -> list[RNG]:
@@ -74,114 +78,114 @@ def num_rejected_hypotheses(
 
     Returns:
         int: the number of hypotheses that should be rejected according to the provided significance level
-    """
+    """  # noqa: E501
     fail_to_reject_null = np.sort(p_vals) > alpha / (
         p_vals.shape[0] - np.arange(p_vals.shape[0])
     )
 
-    if np.any(fail_to_reject_null):
-        n_rejected = np.where(fail_to_reject_null)[0][0]
-    else:
-        n_rejected = 0
+    n_rejected = (
+        np.where(fail_to_reject_null)[0][0] if np.any(fail_to_reject_null) else 0
+    )
 
     return n_rejected
 
 
 # Tests ========================================================================
 class TestRNG:
-    all_seeds = np.random.default_rng(0).integers(low=0, high=2**31 - 1, size=(10,))
+    @pytest.mark.parametrize(argnames="seed", argvalues=ALL_SEEDS)
+    def test_equivalence_to_numpy(self, seed: int):
+        # Test root node
+        our_rng = RNG(seed=seed)
+        np_rng = np.random.default_rng(seed)
 
-    def test_equivalence_to_numpy(self):
-        for seed in self.all_seeds:
-            # Test root node
-            our_rng = RNG(seed=seed)
-            np_rng = np.random.default_rng(seed)
+        our_value = our_rng.random(size=(1000,))
+        np_value = np_rng.random(size=(1000,))
 
-            our_value = our_rng.random(size=(1000,))
-            np_value = np_rng.random(size=(1000,))
+        assert np.allclose(our_value, np_value)
 
-            assert np.allclose(our_value, np_value)
+        # Test child node
+        our_child_rng = our_rng.spawn(1)[0]
+        np_child_rng = np.random.default_rng(seed).spawn(1)[0]
 
-            # Test child node
-            our_child_rng = our_rng.spawn(1)[0]
-            np_child_rng = np.random.default_rng(seed).spawn(1)[0]
+        our_value = our_child_rng.random(size=(1000,))
+        np_value = np_child_rng.random(size=(1000,))
 
-            our_value = our_child_rng.random(size=(1000,))
-            np_value = np_child_rng.random(size=(1000,))
+        assert np.allclose(our_value, np_value)
 
-            assert np.allclose(our_value, np_value)
+    @pytest.mark.parametrize(argnames="seed", argvalues=ALL_SEEDS)
+    def test_independence(self, seed: int):
+        tree = generate_tree(meta_seed=seed, root_seed=0, max_children=4)
 
-    def test_independence(self):
-        for seed in self.all_seeds:
-            tree = generate_tree(meta_seed=seed, root_seed=0, max_children=4)
-
-            all_pvals = []
-            for node_a, node_b in itertools.combinations(tree, 2):
-                all_pvals.append(
-                    p_independent(node_a, node_b, sample_size=10000, num_bins=100),
-                )
-
-            all_pvals = np.stack(all_pvals)
-
-            n_rejected = num_rejected_hypotheses(p_vals=all_pvals, alpha=0.1)
-
-            assert n_rejected == 0, n_rejected
-
-    def test_chnaging_seed(self):
-        for seed_a, seed_b in itertools.combinations(self.all_seeds, 2):
-            tree_generator_seed = abs(seed_a - seed_b)
-
-            # Sample a tree
-            tree_a = generate_tree(
-                meta_seed=tree_generator_seed,
-                root_seed=seed_a,
-                max_children=4,
+        all_pvals = []
+        for node_a, node_b in itertools.combinations(tree, 2):
+            all_pvals.append(
+                p_independent(node_a, node_b, sample_size=10000, num_bins=100),
             )
 
-            samples_a = []
-            for node in tree_a:
-                samples_a.append(node.random())
+        all_pvals = np.stack(all_pvals)
 
-            samples_a = np.stack(samples_a)
+        n_rejected = num_rejected_hypotheses(p_vals=all_pvals, alpha=0.1)
 
-            # Sample a second, independent tree
-            tree_b = generate_tree(
-                meta_seed=tree_generator_seed,
-                root_seed=seed_b,
-                max_children=4,
-            )
+        assert n_rejected == 0, n_rejected
 
-            samples_b = []
-            for node in tree_b:
-                samples_b.append(node.random())
+    @pytest.mark.parametrize(
+        argnames="seed_a,seed_b",
+        argvalues=itertools.combinations(ALL_SEEDS, 2),
+    )
+    def test_changing_seed(self, seed_a: int, seed_b: int):
+        tree_generator_seed = abs(seed_a - seed_b)
 
-            samples_b = np.stack(samples_b)
+        # Sample a tree
+        tree_a = generate_tree(
+            meta_seed=tree_generator_seed,
+            root_seed=seed_a,
+            max_children=4,
+        )
 
-            #! Samples from different trees with different seeds should be independent
-            assert not np.allclose(samples_a, samples_b)
+        samples_a = []
+        for node in tree_a:
+            samples_a.append(node.random())
 
-            # Set the seed on the root node to the same seed as tree_b
-            tree_a[0].seed = seed_b
+        samples_a = np.stack(samples_a)
 
-            samples_a_reset = []
-            for node in tree_a:
-                samples_a_reset.append(node.random())
+        # Sample a second, independent tree
+        tree_b = generate_tree(
+            meta_seed=tree_generator_seed,
+            root_seed=seed_b,
+            max_children=4,
+        )
 
-            samples_a_reset = np.stack(samples_a_reset)
+        samples_b = []
+        for node in tree_b:
+            samples_b.append(node.random())
 
-            #! Samples from different trees with the same seed should be the same
-            #! Setting the seed on the root node should reset the tree's state
-            assert np.allclose(samples_a_reset, samples_b)
+        samples_b = np.stack(samples_b)
 
-            # Set the seed back to the initial seed of tree_a
-            tree_a[0].seed = seed_a
+        #! Samples from different trees with different seeds should be independent
+        assert not np.allclose(samples_a, samples_b)
 
-            samples_a_reset = []
-            for node in tree_a:
-                samples_a_reset.append(node.random())
+        # Set the seed on the root node to the same seed as tree_b
+        tree_a[0].seed = seed_b
 
-            samples_a_reset = np.stack(samples_a_reset)
+        samples_a_reset = []
+        for node in tree_a:
+            samples_a_reset.append(node.random())
 
-            #! Samples from different trees with the same seed should be the same
-            #! Setting the seed on the root node should reset the tree's state
-            assert np.allclose(samples_a_reset, samples_a)
+        samples_a_reset = np.stack(samples_a_reset)
+
+        #! Samples from different trees with the same seed should be the same
+        #! Setting the seed on the root node should reset the tree's state
+        assert np.allclose(samples_a_reset, samples_b)
+
+        # Set the seed back to the initial seed of tree_a
+        tree_a[0].seed = seed_a
+
+        samples_a_reset = []
+        for node in tree_a:
+            samples_a_reset.append(node.random())
+
+        samples_a_reset = np.stack(samples_a_reset)
+
+        #! Samples from different trees with the same seed should be the same
+        #! Setting the seed on the root node should reset the tree's state
+        assert np.allclose(samples_a_reset, samples_a)

@@ -14,7 +14,7 @@ class TestConfig:
         ci_probability=0.95,
     )
 
-    def fetch_base_config(self, *args) -> typing.Dict[str, typing.Any]:
+    def fetch_base_config(self, *args) -> dict[str, typing.Any]:
         return {k: v for k, v in self.base_config.items() if k not in args}
 
     def test_seed(self) -> None:
@@ -43,15 +43,17 @@ class TestConfig:
             Study(seed=0.1, **self.fetch_base_config("seed"))  # type: ignore
 
         # Test a negative convertible non-int class
-        with pytest.warns(
-            ConfigWarning,
-            match="Parameter `seed` must be a positive integer",
-        ):
-            with pytest.raises(
+        with (
+            pytest.warns(
+                ConfigWarning,
+                match="Parameter `seed` must be a positive integer",
+            ),
+            pytest.raises(
                 ConfigError,
                 match="Parameter `seed` must be a positive integer.",
-            ):
-                Study(seed=-10.1, **self.fetch_base_config("seed"))  # type: ignore
+            ),
+        ):
+            Study(seed=-10.1, **self.fetch_base_config("seed"))  # type: ignore
 
         # Test a 'None'
         with pytest.warns(
@@ -97,18 +99,20 @@ class TestConfig:
             ConfigWarning,
             match="Parameter `num_samples` must be a strictly positive integer",
         ):
-            Study(num_samples=float(10e5), **self.fetch_base_config("num_samples"))  # type: ignore
+            Study(num_samples=10e5, **self.fetch_base_config("num_samples"))  # type: ignore
 
         # Test a negative convertible non-int class
-        with pytest.warns(
-            ConfigWarning,
-            match="Parameter `num_samples` must be a strictly positive integer",
-        ):
-            with pytest.raises(
+        with (
+            pytest.warns(
+                ConfigWarning,
+                match="Parameter `num_samples` must be a strictly positive integer",
+            ),
+            pytest.raises(
                 ConfigError,
                 match="Parameter `num_samples` must be greater than 0. Currently:",
-            ):
-                Study(num_samples=float(-10e5), **self.fetch_base_config("num_samples"))  # type: ignore
+            ),
+        ):
+            Study(num_samples=(-10e5), **self.fetch_base_config("num_samples"))  # type: ignore
 
     def test_ci_probability(self) -> None:
         # Test a valid num_samples
@@ -218,7 +222,7 @@ class TestConfig:
         )
 
         assert np.all(
-            study["test/test"].prevalence_prior == 1.0  # type: ignore
+            study["test/test"].prevalence_prior == 1.0,  # type: ignore
         )
 
         # Float
@@ -233,7 +237,7 @@ class TestConfig:
 
         assert np.all(
             a=study["test/test"].prevalence_prior  # type: ignore
-            == 1.0
+            == 1.0,
         )
 
         # Out of bounds numeric
@@ -263,7 +267,7 @@ class TestConfig:
 
         assert np.all(
             a=study["test/test"].prevalence_prior  # type: ignore
-            == 1.0
+            == 1.0,
         )
 
         # Needs reshaping
@@ -278,7 +282,7 @@ class TestConfig:
 
         assert np.all(
             a=study["test/test"].prevalence_prior  # type: ignore
-            == 1.0
+            == 1.0,
         )
 
         # Malformed - too many columns
@@ -322,7 +326,7 @@ class TestConfig:
                 prevalence_prior=[
                     [
                         1.0,
-                    ]
+                    ],
                 ],
                 confusion_prior=0,
             )
@@ -411,7 +415,7 @@ class TestConfig:
         )
 
         assert np.all(
-            study["test/test"].confusion_prior == 1.0  # type: ignore
+            study["test/test"].confusion_prior == 1.0,  # type: ignore
         )
 
         # Float
@@ -425,7 +429,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study["test/test"].confusion_prior == 1.0  # type: ignore
+            a=study["test/test"].confusion_prior == 1.0,  # type: ignore
         )
 
         # Out of bounds numeric
@@ -454,7 +458,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study["test/test"].confusion_prior == 1.0  # type: ignore
+            a=study["test/test"].confusion_prior == 1.0,  # type: ignore
         )
 
         # Needs reshaping
@@ -468,7 +472,7 @@ class TestConfig:
         )
 
         assert np.all(
-            a=study["test/test"].confusion_prior == 1.0  # type: ignore
+            a=study["test/test"].confusion_prior == 1.0,  # type: ignore
         )
 
         # Malformed - too many columns
