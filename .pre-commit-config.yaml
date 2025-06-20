@@ -11,6 +11,11 @@ repos:
     -   id: check-added-large-files
     -   id: check-ast
     -   id: check-toml
+    -   id: check-case-conflict
+    -   id: check-illegal-windows-names
+    -   id: check-merge-conflict
+    -   id: name-tests-test
+        args: ["--pytest-test-first"]
 -   repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
     rev: 0.7.3
@@ -18,77 +23,3 @@ repos:
       - id: uv-lock
       - id: uv-export
         args: ["--no-dev", "--frozen", "--format=requirements.txt"]
-#-   repo: https://github.com/astral-sh/ruff-pre-commit
-#    # Ruff version.
-#    rev: v0.11.8
-#    hooks:
-#    # Run the linter.
-#    -   id: ruff
-#        types_or: [ python, pyi ]
-#    # Run the formatter.
-#    -   id: ruff-format
-#        types_or: [ python, pyi ]
-#-   repo: https://github.com/RobertCraigie/pyright-python
-#    rev: v1.1.400
-#    hooks:
-#    - id: pyright
--   repo: local
-    hooks:
-    -   id: test_config
-        name: test_config
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_config.py
-    -   id: test_extension
-        name: test_extension
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_extension.py
-    -   id: test_io
-        name: test_io
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_io.py
-    -   id: test_metric_equivalence
-        name: test_metric_equivalence
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_metric_equivalence.py
-    -   id: test_notebooks
-        name: test_notebooks
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_notebooks.py
-    -   id: test_rng
-        name: test_rng
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_rng.py
-    -   id: test_study
-        name: test_study
-        language: system
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev pytest tests/test_study.py
--   repo: local
-    hooks:
-    # TODO: make this dynamic
-    # i.e. run only when the python files are newer than the documentation
-    #-   id: update_documentation
-    #    name: update_documentation
-    #    language: python
-    #    types: [python]
-    #    pass_filenames: false
-    #    entry: uv run python mkdocs.py
-    -   id: mkdocs
-        name: mkdocs
-        language: python
-        types: [python]
-        pass_filenames: false
-        entry: uv run --dev mkdocs build

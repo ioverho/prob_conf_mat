@@ -6,8 +6,6 @@
 </picture>
 <div style="text-align: center;" align="center">
 
-# Probabilistic Confusion Matrices
-
 <a href="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml" >
  <img src="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml/badge.svg"/ alt="Tests status">
 </a>
@@ -15,6 +13,8 @@
 <a href="https://codecov.io/github/ioverho/prob_conf_mat" >
  <img src="https://codecov.io/github/ioverho/prob_conf_mat/graph/badge.svg?token=EU85JBF8M2"/ alt="Codecov report">
 </a>
+
+# Probabilistic Confusion Matrices
 
 </div>
 </div>

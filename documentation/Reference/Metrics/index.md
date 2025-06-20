@@ -45,16 +45,16 @@ Only numeric (float, int) or string arguments are accepted. The strings "None", 
 
 The following lists all implemented metrics, by alias
 
-| Alias                              | Metric                                                                                                        | Multiclass   | sklearn                 |
-|------------------------------------|---------------------------------------------------------------------------------------------------------------|--------------|-------------------------|
+| Alias                              | Metric                                                                                                       | Multiclass   | sklearn                 |
+|------------------------------------|--------------------------------------------------------------------------------------------------------------|--------------|-------------------------|
 | 'acc'                              | [`Accuracy`](Metrics.md#prob_conf_mat.metrics._metrics.Accuracy)                                             | True         | accuracy_score          |
 | 'accuracy'                         | [`Accuracy`](Metrics.md#prob_conf_mat.metrics._metrics.Accuracy)                                             | True         | accuracy_score          |
 | 'ba'                               | [`BalancedAccuracy`](Metrics.md#prob_conf_mat.metrics._metrics.BalancedAccuracy)                             | True         | balanced_accuracy_score |
 | 'balanced_accuracy'                | [`BalancedAccuracy`](Metrics.md#prob_conf_mat.metrics._metrics.BalancedAccuracy)                             | True         | balanced_accuracy_score |
-| 'bookmaker_informedness'           | [`Informedness`](Metrics.md#prob_conf_matmetrics._metrics.Informedness)                                     | False        |                         |
-| 'cohen_kappa'                      | [`CohensKappa`](Metrics.md#prob_conf_matmetrics._metrics.CohensKappa)                                       | True         | cohen_kappa_score       |
+| 'bookmaker_informedness'           | [`Informedness`](Metrics.md#prob_conf_mat.metrics._metrics.Informedness)                                     | False        |                         |
+| 'cohen_kappa'                      | [`CohensKappa`](Metrics.md#prob_conf_mat.metrics._metrics.CohensKappa)                                       | True         | cohen_kappa_score       |
 | 'critical_success_index'           | [`JaccardIndex`](Metrics.md#prob_conf_mat.metrics._metrics.JaccardIndex)                                     | False        | jaccard_score           |
-| 'delta_p'                          | [`Markedness`](Metrics.md#prob_conf_matmetrics._metrics.Markedness)                                         | False        |                         |
+| 'delta_p'                          | [`Markedness`](Metrics.md#prob_conf_mat.metrics._metrics.Markedness)                                         | False        |                         |
 | 'diag_mass'                        | [`DiagMass`](Metrics.md#prob_conf_mat.metrics._metrics.DiagMass)                                             | False        |                         |
 | 'diagnostic_odds_ratio'            | [`DiagnosticOddsRatio`](Metrics.md#prob_conf_mat.metrics._metrics.DiagnosticOddsRatio)                       | False        |                         |
 | 'dor'                              | [`DiagnosticOddsRatio`](Metrics.md#prob_conf_mat.metrics._metrics.DiagnosticOddsRatio)                       | False        |                         |
@@ -77,7 +77,7 @@ The following lists all implemented metrics, by alias
 | 'kappa'                            | [`CohensKappa`](Metrics.md#prob_conf_mat.metrics._metrics.CohensKappa)                                       | True         | cohen_kappa_score       |
 | 'ldor'                             | [`LogDiagnosticOddsRatio`](Metrics.md#prob_conf_mat.metrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
 | 'lnlr'                             | [`LogNegativeLikelihoodRatio`](Metrics.md#prob_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio)         | False        | class_likelihood_ratios |
-| 'log_diagnostic_odds_ratio'        | [`LogDiagnosticOddsRatio`](Metrics.md#prob_conf_matmetrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
+| 'log_diagnostic_odds_ratio'        | [`LogDiagnosticOddsRatio`](Metrics.md#prob_conf_mat.metrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
 | 'log_dor'                          | [`LogDiagnosticOddsRatio`](Metrics.md#prob_conf_mat.metrics._metrics.LogDiagnosticOddsRatio)                 | False        |                         |
 | 'log_negative_likelihood_ratio'    | [`LogNegativeLikelihoodRatio`](Metrics.md#prob_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio)         | False        | class_likelihood_ratios |
 | 'log_nlr'                          | [`LogNegativeLikelihoodRatio`](Metrics.md#prob_conf_mat.metrics._metrics.LogNegativeLikelihoodRatio)         | False        | class_likelihood_ratios |
@@ -102,7 +102,10 @@ The following lists all implemented metrics, by alias
 | 'positive_predictive_value'        | [`PositivePredictiveValue`](Metrics.md#prob_conf_mat.metrics._metrics.PositivePredictiveValue)               | False        |                         |
 | 'ppv'                              | [`PositivePredictiveValue`](Metrics.md#prob_conf_mat.metrics._metrics.PositivePredictiveValue)               | False        |                         |
 | 'precision'                        | [`PositivePredictiveValue`](Metrics.md#prob_conf_mat.metrics._metrics.PositivePredictiveValue)               | False        |                         |
+| 'prev_thresh'                      | [`PrevalenceThreshold`](Metrics.md#prob_conf_mat.metrics._metrics.PrevalenceThreshold)                       | False        |                         |
 | 'prevalence'                       | [`Prevalence`](Metrics.md#prob_conf_mat.metrics._metrics.Prevalence)                                         | False        |                         |
+| 'prevalence_threshold'             | [`PrevalenceThreshold`](Metrics.md#prob_conf_mat.metrics._metrics.PrevalenceThreshold)                       | False        |                         |
+| 'pt'                               | [`PrevalenceThreshold`](Metrics.md#prob_conf_mat.metrics._metrics.PrevalenceThreshold)                       | False        |                         |
 | 'recall'                           | [`TruePositiveRate`](Metrics.md#prob_conf_mat.metrics._metrics.TruePositiveRate)                             | False        |                         |
 | 'selectivity'                      | [`TrueNegativeRate`](Metrics.md#prob_conf_mat.metrics._metrics.TrueNegativeRate)                             | False        |                         |
 | 'sensitivity'                      | [`TruePositiveRate`](Metrics.md#prob_conf_mat.metrics._metrics.TruePositiveRate)                             | False        |                         |
@@ -119,8 +122,8 @@ The following lists all implemented metrics, by alias
 
 The following lists all implemented metric averaging methods, by alias
 
-| Alias              | Metric                                                                                     | sklearn   |
-|--------------------|--------------------------------------------------------------------------------------------|-----------|
+| Alias              | Metric                                                                                    | sklearn   |
+|--------------------|-------------------------------------------------------------------------------------------|-----------|
 | 'binary'           | [`SelectPositiveClass`](Averaging.md#prob_conf_mat.metrics.averaging.SelectPositiveClass) | binary    |
 | 'geom'             | [`GeometricMean`](Averaging.md#prob_conf_mat.metrics.averaging.GeometricMean)             |           |
 | 'geometric'        | [`GeometricMean`](Averaging.md#prob_conf_mat.metrics.averaging.GeometricMean)             |           |

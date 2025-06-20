@@ -549,3 +549,23 @@
                 - sklearn_equivalent
         show_labels: false
         group_by_category: false
+
+::: prob_conf_mat.metrics._metrics.PrevalenceThreshold
+    options:
+        heading_level: 3
+        show_root_heading: true
+        show_root_toc_entry: true
+        show_category_heading: false
+        show_symbol_type_toc: true
+        summary:
+                attributes: false
+                functions: false
+                modules: false
+        members:
+                - aliases
+                - bounds
+                - dependencies
+                - is_multiclass
+                - sklearn_equivalent
+        show_labels: false
+        group_by_category: false
