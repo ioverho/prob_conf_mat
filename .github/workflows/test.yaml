@@ -1,0 +1,56 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/**'
+      - 'pyproject.toml'
+      - 'src/**'
+      - 'tests/**'
+      - '!tests/data/**'
+      - '!tests/logs/**'
+      - '!tests/profile/**'
+      - 'documentation/Getting Started/**'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          # Install a specific version of uv.
+          version: "0.7.13"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      - name: Run tests
+        run: uv run --dev coverage run -m pytest
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
+
+      - name: Minimize uv cache
+        run: uv cache prune --ci
