@@ -33,6 +33,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -53,6 +55,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          slug: ioverho/prob_conf_mat
 
       - name: Minimize uv cache
         run: uv cache prune --ci
