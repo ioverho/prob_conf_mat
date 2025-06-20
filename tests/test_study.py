@@ -53,6 +53,12 @@ class TestStudy:
         ):
             study["foo/bar/baz"]
 
+        # Test unknown experiment group
+        with pytest.raises(
+            KeyError,
+        ):
+            study["foo/bar"]
+
     def test_init(self):
         # First experiment, then metric
         study = Study(seed=0, num_samples=10000, ci_probability=0.95)
@@ -131,3 +137,74 @@ class TestStudy:
                 "acc": {"aggregation": "fe_gaussian"},
             },
         )
+
+    def test_metric_label_validation(self):
+        study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        study.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[1, 0], [0, 1]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        study.add_metric(metric="acc", aggregation="normal")
+        study.add_metric(metric="f1", aggregation="normal")
+
+        # Test valid multiclass label
+        study._validate_metric_class_label_combination(
+            metric="acc",
+            class_label=0,
+        )
+
+        study._validate_metric_class_label_combination(
+            metric="acc",
+            class_label=None,
+        )
+
+        # Test accessing invalid class
+        with pytest.warns(match="Metric is multiclass, ignoring class label."):
+            study._validate_metric_class_label_combination(
+                metric="acc",
+                class_label=1,
+            )
+
+        # Test valid binary label
+        study._validate_metric_class_label_combination(
+            metric="f1",
+            class_label=0,
+        )
+
+        study._validate_metric_class_label_combination(
+            metric="f1",
+            class_label=1,
+        )
+
+        # Test accessing invalid class
+        with pytest.raises(
+            ValueError,
+            match="is not multiclass. You must provide a class label.",
+        ):
+            study._validate_metric_class_label_combination(
+                metric="f1",
+                class_label=None,
+            )
+
+        with pytest.raises(ValueError, match="Class label must be in range"):
+            study._validate_metric_class_label_combination(
+                metric="f1",
+                class_label=-1,
+            )
+
+        with pytest.raises(ValueError, match="Class label must be in range"):
+            study._validate_metric_class_label_combination(
+                metric="f1",
+                class_label=3,
+            )
+
+        # Test unknown metric
+        with pytest.raises(KeyError, match="Could not find metric"):
+            study._validate_metric_class_label_combination(
+                metric="foobarbaz",
+                class_label=None,
+            )

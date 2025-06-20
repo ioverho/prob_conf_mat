@@ -46,10 +46,38 @@ def study() -> pcm.Study:
     return study
 
 
-class TestBasicExample:
+class TestReportingMethods:
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
-    def test_aggregation_reporting(self, study, metric):
-        study.report_aggregated_metric_summaries(metric="f1@macro", class_label=0)
+    def test_plot_metric_summaries(self, study, metric):
+        study.plot_metric_summaries(
+            metric=metric,
+            class_label=0,
+        )
+
+    @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
+    def test_report_random_metric_summaries(self, study, metric):
+        study.report_random_metric_summaries(
+            metric=metric,
+            class_label=0,
+        )
+
+    @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
+    def test_report_aggregated_metric_summaries(self, study, metric):
+        study.report_aggregated_metric_summaries(metric=metric, class_label=0)
+
+    @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
+    def test_plot_experiment_aggregation(self, study, metric):
+        study.plot_experiment_aggregation(
+            metric=metric,
+            class_label=0,
+            experiment_group="mlp",
+        )
+
+        study.plot_experiment_aggregation(
+            metric=metric,
+            class_label=0,
+            experiment_group="svm",
+        )
 
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
     def test_forest_plot(self, study, metric):
@@ -57,7 +85,6 @@ class TestBasicExample:
 
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
     def test_pairwise_comparison(self, study, metric):
-        # Compare the aggregated F1 macro scores
         study.report_pairwise_comparison(
             metric=metric,
             class_label=0,
@@ -68,11 +95,41 @@ class TestBasicExample:
 
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
     def test_pairwise_comparison_plot(self, study, metric):
-        # Compare the aggregated F1 macro scores
         study.plot_pairwise_comparison(
             metric=metric,
             class_label=0,
             experiment_a="mlp/aggregated",
             experiment_b="svm/aggregated",
             min_sig_diff=0.005,
+        )
+
+        study.plot_pairwise_comparison(
+            metric=metric,
+            class_label=0,
+            method="histogram",
+            experiment_a="mlp/aggregated",
+            experiment_b="svm/aggregated",
+            min_sig_diff=0.005,
+        )
+
+        study.plot_pairwise_comparison(
+            metric=metric,
+            class_label=0,
+            experiment_a="mlp/fold_0",
+            experiment_b="svm/fold_0",
+            min_sig_diff=0.005,
+        )
+
+    @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
+    def test_report_pairwise_comparison_to_random(self, study, metric):
+        study.report_pairwise_comparison_to_random(
+            metric=metric,
+            class_label=0,
+        )
+
+    @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
+    def test_report_listwise_comparison(self, study, metric):
+        study.report_listwise_comparison(
+            metric=metric,
+            class_label=0,
         )
