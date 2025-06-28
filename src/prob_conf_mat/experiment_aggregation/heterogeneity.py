@@ -14,15 +14,15 @@ import scipy
 from prob_conf_mat.utils.formatting import fmt
 
 
-def heterogeneity_DL(
+def heterogeneity_dl(
     means: jtyping.Float[np.ndarray, " num_experiments"],
     variances: jtyping.Float[np.ndarray, " num_experiments"],
 ) -> float:
     """Compute the DerSimonian-Laird estimate of between-experiment heterogeneity.
 
     Args:
-        means (jtyping.Float[np.ndarray, " num_experiments"]): the experiment means
-        variances (jtyping.Float[np.ndarray, " num_experiments"]): the experiment variances
+        means (Float[np.ndarray, "num_experiments"]): the experiment means
+        variances (Float[np.ndarray, "num_experiments"]): the experiment variances
 
     Returns:
         float: estimate of the between-experiment heterogeneity
@@ -41,32 +41,41 @@ def heterogeneity_DL(
     return tau2
 
 
-def heterogeneity_PM(
+def heterogeneity_pm(
     means: jtyping.Float[np.ndarray, " num_experiments"],
     variances: jtyping.Float[np.ndarray, " num_experiments"],
     init_tau2: float = 0.0,
     atol: float = 1e-5,
     maxiter: int = 100,
+    *,
     use_viechtbauer_correction: bool = False,
 ) -> float:
     """Compute the Paule-Mandel estimate of between-experiment heterogeneity.
 
     Based on the `_fit_tau_iterative` function from `stats_models`.
 
-    Original implementation is based on Appendix A of
-        'Random-effects model for meta-analysis of clinical trials: An update' (DerSimonian and Kacker, 2007).
+    Original implementation is based on Appendix A of [1]
 
     We make two modifications:
-        1. instead of stopping iteration if F(tau_2) < 0, we back-off to the midpoint between the current and previous estimate
-        2. optionally, we apply the Viechtbauer correction to the root. Instead of converging to the mean, converge to the median
+        1. instead of stopping iteration if F(tau_2) < 0, we back-off to the midpoint
+            between the current and previous estimate
+        2. optionally, we apply the Viechtbauer correction to the root. Instead of
+            converging to the mean, converge to the median
+
+    References: Read More:
+        1. DerSimonian, R., & Kacker, R. (2007). Random-effects model for meta-analysis
+            of clinical trials: an update. Contemporary clinical trials, 28(2), 105-114.
+
 
     Args:
         means (Float[np.ndarray, " num_experiments"]): the experiment means
         variances (Float[np.ndarray, " num_experiments"]): the experiment variances
         init_tau2 (float, optional): the inital tau2 estimate. Defaults to 0.0.
         atol (float, optional): when to assume convergence. Defaults to 1e-5.
-        maxiter (int, optional): the maximum number of iterations needed. Defaults to 50.
-        use_viechtbauer_correction (bool, optional): whether to use the Viechtbauer correction. Very new. Defaults to False.
+        maxiter (int, optional): the maximum number of iterations needed.
+            Defaults to 50.
+        use_viechtbauer_correction (bool, optional): whether to use the Viechtbauer
+            correction. Very new. Defaults to False.
 
     Returns:
         float: estimate of the between-experiment heterogeneity
@@ -83,16 +92,16 @@ def heterogeneity_PM(
 
     while patience > 0:
         # Estimate RE summary stat
-        w_PM = 1 / (variances + tau2)
-        mu_PM = np.sum(w_PM * means) / np.sum(w_PM)
+        w_pm = 1 / (variances + tau2)
+        mu_pm = np.sum(w_pm * means) / np.sum(w_pm)
 
         # Compute generalised Q values
         # i.e. the residual squares
-        q_PM = np.sum(w_PM * np.power(means - mu_PM, 2))
+        q_pm = np.sum(w_pm * np.power(means - mu_pm, 2))
 
         # Check if residual has converged
-        F_tau2 = q_PM - root
-        if F_tau2 < 0:
+        f_tau2 = q_pm - root
+        if f_tau2 < 0:
             # If negative, reduce tau2 estimate
             # and try again
             # This is different from other implementations
@@ -103,15 +112,15 @@ def heterogeneity_PM(
             continue
             # break
 
-        if np.allclose(F_tau2, 0.0, atol=atol):
+        if np.allclose(f_tau2, 0.0, atol=atol):
             # Check convergence
             break
 
         # Otherwise, update tau2
-        delta_denom = np.sum(np.power(w_PM, 2) * np.power(means - mu_PM, 2))
+        delta_denom = np.sum(np.power(w_pm, 2) * np.power(means - mu_pm, 2))
 
         prev_tau2 = tau2
-        tau2 += F_tau2 / delta_denom
+        tau2 += f_tau2 / delta_denom
 
         patience -= 1
 
@@ -123,18 +132,33 @@ def heterogeneity_PM(
 
 @dataclass(frozen=True)
 class HeterogeneityResult:
+    """Container for the output of a heterogeneity computation."""
+
     i2: float
     within_experiment_variance: float
     between_experiment_variance: float
     i2_interpretation: str
 
-    def template_sentence(self, precision: int = 4):
-        template_sentence = ""
+    def template_sentence(self, precision: int = 4) -> str:
+        """Fills a template string with some standard summary statistics."""
+        within_experiment_variance = fmt(
+            self.within_experiment_variance,
+            precision=precision,
+            mode="f",
+        )
 
-        template_sentence += f"I2 is {fmt(self.i2, precision=precision, mode='%')}"
-        template_sentence += f" (variance within={fmt(self.within_experiment_variance, precision=precision, mode='f')}, "
-        template_sentence += f"between={fmt(self.between_experiment_variance, precision=precision, mode='f')})."
-        template_sentence += f"\nThis can be considered '{self.i2_interpretation}'."
+        between_experiment_variance = fmt(
+            self.between_experiment_variance,
+            precision=precision,
+            mode="f",
+        )
+
+        template_sentence = (
+            f"I2 is {fmt(self.i2, precision=precision, mode='%')}"
+            f" (variance within={within_experiment_variance}, "
+            f"between={between_experiment_variance})."
+            f"\nThis can be considered '{self.i2_interpretation}'."
+        )
 
         return template_sentence
 
@@ -142,15 +166,21 @@ class HeterogeneityResult:
 def estimate_i2(
     individual_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
 ) -> HeterogeneityResult:
-    """Estimates a generalised I^2 metric, as suggested by Bowden et al. [1], using a Paule-Mandel tau2 estimator.
+    """Estimates a generalised I^2 metric, as suggested by Bowden et al. [1].
 
-    Measures the amopunt of variance attributable to within-experiment variation vs. between-experiment variation.
+    It measures the amount of variance attributable to within-experiment variance vs.
+    between-experiment variance. The between experiment variance is estimated using a
+    Paule-Mandel tau2 estimator.
 
-    References:
-    [1] Bowden, J., Tierney, J. F., Copas, A. J., & Burdett, S. (2011). Quantifying, displaying and accounting for heterogeneity in the meta-analysis of RCTs using standard and generalised Qstatistics. BMC medical research methodology, 11(1), 1-12.
+    References: Read more:
+        1. Bowden, J., Tierney, J. F., Copas, A. J., & Burdett, S. (2011). Quantifying,
+            displaying and accounting for heterogeneity in the meta-analysis of RCTs
+            using standard and generalised Qstatistics. BMC medical research
+            methodology, 11(1), 1-12.
 
     Args:
-        individual_samples (Float[np.ndarray, " num_samples num_experiments"])
+        individual_samples (Float[np.ndarray, "num_samples num_experiments"]): the
+            samples from individual experiments
 
     Returns:
         float: the I^2 estimate
@@ -173,8 +203,8 @@ def estimate_i2(
     pooled_var = np.mean(variances)
 
     # Estimate of inter-experiment variance
-    tau2 = heterogeneity_DL(means, variances)
-    tau2 = heterogeneity_PM(
+    tau2 = heterogeneity_dl(means, variances)
+    tau2 = heterogeneity_pm(
         means,
         variances,
         init_tau2=tau2,
@@ -196,19 +226,20 @@ def estimate_i2(
 
 def interpret_i2(
     i2_score: float,
-) -> (
-    Literal["insignificant heterogeneity"]
-    | Literal["borderline moderate heterogeneity"]
-    | Literal["moderate heterogeneity"]
-    | Literal["borderline substantial heterogeneity"]
-    | Literal["borderline considerable heterogeneity"]
-    | Literal["considerable heterogeneity"]
-    | Literal[" heterogeneity"]
-):
-    """'Interprets I^2 values using the guideline prescribed by the Cochrane Handbook [1]
+) -> Literal[
+    "insignificant heterogeneity",
+    "borderline moderate heterogeneity",
+    "moderate heterogeneity",
+    "borderline substantial heterogeneity",
+    "borderline considerable heterogeneity",
+    "considerable heterogeneity",
+    "considerable heterogeneity",
+]:
+    """Interprets I^2 values using prescribed guidelines [1].
 
-    References:
-    [1] Higgins, J. P., & Green, S. (Eds.). (2008). Cochrane handbook for systematic reviews of interventions.
+    References: Read More:
+        1. Higgins, J. P., & Green, S. (Eds.). (2008). Cochrane handbook for
+            systematic reviews of interventions.
 
     Args:
         i2_score (float): the I2 estimate

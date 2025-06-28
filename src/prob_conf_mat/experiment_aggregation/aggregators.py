@@ -13,8 +13,8 @@ import scipy.stats
 
 from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator
 from prob_conf_mat.experiment_aggregation.heterogeneity import (
-    heterogeneity_DL,
-    heterogeneity_PM,
+    heterogeneity_dl,
+    heterogeneity_pm,
 )
 from prob_conf_mat.stats import truncated_sample
 
@@ -42,7 +42,7 @@ class SingletonAggregator(ExperimentAggregator):
     full_name = "Singleton experiment aggregation"
     aliases = ["singleton", "identity"]
 
-    def aggregate(
+    def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
@@ -101,7 +101,7 @@ class BetaAggregator(ExperimentAggregator):
         # MLE is more efficient than MoME, and difference is small
         self.estimation_method = estimation_method
 
-    def aggregate(
+    def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
@@ -205,7 +205,7 @@ class GammaAggregator(ExperimentAggregator):
         2. [Hill, T., & Miller, J. (2011). How to combine independent data sets for the same quantity.](https://arxiv.org/abs/1005.4978)
         3. ['Gamma distribution' on Wikipedia](https://en.wikipedia.org/wiki/Gamma_distribution)
 
-    """
+    """  # noqa: E501
 
     full_name = "Gamma conflated experiment aggregator"
     aliases = ["gamma", "gamma_conflation"]
@@ -215,7 +215,7 @@ class GammaAggregator(ExperimentAggregator):
 
         self.shifted = shifted
 
-    def aggregate(
+    def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
@@ -307,7 +307,7 @@ class FEGaussianAggregator(ExperimentAggregator):
     full_name = "Fixed-effect Gaussian meta-analytical experiment aggregator"
     aliases = ["fe", "fixed_effect", "fe_gaussian", "gaussian", "normal", "fe_normal"]
 
-    def aggregate(
+    def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
@@ -389,7 +389,7 @@ class REGaussianAggregator(ExperimentAggregator):
         hksj_sampling_distribution (bool): whether to use the Hartung-Knapp-Sidik-Jonkman corrected
             $t$-distribition as the aggregate sampling distribution.
             Defaults to False.
-    """
+    """  # noqa: E501
 
     full_name = "Random-effects Gaussian meta-analytical experiment aggregator"
     aliases = ["re", "random_effect", "re_gaussian", "re_normal"]
@@ -405,7 +405,7 @@ class REGaussianAggregator(ExperimentAggregator):
         self.paule_mandel_heterogeneity = paule_mandel_heterogeneity
         self.hksj_sampling_distribution = hksj_sampling_distribution
 
-    def aggregate(
+    def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
@@ -417,9 +417,9 @@ class REGaussianAggregator(ExperimentAggregator):
         variances = np.var(experiment_samples, axis=0, ddof=1)
 
         # Estimate the between-experiment variance
-        tau2 = heterogeneity_DL(means, variances)
+        tau2 = heterogeneity_dl(means, variances)
         if self.paule_mandel_heterogeneity:
-            tau2 = heterogeneity_PM(
+            tau2 = heterogeneity_pm(
                 means,
                 variances,
                 init_tau2=tau2,
@@ -506,7 +506,7 @@ class HistogramAggregator(ExperimentAggregator):
         # This is super arbitrary and should probably be tuned
         self.pseudo_count_weight = pseudo_count_weight
 
-    def aggregate(
+    def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],

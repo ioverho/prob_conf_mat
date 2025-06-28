@@ -23,6 +23,17 @@ Optimized sampling of batched samples from independent Dirichlet distributions.
 
 These functions tend to be a performance bottleneck, and should be as optimized as much as possible.
 
+::: prob_conf_mat.stats.dirichlet_prior
+    options:
+        heading_level: 3
+        show_root_heading: false
+        show_root_toc_entry: false
+        group_by_category: false
+        show_signature: true
+        show_signature_annotations: true
+        separate_signature: true
+        line_length: 80
+
 ::: prob_conf_mat.stats.dirichlet_distribution
     options:
         heading_level: 3

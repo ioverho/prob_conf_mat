@@ -19,13 +19,13 @@ copyright: Copyright &copy; 2025 Ivo Verhoeven
 nav:
   - index.md
   - Getting Started:
-      - Getting Started/index.md
       - Getting Started/01_estimating_uncertainty.ipynb
       - Getting Started/02_comparing_experiments.ipynb
       - Getting Started/03_aggregating_experiments.ipynb
       - Getting Started/04_interfacing_with_the_filesystem.ipynb
   - How-To:
       - How To Guides/index.md
+      - How To Guides/configuration.md
       - How To Guides/extending_the_library.md
       #- How To Guides/configuration.md
       #- How To Guides/metric_syntax.md
@@ -46,12 +46,12 @@ nav:
   - Explanation:
       - "Explanation/index.md"
       - "Explanation/generating_confusion_matrices.md"
+      - "Explanation/experiment_aggregation.md"
 
 theme:
   name: material
   language: en
   # Project logo, top-left
-  # TODO: get a nice logo
   logo: _static/logo_rectangle.svg
   favicon: _static/logo_square.svg
   # GitHub logo, top-right

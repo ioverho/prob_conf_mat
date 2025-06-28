@@ -68,9 +68,9 @@ The development dependencies should automatically install into the `.venv` folde
 ## Quick Start
 
 ```python
-import prob_conf_mat as pcm
+from prob_conf_mat import Study
 
-study = pcm.Study(
+study = Study(
     seed=0,
     num_samples=10000,
     ci_probability=0.95,

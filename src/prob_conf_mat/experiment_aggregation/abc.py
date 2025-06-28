@@ -73,6 +73,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
     @property
     def name(self) -> str:
+        """The name of the experiment aggregation method."""
         init_name = self._init_params.get("aggregation", None)
         if init_name is not None:
             return init_name
@@ -84,6 +85,17 @@ class ExperimentAggregator(metaclass=ABCMeta):
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_experiments"]:
+        """Aggregates samples from many experiments.
+
+        Args:
+            experiment_samples (Float[nd.array, "num_samples num_experiments"]): the samples from
+                the individual experiments
+            bounds (tuple[float, float]): the maximum and minimum possible value that the samples
+                might take
+
+        Returns:
+            Float[nd.array, "num_samples num_experiments"]: samples from the aggregate distribution
+        """
         raise NotImplementedError
 
     def _mappable_aggregate(self, kwargs: dict):
@@ -95,6 +107,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         metric: MetricLike,
         experiment_results: typing.Annotated[list[ExperimentResult], "num_experiments"],
     ) -> ExperimentAggregationResult:
+        """Aggregates a series of experiment results from a specific ExperimentGroup and Metric."""
         # Stack the experiment values
         stacked_experiment_results: jtyping.Float[
             np.ndarray,
@@ -145,21 +158,23 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
         return result
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # noqa: D105
         return f"ExperimentAggregator({self.name})"
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # noqa: D105
         return f"ExperimentAggregator({self.name})"
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: object) -> bool:  # noqa: D105
         return isinstance(other, self.__class__) and self.name == other.name
 
-    def __hash__(self):
+    def __hash__(self):  # noqa: D105
         return hash(self.name)
 
 
 @dataclass(frozen=True)
 class ExperimentAggregationResult:
+    """Container class for results from an experiment aggregation method."""
+
     experiment_group: ExperimentGroup
     aggregator: type[ExperimentAggregator]
     metric: MetricLike
@@ -167,11 +182,18 @@ class ExperimentAggregationResult:
     values: jtyping.Float[np.ndarray, " num_samples #num_classes"]
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """The name of the experiment group."""
         return self.experiment_group.name
 
-    def __repr__(self):
-        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}, aggregator={self.aggregator})"
+    def __repr__(self) -> str:
+        return (
+            f"ExperimentAggregationResult(experiment_group={self.experiment_group}, "
+            f"metric={self.metric}, aggregator={self.aggregator})"
+        )
 
-    def __str__(self):
-        return f"ExperimentAggregationResult(experiment_group={self.experiment_group}, metric={self.metric}, aggregator={self.aggregator})"
+    def __str__(self) -> str:
+        return (
+            f"ExperimentAggregationResult(experiment_group={self.experiment_group}, "
+            f"metric={self.metric}, aggregator={self.aggregator})"
+        )

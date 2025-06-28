@@ -72,6 +72,7 @@ ignore = [
     "W505",   # Docstring too long
     "D100",   # Undocumented public module
     "D104",   # Undocumented public package
+    "D105",   # Undocumented magic method
     "D107",   # Undocumented __init__ method
     "ICN001", # Matplotlib should be imported as MPL
 ]
