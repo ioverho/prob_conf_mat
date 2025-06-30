@@ -19,7 +19,9 @@ on:
       - 'mkdocs.yaml'
 
 permissions:
-  contents: read
+  contents: write
+  id-token: write
+  pages: write
 
 jobs:
   documentation:
