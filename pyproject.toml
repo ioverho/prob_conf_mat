@@ -1,15 +1,31 @@
 [project]
 name = "prob-conf-mat"
-version = "0.1.0"
-description = ""
+version = "0.1.0.1"
 authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
-license = { file = "LICENSE" }
+description = "Confusion matrices with uncertainty quantification, experiment aggregation and significance testing."
 readme = "README.md"
-# TODO: check out the other available classifiers
-classifiers = ["Programming Language :: Python :: 3"]
-# TODO: add some keywords
-
 requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Typing :: Typed",
+]
+license = { file = "LICENSE" }
+keywords = [
+    "confusion matrices",
+    "classification",
+    "confusion matrix",
+    "statistics",
+    "probabilistic",
+]
+
+
 dependencies = [
     "jaxtyping>=0.3",
     "numpy>=2.2",
@@ -20,7 +36,10 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/ioverho/prob_conf_mat"
+#Homepage = "https://github.com/ioverho/prob_conf_mat"
+#Documentation = "https://github.com/ioverho/prob_conf_mat"
+Repository = "https://github.com/ioverho/prob_conf_mat"
+Issues = "https://github.com/ioverho/prob_conf_mat/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -51,6 +70,14 @@ dev = [
     "toml>=0.10.2",
     "tqdm>=4.67.1",
 ]
+
+# Building
+# UV
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 # Linting
 # Ruff

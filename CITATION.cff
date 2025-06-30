@@ -1,0 +1,26 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: prob_conf_mat
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ivo
+    family-names: Verhoeven
+    email: mail@ivoverhoeven.nl
+    affiliation: University of Amsterdam
+    orcid: 'https://orcid.org/0000-0002-5163-210X'
+repository-code: 'https://github.com/ioverho/prob_conf_mat'
+abstract: >-
+  Confusion matrices with uncertainty quantification,
+  experiment aggregation and significance testing.
+keywords:
+  - confusion matrices
+  - classification
+  - confusion matrix
+  - statistics
+  - probabilistic
+license: MIT

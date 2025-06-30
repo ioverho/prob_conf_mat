@@ -205,11 +205,13 @@ class ExperimentGroup:
                 if len(self) > 1:
                     raise ValueError(
                         (
-                            f"Metric '{metric}' does not have an assigned aggregation method, "
-                            f"but experiment group {self} has {len(self)} experiments. "
-                            f"Try adding one using `Study.add_experiment_aggregation`."
+                            f"Metric '{metric.name}' does not have an assigned aggregation method, "
+                            f"but experiment group '{self.name}' has {len(self)} experiments. "
+                            f"Try adding one using "
+                            f"`Study.add_metric(metric={metric.name}, aggregation=...)`."
                         ),
                     )
+
                 # We're allowed to pass the group's RNG, because the singleton aggregator is just
                 # an identity function
                 aggregator = get_experiment_aggregator(
