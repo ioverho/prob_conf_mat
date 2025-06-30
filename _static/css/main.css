@@ -1,0 +1,26 @@
+.md-header {
+    box-shadow: none;
+}
+
+.md-header--shadow {
+    box-shadow: none;
+    transition: none;
+}
+
+#logo_light {
+    display: var(--md-header-logo-light);
+}
+
+#logo_dark {
+    display: var(--md-header-logo-dark);
+}
+
+[data-md-color-scheme="default"] {
+    --md-header-logo-dark: none;
+    --md-header-logo-light: block;
+}
+
+[data-md-color-scheme="slate"] {
+    --md-header-logo-dark: block;
+    --md-header-logo-light: none;
+}
