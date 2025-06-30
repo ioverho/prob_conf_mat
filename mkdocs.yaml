@@ -24,7 +24,6 @@ nav:
       - Getting Started/03_aggregating_experiments.ipynb
       - Getting Started/04_interfacing_with_the_filesystem.ipynb
   - How-To:
-      - How To Guides/index.md
       - How To Guides/configuration.md
       - How To Guides/extending_the_library.md
       #- How To Guides/configuration.md
@@ -44,15 +43,17 @@ nav:
       - Reference/IO.md
       - Reference/Statistics.md
   - Explanation:
-      - "Explanation/index.md"
       - "Explanation/generating_confusion_matrices.md"
       - "Explanation/experiment_aggregation.md"
 
 theme:
   name: material
+  custom_dir: documentation_overrides
   language: en
   # Project logo, top-left
-  logo: _static/logo_rectangle.svg
+  #logo: custom/logo-rectangle
+  logo_light: _static/logo_rectangle_dark_text.svg
+  logo_dark: _static/logo_rectangle_light_text.svg
   favicon: _static/logo_square.svg
   # GitHub logo, top-right
   icon:
@@ -229,20 +230,28 @@ markdown_extensions:
   # Metadata
   # https://t.pxeger.com/mkdocs-material/reference/meta-tags/#metadata
   - meta
+  # Custom icons
+  # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/#additional-icons
+  #- pymdownx.emoji:
+  #    emoji_index: !!python/name:material.extensions.emoji.twemoji
+  #    emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  #    options:
+  #      custom_icons:
+  #        - documentation_overrides/.icons
 
 extra_css:
   - _static/css/main.css
-  #- _static/custom.css
-  - https://unpkg.com/katex@0/dist/katex.min.css
+  #- https://unpkg.com/katex@0/dist/katex.min.css
 
 extra_javascript:
   # MathJax
   # https://squidfunk.github.io/mkdocs-material/reference/math/#mathjax-mkdocsyml
-  #- _static/mathjax.js
-  #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - _static/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
   #- https://polyfill.io/v3/polyfill.min.js?features=es6
   #- https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   #- https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-  - _static/katex.js
-  - https://unpkg.com/katex@0/dist/katex.min.js
-  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js
+  # Katex
+  #- _static/katex.js
+  #- https://unpkg.com/katex@0/dist/katex.min.js
+  #- https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

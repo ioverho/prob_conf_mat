@@ -22,7 +22,9 @@ Type: `int | None`
 
 This is the number of syntehtic confusion matrices to sample for each experiment. A higher value is better, since it reduces the amount of variation between different runs of the same study, but also more computationally expensive. Keep in mind that confusion matrices are square by definition, such that the computational and storage costs scales as,
 
-$\mathcal{O}(\mathtt{num\_samples}\cdot \mathtt{num\_classes}^2)$
+$$
+\mathcal{O}(\mathtt{num\_samples}\cdot \mathtt{num\_classes}^2)
+$$
 
 Defaults to 10000, the minimum recommended value,
 

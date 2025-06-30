@@ -1,19 +1,19 @@
 <div style="text-align: center;" align="center">
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangle.svg">
-  <img alt="Logo" src="documentation/_static/logo_rectangle.svg" width="150px">
+  <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangle_dark_text.svg">
+  <img alt="Logo" src="documentation/_static/logo_rectangle_dark_text.svg" width="150px">
 </picture>
+
 <div style="text-align: center;" align="center">
 
 <a href="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml" >
  <img src="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml/badge.svg"/ alt="Tests status">
 </a>
-
 <a href="https://codecov.io/github/ioverho/prob_conf_mat" >
  <img src="https://codecov.io/github/ioverho/prob_conf_mat/graph/badge.svg?token=EU85JBF8M2"/ alt="Codecov report">
 </a>
-
 <a href="./LICENSE" >
  <img alt="GitHub License" src="https://img.shields.io/github/license/ioverho/prob_conf_mat">
 </a>

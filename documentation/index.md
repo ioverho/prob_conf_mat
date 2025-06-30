@@ -1,14 +1,16 @@
 ---
 hide:
-  - toc
+  #- toc
 ---
 
 <div style="text-align: center;" align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangle.svg">
-  <img alt="Logo" src="documentation/_static/logo_rectangle.svg" width="150px">
-</picture>
+<div style="margin-bottom: 1rem;">
+  <a href="." aria-label="Probabilistic Confusion Matrices" data-md-component="logo" title="Probabilistic Confusion Matrices">
+    <img id="logo_light" src="http://127.0.0.1:8000/ioverho/prob_conf_mat/_static/logo_rectangle_dark_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+    <img id="logo_dark" src="http://127.0.0.1:8000/ioverho/prob_conf_mat/_static/logo_rectangle_light_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+  </a>
+</div>
+
 <div style="text-align: center;" align="center">
 
 <a href="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml" >
@@ -135,7 +137,7 @@ fig = study.plot_metric_summaries(metric="acc")
 ```
 
 <picture>
-  <img alt="Logo" src="documentation/_static/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Logo" src="_static/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
@@ -165,7 +167,7 @@ fig = study.plot_forest_plot(metric="acc")
 ```
 
 <picture>
-  <img alt="Logo" src="documentation/_static/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Logo" src="_static/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
@@ -182,7 +184,7 @@ fig = study.plot_pairwise_comparison(
 ```
 
 <picture>
-  <img alt="Logo" src="documentation/_static/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Logo" src="_static/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
