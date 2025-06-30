@@ -1,3 +1,5 @@
+# Taken from:
+# https://thomasthornton.cloud/2024/05/01/deploying-mkdocs-to-github-pages-with-github-actions/
 name: Documentation
 
 on:

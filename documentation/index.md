@@ -6,8 +6,8 @@ hide:
 <div style="text-align: center;" align="center">
 <div style="margin-bottom: 1rem;">
   <a href="." aria-label="Probabilistic Confusion Matrices" data-md-component="logo" title="Probabilistic Confusion Matrices">
-    <img id="logo_light" src="http://127.0.0.1:8000/ioverho/prob_conf_mat/_static/logo_rectangle_dark_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
-    <img id="logo_dark" src="http://127.0.0.1:8000/ioverho/prob_conf_mat/_static/logo_rectangle_light_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+    <img id="logo_light" src="_static/logo_rectangle_dark_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+    <img id="logo_dark" src="_static/logo_rectangle_light_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
   </a>
 </div>
 
