@@ -63,13 +63,12 @@ def get_metric(syntax_string: str) -> MetricLike:
     Returns:
         callable: a metric class instance
     """  # noqa: E501
-
     # Split on the averaging
     syntax_components = syntax_string.split("@")
 
     if len(syntax_components) > 2:
         raise ValueError(
-            f"Multiple averaging methods found in metric string `{syntax_string}`. Make sure to include only one `@` character"  # noqa: E501
+            f"Multiple averaging methods found in metric string `{syntax_string}`. Make sure to include only one `@` character",  # noqa: E501
         )
 
     # Parse the metric name ====================================================
@@ -85,7 +84,9 @@ def get_metric(syntax_string: str) -> MetricLike:
 
     else:
         raise ValueError(
-            f"Metric alias must be registered. Currently: {metric_name}. Must be one of {set(METRIC_REGISTRY.keys())}"
+            f"Metric alias must be registered. "
+            f"Currently: {metric_name}. "
+            f"Must be one of {set(METRIC_REGISTRY.keys())}",
         )
 
     # Parse and pass the kwargs for the metric function ========================
@@ -98,7 +99,8 @@ def get_metric(syntax_string: str) -> MetricLike:
     unterminated_kwargs = UNTERMINATED_ARGUMENT_REGEX.findall(metric_string)
     if len(unterminated_kwargs) != len(metric_kwargs):
         raise ValueError(
-            f"Found potentially unterminated kwarg in: {metric_string}. Make sure kwargs are written as '+foo=bar'"
+            f"Found potentially unterminated kwarg in: {metric_string}. "
+            "Make sure kwargs are written as '+foo=bar'",
         )
 
     metric_instance = metric_class(**metric_kwargs)
@@ -111,7 +113,7 @@ def get_metric(syntax_string: str) -> MetricLike:
 
         if metric_instance.is_multiclass:
             raise ValueError(
-                "Metric is already multivariate and does not need to be averaged. Please remove the `@` specification"  # noqa: E501
+                "Metric is already multivariate and does not need to be averaged. Please remove the `@` specification",  # noqa: E501
             )
 
         averaging_name = NAME_REGEX.findall(averaging_string)[0]
@@ -120,7 +122,9 @@ def get_metric(syntax_string: str) -> MetricLike:
             averaging_class = AVERAGING_REGISTRY[averaging_name]
         except KeyError:
             raise ValueError(
-                f"Averaging alias must be registered. Currently: {averaging_name}. Must be one of {set(AVERAGING_REGISTRY.keys())}"
+                f"Averaging alias must be registered. "
+                f"Currently: {averaging_name}. "
+                f"Must be one of {set(AVERAGING_REGISTRY.keys())}",
             )
 
         # Parse and pass the kwargs for the metric function ========================
@@ -133,7 +137,8 @@ def get_metric(syntax_string: str) -> MetricLike:
         unterminated_kwargs = UNTERMINATED_ARGUMENT_REGEX.findall(averaging_string)
         if len(unterminated_kwargs) != len(averaging_kwargs):
             raise ValueError(
-                f"Found potentially unterminated kwarg in: {averaging_string}. Make sure kwargs are written as '+foo=bar'"
+                f"Found potentially unterminated kwarg in: {averaging_string}. "
+                "Make sure kwargs are written as '+foo=bar'",
             )
 
         averaging_instance = averaging_class(**averaging_kwargs)
@@ -144,9 +149,8 @@ def get_metric(syntax_string: str) -> MetricLike:
             averaging=averaging_instance,
         )
 
-        composed_metric_instance._instantiation_name = syntax_string # type: ignore
+        composed_metric_instance._instantiation_name = syntax_string  # type: ignore
 
         return composed_metric_instance
 
-    else:
-        return metric_instance
+    return metric_instance

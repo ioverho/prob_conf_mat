@@ -15,16 +15,16 @@ from prob_conf_mat.stats import numpy_batched_harmonic_mean
 # Pretty much all metrics are going to rely on these
 # ==============================================================================
 class DiagMass(Metric):
-    """Computes the mass on the diagonal of the normalized confusion matrix.
+    r"""Computes the mass on the diagonal of the normalized confusion matrix.
 
     It is defined as the rate of true positives to all entries:
 
-    $$TP / N$$
+    $$\mathtt{diag}(\mathbf{CM})=TP / N$$
 
     where $TP$ are the true positives, and $N$ are the total number of predictions.
 
-    This is a metric primarily used as a intermediate value for other metrics, and say relatively little
-    on its own.
+    This is a metric primarily used as a intermediate value for other metrics, and says relatively
+    little on its own.
 
     Not to be confused with the True Positive Rate.
 
@@ -54,11 +54,11 @@ class DiagMass(Metric):
 
 
 class Prevalence(Metric):
-    """Computes the marginal distribution of condition occurence. Also known as the prevalence.
+    r"""Computes the marginal distribution of condition occurence. Also known as the prevalence.
 
     It can be defined as the rate of positives to all predictions:
 
-    $$P / N$$
+    $$\mathtt{Prev}=P / N$$
 
     where $P$ is the count of condition positives, and $N$ are the total number of predictions.
 
@@ -82,11 +82,11 @@ class Prevalence(Metric):
 
 
 class ModelBias(Metric):
-    """Computes the marginal distribution of prediction occurence. Also known as the model bias.
+    r"""Computes the marginal distribution of prediction occurence. Also known as the model bias.
 
     It can be defined as the rate of predicted positives to all predictions:
 
-    $$PP / N$$
+    $$\mathtt{Bias}=PP / N$$
 
     where $PP$ is the count of predicted positives, and $N$ are the total number of predictions.
 
@@ -120,11 +120,11 @@ class ModelBias(Metric):
 # used as intermediate values
 # ==============================================================================
 class TruePositiveRate(Metric):
-    """Computes the True Positive Rate, also known as recall, sensitivity.
+    r"""Computes the True Positive Rate, also known as recall, sensitivity.
 
     It is defined as the ratio of correctly predited positives to all condition positives:
 
-    $$TP / P$$
+    $$\mathtt{TPR}=TP / P$$
 
     where $TP$ are the true positives, and $TN$ are true negatives and $N$ the number of predictions.
 
@@ -164,11 +164,11 @@ class TruePositiveRate(Metric):
 
 
 class FalseNegativeRate(Metric):
-    """Computes the False Negative Rate, also known as the miss-rate.
+    r"""Computes the False Negative Rate, also known as the miss-rate.
 
     It is defined as the ratio of false negatives to condition positives:
 
-    $$FN / (TP + FN)$$
+    $$\mathtt{FNR}=FN / (TP + FN)$$
 
     where $TP$ are the true positives, and $FN$ are the false negatives.
 
@@ -198,11 +198,11 @@ class FalseNegativeRate(Metric):
 
 
 class PositivePredictiveValue(Metric):
-    """Computes the Positive Predictive Value, also known as precision.
+    r"""Computes the Positive Predictive Value, also known as precision.
 
     It is defined as the ratio of true positives to predicted positives:
 
-    $$TP / (TP + FP)$$
+    $$\mathtt{PPV}=TP / (TP + FP)$$
 
     where $TP$ is the count of true positives, and $FP$ the count falsely predicted positives.
 
@@ -239,11 +239,11 @@ class PositivePredictiveValue(Metric):
 
 
 class FalseDiscoveryRate(Metric):
-    """Computes the False Discovery Rate.
+    r"""Computes the False Discovery Rate.
 
     It is defined as the ratio of falsely predicted positives to predicted positives:
 
-    $$FP / (TP + FP)$$
+    $$\mathtt{FDR}=FP / (TP + FP)$$
 
     where $TP$ is the count of true positives, and $FP$ the count of falsely predicted positives.
 
@@ -284,7 +284,7 @@ class FalsePositiveRate(Metric):
 
     It is defined as the ratio of falsely predicted positives to condition negatives:
 
-    $$FP / (TN + FP)$$
+    $$\mathtt{FPR}=FP / (TN + FP)$$
 
     where $TN$ is the count of true negatives, and $FP$ the count of falsely predicted positives.
 
@@ -318,11 +318,11 @@ class FalsePositiveRate(Metric):
 
 
 class TrueNegativeRate(Metric):
-    """Computes the True Negative Rate, i.e. specificity, selectivity.
+    r"""Computes the True Negative Rate, i.e. specificity, selectivity.
 
     It is defined as the ratio of true predicted negatives to condition negatives:
 
-    $$TN / (TN + FP)$$
+    $$\mathtt{TNR}=TN / (TN + FP)$$
 
     where $TN$ is the count of true negatives, and FP the count of falsely predicted positives.
 
@@ -354,11 +354,11 @@ class TrueNegativeRate(Metric):
 
 
 class FalseOmissionRate(Metric):
-    """Computes the False Omission Rate.
+    r"""Computes the False Omission Rate.
 
     It is defined as the ratio of falsely predicted negatives to all predicted negatives:
 
-    $$FN / (TN + FN)$$
+    $$\mathtt{FOR}=FN / (TN + FN)$$
 
     where $$TN$$ is the count of true negatives, and $$FN$$ the count of falsely predicted negatives.
 
@@ -394,11 +394,11 @@ class FalseOmissionRate(Metric):
 
 
 class NegativePredictiveValue(Metric):
-    """Computes the Negative Predicitive Value.
+    r"""Computes the Negative Predicitive Value.
 
     It is defined as the ratio of true negatives to all predicted negatives:
 
-    $$TN / (TN + FN)$$
+    $$\mathtt{NPV}=TN / (TN + FN)$$
 
     where TN are the true negatives, and FN are the falsely predicted negatives.
 
@@ -436,11 +436,11 @@ class NegativePredictiveValue(Metric):
 # These actually tell you something interesting about model performance
 # ==============================================================================
 class Accuracy(Metric):
-    """Computes the multiclass accuracy score.
+    r"""Computes the multiclass accuracy score.
 
     It is defined as the rate of correct classifications to all classifications:
 
-    $$(TP + TN) / N$$
+    $$\mathtt{Acc}=(TP + TN) / N$$
 
     where $TP$ are the true positives, $TN$ the true negatives and $N$ the total number of predictions.
 
@@ -477,7 +477,7 @@ class BalancedAccuracy(Metric):
 
     It is defined as the the arithmetic average of the per-class true-positive rate:
 
-    $$\\frac{1}{|C|}\\sum TPR_{c}$$
+    $$\mathtt{BA}=\frac{1}{|C|}\sum TPR_{c}$$
 
     where $TPR$ is the true positive rate (precision).
 
@@ -595,7 +595,7 @@ class CohensKappa(Metric):
 
     It is defined as
 
-    $$\\frac{p_o-p_e}{1-p_e}$$
+    $$\kappa=\frac{p_o-p_e}{1-p_e}$$
 
     where $p_o$ is the observed agreement and $p_e$ the expected agreement
     due to chance. Perfect agreement yields a score of 1, with a score of
@@ -638,20 +638,20 @@ class F1(Metric):
 
     It is defined as:
 
-    $$2\\dfrac{\\text{precision} \\cdot \\text{recall}}{\\text{precision} + \\text{recall}}$$
+    $$\mathtt{F}_{1}=2\dfrac{\text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}$$
 
     or simply put, the harmonic mean between precision (PPV) and recall (TPR).
 
     It is an exceedingly common metric used to evaluate machine learning performance. It is closely
     related to the Precision-Recall curve, an anlysis with varying thresholds.
 
-    The 1 in the name from an unseen $\\beta$ parameter that weights precision and recall.
+    The 1 in the name from an unseen $\beta$ parameter that weights precision and recall.
     See the `FBeta` metric.
 
     The $F_{1}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A random
     classifier which predicts a class with a probability $p$, achieves a performance of,
 
-    $$2\\dfrac{\\text{prevalence}\\cdot p}{\\text{prevalence}+p}.$$
+    $$2\dfrac{\text{prevalence}\cdot p}{\text{prevalence}+p}.$$
 
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
     recommend comparing performance not to a random classifier, but the 'always-on' classifier
@@ -690,25 +690,25 @@ class F1(Metric):
 
 
 class FBeta(Metric):
-    r"""Computes the univariate $F_{\\beta}$-score.
+    r"""Computes the univariate $F_{\beta}$-score.
 
     Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
     be used to quantify the quality of a predictor.
 
     It is defined as:
 
-    $$(1+\\beta^2)\\dfrac{\\text{precision} \\cdot \\text{recall}}{\\beta^2\\cdot\\text{precision} + \\text{recall}}$$
+    $$\mathtt{F}_{\beta}=(1+\beta^2)\dfrac{\text{precision} \cdot \text{recall}}{\beta^2\cdot\text{precision} + \text{recall}}$$
 
     or simply put, the weighted harmonic mean between precision (PPV) and recall (TPR).
 
-    The value of $\\beta$ determines to which degree a user deems recall more important than
+    The value of $\beta$ determines to which degree a user deems recall more important than
     precision. Larger values (x > 1) weight recall more, whereas lower values weight precision more.
     A value of 1 corresponds to equal weighting, see the `F1` metric.
 
-    The $F_{\\beta}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A
+    The $F_{\beta}$-score is susceptible to class imbalance. Values fall in the range [0, 1]. A
     random classifier which predicts a class with a probability $p$, achieves a performance of,
 
-    $$(1+\\beta^2)\\dfrac{\\text{prevalence}\\cdot p}{\\beta^2\\cdot\\text{prevalence}+p}.$$
+    $$(1+\beta^2)\dfrac{\text{prevalence}\cdot p}{\beta^2\cdot\text{prevalence}+p}.$$
 
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
     recommend comparing performance not to a random classifier, but the 'always-on' classifier
@@ -758,7 +758,7 @@ class Informedness(Metric):
 
     It is defined as:
 
-    $$\\text{sensitivity}+\\text{specificity}-1$$
+    $$\mathtt{J}=\text{sensitivity}+\text{specificity}-1$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the
     True Negative Rate (TNR).
@@ -794,11 +794,11 @@ class Informedness(Metric):
 
 
 class Markedness(Metric):
-    r"""Computes the markedness metric, also known as $\\Delta p$.
+    r"""Computes the markedness metric, also known as $\Delta p$.
 
     It is defined as:
 
-    $$\\text{precision}+NPV-1$$
+    $$\Delta p=\text{precision}+NPV-1$$
 
     where precision is the Positive Predictive Value (PPV).
 
@@ -835,7 +835,7 @@ class P4(Metric):
 
     It is defined as:
 
-    $$4\\left(\\dfrac{1}{\\text{precision}}+\\dfrac{1}{\\text{recall}}+\\dfrac{1}{\\text{specificity}}+\\dfrac{1}{NPV}\\right)^{-1}$$
+    $$\mathtt{P4}=4\left(\dfrac{1}{\text{precision}}+\dfrac{1}{\text{recall}}+\dfrac{1}{\text{specificity}}+\dfrac{1}{NPV}\right)^{-1}$$
 
     where precision corresponds to the Positive Predictive Value (PPV), recall to the
     True Positive Rate (TPR), and specificity to the True Negative Rate (TNR). Put otherwise, it is
@@ -892,7 +892,7 @@ class JaccardIndex(Metric):
 
     It is defined as:
 
-    $$\\dfrac{TP}{TP+FP+FN}$$
+    $$\mathtt{Jaccard}=\dfrac{TP}{TP+FP+FN}$$
 
     where $TP$ is the count of true positives, $FP$ the count of false positives and $FN$ the count
     of false negatives.
@@ -933,7 +933,7 @@ class PositiveLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
+    $$\mathtt{LR}^{+}=\dfrac{\text{sensitivity}}{1-\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the
     True Negative Rate (TNR).
@@ -941,7 +941,7 @@ class PositiveLikelihoodRatio(Metric):
     Simply put, it is the ratio of the probabilities of the model predicting a positive when the
     condition is positive and negative, respectively.
 
-    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no true positives,
+    Possible values lie in the range [0.0, $\infty$], with 0.0 corresponding to no true positives,
     and infinity corresponding to no false positives. Larger values indicate better performance,
     with a score of 1 corresponding to random performance.
 
@@ -981,7 +981,7 @@ class LogPositiveLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\\log\\dfrac{\\text{sensitivity}}{1-\\text{specificity}}$$
+    $$\mathtt{LogLR}{+}=\log\dfrac{\text{sensitivity}}{1-\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the
     True Negative Rate (TNR).
@@ -989,7 +989,7 @@ class LogPositiveLikelihoodRatio(Metric):
     Simply put, it is logarithm of the ratio of the probabilities of the model predicting a
     positive when the condition is positive and negative, respectively.
 
-    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no
+    Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no
     true positives, and infinity corresponding to no false positives. Larger values indicate better
     performance, with a score of 0 corresponding to random performance.
 
@@ -1032,7 +1032,7 @@ class NegativeLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
+    $$\mathtt{LR}^{-}=\dfrac{1-\text{sensitivity}}{\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the
     True Negative Rate(TNR).
@@ -1040,7 +1040,7 @@ class NegativeLikelihoodRatio(Metric):
     Simply put, it is the ratio of the probabilities of the model predicting a negative when the
     condition is positive and negative, respectively.
 
-    Possible values lie in the range [0.0, $\\infty$], with 0.0 corresponding to no false negatives,
+    Possible values lie in the range [0.0, $\infty$], with 0.0 corresponding to no false negatives,
     and infinity corresponding to no true negatives. Smaller values indicate better performance,
     with a score of 1 corresponding to random performance.
 
@@ -1080,7 +1080,7 @@ class LogNegativeLikelihoodRatio(Metric):
 
     It is defined as
 
-    $$\\log \\dfrac{1-\\text{sensitivity}}{\\text{specificity}}$$
+    $$\mathtt{LogLR}{-}=\log \dfrac{1-\text{sensitivity}}{\text{specificity}}$$
 
     where sensitivity is the True Positive Rate (TPR), and specificity is the
     True Negative Rate (TNR).
@@ -1088,7 +1088,7 @@ class LogNegativeLikelihoodRatio(Metric):
     Simply put, it is the logarithm of the ratio of the probabilities of the model predicting a
     negative when the condition is positive and negative, respectively.
 
-    Possible values lie in the range ($-\\infty$, $\\infty$), with $-\\infty$ corresponding to no
+    Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no
     true positives, and infinity corresponding to no true negatives. Smaller values indicate better
     performance, with a score of 0 corresponding to random performance.
 
@@ -1131,11 +1131,12 @@ class DiagnosticOddsRatio(Metric):
 
     It is defined as:
 
-    $$\\dfrac{LR_{+}}{LR_{-}}$$
+    $$\mathtt{DOR}=\dfrac{\mathtt{LR}^{+}=}{\mathtt{LR}^{-}=}$$
 
-    where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
+    where $\mathtt{LR}^{+}=$ and $\mathtt{LR}^{-}=$ are the positive and
+    negative likelihood ratios, respectively.
 
-    Possible values lie in the range [0.0, $\\infty$]. Larger values indicate better performance,
+    Possible values lie in the range [0.0, $\infty$]. Larger values indicate better performance,
     with a score of 1 corresponding to random performance.
 
     To make experiment aggregation easier, you can log transform this metric by specifying
@@ -1170,11 +1171,12 @@ class LogDiagnosticOddsRatio(Metric):
 
     It is defined as:
 
-    $$\\log\\dfrac{LR_{+}}{LR_{-}}$$
+    $$\mathtt{LogDOR}=\mathtt{LogLR}^{+}-\mathtt{LogLR}^{-}$$
 
-    where $LR_{+}$ and $LR_{-}$ are the positive and negative likelihood ratios, respectively.
+    where $\mathtt{LR}^{+}$ and $\mathtt{LR}^{-}=$ are the positive and
+    negative likelihood ratios, respectively.
 
-    Possible values lie in the range (-$\\infty$, $\\infty$). Larger values indicate better
+    Possible values lie in the range (-$\infty$, $\infty$). Larger values indicate better
     performance, with a score of 0 corresponding to random performance.
 
     Examples:
@@ -1190,16 +1192,16 @@ class LogDiagnosticOddsRatio(Metric):
     full_name = "Log Diagnostic Odds Ratio"
     is_multiclass = False
     bounds = (-float("inf"), float("inf"))
-    dependencies = ("nlr", "plr")
+    dependencies = ("log_plr", "log_nlr")
     sklearn_equivalent = None
     aliases = ["log_dor", "ldor", "log_diagnostic_odds_ratio"]
 
     def compute_metric(
         self,
-        plr: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        nlr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        log_plr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        log_nlr: jtyping.Float[np.ndarray, "num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
-        log_dor = np.log(plr) - np.log(nlr)
+        log_dor = log_plr - log_nlr
 
         return log_dor
 
@@ -1209,9 +1211,9 @@ class PrevalenceThreshold(Metric):
 
     It is defined as:
 
-    $$\frac{\sqrt{\text{TPR}\cdot(1-\text{TNR})}+\text{TNR}-1}{\text{TPR}+\text{TNR}-1}$$
+    $$\phi \mathtt{e}=\frac{\sqrt{\mathtt{TPR}\cdot(1-\mathtt{TNR})}+\mathtt{TNR}-1}{\mathtt{TPR}+\mathtt{TNR}-1}$$
 
-    where $\text{TPR}$ and $\text{TNR}$ are the true positive and negative rates, respectively.
+    where $\mathtt{TPR}$ and $\mathtt{TNR}$ are the true positive and negative rates, respectively.
 
     Possible values lie in the range (0, 1). Larger values indicate *worse* performance, with a
     score of 0 corresponding to perfect classification, and a score of 1 to perfect
@@ -1225,7 +1227,10 @@ class PrevalenceThreshold(Metric):
         - `pt`
         - `prevalence_threshold`
 
-    """
+    Note: Read more:
+        1. [Balayla, J. (2020). Prevalence threshold ($\phi \mathtt{e}$) and the geometry of screening curves. Plos one, 15(10), e0240215.](https://pmc.ncbi.nlm.nih.gov/articles/PMC7540853/)
+
+    """  # noqa: E501
 
     full_name = "Prevalence Threshold"
     is_multiclass = False

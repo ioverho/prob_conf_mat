@@ -12,6 +12,7 @@ from itertools import product
 
 import numpy as np
 
+
 # Root metrics are always computed, because they're (almost) always needed as
 # intermediate variables
 _ROOT_METRICS = {
@@ -27,31 +28,34 @@ AVERAGING_REGISTRY = dict()
 
 @dataclass(frozen=True)
 class RootMetric:
+    """A container for a metric that all other dependencies depend upon."""
+
     name: str
 
     @property
-    def full_name(self) -> str:
+    def full_name(self) -> str:  # noqa: D102
         return self.name
 
     @property
-    def is_multiclass(self) -> bool:
+    def is_multiclass(self) -> bool:  # noqa: D102
         raise TypeError("Root metrics are not directly interpretable.")
 
     @property
-    def bounds(self) -> tuple[float, float]:
+    def bounds(self) -> tuple[float, float]:  # noqa: D102
         raise TypeError("Root metrics are not directly interpretable.")
 
     @property
-    def dependencies(self) -> typing.Sequence[str]:
+    def dependencies(self) -> typing.Sequence[str]:  # noqa: D102
         return ()
 
     @property
-    def sklearn_equivalent(self) -> str | None:
+    def sklearn_equivalent(self) -> str | None:  # noqa: D102
         raise TypeError("Root metrics are not directly interpretable.")
 
     @property
-    def aliases(self) -> list[str]:
+    def aliases(self) -> list[str]:  # noqa: D102
         return [self.name]
+
 
 class Metric(metaclass=ABCMeta):
     """The abstract base class for metrics.
@@ -67,23 +71,30 @@ class Metric(metaclass=ABCMeta):
 
         # Validate =============================================================
         # Make sure that all aliases are unique
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             if alias in METRIC_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. Currently used by metric {METRIC_REGISTRY[alias]}."
+                    f"Alias '{alias}' not unique. "
+                    f"Currently used by metric {METRIC_REGISTRY[alias]}.",
                 )
 
         # Make sure the parameters of the `compute_metric` function are actually
         # the ones listed as dependencies
         parameters = set(signature(cls.compute_metric).parameters.keys()) - {"self"}
-        dependencies = set(cls.dependencies) # type: ignore
+        dependencies = set(cls.dependencies)  # type: ignore
         if parameters != dependencies:
             raise TypeError(
-                f"The input for the {cls.__name__}'s `compute_metric` method does not match the specified dependencies: {parameters} != {dependencies}"  # noqa: E501
+                f"The input for the {cls.__name__}'s `compute_metric` method does not match the specified dependencies: {parameters} != {dependencies}",  # noqa: E501
             )
 
+        # Make sure the dependencies actually exist
+        if not hasattr(cls, "_validated_dependencies"):
+            for dependency in cls.dependencies:
+                if dependency in _ROOT_METRICS:
+                    continue
+
         # Register =============================================================
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             METRIC_REGISTRY[alias] = cls
 
         cls._kwargs = {
@@ -96,39 +107,47 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str: # type: ignore
-        """A human-readable name for this metric"""
+    def full_name(self) -> str:  # type: ignore
+        """A human-readable name for this metric."""
         raise NotImplementedError
 
     full_name: str
 
     @property
     @abstractmethod
-    def is_multiclass(self) -> bool: # type: ignore
-        """Whether or not this metric computes a value for each class individually, or for all classes at once."""
+    def is_multiclass(self) -> bool:  # type: ignore
+        """Whether or not this metric computes a value for each class individually, or for all classes at once."""  # noqa: E501
         raise NotImplementedError
 
     is_multiclass: bool
 
     @property
     @abstractmethod
-    def bounds(self) -> tuple[float, float]: # type: ignore
-        """A tuple of the minimum and maximum possible value for this metric to take. Can be infinite."""
+    def bounds(self) -> tuple[float, float]:  # type: ignore
+        """A tuple of the minimum and maximum possible value for this metric to take.
+
+        Can be infinite.
+        """
         raise NotImplementedError
 
     bounds: tuple[float, float]
 
     @property
     @abstractmethod
-    def dependencies(self) -> typing.Sequence[str]: # type: ignore
-        """All metrics upon which this metric depends. Used to generate a computation schedule, such that no metric is calculated before its dependencies. The dependencies **must** match the `compute_metric` signature. This is checked during class definition."""
+    def dependencies(self) -> typing.Sequence[str]:  # type: ignore
+        """All metrics upon which this metric depends.
+
+        Used to generate a computation schedule, such that no metric is calculated before its
+        dependencies. The dependencies **must** match the `compute_metric` signature.
+        This is checked during class definition.
+        """
         raise NotImplementedError
 
     dependencies: typing.Sequence[str]
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self) -> str | None: # type: ignore
+    def sklearn_equivalent(self) -> str | None:  # type: ignore
         """The `sklearn` equivalent function, if applicable"""
         raise NotImplementedError
 
@@ -136,7 +155,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> typing.Sequence[str]: # type: ignore
+    def aliases(self) -> typing.Sequence[str]:  # type: ignore
         """A list of all valid aliases for this metric. Can be used when creating metric syntax strings."""
         raise NotImplementedError
 
@@ -148,7 +167,9 @@ class Metric(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def __call__(
-        self, *args, **kwargs
+        self,
+        *args,
+        **kwargs,
     ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         return self.compute_metric(*args, **kwargs)
 
@@ -160,12 +181,11 @@ class Metric(metaclass=ABCMeta):
     def name(self) -> str:
         if self._instantiation_name != "":
             return self._instantiation_name
-        else:
-            metric_kwargs = "".join(
-                [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()]
-            )
+        metric_kwargs = "".join(
+            [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()],
+        )
 
-            return f"{self._metric_name}{metric_kwargs}"
+        return f"{self._metric_name}{metric_kwargs}"
 
     def __repr__(self) -> str:
         return f"Metric({self.name})"
@@ -194,20 +214,20 @@ class Averaging(metaclass=ABCMeta):
 
         # Validate =============================================================
         # Make sure that all aliases are unique
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             if alias in AVERAGING_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. Currently used by averaging method {AVERAGING_REGISTRY[alias]}."
+                    f"Alias '{alias}' not unique. Currently used by averaging method {AVERAGING_REGISTRY[alias]}.",
                 )
 
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             if alias in METRIC_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. Currently used by metric {METRIC_REGISTRY[alias]}."
+                    f"Alias '{alias}' not unique. Currently used by metric {METRIC_REGISTRY[alias]}.",
                 )
 
         # Register =============================================================
-        for alias in cls.aliases: # type: ignore
+        for alias in cls.aliases:  # type: ignore
             AVERAGING_REGISTRY[alias] = cls
 
         cls._kwargs = {
@@ -220,28 +240,28 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str: # type: ignore
+    def full_name(self) -> str:  # type: ignore
         raise NotImplementedError
 
     full_name: str
 
     @property
     @abstractmethod
-    def dependencies(self) -> typing.Sequence[str]: # type: ignore
+    def dependencies(self) -> typing.Sequence[str]:  # type: ignore
         raise NotImplementedError
 
     dependencies: typing.Sequence[str]
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self) -> str | None: # type: ignore
+    def sklearn_equivalent(self) -> str | None:  # type: ignore
         raise NotImplementedError
 
     sklearn_equivalent: str | None
 
     @property
     @abstractmethod
-    def aliases(self) -> typing.Sequence[str]: # type: ignore
+    def aliases(self) -> typing.Sequence[str]:  # type: ignore
         raise NotImplementedError
 
     aliases: typing.Sequence[str]
@@ -266,12 +286,11 @@ class Averaging(metaclass=ABCMeta):
     def name(self) -> str:
         if self._instantiation_name != "":
             return self._instantiation_name
-        else:
-            kwargs = "".join(
-                [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()]
-            )
+        kwargs = "".join(
+            [f"+{k}={getattr(self, k)}" for k, _ in self._kwargs.items()],
+        )
 
-            return self._averaging_name + kwargs
+        return self._averaging_name + kwargs
 
     def __repr__(self) -> str:
         return self.name
@@ -301,7 +320,7 @@ class AveragedMetric(metaclass=ABCMeta):
 
         if self.base_metric.is_multiclass:
             raise ValueError(
-                f"Cannot aggregate a metric ({self.base_metric.name}) that is already multiclass."  # noqa: E501
+                f"Cannot aggregate a metric ({self.base_metric.name}) that is already multiclass.",  # noqa: E501
             )
 
         self.averaging = averaging
@@ -318,7 +337,7 @@ class AveragedMetric(metaclass=ABCMeta):
         """
         return [
             f"{lhs}@{rhs}"
-            for lhs, rhs in product(self.base_metric.aliases, self.averaging.aliases) # type: ignore
+            for lhs, rhs in product(self.base_metric.aliases, self.averaging.aliases)  # type: ignore
         ]
 
     @property
@@ -336,7 +355,7 @@ class AveragedMetric(metaclass=ABCMeta):
     @property
     def bounds(self) -> tuple[float, float]:
         """A tuple of the minimum and maximum possible value for this metric to take. Can be infinite."""
-        return self.base_metric.bounds # type: ignore
+        return self.base_metric.bounds  # type: ignore
 
     @property
     def dependencies(self) -> typing.Sequence[str]:
@@ -351,8 +370,8 @@ class AveragedMetric(metaclass=ABCMeta):
         This is checked during class definition.
         """
         dependencies = (
-            *self.base_metric.dependencies, # type: ignore
-            *self.averaging.dependencies, # type: ignore
+            *self.base_metric.dependencies,  # type: ignore
+            *self.averaging.dependencies,  # type: ignore
         )
 
         return dependencies
@@ -363,16 +382,24 @@ class AveragedMetric(metaclass=ABCMeta):
         sklearn_equivalent = self.base_metric.sklearn_equivalent
         if self.averaging.sklearn_equivalent is not None:
             sklearn_equivalent = (
-                sklearn_equivalent.sklearn_equivalent # type: ignore
+                sklearn_equivalent.sklearn_equivalent  # type: ignore
                 + f"with average={self.averaging.sklearn_equivalent}"
             )
 
-        return sklearn_equivalent # type: ignore
+        return sklearn_equivalent  # type: ignore
 
-    def compute_metric(self, *args, **kwargs) -> jtyping.Float[np.ndarray, " num_samples ..."]:
+    def compute_metric(
+        self,
+        *args,
+        **kwargs,
+    ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         return self.base_metric(*args, **kwargs)
 
-    def compute_average(self, *args, **kwargs) -> jtyping.Float[np.ndarray, " num_samples"]:
+    def compute_average(
+        self,
+        *args,
+        **kwargs,
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
         return self.averaging.__call__(*args, **kwargs)
 
     def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples 1"]:
@@ -381,7 +408,7 @@ class AveragedMetric(metaclass=ABCMeta):
                 key: value
                 for key, value in kwargs.items()
                 if key == "samples" or key in self.base_metric.dependencies
-            }
+            },
         )
 
         aggregated_metric_vals = self.averaging(
@@ -408,8 +435,7 @@ class AveragedMetric(metaclass=ABCMeta):
     def name(self) -> str:
         if self._instantiation_name != "":
             return self._instantiation_name
-        else:
-            return f"{self.base_metric.name}@{self.averaging.name}"
+        return f"{self.base_metric.name}@{self.averaging.name}"
 
     def __repr__(self) -> str:
         return f"AveragedMetric({self.name})"
