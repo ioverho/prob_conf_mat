@@ -28,27 +28,18 @@ ARGUMENT_REGEX = re.compile(r"\+([^\+\@\=]+)\=([^\+\@\=]+)[^\+\@]?")
 UNTERMINATED_ARGUMENT_REGEX = re.compile(r"\+([^\+\@\=]+)")
 
 
-def _parse_kwargs(kwargs):
-    # Parse any passed kwargs ==================================================
-    # Only accepting numeric, None or str as argument values
+def _parse_kwargs(kwargs: dict[str, str]) -> dict[str, typing.Any]:
+    """Parse any passed kwargs."""
     for k, v in kwargs.items():
+        # First try to eval
         try:
-            # Check if value is numeric
-            val = float(v)
-            # Check if float is a whole number
-            if val.is_integer():
-                val = int(val)
+            val = eval(v)
 
             kwargs[k] = val
 
-        except ValueError:
-            # Check for None
-            if v == "None":
-                kwargs[k] = None
-
-            # Else we assume a string
-            else:
-                continue
+        # If it fails, assume a string
+        except:  # noqa: E722
+            continue
 
     return kwargs
 
