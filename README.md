@@ -1,6 +1,6 @@
 <div style="text-align: center;" align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangle.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangle_light_text.svg">
   <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangle.svg">
   <img alt="Logo" src="documentation/_static/logo_rectangle.svg" width="150px">
 </picture>
@@ -14,7 +14,11 @@
  <img src="https://codecov.io/github/ioverho/prob_conf_mat/graph/badge.svg?token=EU85JBF8M2"/ alt="Codecov report">
 </a>
 
-# Probabilistic Confusion Matrices
+<a href="./LICENSE" >
+ <img src="https://img.shields.io/badge/License-MIT-yellow.svg)"/ alt="License">
+</a>
+
+<h1>Probabilistic Confusion Matrices</h1>
 
 </div>
 </div>
