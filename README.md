@@ -15,7 +15,7 @@
 </a>
 
 <a href="./LICENSE" >
- <img src="https://img.shields.io/badge/License-MIT-yellow.svg)"/ alt="License">
+ <img alt="GitHub License" src="https://img.shields.io/github/license/ioverho/prob_conf_mat">
 </a>
 
 <h1>Probabilistic Confusion Matrices</h1>
