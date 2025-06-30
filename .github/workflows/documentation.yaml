@@ -46,4 +46,4 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Build documentation
-        run: uv run --dev mkdocs gh-deploy --clean --site-dir "./site" --verbose
+        run: uv run --dev mkdocs gh-deploy --clean --site-dir "./site" --force
