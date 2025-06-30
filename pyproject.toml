@@ -121,7 +121,15 @@ docstring-code-format = true
 # Pyright
 [tool.pyright]
 include = ["src"]
-#project-excludes = ["node_modules", "**/__pycache__", "**/.*", "tests", "dev", "klad"]
+project-excludes = [
+    'node_modules',
+    '**/__pycache__',
+    '**/.*',
+    '**/tests*',
+    '**/dev*',
+    '**/klad*',
+    '**/experimental*',
+]
 venvPath = ".venv"
 pythonVersion = "3.11"
 pythonPlatform = "Linux"

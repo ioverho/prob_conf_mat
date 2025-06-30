@@ -233,7 +233,6 @@ def interpret_i2(
     "borderline substantial heterogeneity",
     "borderline considerable heterogeneity",
     "considerable heterogeneity",
-    "considerable heterogeneity",
 ]:
     """Interprets I^2 values using prescribed guidelines [1].
 
@@ -251,7 +250,7 @@ def interpret_i2(
 
     if i2_score < 0.0 or i2_score > 1.0:
         raise ValueError(
-            "I^2 should be in the range (0.0, 1.0). Currently out-of-bounds.",
+            f"I^2 should be in the range (0.0, 1.0). Currently: {i2_score}",
         )
     if i2_score < 0.3:
         het_sig = "insignificant"
@@ -265,6 +264,10 @@ def interpret_i2(
         het_sig = "borderline considerable"
     elif i2_score >= 0.75 and i2_score <= 1.0:
         het_sig = "considerable"
+    else:
+        raise ValueError(
+            f"I^2 should be in the range (0.0, 1.0). Currently: {i2_score}",
+        )
 
     het_sig += " heterogeneity"
 
