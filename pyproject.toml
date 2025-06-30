@@ -1,6 +1,6 @@
 [project]
 name = "prob-conf-mat"
-version = "0.1.0.1"
+version = "0.1.0"
 authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
 description = "Confusion matrices with uncertainty quantification, experiment aggregation and significance testing."
 readme = "README.md"
