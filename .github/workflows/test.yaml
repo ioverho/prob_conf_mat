@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '.github/**'
+      - 'pyproject.toml'
+      - 'src/**'
+      - 'tests/**'
+      - '!tests/data/**'
+      - '!tests/logs/**'
+      - '!tests/profile/**'
+      - 'documentation/Getting Started/**'
   pull_request:
     branches:
       - main
