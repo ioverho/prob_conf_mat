@@ -1,9 +1,9 @@
 <div style="text-align: center;" align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="http://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="http://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg">
-  <img alt="Logo" src="http://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg" width="150px">
+  <source media="(prefers-color-scheme: dark)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_light_text.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg">
+  <img alt="Logo" src="https://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg" width="150px">
 </picture>
 
 <div style="text-align: center;" align="center">
@@ -11,11 +11,17 @@
 <a href="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml" >
  <img src="https://github.com/ioverho/prob_conf_mat/actions/workflows/test.yaml/badge.svg"/ alt="Tests status">
 </a>
+
 <a href="https://codecov.io/github/ioverho/prob_conf_mat" >
  <img src="https://codecov.io/github/ioverho/prob_conf_mat/graph/badge.svg?token=EU85JBF8M2"/ alt="Codecov report">
 </a>
+
 <a href="./LICENSE" >
  <img alt="GitHub License" src="https://img.shields.io/github/license/ioverho/prob_conf_mat">
+</a>
+
+<a href="https://pypi.org/project/prob-conf-mat/" >
+  <img alt="PyPI - Version" src="https://img.shields.io/pypi/v/prob_conf_mat">
 </a>
 
 <h1>Probabilistic Confusion Matrices</h1>
@@ -76,7 +82,7 @@ The development dependencies should automatically install into the `.venv` folde
 
 ## Documentation
 
-For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](http://www.ivoverhoeven.nl/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://www.ivoverhoeven.nl/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
 
 The documentation is broadly divided into 4 sections:
 
@@ -87,13 +93,13 @@ The documentation is broadly divided into 4 sections:
 
 |                 | Learning                                                                                                     | Coding                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| **Practical**   | [Getting Started](http://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](http://www.ivoverhoeven.nl/prob_conf_mat/How%20To%20Guides/configuration.html) |
-| **Theoretical** | [Explanation](http://www.ivoverhoeven.nl/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](http://www.ivoverhoeven.nl/prob_conf_mat/Reference/Study.html)                     |
+| **Practical**   | [Getting Started](https://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://www.ivoverhoeven.nl/prob_conf_mat/How%20To%20Guides/configuration.html) |
+| **Theoretical** | [Explanation](https://www.ivoverhoeven.nl/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](https://www.ivoverhoeven.nl/prob_conf_mat/Reference/Study.html)                     |
 |                 |                                                                                                              |                                                                                                |
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](http://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](https://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 

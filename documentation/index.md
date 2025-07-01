@@ -25,6 +25,10 @@ hide:
  <img alt="GitHub License" src="https://img.shields.io/github/license/ioverho/prob_conf_mat">
 </a>
 
+<a href="https://pypi.org/project/prob-conf-mat/" >
+  <img alt="PyPI - Version" src="https://img.shields.io/pypi/v/prob_conf_mat">
+</a>
+
 <h1>Probabilistic Confusion Matrices</h1>
 
 </div>

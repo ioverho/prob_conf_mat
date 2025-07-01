@@ -36,8 +36,8 @@ dependencies = [
 ]
 
 [project.urls]
-#Homepage = "https://github.com/ioverho/prob_conf_mat"
-#Documentation = "https://github.com/ioverho/prob_conf_mat"
+Homepage = "https://www.ivoverhoeven.nl/prob_conf_mat/"
+Documentation = "https://www.ivoverhoeven.nl/prob_conf_mat/"
 Repository = "https://github.com/ioverho/prob_conf_mat"
 Issues = "https://github.com/ioverho/prob_conf_mat/issues"
 
