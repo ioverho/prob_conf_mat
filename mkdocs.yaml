@@ -25,6 +25,7 @@ nav:
       - Getting Started/04_interfacing_with_the_filesystem.ipynb
   - How-To:
       - How To Guides/configuration.md
+      - How To Guides/choosing_a_prior.md
       - How To Guides/extending_the_library.md
       #- How To Guides/configuration.md
       #- How To Guides/metric_syntax.md

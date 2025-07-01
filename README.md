@@ -1,9 +1,9 @@
 <div style="text-align: center;" align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="documentation/_static/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="documentation/_static/logo_rectangle_dark_text.svg">
-  <img alt="Logo" src="documentation/_static/logo_rectangle_dark_text.svg" width="150px">
+  <source media="(prefers-color-scheme: dark)" srcset="http://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_light_text.svg">
+  <source media="(prefers-color-scheme: light)" srcset="http://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg">
+  <img alt="Logo" src="http://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg" width="150px">
 </picture>
 
 <div style="text-align: center;" align="center">
@@ -27,11 +27,16 @@
 
 ## Installation
 
-<!-- Add a link to pypi repository -->
-Installation can be done using from [pypi]() can be done using `pip`:
+Installation can be done using from [pypi](https://pypi.org/project/prob-conf-mat/) can be done using `pip`:
 
 ```bash
 pip install prob_conf_mat
+```
+
+Or, if you're using [`uv`](https://docs.astral.sh/uv/), simply run:
+
+```bash
+uv add prob_conf_mat
 ```
 
 The project currently depends on the following packages:
@@ -40,7 +45,7 @@ The project currently depends on the following packages:
   <summary>Dependency tree</summary>
 
 ```txt
-bayes-conf-mat v0.1.0
+bayes-conf-mat
 ├── jaxtyping v0.3.2
 ├── matplotlib v3.10.3
 ├── numpy v2.3.0
@@ -69,14 +74,29 @@ uv sync --dev
 
 The development dependencies should automatically install into the `.venv` folder.
 
+## Documentation
+
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](http://www.ivoverhoeven.nl/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
+
+The documentation is broadly divided into 4 sections:
+
+1. **Getting Started**: a collection of small tutorials to help new users get started
+2. **How To**: more expansive guides on how to achieve specific things
+3. **Reference**: in-depth information about how to interface with the library
+4. **Explanation**: explanations about *why* things are the way they are
+
+|                 | Learning                                                                                                     | Coding                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Practical**   | [Getting Started](http://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](http://www.ivoverhoeven.nl/prob_conf_mat/How%20To%20Guides/configuration.html) |
+| **Theoretical** | [Explanation](http://www.ivoverhoeven.nl/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](http://www.ivoverhoeven.nl/prob_conf_mat/Reference/Study.html)                     |
+|                 |                                                                                                              |                                                                                                |
+
 ## Quick Start
 
-<!-- TODO: add link to guides -->
-In depth tutorials taking you through all basic steps are available on the [documentation site](). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](http://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 
-<!-- Add comments to the documentation for the concepts discussed here -->
 ```python
 from prob_conf_mat import Study
 
@@ -130,7 +150,7 @@ fig = study.plot_metric_summaries(metric="acc")
 ```
 
 <picture>
-  <img alt="Logo" src="documentation/_static/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Metric distribution" src="documentation/_static/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
@@ -160,7 +180,7 @@ fig = study.plot_forest_plot(metric="acc")
 ```
 
 <picture>
-  <img alt="Logo" src="documentation/_static/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Forest plot" src="documentation/_static/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
@@ -177,28 +197,10 @@ fig = study.plot_pairwise_comparison(
 ```
 
 <picture>
-  <img alt="Logo" src="documentation/_static/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Comparison plot" src="documentation/_static/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
-
-## Documentation
-
-<!-- Link to the documentation here -->
-<!-- Include table with some quick start tutorials -->
-For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
-
-The documentation is broadly divided into 4 sections:
-
-1. **Getting Started**: a collection of small tutorials to help new users get started
-2. **How To**: more expansive guides on how to achieve specific things
-3. **Reference**: in-depth information about how to interface with the library
-4. **Explanation**: explanations about *why* things are the way they are
-
-|                 | Learning        | Coding        |
-| --------------- | --------------- | ------------- |
-| **Practical**   | Getting Started | How-To Guides |
-| **Theoretical** | Explanation     | Reference     |
 
 ## Development
 
@@ -243,6 +245,7 @@ Documentation
 The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), , [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.html).
 
 A lot of the approaches and methods used in this project come from published works. Some especially important works include:
+
 1. Goutte, C., & Gaussier, E. (2005). [A probabilistic interpretation of precision, recall and F-score, with implication for evaluation](https://link.springer.com/chapter/10.1007/978-3-540-31865-1_25). In European conference on information retrieval (pp. 345-359). Berlin, Heidelberg: Springer Berlin Heidelberg.
 2. Tötsch, N., & Hoffmann, D. (2021). [Classifier uncertainty: evidence, potential impact, and probabilistic treatment](https://peerj.com/articles/cs-398/). PeerJ Computer Science, 7, e398.
 3. Kruschke, J. K. (2013). [Bayesian estimation supersedes the t test](https://pubmed.ncbi.nlm.nih.gov/22774788/). Journal of Experimental Psychology: General, 142(2), 573.
