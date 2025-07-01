@@ -1980,11 +1980,10 @@ for method, aliases in method_to_alias.items():
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>SingletonAggregator: ['singleton', 'identity']
 BetaAggregator: ['beta', 'beta_conflation']
+GammaAggregator: ['gamma', 'gamma_conflation']
 FEGaussianAggregator: ['fe', 'fixed_effect', 'fe_gaussian', 'gaussian', 'normal', 'fe_normal']
 REGaussianAggregator: ['re', 'random_effect', 're_gaussian', 're_normal']
 HistogramAggregator: ['hist', 'histogram']
-GammaAggregator: ['gamma', 'gamma_conflation']
-FELogGaussianAggregator: ['fe_log_gaussian', 'log_gaussian', 'log_normal']
 </pre>
 </div>
 </div>
@@ -2160,9 +2159,9 @@ study.report_aggregated_metric_summaries(metric="dor", class_label=0)
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/home/ioverho/bayes_conf_mat/src/prob_conf_mat/metrics/_metrics.py:976: RuntimeWarning: divide by zero encountered in divide
+<pre>/home/ioverho/prob_conf_mat/src/prob_conf_mat/metrics/_metrics.py:976: RuntimeWarning: divide by zero encountered in divide
   return tpr / fpr
-/home/ioverho/bayes_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1165: RuntimeWarning: divide by zero encountered in divide
+/home/ioverho/prob_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1166: RuntimeWarning: divide by zero encountered in divide
   return plr / nlr
 </pre>
 </div>
@@ -2347,12 +2346,14 @@ fig = study.plot_experiment_aggregation(
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/home/ioverho/bayes_conf_mat/src/prob_conf_mat/metrics/_metrics.py:976: RuntimeWarning: divide by zero encountered in divide
+<pre>/home/ioverho/prob_conf_mat/src/prob_conf_mat/metrics/_metrics.py:976: RuntimeWarning: divide by zero encountered in divide
   return tpr / fpr
-/home/ioverho/bayes_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1165: RuntimeWarning: divide by zero encountered in divide
+/home/ioverho/prob_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1025: RuntimeWarning: divide by zero encountered in log
+  lplr = np.log(tpr) - np.log(fpr)
+/home/ioverho/prob_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1124: RuntimeWarning: divide by zero encountered in log
+  lnlr = np.log(fnr) - np.log(tnr)
+/home/ioverho/prob_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1166: RuntimeWarning: divide by zero encountered in divide
   return plr / nlr
-/home/ioverho/bayes_conf_mat/src/prob_conf_mat/metrics/_metrics.py:1202: RuntimeWarning: divide by zero encountered in log
-  log_dor = np.log(plr) - np.log(nlr)
 </pre>
 </div>
 </div>
@@ -2646,7 +2647,7 @@ fig = study.plot_forest_plot(metric="ba+adjusted=True")
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 19, 2025 15:14:02 UTC">June 19, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 1, 2025 10:17:09 UTC">July 1, 2025</span>
   </span>
 
     
