@@ -239,6 +239,10 @@ markdown_extensions:
   #      custom_icons:
   #        - documentation_overrides/.icons
 
+extra:
+  analytics:
+    provider: custom
+
 extra_css:
   - _static/css/main.css
   #- https://unpkg.com/katex@0/dist/katex.min.css
