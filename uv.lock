@@ -1510,7 +1510,7 @@ wheels = [
 
 [[package]]
 name = "prob-conf-mat"
-version = "0.1.0rc1"
+version = "0.1.0rc2"
 source = { editable = "." }
 dependencies = [
     { name = "jaxtyping" },

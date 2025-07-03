@@ -95,7 +95,6 @@ The documentation is broadly divided into 4 sections:
 | --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | **Practical**   | [Getting Started](https://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://www.ivoverhoeven.nl/prob_conf_mat/How%20To%20Guides/configuration.html) |
 | **Theoretical** | [Explanation](https://www.ivoverhoeven.nl/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](https://www.ivoverhoeven.nl/prob_conf_mat/Reference/Study.html)                     |
-|                 |                                                                                                              |                                                                                                |
 
 ## Quick Start
 
