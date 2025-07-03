@@ -14,71 +14,72 @@ class ListwiseComparisonResult:
     experiment_names: list[str]
     metric_name: str
 
-    p_rank_given_experiment: jtyping.Float[
+    p_experiment_given_rank: jtyping.Float[
         np.ndarray,
         " num_experiments num_experiments",
     ]
-    p_experiment_given_rank: jtyping.Float[
+    p_rank_given_experiment: jtyping.Float[
         np.ndarray,
         " num_experiments num_experiments",
     ]
 
 
 def listwise_compare(
-    experiment_values_dict: dict[str, jtyping.Float[np.ndarray, " num_samples"]],
+    experiment_scores_dict: dict[str, jtyping.Float[np.ndarray, " num_samples"]],
     metric_name: str,
 ) -> ListwiseComparisonResult:
-    experiment_names, experiment_values = list(
-        map(list, zip(*list(experiment_values_dict.items()))),
+    # Convert the experiment values to a list of lists
+    all_experiment_scores = list(experiment_scores_dict.items())
+
+    # Transpose the list of lists
+    experiment_names, experiment_scores = list(
+        map(list, zip(*all_experiment_scores)),
     )
 
     # Stack the experiments into a [num_samples, num_experiments] array
-    stacked_metric_values = np.stack(
-        experiment_values,
+    experiment_scores = np.stack(
+        arrays=experiment_scores,
         axis=1,
     )
 
-    num_samples, num_experiments = stacked_metric_values.shape
+    num_samples, num_experiments = experiment_scores.shape
 
-    # Pre-sort the arrays
-    # Should speed up sorting, as arrays are already 'nearly' sorted
-    pre_sort_indices = np.argsort(np.mean(stacked_metric_values, axis=0))
-    inv_pre_sort_indices = np.argsort(pre_sort_indices)
-
-    # Sort the arrays
-    ranked_metric_values = np.argsort(
-        stacked_metric_values[:, pre_sort_indices],
-        axis=1,
-    )
+    # TODO: pre-sort the arrays by the mean scores
+    # *Might* speed up quicksort
+    # Very low priority
+    # Rank the arrays
+    experiment_inv_ranks = np.argsort(np.argsort(experiment_scores, axis=1), axis=1)
 
     # Invert the ranking (largest value gets smallest rank)
-    ranked_metric_values = num_experiments - ranked_metric_values - 1
-
-    # Reduce the ranked arrays to the distinct combinations of ranks
-    rank_combinations, rank_comb_count = np.unique(
-        ranked_metric_values,
-        return_counts=True,
-        axis=0,
-    )
+    experiment_ranks = experiment_scores.shape[1] - experiment_inv_ranks
 
     # Count the number of times each experiment achieved a certain rank
-    idx_vector = np.arange(num_experiments)
     rank_count_matrix = np.zeros((num_experiments, num_experiments))
-    for combi, count in zip(rank_combinations, rank_comb_count):
-        rank_count_matrix[idx_vector, combi] += count
+    for i in range(num_experiments):
+        ranks, counts = np.unique(experiment_ranks[:, i], axis=0, return_counts=True)
 
-    # Invert the pre-sorting
-    rank_count_matrix = rank_count_matrix[inv_pre_sort_indices, :]
+        for rank, rank_count in zip(ranks, counts):
+            rank_count_matrix[i, rank - 1] = rank_count
 
-    # Compute the tables of interest
-    p_rank_given_experiment = rank_count_matrix / np.sum(rank_count_matrix, axis=1)
-    p_experiment_given_rank = p_rank_given_experiment.T
+    # Normalize the matrix
+    rank_prob_matrix = rank_count_matrix / num_samples
+
+    # Sort the table by MRR
+    reciprocal_rank = 1 / (np.arange(rank_prob_matrix.shape[0]) + 1)
+
+    mrr = np.sum(
+        reciprocal_rank[np.newaxis, :] * rank_prob_matrix,
+        axis=1,
+    )
+
+    idx = np.argsort(1 - mrr)
+    rank_prob_matrix = rank_prob_matrix[idx, :]
 
     result = ListwiseComparisonResult(
-        experiment_names=experiment_names,
+        experiment_names=[experiment_names[i] for i in idx],
         metric_name=metric_name,
-        p_rank_given_experiment=p_rank_given_experiment,
-        p_experiment_given_rank=p_experiment_given_rank,
+        p_rank_given_experiment=rank_prob_matrix,
+        p_experiment_given_rank=rank_prob_matrix.T,
     )
 
     return result

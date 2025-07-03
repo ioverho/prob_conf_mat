@@ -25,6 +25,7 @@ _DIRICHLET_PRIOR_STRATEGIES = {
 }
 
 
+# TODO: add support for other dtypes
 def dirichlet_prior(
     strategy: str | float | int | jtyping.Float[np.typing.ArrayLike, " ..."],
     shape: tuple[int, ...],
@@ -40,7 +41,7 @@ def dirichlet_prior(
                 f"A Dirichlet prior must contain positive values. Received: {strategy}",
             )
 
-        prior = np.full(shape, fill_value=strategy)
+        prior = np.full(shape, fill_value=strategy, dtype=np.float64)
 
     elif isinstance(strategy, str):
         if strategy not in _DIRICHLET_PRIOR_STRATEGIES:
@@ -50,12 +51,12 @@ def dirichlet_prior(
             )
 
         strategy_fill_value = _DIRICHLET_PRIOR_STRATEGIES[strategy]
-        prior = np.full(shape, fill_value=strategy_fill_value)
+        prior = np.full(shape, fill_value=strategy_fill_value, dtype=np.float64)
 
     else:
         try:
             # TODO: control dtype
-            prior = np.array(strategy, dtype=np.float32)
+            prior = np.array(strategy, dtype=np.float64)
         except Exception as e:  # noqa: BLE001
             raise ValueError(
                 f"While trying to convert {strategy} to a numpy array, "
@@ -97,6 +98,9 @@ def dirichlet_sample(
     Returns:
         jtyping.Float[np.ndarray, " num_samples ..."]: samples from the specified Dirichlet distribution
     """  # noqa: E501
+    # TODO: add support for other dtypes
+    alphas = alphas.astype(np.float64)
+
     # Broadcast alphas to the desired shape
     alphas = np.broadcast_to(alphas, (num_samples, *alphas.shape))
 

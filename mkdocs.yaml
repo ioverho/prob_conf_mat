@@ -46,6 +46,7 @@ nav:
   - Explanation:
       - "Explanation/generating_confusion_matrices.md"
       - "Explanation/experiment_aggregation.md"
+      - "Explanation/totsch_replication.ipynb"
 
 theme:
   name: material

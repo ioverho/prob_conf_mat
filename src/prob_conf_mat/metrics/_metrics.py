@@ -737,8 +737,8 @@ class FBeta(Metric):
 
     def compute_metric(
         self,
-        ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
-        tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
+        ppv: jtyping.Float[np.ndarray, " num_samplesnum_classes"],
+        tpr: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
         beta_2 = self.beta**2
 
@@ -783,7 +783,7 @@ class Informedness(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("tpr", "tnr")
     sklearn_equivalent = None
-    aliases = ["informedness", "youdenj", "youden_j", "bookmaker_informedness"]
+    aliases = ["informedness", "youdenj", "youden_j", "bookmaker_informedness", "bm"]
 
     def compute_metric(
         self,

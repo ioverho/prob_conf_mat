@@ -7,9 +7,11 @@ if typing.TYPE_CHECKING:
     import matplotlib.figure
     import matplotlib.axes
     import matplotlib.ticker
+    import pandas as pd
 
     from prob_conf_mat.utils.typing import MetricLike
     from prob_conf_mat.experiment_comparison.pairwise import PairwiseComparisonResult
+    from prob_conf_mat.experiment_comparison.listwise import ListwiseComparisonResult
     from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
 
 import warnings
@@ -657,9 +659,7 @@ class Study(Config):
         table_fmt: str = "html",
         precision: int = 4,
         include_observed_values: bool = False,
-    ) -> str:
-        import tabulate
-
+    ) -> list | pd.DataFrame | str:
         table = []
         for experiment_group_name, experiment_group in self._experiment_store.items():
             for experiment_name, _ in experiment_group.experiments.items():
@@ -697,7 +697,7 @@ class Study(Config):
                         sampling_method=SamplingMethod.INPUT,
                     )
 
-                    table_row.append(observed_experiment_result.values[:, class_label])
+                    table_row.append(observed_experiment_result.values[0, class_label])
 
                 table_row += [
                     distribution_summary.median,
@@ -716,13 +716,25 @@ class Study(Config):
 
         headers += [*distribution_summary.headers]  # type: ignore
 
-        table = tabulate.tabulate(  # type: ignore
-            tabular_data=table,
-            headers=headers,
-            floatfmt=f".{precision}f",
-            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
-            tablefmt=table_fmt,
-        )
+        # Apply formatting to the table
+        match table_fmt:
+            case "records":
+                pass
+            case "pd" | "pandas":
+                import pandas as pd
+
+                table = pd.DataFrame.from_records(data=table, columns=headers)
+
+            case _:
+                import tabulate
+
+                table = tabulate.tabulate(  # type: ignore
+                    tabular_data=table,
+                    headers=headers,
+                    floatfmt=f".{precision}f",
+                    colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
+                    tablefmt=table_fmt,
+                )
 
         return table
 
@@ -733,7 +745,7 @@ class Study(Config):
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> str:
+    ) -> list | pd.DataFrame | str:
         """Generates a table with summary statistics for all experiments.
 
         Args:
@@ -742,9 +754,12 @@ class Study(Config):
                 a multiclass metric. Defaults to None.
 
         Keyword Args:
-            table_fmt (str, optional): the format of the table, passed to
+            table_fmt (str, optional): the format of the table.
+                If 'records', the raw list of values is returned.
+                If 'pandas' or 'pd', a Pandas DataFrame is returned.
+                In all other cases, it is passed to
                 [tabulate](https://github.com/astanin/python-tabulate#table-format).
-                Defaults to "html".
+                Defaults to tabulate's "html".
             precision (int, optional): the required precision of the presented numbers.
                 Defaults to 4.
 
@@ -793,7 +808,7 @@ class Study(Config):
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> str:
+    ) -> list | pd.DataFrame | str:
         """Provides a table with metric results from a simulated random classifier.
 
         Args:
@@ -1311,14 +1326,42 @@ class Study(Config):
 
         return fig
 
-    def _pairwise_compare(
+    def get_pairwise_comparison(
         self,
-        metric: MetricLike,
-        class_label: int,
+        metric: str,  # type: ignore
+        class_label: int,  # type: ignore
+        *,
         experiment_a: str,
         experiment_b: str,
         min_sig_diff: float | None = None,
     ) -> PairwiseComparisonResult:
+        """Generates a `PairwiseComparisonResult` between two experiments in this study.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment_a (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            experiment_b (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            min_sig_diff (float | None, optional): the minimal difference which is considered
+                significant. Defaults to 0.1 * std.
+            precision (int, optional): the precision of floats used when printing. Defaults to 4.
+
+        Returns:
+            PairwiseComparisonResult: the unformatted `PairwiseComparisonResult`
+        """
+        # Typehint the metric and class_label variables
+        metric: MetricLike
+        class_label: int
+
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
         lhs_samples = self.get_metric_samples(
             metric=metric.name,
             experiment_name=experiment_a,
@@ -1437,8 +1480,8 @@ class Study(Config):
             class_label=class_label,
         )
 
-        comparison_result = self._pairwise_compare(
-            metric=metric,
+        comparison_result = self.get_pairwise_comparison(
+            metric=metric.name,
             class_label=class_label,
             experiment_a=experiment_a,
             experiment_b=experiment_b,
@@ -1621,8 +1664,8 @@ class Study(Config):
             class_label=class_label,
         )
 
-        comparison_result = self._pairwise_compare(
-            metric=metric,
+        comparison_result = self.get_pairwise_comparison(
+            metric=metric.name,
             class_label=class_label,
             experiment_a=experiment_a,
             experiment_b=experiment_b,
@@ -1942,13 +1985,31 @@ class Study(Config):
 
         return fig
 
-    def _pairwise_random_comparison(
+    def get_pairwise_random_comparison(
         self,
         metric: str,  # type: ignore
         class_label: int | None,  # type: ignore
+        *,
         experiment: str,
         min_sig_diff: float | None = None,
     ) -> PairwiseComparisonResult:
+        """Generates a `PairwiseComparisonResult` between an Experiment or ExperimentGroup
+        and a simulated random classifier.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment (str): the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+                format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
+            min_sig_diff (float | None, optional): the minimal difference which is considered
+                significant. Defaults to 0.1 * std.
+
+        Returns:
+            str: a description of the significance of the difference between
+                `experiment_a` and `experiment_b`
+        """  # noqa: D205
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
@@ -1991,8 +2052,8 @@ class Study(Config):
         min_sig_diff: float | None = None,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> str:
-        """Reports on the comparison between an Experiments or ExperimentGroups
+    ) -> list | pd.DataFrame | str:
+        """Reports on the comparison between an Experiment or ExperimentGroup
         and a simulated random classifier.
 
         Args:
@@ -2004,9 +2065,12 @@ class Study(Config):
                 format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
             min_sig_diff (float | None, optional): the minimal difference which is considered
                 significant. Defaults to 0.1 * std.
-            table_fmt (str, optional): the format of the table, passed to
+            table_fmt (str, optional): the format of the table.
+                If 'records', the raw list of values is returned.
+                If 'pandas' or 'pd', a Pandas DataFrame is returned.
+                In all other cases, it is passed to
                 [tabulate](https://github.com/astanin/python-tabulate#table-format).
-                Defaults to "html".
+                Defaults to tabulate's "html".
             precision (int, optional): the precision of floats used when printing. Defaults to 4.
 
         Returns:
@@ -2031,12 +2095,10 @@ class Study(Config):
             | GROUP   | EXPERIMENT_B |     0.3231 |        1.0000 | [-0.0056, 0.0056] |   0.0000 |  1.0000 |
             ```
         """  # noqa: D205, E501
-        import tabulate
-
         records = []
 
         for experiment in self.all_experiments():
-            random_comparison_result = self._pairwise_random_comparison(
+            random_comparison_result = self.get_pairwise_random_comparison(
                 metric=metric,
                 class_label=class_label,
                 experiment=experiment,
@@ -2070,63 +2132,42 @@ class Study(Config):
 
             records.append(random_comparison_record)
 
-        table = tabulate.tabulate(  # type: ignore
-            tabular_data=records,
-            headers="keys",
-            floatfmt=f".{precision}f",
-            colalign=["left", "left"]
-            + ["decimal" for _ in range(len(records[0].keys()) - 2)],
-            tablefmt=table_fmt,
-        )
+        match table_fmt:
+            case "records":
+                table = records
+            case "pd" | "pandas":
+                import pandas as pd
+
+                table = pd.DataFrame.from_records(data=records)
+
+            case _:
+                import tabulate
+
+                table = tabulate.tabulate(  # type: ignore
+                    tabular_data=records,
+                    headers="keys",
+                    floatfmt=f".{precision}f",
+                    colalign=["left", "left"]
+                    + ["decimal" for _ in range(len(records[0].keys()) - 2)],
+                    tablefmt=table_fmt,
+                )
 
         return table
 
-    def report_listwise_comparison(
+    def get_listwise_comparsion_result(
         self,
         metric: str,  # type: ignore
         class_label: int | None = None,  # type: ignore
-        *,
-        table_fmt: str = "html",
-        precision: int = 4,
-    ) -> str:
-        """Reports the probability for an experiment achieving a rank when compared to all other
-        experiments on the same metric.
+    ) -> ListwiseComparisonResult:
+        """Generates a `ListwiseComparisonResult` comparing all Experiments in this study.
 
         Args:
             metric (str): the name of the metric
-            class_label (int | None, optional): the class label. Leave 0 or None if using a
-                multiclass metric. Defaults to None.
-
-        Keyword Args:
-            table_fmt (str, optional): the format of the table, passed to
-                [tabulate](https://github.com/astanin/python-tabulate#table-format).
-                Defaults to "html".
-            precision (int, optional): the required precision of the presented numbers.
-                Defaults to 4.
+            class_label (int | None, optional): the class label. Defaults to None.
 
         Returns:
-            str: the table as a string
-
-        Examples:
-            Prints the probability of all experiments achieving a particular rank when
-            compared against all others.
-            >>> print(
-            ...     study.report_listwise_comparison(
-            ...         metric="acc",
-            ...         class_label=0,
-            ...         table_fmt="github",
-            ...     ),
-            ... )
-
-            ```
-            | Group   | Experiment   |   Rank 1 |   Rank 2 |
-            |---------|--------------|----------|----------|
-            | GROUP   | EXPERIMENT_A |   0.4987 |   0.5013 |
-            | GROUP   | EXPERIMENT_B |   0.5013 |   0.4987 |
-            ```
-        """  # noqa: D205
-        import tabulate
-
+            ListwiseComparisonResult: the unformatted `ListwiseComparisonResult`
+        """
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
@@ -2147,28 +2188,118 @@ class Study(Config):
             for experiment in self.all_experiments()
         }
 
-        p_experiment_given_rank_arr = listwise_compare(
-            experiment_values_dict=experiment_values,
+        listwise_comparison_result = listwise_compare(
+            experiment_scores_dict=experiment_values,
             metric_name=metric.name,
-        ).p_experiment_given_rank
+        )
+
+        return listwise_comparison_result
+
+    def report_listwise_comparison(
+        self,
+        metric: str,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        *,
+        table_fmt: str = "html",
+        precision: int = 4,
+    ) -> list | pd.DataFrame | str:
+        """Reports the probability for an experiment achieving a rank when compared to all other
+        experiments on the same metric.
+
+        Any probability values smaller than the precision are discarded.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Leave 0 or None if using a
+                multiclass metric. Defaults to None.
+
+        Keyword Args:
+            table_fmt (str, optional): the format of the table.
+                If 'records', the raw list of values is returned.
+                If 'pandas' or 'pd', a Pandas DataFrame is returned.
+                In all other cases, it is passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to tabulate's "html".
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
+
+        Returns:
+            str: the table as a string
+
+        Examples:
+            Prints the probability of all experiments achieving a particular rank when
+            compared against all others.
+            >>> print(
+            ...     study.report_listwise_comparison(
+            ...         metric="acc",
+            ...         class_label=0,
+            ...         table_fmt="github",
+            ...     ),
+            ... )
+
+            ```
+            | Group   | Experiment   |   Rank 1 |   Rank 2 |
+            |---------|--------------|----------|----------|
+            | GROUP   | EXPERIMENT_B |   0.5013 |   0.4987 |
+            | GROUP   | EXPERIMENT_A |   0.4987 |   0.5013 |
+            ```
+        """  # noqa: D205
+        # Typehint the metric and class_label variables
+        metric: MetricLike
+        class_label: int
+
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        listwise_comparison_result = self.get_listwise_comparsion_result(
+            metric=metric.name,
+            class_label=class_label,
+        )
 
         headers = ["Group", "Experiment"] + [
-            f"Rank {i + 1}" for i in range(p_experiment_given_rank_arr.shape[0])
+            f"Rank {i + 1}"
+            for i in range(
+                listwise_comparison_result.p_experiment_given_rank.shape[0],
+            )
         ]
 
-        table = tabulate.tabulate(  # type: ignore
-            tabular_data=[
-                [*self._split_experiment_name(experiment_names), *row]
-                for row, experiment_names in zip(
-                    p_experiment_given_rank_arr,
-                    self.all_experiments(),
-                )
-            ],
-            tablefmt=table_fmt,
-            floatfmt=f".{precision}f",
-            headers=headers,
-            colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
+        p_experiment_given_rank = (
+            listwise_comparison_result.p_experiment_given_rank.tolist()
         )
+        for row_id, row in enumerate(p_experiment_given_rank):
+            for col_id, val in enumerate(row):
+                if val <= (10 ** (-precision)):
+                    p_experiment_given_rank[row_id][col_id] = None
+
+        records = [
+            [*self._split_experiment_name(experiment_name), *row]
+            for experiment_name, row in zip(
+                listwise_comparison_result.experiment_names,
+                p_experiment_given_rank,
+            )
+        ]
+
+        match table_fmt:
+            case "records":
+                table = records
+            case "pd" | "pandas":
+                import pandas as pd
+
+                table = pd.DataFrame.from_records(data=records, columns=headers)
+
+            case _:
+                import tabulate
+
+                table = tabulate.tabulate(  # type: ignore
+                    tabular_data=records,
+                    tablefmt=table_fmt,
+                    floatfmt=f".{precision}f",
+                    headers=headers,
+                    colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
+                    missingval="",
+                )
 
         return table
 
@@ -2179,7 +2310,7 @@ class Study(Config):
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> str:
+    ) -> list | pd.DataFrame | str:
         """Reports on the aggregation of Experiments in all ExperimentGroups.
 
         Args:
@@ -2187,9 +2318,12 @@ class Study(Config):
             class_label (int | None, optional): the class label. Defaults to None.
 
         Keyword Args:
-            table_fmt (str, optional): the format of the table, passed to
+            table_fmt (str, optional): the format of the table.
+                If 'records', the raw list of values is returned.
+                If 'pandas' or 'pd', a Pandas DataFrame is returned.
+                In all other cases, it is passed to
                 [tabulate](https://github.com/astanin/python-tabulate#table-format).
-                Defaults to "html".
+                Defaults to tabulate's "html".
             precision (int, optional): the precision of floats used when printing. Defaults to 4.
 
 
@@ -2214,8 +2348,6 @@ class Study(Config):
             ```
 
         """  # noqa: E501
-        import tabulate
-
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
@@ -2297,13 +2429,24 @@ class Study(Config):
             "I2",
         ]
 
-        table = tabulate.tabulate(  # type: ignore
-            tabular_data=table,
-            headers=headers,
-            floatfmt=f".{precision}f",
-            colalign=["left"] + ["decimal" for _ in headers[1:]],
-            tablefmt=table_fmt,
-        )
+        match table_fmt:
+            case "records":
+                pass
+            case "pd" | "pandas":
+                import pandas as pd
+
+                table = pd.DataFrame.from_records(data=table, columns=headers)
+
+            case _:
+                import tabulate
+
+                table = tabulate.tabulate(  # type: ignore
+                    tabular_data=table,
+                    headers=headers,
+                    floatfmt=f".{precision}f",
+                    colalign=["left"] + ["decimal" for _ in headers[1:]],
+                    tablefmt=table_fmt,
+                )
 
         return table
 
