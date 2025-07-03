@@ -1166,6 +1166,8 @@ Version 0.1.0-pre.1. This library is still under active development. Expect bugs
       
         
       
+        
+      
     
     
     
@@ -2099,9 +2101,12 @@ a multiclass metric. Defaults to None.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the format of the table, passed to
+            <p>the format of the table.
+If 'records', the raw list of values is returned.
+If 'pandas' or 'pd', a Pandas DataFrame is returned.
+In all other cases, it is passed to
 <a href="https://github.com/astanin/python-tabulate#table-format">tabulate</a>.
-Defaults to "html".</p>
+Defaults to tabulate's "html".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -2119,7 +2124,7 @@ Defaults to 4.</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-<b><code>str</code></b> (              <code><span title="str">str</span></code>
+<b><code>str</code></b> (              <code><span title="list">list</span> | <span title="pandas.DataFrame">DataFrame</span> | <span title="str">str</span></code>
 )          –
           <div class="doc-md-description">
             <p>the table as a string</p>
@@ -2211,7 +2216,7 @@ Defaults to 4.</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-<b><code>str</code></b> (              <code><span title="str">str</span></code>
+<b><code>str</code></b> (              <code><span title="list">list</span> | <span title="pandas.DataFrame">DataFrame</span> | <span title="str">str</span></code>
 )          –
           <div class="doc-md-description">
             <p>the table as a string</p>
@@ -2727,7 +2732,7 @@ significant. Defaults to 0.1 * std.</p>
 
     <div class="doc doc-contents first">
 
-        <p>Reports on the comparison between an Experiments or ExperimentGroups
+        <p>Reports on the comparison between an Experiment or ExperimentGroup
 and a simulated random classifier.</p>
 
 
@@ -2779,9 +2784,12 @@ significant. Defaults to 0.1 * std.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the format of the table, passed to
+            <p>the format of the table.
+If 'records', the raw list of values is returned.
+If 'pandas' or 'pd', a Pandas DataFrame is returned.
+In all other cases, it is passed to
 <a href="https://github.com/astanin/python-tabulate#table-format">tabulate</a>.
-Defaults to "html".</p>
+Defaults to tabulate's "html".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -2798,7 +2806,7 @@ Defaults to "html".</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-<b><code>str</code></b> (              <code><span title="str">str</span></code>
+<b><code>str</code></b> (              <code><span title="list">list</span> | <span title="pandas.DataFrame">DataFrame</span> | <span title="str">str</span></code>
 )          –
           <div class="doc-md-description">
             <p>a description of the significance of the difference between
@@ -3284,6 +3292,7 @@ Defaults to True.</p>
 
         <p>Reports the probability for an experiment achieving a rank when compared to all other
 experiments on the same metric.</p>
+<p>Any probability values smaller than the precision are discarded.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3317,9 +3326,12 @@ multiclass metric. Defaults to None.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the format of the table, passed to
+            <p>the format of the table.
+If 'records', the raw list of values is returned.
+If 'pandas' or 'pd', a Pandas DataFrame is returned.
+In all other cases, it is passed to
 <a href="https://github.com/astanin/python-tabulate#table-format">tabulate</a>.
-Defaults to "html".</p>
+Defaults to tabulate's "html".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -3337,7 +3349,7 @@ Defaults to 4.</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-<b><code>str</code></b> (              <code><span title="str">str</span></code>
+<b><code>str</code></b> (              <code><span title="list">list</span> | <span title="pandas.DataFrame">DataFrame</span> | <span title="str">str</span></code>
 )          –
           <div class="doc-md-description">
             <p>the table as a string</p>
@@ -3359,8 +3371,8 @@ compared against all others.</p>
 </span></code></pre></div>
     <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>| Group   | Experiment   |   Rank 1 |   Rank 2 |
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>|---------|--------------|----------|----------|
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>| GROUP   | EXPERIMENT_A |   0.4987 |   0.5013 |
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>| GROUP   | EXPERIMENT_B |   0.5013 |   0.4987 |
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>| GROUP   | EXPERIMENT_B |   0.5013 |   0.4987 |
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>| GROUP   | EXPERIMENT_A |   0.4987 |   0.5013 |
 </span></code></pre></div>
 
 
@@ -3413,9 +3425,12 @@ compared against all others.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the format of the table, passed to
+            <p>the format of the table.
+If 'records', the raw list of values is returned.
+If 'pandas' or 'pd', a Pandas DataFrame is returned.
+In all other cases, it is passed to
 <a href="https://github.com/astanin/python-tabulate#table-format">tabulate</a>.
-Defaults to "html".</p>
+Defaults to tabulate's "html".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -3432,7 +3447,7 @@ Defaults to "html".</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-<b><code>str</code></b> (              <code><span title="str">str</span></code>
+<b><code>str</code></b> (              <code><span title="list">list</span> | <span title="pandas.DataFrame">DataFrame</span> | <span title="str">str</span></code>
 )          –
           <div class="doc-md-description">
             <p>the table with experiment aggregation statistics as a string</p>
