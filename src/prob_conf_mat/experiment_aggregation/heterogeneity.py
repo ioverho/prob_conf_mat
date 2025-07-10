@@ -166,7 +166,7 @@ class HeterogeneityResult:
 def estimate_i2(
     individual_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
 ) -> HeterogeneityResult:
-    """Estimates a generalised I^2 metric, as suggested by Bowden et al. [1].
+    """Estimates a generalised $I^2$ metric, as suggested by Bowden et al. [1].
 
     It measures the amount of variance attributable to within-experiment variance vs.
     between-experiment variance. The between experiment variance is estimated using a
@@ -183,7 +183,7 @@ def estimate_i2(
             samples from individual experiments
 
     Returns:
-        float: the I^2 estimate
+        float: the $I^2$ estimate
     """
     if individual_samples.shape[1] == 1:
         result = HeterogeneityResult(
@@ -235,7 +235,7 @@ def interpret_i2(
     "considerable heterogeneity",
     "unknown",
 ]:
-    """Interprets I^2 values using prescribed guidelines [1].
+    """Interprets $I^2$ values using prescribed guidelines [1].
 
     References: Read More:
         1. Higgins, J. P., & Green, S. (Eds.). (2008). Cochrane handbook for
