@@ -6,19 +6,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'documentation/**'
-      - 'mkdocs.yaml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'documentation/**'
-      - 'mkdocs.yaml'
 
 permissions:
   contents: write
