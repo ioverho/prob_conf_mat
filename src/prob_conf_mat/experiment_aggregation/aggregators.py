@@ -64,7 +64,7 @@ class BetaAggregator(ExperimentAggregator):
     estimated as:
 
     $$\begin{aligned}
-        \tilde{\alpha}&=\left[\sum_{i=1}^{M}\alpha_{i}\right]-\left(M-1\right) \\
+        \tilde{\alpha}&=\left[\sum_{i=1}^{M}\alpha_{i}\right]-\left(M-1\right) \
         \tilde{\beta}&=\left[\sum_{i=1}^{M}\beta_{i}\right]-\left(M-1\right)
     \end{aligned}$$
 
@@ -113,33 +113,6 @@ class BetaAggregator(ExperimentAggregator):
                 "Beta aggregation does not (yet) support metrics with infite bounds.",
             )
 
-        # Tranform the data to lie in the bounds of the beta distribution
-        # if bounds[0] != 0.0 or bounds[1] != 1.0:
-        #    if bounds[0] == -float("inf") or bounds[1] == float("inf"):
-        #        raise NotImplementedError(
-        #            "Beta aggregation does not (yet) support metrics with infite bounds."
-        #        )
-        #
-        #    transformed_distribution_samples = (distribution_samples - bounds[0]) / (
-        #        bounds[1] - bounds[0]
-        #    )
-        #
-        # else:
-        #    transformed_distribution_samples = distribution_samples
-        #
-        ## Try to shift any values at the bounds just off the bounds using 'prior'
-        ## https://stats.stackexchange.com/a/31313
-        ## Otherwise MLE breaks
-        # if (
-        #    np.min(transformed_distribution_samples) == 0.0
-        #    or np.max(transformed_distribution_samples) == 1.0
-        # ):
-        #    mome_mean = np.mean(transformed_distribution_samples)
-        #
-        #    transformed_distribution_samples = (
-        #        transformed_distribution_samples * (num_samples - 1) + mome_mean
-        #    ) / num_samples
-
         alphas = []
         betas = []
         for per_experiment_samples in experiment_samples.T:
@@ -183,13 +156,13 @@ class BetaAggregator(ExperimentAggregator):
 class GammaAggregator(ExperimentAggregator):
     r"""Samples from the Gamma-conflated distribution.
 
-    Specifically, the aggregate distribution $\\text{Gamma}(\\tilde{\\alpha}, \\tilde{\\beta})$
-    ($\\alpha$ is the shape, $\\beta$ the rate parameter) is estimated as:
+    Specifically, the aggregate distribution $\text{Gamma}(\tilde{\alpha}, \tilde{\beta})$
+    ($\alpha$ is the shape, $\beta$ the rate parameter) is estimated as:
 
-    $$\\begin{aligned}
-        \\tilde{\\alpha}&=\\left[\\sum_{i}^{M}\\alpha_{i}\\right]-(M-1) \\\\
-        \\tilde{\\beta}&=\\dfrac{1}{\\sum_{i}^{M}\\beta_{i}^{-1}}
-    \\end{aligned}$$
+    $$\begin{aligned}
+        \tilde{\alpha}&=\left[\sum_{i}^{M}\alpha_{i}\right]-(M-1) \
+        \tilde{\beta}&=\dfrac{1}{\sum_{i}^{M}\beta_{i}^{-1}}
+    \end{aligned}$$
 
     where $M$ is the total number of experiments.
 
@@ -281,13 +254,13 @@ class FEGaussianAggregator(ExperimentAggregator):
     This is equivalent to the fixed-effects meta-analytical estimator.
 
     Uses the inverse variance weighted mean and standard errors. Specifically, the aggregate
-    distribution $\\mathcal{N}(\\tilde{\\mu}, \\tilde{\\sigma})$ is estimated as:
+    distribution $\mathcal{N}(\tilde{\mu}, \tilde{\sigma})$ is estimated as:
 
-    $$\\begin{aligned}
-        w_{i}&=\\dfrac{\\sigma_{i}^{-2}}{\\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
-        \\tilde{\\mu}&=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-        \\tilde{\\sigma^2}&=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
-    \\end{aligned}$$
+    $$\begin{aligned}
+        w_{i}&=\dfrac{\sigma_{i}^{-2}}{\sum_{j}^{M}\sigma_{j}^{-2}} \\
+        \tilde{\mu}&=\sum_{i}^{M}w_{i}\mu_{i} \\
+        \tilde{\sigma^2}&=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+    \end{aligned}$$
 
     where $M$ is the total number of experiments.
 
@@ -351,15 +324,15 @@ class REGaussianAggregator(ExperimentAggregator):
     fixed-effects model.
 
     Specifically, starting with a Fixed-Effects model
-    $\\mathcal{N}(\\tilde{\\mu_{\\text{FE}}}, \\tilde{\\sigma_{\\text{FE}}})$,
+    $\mathcal{N}(\tilde{\mu_{\text{FE}}}, \tilde{\sigma_{\text{FE}}})$,
 
-    $$\\begin{aligned}
-        w_{i}&=\\dfrac{\\left(\\sigma_{i}^2+\\tau^2\\right)^{-1}}{\\sum_{j}^{M}\\left(\\sigma_{j}^2+\\tau^2\\right)^{-1}} \\\\
-        \\tilde{\\mu}&=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-        \\tilde{\\sigma^2}&=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
-    \\end{aligned}$$
+    $$\begin{aligned}
+        w_{i}&=\dfrac{\left(\sigma_{i}^2+\tau^2\right)^{-1}}{\sum_{j}^{M}\left(\sigma_{j}^2+\tau^2\right)^{-1}} \\
+        \tilde{\mu}&=\sum_{i}^{M}w_{i}\mu_{i} \\
+        \tilde{\sigma^2}&=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+    \end{aligned}$$
 
-    where $\\tau$ is the estimated inter-experiment heterogeneity, and $M$ is the total number
+    where $\tau$ is the estimated inter-experiment heterogeneity, and $M$ is the total number
     of experiments.
 
     Uses the Paule-Mandel iterative heterogeneity estimator, which does not make a parametric
