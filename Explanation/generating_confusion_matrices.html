@@ -16,7 +16,7 @@
         <link rel="prev" href="../Reference/Statistics.html">
       
       
-        <link rel="next" href="experiment_aggregation.html">
+        <link rel="next" href="metric_computation.html">
       
       
       <link rel="icon" href="../assets/logo_square.svg">
@@ -98,6 +98,19 @@
       
     
     
+    
+    
+        
+    
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Probabilistic Confusion Matrices - Generating Confusion Matrices" />
+<meta property="og:description" content="" />
+<meta property="og:url" content="https://github.com/ioverho/prob_conf_mat/Explanation/generating_confusion_matrices.html" />
+<meta property="og:image" content="https://ioverho.github.io/prob_conf_mat/assets/social-preview.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
   </head>
   
   
@@ -633,6 +646,10 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       
         
       
+        
+      
+        
+      
     
     
     
@@ -729,9 +746,9 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#binary-confusion-matrices" class="md-nav__link">
+  <a href="#sampling-confusion-matrices" class="md-nav__link">
     <span class="md-ellipsis">
-      Binary Confusion Matrices
+      Sampling Confusion Matrices
     </span>
   </a>
   
@@ -762,12 +779,58 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
   
     <li class="md-nav__item">
+      <a href="metric_computation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Computing Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="experiment_aggregation.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     Experiment Aggregation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hypothesis_testing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Experiment Comparison
     
   </span>
   
@@ -835,9 +898,9 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#binary-confusion-matrices" class="md-nav__link">
+  <a href="#sampling-confusion-matrices" class="md-nav__link">
     <span class="md-ellipsis">
-      Binary Confusion Matrices
+      Sampling Confusion Matrices
     </span>
   </a>
   
@@ -872,10 +935,21 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
 
 <h1 id="generating-confusion-matrices">Generating Confusion Matrices<a class="headerlink" href="#generating-confusion-matrices" title="Permanent link">#</a></h1>
-<p>Let <span class="arithmatex">\(f\)</span> be some classification model, <span class="arithmatex">\(f:\mathcal{X}\rightarrow \mathcal{Y}\)</span>. Evaluated on a dataset <span class="arithmatex">\((x_{n},y_{n})\in\mathcal{D}\)</span> of size <span class="arithmatex">\(N\)</span>, the classifier produces a set of predictions <span class="arithmatex">\(\hat{y}_n\)</span>, whose value lies in <span class="arithmatex">\(\{1..|\mathcal{Y}|\}\)</span>; i.e., for each input data point, the classification produces a probable class.</p>
-<p>The confusion matrix, <span class="arithmatex">\(\mathbf{C}\)</span>, is a <span class="arithmatex">\(\left|\mathcal{Y}\right|\times\left|\mathcal{Y}\right|\)</span> matrix whose entries contain the count of each <span class="arithmatex">\((y_{n}, \hat{y}_{n})\)</span> pair. Thus, element <span class="arithmatex">\(\mathbf{C}_{i,j}\)</span> denotes the number of times the model predict class <span class="arithmatex">\(i\)</span>, when it should have predicted class <span class="arithmatex">\(j\)</span>.</p>
-<p>In a binary classification scenario (<span class="arithmatex">\(|\mathcal{Y}|=2\)</span>), each element of the confusion matrix has a semantic interpretation. Assuming the positive class has index <span class="arithmatex">\(1\)</span>, element <span class="arithmatex">\(\mathbf{C}_{1,1}\)</span> contains the number of True Positives (TP). The model correctly predicted the condition was present. Element <span class="arithmatex">\(\mathbf{C}_{1,2}\)</span> contains the count of False Negatives (FN). The model predicted the condition was <em>not</em> present, when in truth it was. This is the opposite of element <span class="arithmatex">\(\mathbf{C}_{2,1}\)</span>, the False Positives (FP). There the model does predict the condition is present, when in truth it is not. Finally, element <span class="arithmatex">\(\mathbf{C}_{2,2}\)</span> contains the count of all predictions which correctly estimated that the condition was not present, the True Negatives (TN).</p>
-<!-- TODO:  update this figure. FP <-> FN -->
+<p>Classifiers, or classification models, are everywhere in machine-learning. Specifically, we consider models, denoted <span class="arithmatex">\(f\)</span>, which map some set of input features <span class="arithmatex">\(X\)</span> to a condition <span class="arithmatex">\(Y\)</span>: <span class="arithmatex">\(\hat{y}=f(x),~\mathcal{X}\rightarrow \mathcal{Y}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>I use the word 'condition' here, because it seems to be the convention in the (bio)statistics literature. The word 'class', 'label', 'target' are all equivalent.</p>
+</div>
+<p>The goal of a machine-learning algorithm is typically to optimize the classifier over some training data where labels are available, <span class="arithmatex">\((x_{n},y_{n})\in\mathcal{D}^{\text{(train)}}\)</span>, in order to perform well on data where labels are <strong>not</strong> available. Since we want to deploy the classifier on unseen data, but since we do not have access to deployment data distribution, we instead estimate the model's 'performance' on a held-out subset of our data <span class="arithmatex">\(\mathcal{D}^{\text{(test)}}\)</span>, such that <span class="arithmatex">\(\mathcal{D}^{\text{(train)}}\cup \mathcal{D}^{\text{(test)}}=\varnothing\)</span>.</p>
+<p>The confusion matrix, <span class="arithmatex">\(\mathbf{C}\)</span>, is a <span class="arithmatex">\(\left|\mathcal{Y}\right|\times\left|\mathcal{Y}\right|\)</span> matrix that summarizes the model's performance on the test set. Each entry contains the count of a <span class="arithmatex">\((y_{n}, \hat{y}_{n})\)</span> pair. In other words, element <span class="arithmatex">\(\mathbf{C}_{i,j}\)</span> denotes the number of times the model predict class <span class="arithmatex">\(j\)</span>, when the sample's condition is actually <span class="arithmatex">\(i\)</span>.</p>
+<p>In a binary classification scenario (<span class="arithmatex">\(|\mathcal{Y}|=2\)</span>), each element of the confusion matrix has a simple interpretation. Assuming the positive class is index <span class="arithmatex">\(1\)</span>:</p>
+<ul>
+<li><span class="arithmatex">\(\mathbf{C}_{1,1}\)</span> contains the number of True Positives (TP), where the model correctly predicts the condition is present</li>
+<li><span class="arithmatex">\(\mathbf{C}_{1,2}\)</span> contains the count of False Negatives (FN), where the model predicted the condition is <em>not</em> present, when in truth it was</li>
+<li><span class="arithmatex">\(\mathbf{C}_{2,1}\)</span>, the False Positives (FP), where the model predicts the condition is present, when in truth it is not</li>
+<li><span class="arithmatex">\(\mathbf{C}_{2,2}\)</span>, the True Negatives (TN), contains the count of all predictions for which the model correctly estimated that the condition was not present</li>
+</ul>
+<p>Visually, this looks like:</p>
 <p><img
     style="display: block;
            margin-left: auto;
@@ -884,12 +958,13 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     src="../assets/figures/binary_confusion_matrix.svg"
     alt="A binary confusion matrix">
 </img></p>
-<p>For convenience, we normalize <span class="arithmatex">\(\mathbf{C}\)</span>, such that <span class="arithmatex">\(\sum_{i,j}\mathbf{C}_{i,j}=1\)</span>. Instead of counts, each element now contains the proportion of predictions that is a TP, FP, FN or TN. In effect, we can see this as the joint probability distribution <span class="arithmatex">\(p(Y, \hat{Y})\)</span>.</p>
-<h2 id="binary-confusion-matrices">Binary Confusion Matrices<a class="headerlink" href="#binary-confusion-matrices" title="Permanent link">#</a></h2>
-<p>...</p>
-<p>Totsch et al. () model the binary confusion matrix through the product of probabilities:</p>
+<h2 id="sampling-confusion-matrices">Sampling Confusion Matrices<a class="headerlink" href="#sampling-confusion-matrices" title="Permanent link">#</a></h2>
+<p>With <code>prob_conf_mat</code>, we want to be able to quantify the uncertainty present in our metric estimates stemming from the size and composition of the test data. To achieve this, we generate synthetic confusion matrices by sampling from the product of two <a href="https://en.wikipedia.org/wiki/Dirichlet_distribution#Bayesian_models">Dirichlet-Categorical posteriors</a>.</p>
+<p>This approach is directly inspired by two papers <a href="https://link.springer.com/article/10.1007/s10472-017-9564-8">Caelen (2017)</a><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> and <a href="https://peerj.com/articles/cs-398.pdf">Tötsch et al. (2020)</a><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>. The former treats the entire confusion matrix as a single Dirichlet-Categorical model, whereas the latter computes a <a href="https://en.wikipedia.org/wiki/Beta-binomial_distribution">Beta-Binomial distribution</a> for three distinct quantities, and reconstructs the confusion matrix through their product. In either approach, however, the posterior is 'learned' by taking into account the various different counts of prediction-condition pairs.</p>
+<p>Most important to <code>prob_conf_mat</code> is the Tötsch model. In their paper<sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, they show that the confidence intervals they produce are consistently closer to the truth than those produced by Caelen (2017)<sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, despite the simpler model used in the latter.</p>
+<p>Specifically, Tötsch et al. (2020)<sup id="fnref3:2"><a class="footnote-ref" href="#fn:2">2</a></sup> model the binary confusion matrix as products of the following probabilities:</p>
 <ul>
-<li>The prevalence <span class="arithmatex">\(\phi\)</span>, or how often the condition occurs</li>
+<li>The prevalence <span class="arithmatex">\(\phi\)</span>, or how often each condition occurs</li>
 </ul>
 <div class="arithmatex">\[
 \phi=\dfrac{\text{TP}+\text{FN}}{\text{TP}+\text{FN}+\text{FP}+\text{TN}}
@@ -917,10 +992,11 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     \text{TNR}&amp;\sim \text{Beta}\left(\alpha+\text{TN},\beta+\text{FN}\right)
 \end{align*}
 \]</div>
-<p>Here, <span class="arithmatex">\(\alpha\)</span> and <span class="arithmatex">\(\beta\)</span> are prior hyperparameters.</p>
-<p>With the Totsch model, it's possible to produce plausible synthetic confusion matrices by sampling a prevalence, true positive rate and true negative rate independently, and computing four products. At least for their purposes, this model proved highly effective at generating counterfactual confusion matrices, and allowed the authors to provide confidence intervals for any metric.</p>
+<p>Here, <span class="arithmatex">\(\alpha\)</span> and <span class="arithmatex">\(\beta\)</span> are different prior hyperparameters.</p>
+<p>With the Tötsch model, it's possible to produce plausible synthetic confusion matrices by sampling a prevalence, true positive rate and true negative rate independently, and computing four products. At least for their purposes, this model proved highly effective at generating counterfactual confusion matrices, and allowed the authors to provide confidence intervals for any metric.</p>
+<p>One difference between the Tötsch model and convention, however, is that their approach only generates <em>normalized</em> confusion matrices, i.e., <span class="arithmatex">\(\sum_{i,j}\mathbf{C}_{i,j}=1\)</span>. As we'll see in <a href="metric_computation.html">another explainer</a>, this has no effect on the value of the computed metrics.</p>
 <h2 id="multi-class-confusion-matrices">Multi-Class Confusion Matrices<a class="headerlink" href="#multi-class-confusion-matrices" title="Permanent link">#</a></h2>
-<p>While the Totsch model is useful for binary confusion matrices, it does not allow for modelling multi-class confusion matrices. In a multi-class confusion matrix, each class has its own set of TP, FN, FP, and TN. Specifically, all the elements on the same row or column form the FN and FP, respectively, and the TN are all elements which share neither the same row or column.</p>
+<p>While the Tötsch model is applicable to binary confusion matrices, they did not make the extension to multi-class confusion matrices. In a multi-class confusion matrix, each condition has its own set of TP, FN, FP, and TN. Specifically, all the elements on the same row or column form the FN and FP, respectively, and the TN are all elements which share neither the same row or column. This is pictured in the following figure:</p>
 <p><img
     style="display: block;
            margin-left: auto;
@@ -929,19 +1005,19 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     src="../assets/figures/multiclass_confusion_matrix.svg"
     alt="A multi-class confusion matrix">
 </img></p>
-<p>Luckily, an extension is easily made. Recall that we can view the normalized confusion matrix as the joint probability distribution: <span class="arithmatex">\(p(Y, \hat{Y})\)</span>. By the definition of the conditional probability distribution, we can rewrite this as,</p>
+<p>Luckily, an extension is easily made. Given that the method presently only produces normalized confusion matrices, we can essentially view this as a joint probability distribution: <span class="arithmatex">\(p(Y, \hat{Y})\)</span>. Then, by the definition of the conditional probability distribution, we can rewrite this as,</p>
 <div class="arithmatex">\[
 p(Y, \hat{Y})=p(\hat{Y}|Y)p(Y)
 \]</div>
-<p>Here <span class="arithmatex">\(p(Y)\)</span> is the probability of a particular condition occurring, i.e., the prevalence, and <span class="arithmatex">\(p(\hat{Y}|Y)\)</span> is the probability of a model making a certain prediction, given that the ground-truth condition is <span class="arithmatex">\(Y=y\)</span>. We call this the confusion conditional.</p>
-<p>Note that the above <span class="arithmatex">\(\text{TPR}\)</span> and <span class="arithmatex">\(\text{TNR}\)</span> rates are essentially just different elements of that confusion conditional:</p>
+<p>Here <span class="arithmatex">\(p(Y)\)</span> is the probability of a particular condition occurring, and <span class="arithmatex">\(p(\hat{Y}|Y)\)</span> is the probability of a model making a certain prediction, given that the ground-truth condition is <span class="arithmatex">\(Y=y\)</span>. The former is simply the multi-class prevalence, and the latter we call the confusion conditional. The <span class="arithmatex">\(\text{TPR}\)</span> and <span class="arithmatex">\(\text{TNR}\)</span> rates are essentially just different elements of that confusion conditional:</p>
 <div class="arithmatex">\[
 \begin{align*}
 \text{TPR}=p(Y=2|\hat{Y}=1),&amp;\quad (1-\text{TPR})=p(Y=1|\hat{Y}=1)\\
 \text{TNR}=p(Y=1|\hat{Y}=2),&amp;\quad (1-\text{TNR})=p(Y=2|\hat{Y}=2) \\
 \end{align*}
 \]</div>
-<p>So in practice, the Totsch model is just computing the product between the prevalence of a class <span class="arithmatex">\(p(Y)\)</span>, and the confusion conditional, <span class="arithmatex">\(p(\hat{Y}|Y)\)</span>. This is easy to replicate in a multi-class setting. We sample each row of the confusion conditional and the prevalence marginal from a <a href="https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution">Dirichlet-Multinomial model</a>. Then, to construct a confusion matrix, we compute the product between the two. Specifically, we generate each synthetic confusion matrix, <span class="arithmatex">\(\tilde{\mathbf{C}}\)</span> as the Hadamard product between the sampled conditional confusion matrix, and the sampled prevalence vector:</p>
+<p>So in practice, the Tötsch model is just computing the product between the prevalence of a class <span class="arithmatex">\(p(Y)\)</span>, and the confusion conditional, <span class="arithmatex">\(p(\hat{Y}|Y)\)</span>.</p>
+<p>This is easy to replicate in a multi-class setting. We sample each row of the confusion conditional and the prevalence marginal from a <a href="https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution">Dirichlet-Multinomial model</a>. Then, to construct a confusion matrix, we compute the product between the two. Specifically, we generate each synthetic confusion matrix, <span class="arithmatex">\(\tilde{\mathbf{C}}\)</span> as the Hadamard product between the sampled conditional confusion matrix, and the sampled prevalence vector:</p>
 <div class="arithmatex">\[
 \begin{align*}
 \tilde{\mathbf{C}}=~~&amp;\text{Diag}(\phi)
@@ -957,6 +1033,44 @@ p(Y, \hat{Y})=p(\hat{Y}|Y)p(Y)
 \end{align*}
 \]</div>
 <p>where <span class="arithmatex">\(\alpha\)</span> are again various prior hyperparameters. In total, we learn <span class="arithmatex">\(\mathcal{Y}+1\)</span> Dirichlet-Multinomial posteriors, and sample from each independently to produce a synthetic confusion matrix. The output of the product is a <span class="arithmatex">\(\mathcal{Y}\times \mathcal{Y}\)</span> matrix, normalized such that <span class="arithmatex">\(\sum_{i,j}\tilde{\mathbf{C}}_{i,j}=1\)</span>.</p>
+<p>Sounds complicated, but it's Numpy implementation is dead simple:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">condition_counts</span><span class="p">,</span> <span class="n">condition_prior</span><span class="p">:</span> <span class="n">Float</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">&quot;num_classes&quot;</span><span class="p">]</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">confusion_prior</span><span class="p">:</span> <span class="n">Float</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="s2">&quot;num_classes num_classes&quot;</span><span class="p">]</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">p_condition</span> <span class="o">=</span> <span class="n">dirichlet_sample</span><span class="p">(</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">alphas</span><span class="o">=</span><span class="n">condition_counts</span> <span class="o">+</span> <span class="n">condition_prior</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">p_pred_given_condition</span> <span class="o">=</span> <span class="n">dirichlet_sample</span><span class="p">(</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">alphas</span><span class="o">=</span><span class="n">confusion_matrix</span> <span class="o">+</span> <span class="n">confusion_prior</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">)</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">norm_confusion_matrix</span> <span class="o">=</span> <span class="n">p_pred_given_condition</span> <span class="o">*</span> <span class="n">p_condition</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This uses the array annotation syntax introduced by <a href="https://docs.kidger.site/jaxtyping/api/array/"><code>jaxtyping</code></a>. A <code>Float[ndarray, "num_classes"]</code> is a one-dimensioanl numpy array float, with length 'num_classes'</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output of the <code>dirichlet_sample</code> method is batched, hence the extra dimension in the multiplication</p>
+</div>
+<p>To see the <code>prob_conf_mat</code> implementation in action, check out <a href="https://github.com/ioverho/prob_conf_mat/blob/main/src/prob_conf_mat/experiment.py#L186">the <code>Experiment._sample</code> source code</a>.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><a href="https://link.springer.com/article/10.1007/s10472-017-9564-8">Caelen, O. (2017). A Bayesian interpretation of the confusion matrix. Annals of Mathematics and Artificial Intelligence, 81(3), 429-450.</a>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p><a href="https://peerj.com/articles/cs-398.pdf">Tötsch, N., &amp; Hoffmann, D. (2021). Classifier uncertainty: evidence, potential impact, and probabilistic treatment. PeerJ Computer Science, 7, e398.</a>&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -977,7 +1091,7 @@ p(Y, \hat{Y})=p(\hat{Y}|Y)p(Y)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 11:22:01 UTC">July 10, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 15:32:13 UTC">July 10, 2025</span>
   </span>
 
     
@@ -1032,13 +1146,13 @@ p(Y, \hat{Y})=p(\hat{Y}|Y)p(Y)
         
         
           
-          <a href="experiment_aggregation.html" class="md-footer__link md-footer__link--next" aria-label="Next: Experiment Aggregation">
+          <a href="metric_computation.html" class="md-footer__link md-footer__link--next" aria-label="Next: Computing Metrics">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Experiment Aggregation
+                Computing Metrics
               </div>
             </div>
             <div class="md-footer__button md-icon">

@@ -98,6 +98,19 @@
       
     
     
+    
+    
+        
+    
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Probabilistic Confusion Matrices - Experiment Aggregators" />
+<meta property="og:description" content="" />
+<meta property="og:url" content="https://github.com/ioverho/prob_conf_mat/Reference/Experiment%20Aggregation/index.html" />
+<meta property="og:image" content="https://ioverho.github.io/prob_conf_mat/assets/social-preview.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
   </head>
   
   
@@ -905,6 +918,10 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       
         
       
+        
+      
+        
+      
     
     
     
@@ -1114,7 +1131,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 <p>Specifically, the aggregate distribution <span class="arithmatex">\(\text{Beta}(\tilde{\alpha}, \tilde{\beta})\)</span> is
 estimated as:</p>
 <div class="arithmatex">\[\begin{aligned}
-    \tilde{\alpha}&amp;=\left[\sum_{i=1}^{M}\alpha_{i}\right]-\left(M-1\right) \\
+    \tilde{\alpha}&amp;=\left[\sum_{i=1}^{M}\alpha_{i}\right]-\left(M-1\right) \
     \tilde{\beta}&amp;=\left[\sum_{i=1}^{M}\beta_{i}\right]-\left(M-1\right)
 \end{aligned}\]</div>
 <p>where <span class="arithmatex">\(M\)</span> is the total number of experiments.</p>
@@ -1201,12 +1218,12 @@ to estimate</p>
 
 
         <p>Samples from the Gamma-conflated distribution.</p>
-<p>Specifically, the aggregate distribution <span class="arithmatex">\(\\text{Gamma}(\\tilde{\\alpha}, \\tilde{\\beta})\)</span>
-(<span class="arithmatex">\(\\alpha\)</span> is the shape, <span class="arithmatex">\(\\beta\)</span> the rate parameter) is estimated as:</p>
-<div class="arithmatex">\[\\begin{aligned}
-    \\tilde{\\alpha}&amp;=\\left[\\sum_{i}^{M}\\alpha_{i}\\right]-(M-1) \\\\
-    \\tilde{\\beta}&amp;=\\dfrac{1}{\\sum_{i}^{M}\\beta_{i}^{-1}}
-\\end{aligned}\]</div>
+<p>Specifically, the aggregate distribution <span class="arithmatex">\(\text{Gamma}(\tilde{\alpha}, \tilde{\beta})\)</span>
+(<span class="arithmatex">\(\alpha\)</span> is the shape, <span class="arithmatex">\(\beta\)</span> the rate parameter) is estimated as:</p>
+<div class="arithmatex">\[\begin{aligned}
+    \tilde{\alpha}&amp;=\left[\sum_{i}^{M}\alpha_{i}\right]-(M-1) \
+    \tilde{\beta}&amp;=\dfrac{1}{\sum_{i}^{M}\beta_{i}^{-1}}
+\end{aligned}\]</div>
 <p>where <span class="arithmatex">\(M\)</span> is the total number of experiments.</p>
 <p>An optional <code>shifted: bool</code> argument exists to dynamically estimate the support for the
 distribution. Can help fit to individual experiments, but likely minimally impacts the
@@ -1274,12 +1291,12 @@ aggregate distribution.</p>
         <p>Samples from the Gaussian-conflated distribution.</p>
 <p>This is equivalent to the fixed-effects meta-analytical estimator.</p>
 <p>Uses the inverse variance weighted mean and standard errors. Specifically, the aggregate
-distribution <span class="arithmatex">\(\\mathcal{N}(\\tilde{\\mu}, \\tilde{\\sigma})\)</span> is estimated as:</p>
-<div class="arithmatex">\[\\begin{aligned}
-    w_{i}&amp;=\\dfrac{\\sigma_{i}^{-2}}{\\sum_{j}^{M}\\sigma_{j}^{-2}} \\\\
-    \\tilde{\\mu}&amp;=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-    \\tilde{\\sigma^2}&amp;=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
-\\end{aligned}\]</div>
+distribution <span class="arithmatex">\(\mathcal{N}(\tilde{\mu}, \tilde{\sigma})\)</span> is estimated as:</p>
+<div class="arithmatex">\[\begin{aligned}
+    w_{i}&amp;=\dfrac{\sigma_{i}^{-2}}{\sum_{j}^{M}\sigma_{j}^{-2}} \\
+    \tilde{\mu}&amp;=\sum_{i}^{M}w_{i}\mu_{i} \\
+    \tilde{\sigma^2}&amp;=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+\end{aligned}\]</div>
 <p>where <span class="arithmatex">\(M\)</span> is the total number of experiments.</p>
 
 
@@ -1350,13 +1367,13 @@ parameters, before debiasing the weights to incorporate inter-experiment heterog
 As a result, studies with larger standard errors will be upweighted relative to the
 fixed-effects model.</p>
 <p>Specifically, starting with a Fixed-Effects model
-<span class="arithmatex">\(\\mathcal{N}(\\tilde{\\mu_{\\text{FE}}}, \\tilde{\\sigma_{\\text{FE}}})\)</span>,</p>
-<div class="arithmatex">\[\\begin{aligned}
-    w_{i}&amp;=\\dfrac{\\left(\\sigma_{i}^2+\\tau^2\\right)^{-1}}{\\sum_{j}^{M}\\left(\\sigma_{j}^2+\\tau^2\\right)^{-1}} \\\\
-    \\tilde{\\mu}&amp;=\\sum_{i}^{M}w_{i}\\mu_{i} \\\\
-    \\tilde{\\sigma^2}&amp;=\\dfrac{1}{\\sum_{i}^{M}\\sigma_{i}^{-2}}
-\\end{aligned}\]</div>
-<p>where <span class="arithmatex">\(\\tau\)</span> is the estimated inter-experiment heterogeneity, and <span class="arithmatex">\(M\)</span> is the total number
+<span class="arithmatex">\(\mathcal{N}(\tilde{\mu_{\text{FE}}}, \tilde{\sigma_{\text{FE}}})\)</span>,</p>
+<div class="arithmatex">\[\begin{aligned}
+    w_{i}&amp;=\dfrac{\left(\sigma_{i}^2+\tau^2\right)^{-1}}{\sum_{j}^{M}\left(\sigma_{j}^2+\tau^2\right)^{-1}} \\
+    \tilde{\mu}&amp;=\sum_{i}^{M}w_{i}\mu_{i} \\
+    \tilde{\sigma^2}&amp;=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+\end{aligned}\]</div>
+<p>where <span class="arithmatex">\(\tau\)</span> is the estimated inter-experiment heterogeneity, and <span class="arithmatex">\(M\)</span> is the total number
 of experiments.</p>
 <p>Uses the Paule-Mandel iterative heterogeneity estimator, which does not make a parametric
 assumption. The more common (but biased) DerSimonian-Laird estimator can also be used by setting
