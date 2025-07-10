@@ -141,7 +141,7 @@ plugins:
   - mkdocs-jupyter:
       # Execute notebooks before conversion
       # Set to false for faster rendering
-      execute: false
+      execute: true
       allow_errors: false
       # Hide cells with code based on tags
       remove_tag_config:
