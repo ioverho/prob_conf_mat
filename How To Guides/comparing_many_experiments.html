@@ -10,17 +10,21 @@
         <meta name="author" content="Ivo Verhoeven">
       
       
-        <link rel="canonical" href="https://github.com/ioverho/prob_conf_mat/_partial/metrics.html">
+        <link rel="canonical" href="https://github.com/ioverho/prob_conf_mat/How%20To%20Guides/comparing_many_experiments.html">
       
       
+        <link rel="prev" href="choosing_a_prior.html">
       
       
-      <link rel="icon" href="../_static/logo_square.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+        <link rel="next" href="extending_the_library.html">
+      
+      
+      <link rel="icon" href="../assets/logo_square.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
-        <title>Metrics - Probabilistic Confusion Matrices</title>
+        <title>Compare Many Experiments - Probabilistic Confusion Matrices</title>
       
     
     
@@ -48,7 +52,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../_static/css/main.css">
+      <link rel="stylesheet" href="../assets/css/main.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -70,11 +74,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Metrics - Probabilistic Confusion Matrices" >
+        <meta  property="og:title"  content="Compare Many Experiments - Probabilistic Confusion Matrices" >
       
         <meta  property="og:description"  content="" >
       
-        <meta  property="og:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/_partial/metrics.png" >
+        <meta  property="og:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/How To Guides/comparing_many_experiments.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -82,15 +86,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://github.com/ioverho/prob_conf_mat/_partial/metrics.html" >
+        <meta  property="og:url"  content="https://github.com/ioverho/prob_conf_mat/How%20To%20Guides/comparing_many_experiments.html" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Metrics - Probabilistic Confusion Matrices" >
+        <meta  name="twitter:title"  content="Compare Many Experiments - Probabilistic Confusion Matrices" >
       
         <meta  name="twitter:description"  content="" >
       
-        <meta  name="twitter:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/_partial/metrics.png" >
+        <meta  name="twitter:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/How To Guides/comparing_many_experiments.png" >
       
     
     
@@ -113,7 +117,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#abstract-base-class" class="md-skip">
+        <a href="#compare-many-experiments" class="md-skip">
           Skip to content
         </a>
       
@@ -140,8 +144,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../index.html" title="Probabilistic Confusion Matrices" class="md-header__button md-logo" aria-label="Probabilistic Confusion Matrices" data-md-component="logo">
-      <img id="logo_light" src="../_static/logo_rectangle_dark_text.svg" alt="logo">
-<img id="logo_dark" src="../_static/logo_rectangle_light_text.svg" alt="logo">
+      <img id="logo_light" src="../assets/logo_rectangle_dark_text.svg" alt="logo">
+<img id="logo_dark" src="../assets/logo_rectangle_light_text.svg" alt="logo">
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
@@ -157,7 +161,7 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Metrics
+              Compare Many Experiments
             
           </span>
         </div>
@@ -303,11 +307,13 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../How%20To%20Guides/configuration.html" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="configuration.html" class="md-tabs__link">
           
   
   
@@ -394,8 +400,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../index.html" title="Probabilistic Confusion Matrices" class="md-nav__button md-logo" aria-label="Probabilistic Confusion Matrices" data-md-component="logo">
-      <img id="logo_light" src="../_static/logo_rectangle_dark_text.svg" alt="logo">
-<img id="logo_dark" src="../_static/logo_rectangle_light_text.svg" alt="logo">
+      <img id="logo_light" src="../assets/logo_rectangle_dark_text.svg" alt="logo">
+<img id="logo_dark" src="../assets/logo_rectangle_light_text.svg" alt="logo">
     </a>
     Probabilistic Confusion Matrices
   </label>
@@ -496,37 +502,42 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
       
   
   
-  
-  
     
-    
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
   
   
   
-    <a href="../How%20To%20Guides/configuration.html" class="md-nav__link">
+    
+    
       
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
   
   
   <span class="md-ellipsis">
@@ -535,12 +546,161 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   </span>
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            How-To
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configure a Study
+    
+  </span>
   
 
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="choosing_a_prior.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Choose a Prior
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Compare Many Experiments
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="comparing_many_experiments.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compare Many Experiments
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#competition-winnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Competition Winnings
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="extending_the_library.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extend the Library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -679,6 +839,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -687,42 +849,9 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#abstract-base-class" class="md-nav__link">
+  <a href="#competition-winnings" class="md-nav__link">
     <span class="md-ellipsis">
-      Abstract Base Class
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Abstract Base Class">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prob_conf_mat.metrics.abc.Metric" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;Metric
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prob_conf_mat.metrics.abc.AveragedMetric" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;AveragedMetric
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#metric-instances" class="md-nav__link">
-    <span class="md-ellipsis">
-      Metric Instances
+      Competition Winnings
     </span>
   </a>
   
@@ -747,407 +876,378 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
 
 
-  <h1>Metrics</h1>
-
-<h2 id="abstract-base-class">Abstract Base Class<a class="headerlink" href="#abstract-base-class" title="Permanent link">#</a></h2>
-
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="prob_conf_mat.metrics.abc.Metric" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>Metric</code>
-
-
-<a href="#prob_conf_mat.metrics.abc.Metric" class="headerlink" title="Permanent link">#</a></h3>
-
-
-    <div class="doc doc-contents first">
-
-
-        <p>The abstract base class for metrics.</p>
-<p>Properties should be implemented as class attributes in derived metrics</p>
-<p>The <code>compute_metric</code> method needs to be implemented</p>
-
-
-
-
-
-
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-<h4 id="prob_conf_mat.metrics.abc.Metric-attributes">Attributes<a href="#prob_conf_mat.metrics.abc.Metric-attributes" class="headerlink" title="Permanent link">#</a></h4>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.full_name" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">full_name</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.full_name" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>A human-readable name for this metric.</p>
-
-    </div>
-
+<h1 id="compare-many-experiments">Compare Many Experiments<a class="headerlink" href="#compare-many-experiments" title="Permanent link">#</a></h1>
+<p>In <a href="../Getting%20Started/02_comparing_experiments">Getting Started/02 Comparing Experiments</a>, we discussed comparing two experiments against each other using a variety of methods. This provided lots of information about the probability of existence and significance, as well as visual intuition for how different the metric distributions of two different experiments are.</p>
+<p>Repeating this process for <em>many</em> experiments is tedious, however: <a href="https://en.wikipedia.org/wiki/Combination">the number of pairwise combinations scales factorially with the number of experiments</a>!</p>
+<p>One setting where we can expect having to compare many experiments at once is in an open-source competition (e.g., <a href="https://www.kaggle.com/">Kaggle</a>). This is exactly a scenario tested by <a href="https://peerj.com/articles/cs-398/">Tötsch &amp; Hoffmann (2020)</a><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, where they computed the expected winnings for the top-10 participants in the <a href="https://www.kaggle.com/c/recursion-cellular-image-classification/overview">'Recursion Cellular Image Classification'</a> challenge, based on the probability that their classifier exceeded all other participants.</p>
+<h2 id="competition-winnings">Competition Winnings<a class="headerlink" href="#competition-winnings" title="Permanent link">#</a></h2>
+<p>While the test set confusion matrices are hidden, from the accuracy scores and the size of the test set we can recreate a confusion matrix that would have produced those accuracy scores. The table for the top 10 participants might look like this:</p>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>TeamId</th>
+<th style="text-align: center;">Score</th>
+<th style="text-align: center;">TP+TN</th>
+<th style="text-align: center;">FP+FN</th>
+<th>TP</th>
+<th>FN</th>
+<th>FP</th>
+<th>TN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>3467175</td>
+<td style="text-align: center;">0.99763</td>
+<td style="text-align: center;">15087</td>
+<td style="text-align: center;">36</td>
+<td>7544</td>
+<td>18</td>
+<td>18</td>
+<td>7544</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3394520</td>
+<td style="text-align: center;">0.99672</td>
+<td style="text-align: center;">15073</td>
+<td style="text-align: center;">50</td>
+<td>7537</td>
+<td>25</td>
+<td>25</td>
+<td>7537</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3338942</td>
+<td style="text-align: center;">0.99596</td>
+<td style="text-align: center;">15062</td>
+<td style="text-align: center;">61</td>
+<td>7531</td>
+<td>31</td>
+<td>31</td>
+<td>7531</td>
+</tr>
+<tr>
+<td>4</td>
+<td>3339018</td>
+<td style="text-align: center;">0.99512</td>
+<td style="text-align: center;">15049</td>
+<td style="text-align: center;">74</td>
+<td>7525</td>
+<td>37</td>
+<td>37</td>
+<td>7525</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3338836</td>
+<td style="text-align: center;">0.99498</td>
+<td style="text-align: center;">15047</td>
+<td style="text-align: center;">76</td>
+<td>7524</td>
+<td>38</td>
+<td>38</td>
+<td>7524</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3429037</td>
+<td style="text-align: center;">0.99380</td>
+<td style="text-align: center;">15029</td>
+<td style="text-align: center;">94</td>
+<td>7515</td>
+<td>47</td>
+<td>47</td>
+<td>7515</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3346448</td>
+<td style="text-align: center;">0.99296</td>
+<td style="text-align: center;">15017</td>
+<td style="text-align: center;">106</td>
+<td>7509</td>
+<td>53</td>
+<td>53</td>
+<td>7509</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3338664</td>
+<td style="text-align: center;">0.99296</td>
+<td style="text-align: center;">15017</td>
+<td style="text-align: center;">106</td>
+<td>7509</td>
+<td>53</td>
+<td>53</td>
+<td>7509</td>
+</tr>
+<tr>
+<td>9</td>
+<td>3338358</td>
+<td style="text-align: center;">0.99282</td>
+<td style="text-align: center;">15014</td>
+<td style="text-align: center;">109</td>
+<td>7507</td>
+<td>55</td>
+<td>55</td>
+<td>7507</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3339624</td>
+<td style="text-align: center;">0.99240</td>
+<td style="text-align: center;">15008</td>
+<td style="text-align: center;">115</td>
+<td>7504</td>
+<td>58</td>
+<td>58</td>
+<td>7504</td>
+</tr>
+</tbody>
+</table>
+<p>Using the <a href="../Reference/Study#prob_conf_mat.study.Study.plot_pairwise_comparison"><code>Study.report_listwise_comparison</code></a> we can request a table with the probability that each competitor's accuracy score achieved a certain rank:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">study</span><span class="o">.</span><span class="n">report_listwise_comparison</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;acc&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Experiment</th>
+<th>Rank 1</th>
+<th>Rank 2</th>
+<th>Rank 3</th>
+<th>Rank 4</th>
+<th>Rank 5</th>
+<th>Rank 6</th>
+<th>Rank 7</th>
+<th>Rank 8</th>
+<th>Rank 9</th>
+<th>Rank 10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>3467175</td>
+<td>0.9297</td>
+<td>0.0677</td>
+<td>0.0025</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>3394520</td>
+<td>0.0678</td>
+<td>0.7916</td>
+<td>0.1264</td>
+<td>0.0090</td>
+<td>0.0053</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>3338942</td>
+<td>0.0024</td>
+<td>0.1254</td>
+<td>0.6522</td>
+<td>0.1282</td>
+<td>0.0902</td>
+<td>0.0016</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>3339018</td>
+<td></td>
+<td>0.0137</td>
+<td>0.1659</td>
+<td>0.4415</td>
+<td>0.3568</td>
+<td>0.0191</td>
+<td>0.0012</td>
+<td>0.0013</td>
+<td>0.0004</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>3338836</td>
+<td></td>
+<td>0.0016</td>
+<td>0.0502</td>
+<td>0.3609</td>
+<td>0.4572</td>
+<td>0.0997</td>
+<td>0.0120</td>
+<td>0.0124</td>
+<td>0.0049</td>
+<td>0.0010</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3429037</td>
+<td></td>
+<td></td>
+<td>0.0026</td>
+<td>0.0518</td>
+<td>0.0755</td>
+<td>0.5209</td>
+<td>0.1282</td>
+<td>0.1281</td>
+<td>0.0688</td>
+<td>0.0241</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3338664</td>
+<td></td>
+<td></td>
+<td>0.0001</td>
+<td>0.0070</td>
+<td>0.0121</td>
+<td>0.2024</td>
+<td>0.2622</td>
+<td>0.2572</td>
+<td>0.1764</td>
+<td>0.0825</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3346448</td>
+<td></td>
+<td></td>
+<td></td>
+<td>0.0014</td>
+<td>0.0024</td>
+<td>0.0964</td>
+<td>0.2524</td>
+<td>0.2540</td>
+<td>0.2381</td>
+<td>0.1552</td>
+</tr>
+<tr>
+<td>9</td>
+<td>3338358</td>
+<td></td>
+<td></td>
+<td></td>
+<td>0.0002</td>
+<td>0.0006</td>
+<td>0.0445</td>
+<td>0.2099</td>
+<td>0.2116</td>
+<td>0.2734</td>
+<td>0.2598</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3339624</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>0.0154</td>
+<td>0.1341</td>
+<td>0.1353</td>
+<td>0.2379</td>
+<td>0.4773</td>
+</tr>
+</tbody>
+</table>
+<p>While we see no rank inversions, for many of the ranks, there is considerable ambiguity in many ranks. This indicates, that despite a large test set of <span class="arithmatex">\(N=15.1k\)</span> images, the margins between the top competitors are so narrow that it's difficult to say definitively which team achieved which rank (especially when <span class="arithmatex">\(r&gt;2\)</span>).</p>
+<p>The competition organizers offered a $10,000 prize for 1st place, a $2,000 prize for 2nd place and a $1,000 prize for 3rd place. Using these probabilities we can compute that expected prize money each competitor should have received in a fair division of the competition winnings. Using the study, we can compute this by calling <code>study.report_expected_reward(metric='acc', rewards=[10000, 2000, 1000])</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Experiment</th>
+<th style="text-align: right;">E[Reward]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>3467175</td>
+<td style="text-align: right;">9435.19</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3394520</td>
+<td style="text-align: right;">2385.68</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3338942</td>
+<td style="text-align: right;">930.13</td>
+</tr>
+<tr>
+<td>4</td>
+<td>3339018</td>
+<td style="text-align: right;">146.50</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3338836</td>
+<td style="text-align: right;">100.89</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3429037</td>
+<td style="text-align: right;">1.57</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3338664</td>
+<td style="text-align: right;">0.03</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3346448</td>
+<td style="text-align: right;">0.01</td>
+</tr>
+<tr>
+<td>9</td>
+<td>3338358</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+<tr>
+<td>10</td>
+<td>3339624</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+</tbody>
+</table>
+<p>So while ranks 1 &amp; 2 clearly did deserve the lion's share of the competition winnings, rank 4 &amp; 5 comparatively deserved substantially more than the 0 they received.</p>
+<p>The following figure (source code can be found in <a href="../Explanation/totsch_replication.html">Explanation/A Replication of Tötsch, N. &amp; Hoffmann, D. (2020). 'Classifier uncertainty: evidence, potential impact, and probabilistic treatment' </a>) summarizes the situation:</p>
+<p><picture>
+  <img alt="Metric distribution" src="../assets/figures/replication/totsch_fig_6.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+</picture></p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Tötsch, N. &amp; Hoffmann, D. (2020). 'Classifier uncertainty: evidence, potential impact, and probabilistic treatment'&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
 </div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.is_multiclass" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">is_multiclass</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.is_multiclass" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Whether or not this metric computes a value for each class individually, or for all classes at once.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.bounds" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">bounds</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.bounds" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>A tuple of the minimum and maximum possible value for this metric to take.</p>
-<p>Can be infinite.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.dependencies" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">dependencies</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.dependencies" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>All metrics upon which this metric depends.</p>
-<p>Used to generate a computation schedule, such that no metric is calculated before its
-dependencies. The dependencies <strong>must</strong> match the <code>compute_metric</code> signature.
-This is checked during class definition.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.sklearn_equivalent" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">sklearn_equivalent</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.sklearn_equivalent" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>The <code>sklearn</code> equivalent function, if applicable</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.aliases" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">aliases</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.aliases" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>A list of all valid aliases for this metric. Can be used when creating metric syntax strings.</p>
-
-    </div>
-
-</div>
-
-<h4 id="prob_conf_mat.metrics.abc.Metric-functions">Functions<a href="#prob_conf_mat.metrics.abc.Metric-functions" class="headerlink" title="Permanent link">#</a></h4>
-
-<div class="doc doc-object doc-function">
-
-
-<h5 id="prob_conf_mat.metrics.abc.Metric.compute_metric" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">compute_metric</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.Metric.compute_metric" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Computes the metric values from its dependencies.</p>
-
-
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h3 id="prob_conf_mat.metrics.abc.AveragedMetric" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>AveragedMetric</code>
-
-
-<a href="#prob_conf_mat.metrics.abc.AveragedMetric" class="headerlink" title="Permanent link">#</a></h3>
-
-
-    <div class="doc doc-contents first">
-
-
-        <p>The abstract base class for the composition of any instance of <code>Metric</code> with any instance of <code>Averaging</code>.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <ul>
-        <li class="doc-section-item field-body">
-            <b><code>metric</code></b>
-              (<code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="../Reference/Metrics/Metrics.html#prob_conf_mat.metrics.abc.Metric">Metric</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>a binary metric</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
-            <b><code>averaging</code></b>
-              (<code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Averaging&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Averaging&lt;/code&gt;)" href="../Reference/Metrics/Averaging.html#prob_conf_mat.metrics.abc.Averaging">Averaging</a></code>)
-          –
-          <div class="doc-md-description">
-            <p>an averaging method</p>
-          </div>
-        </li>
-    </ul>
-
-
-
-
-
-
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-<h4 id="prob_conf_mat.metrics.abc.AveragedMetric-attributes">Attributes<a href="#prob_conf_mat.metrics.abc.AveragedMetric-attributes" class="headerlink" title="Permanent link">#</a></h4>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.aliases" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">aliases</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.AveragedMetric.aliases" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>A list of all valid aliases for this metric.</p>
-<p>Constructed from the product of the all aliases of the Metric and Averaging methods.</p>
-<p>Can be used when creating metric syntax strings.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.is_multiclass" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">is_multiclass</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.AveragedMetric.is_multiclass" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Whether or not this metric computes a value for each class individually, or for all classes at once.</p>
-<p>An AveragedMetric is <em>always</em> multiclass.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.bounds" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">bounds</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.AveragedMetric.bounds" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>A tuple of the minimum and maximum possible value for this metric to take. Can be infinite.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.dependencies" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">dependencies</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.AveragedMetric.dependencies" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>All metrics upon which this AveragedMetric depends.</p>
-<p>Constructed from the union of all Metric and AveragingMethod dependencies.</p>
-<p>Used to generate a computation schedule, such that no metric is calculated before its dependencies.</p>
-<p>The dependencies <strong>must</strong> match the <code>compute_metric</code> signature.</p>
-<p>This is checked during class definition.</p>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.sklearn_equivalent" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">sklearn_equivalent</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#prob_conf_mat.metrics.abc.AveragedMetric.sklearn_equivalent" class="headerlink" title="Permanent link">#</a></h5>
-
-
-    <div class="doc doc-contents ">
-
-        <p>The <code>sklearn</code> equivalent function, if applicable</p>
-
-    </div>
-
-</div>
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div><h2 id="metric-instances">Metric Instances<a class="headerlink" href="#metric-instances" title="Permanent link">#</a></h2>
-<p>@@metrics_list@@</p>
 
 
 
@@ -1168,7 +1268,7 @@ This is checked during class definition.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 19, 2025 15:07:03 UTC">June 19, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 11:22:01 UTC">July 10, 2025</span>
   </span>
 
     
@@ -1201,6 +1301,44 @@ This is checked during class definition.</p>
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="choosing_a_prior.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Choose a Prior">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Choose a Prior
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="extending_the_library.html" class="md-footer__link md-footer__link--next" aria-label="Next: Extend the Library">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Extend the Library
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -1236,9 +1374,9 @@ This is checked during class definition.</p>
       <script id="__config" type="application/json">{"base": "..", "features": ["content.footnote.tooltips", "content.tooltips", "content.code.copy", "content.code.select", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes", "navigation.tracking", "navigation.prune", "toc.follow", "navigation.top", "search.suggest", "search.highlight", "navigation.footer"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
-        <script src="../_static/mathjax.js"></script>
+        <script src="../assets/mathjax.js"></script>
       
         <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -19,8 +19,8 @@
         <link rel="next" href="ExperimentGroup.html">
       
       
-      <link rel="icon" href="../_static/logo_square.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <link rel="icon" href="../assets/logo_square.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -52,7 +52,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../_static/css/main.css">
+      <link rel="stylesheet" href="../assets/css/main.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -144,8 +144,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../index.html" title="Probabilistic Confusion Matrices" class="md-header__button md-logo" aria-label="Probabilistic Confusion Matrices" data-md-component="logo">
-      <img id="logo_light" src="../_static/logo_rectangle_dark_text.svg" alt="logo">
-<img id="logo_dark" src="../_static/logo_rectangle_light_text.svg" alt="logo">
+      <img id="logo_light" src="../assets/logo_rectangle_dark_text.svg" alt="logo">
+<img id="logo_dark" src="../assets/logo_rectangle_light_text.svg" alt="logo">
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
@@ -400,8 +400,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../index.html" title="Probabilistic Confusion Matrices" class="md-nav__button md-logo" aria-label="Probabilistic Confusion Matrices" data-md-component="logo">
-      <img id="logo_light" src="../_static/logo_rectangle_dark_text.svg" alt="logo">
-<img id="logo_dark" src="../_static/logo_rectangle_light_text.svg" alt="logo">
+      <img id="logo_light" src="../assets/logo_rectangle_dark_text.svg" alt="logo">
+<img id="logo_dark" src="../assets/logo_rectangle_light_text.svg" alt="logo">
     </a>
     Probabilistic Confusion Matrices
   </label>
@@ -506,6 +506,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
     
     
+      
+        
       
         
       
@@ -808,14 +810,23 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 </li>
       
         <li class="md-nav__item">
-  <a href="#comparing-experiments" class="md-nav__link">
+  <a href="#comparing-2-experiments" class="md-nav__link">
     <span class="md-ellipsis">
-      Comparing Experiments
+      Comparing 2 Experiments
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Comparing Experiments">
+    <nav class="md-nav" aria-label="Comparing 2 Experiments">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.study.Study.get_pairwise_comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_pairwise_comparison
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#prob_conf_mat.study.Study.report_pairwise_comparison" class="md-nav__link">
@@ -844,10 +855,43 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparing-many-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparing Many Experiments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparing Many Experiments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.study.Study.get_listwise_comparsion_result" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_listwise_comparsion_result
+    </span>
+  </a>
+  
+</li>
+        
           <li class="md-nav__item">
   <a href="#prob_conf_mat.study.Study.report_listwise_comparison" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;report_listwise_comparison
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.study.Study.report_expected_reward" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;report_expected_reward
     </span>
   </a>
   
@@ -1369,14 +1413,23 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 </li>
       
         <li class="md-nav__item">
-  <a href="#comparing-experiments" class="md-nav__link">
+  <a href="#comparing-2-experiments" class="md-nav__link">
     <span class="md-ellipsis">
-      Comparing Experiments
+      Comparing 2 Experiments
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Comparing Experiments">
+    <nav class="md-nav" aria-label="Comparing 2 Experiments">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.study.Study.get_pairwise_comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_pairwise_comparison
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#prob_conf_mat.study.Study.report_pairwise_comparison" class="md-nav__link">
@@ -1405,10 +1458,43 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparing-many-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparing Many Experiments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparing Many Experiments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.study.Study.get_listwise_comparsion_result" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_listwise_comparsion_result
+    </span>
+  </a>
+  
+</li>
+        
           <li class="md-nav__item">
   <a href="#prob_conf_mat.study.Study.report_listwise_comparison" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;report_listwise_comparison
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.study.Study.report_expected_reward" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;report_expected_reward
     </span>
   </a>
   
@@ -2596,11 +2682,102 @@ Defaults to True.</p>
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_metric_summaries_annotated.svg"
+    src="../assets/figures/examples/plot_metric_summaries_annotated.svg"
     alt="A plot of a metric's distribution">
 </img></p>
-<h2 id="comparing-experiments">Comparing Experiments<a class="headerlink" href="#comparing-experiments" title="Permanent link">#</a></h2>
+<h2 id="comparing-2-experiments">Comparing 2 Experiments<a class="headerlink" href="#comparing-2-experiments" title="Permanent link">#</a></h2>
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="prob_conf_mat.study.Study.get_pairwise_comparison" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">get_pairwise_comparison</span></code>
+
+<a href="#prob_conf_mat.study.Study.get_pairwise_comparison" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Generates a <code>PairwiseComparisonResult</code> between two experiments in this study.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>metric</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the name of the metric</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>class_label</code></b>
+              (<code><span title="int">int</span> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the class label. Defaults to None.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Other Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>experiment_a</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+format. To compare an ExperimentGroup, use 'aggregated' as the experiment name</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>experiment_b</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the name of an experiment in the '{EXPERIMENT_NAME}/{EXPERIMENT}'
+format. To compare an ExperimentGroup, use 'aggregated' as the experiment name</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>min_sig_diff</code></b>
+              (<code><span title="float">float</span> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the minimal difference which is considered
+significant. Defaults to 0.1 * std.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>precision</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the precision of floats used when printing. Defaults to 4.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+<b><code>PairwiseComparisonResult</code></b> (              <code><span title="prob_conf_mat.experiment_comparison.pairwise.PairwiseComparisonResult">PairwiseComparisonResult</span></code>
+)          –
+          <div class="doc-md-description">
+            <p>the unformatted <code>PairwiseComparisonResult</code></p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -3274,10 +3451,64 @@ Defaults to True.</p>
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_pairwise_comparison_annotated.svg"
+    src="../assets/figures/examples/plot_pairwise_comparison_annotated.svg"
     alt="A plot of the distribution of the difference of two metrics">
 </img></p>
+<h2 id="comparing-many-experiments">Comparing Many Experiments<a class="headerlink" href="#comparing-many-experiments" title="Permanent link">#</a></h2>
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="prob_conf_mat.study.Study.get_listwise_comparsion_result" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">get_listwise_comparsion_result</span></code>
+
+<a href="#prob_conf_mat.study.Study.get_listwise_comparsion_result" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Generates a <code>ListwiseComparisonResult</code> comparing all Experiments in this study.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>metric</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the name of the metric</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>class_label</code></b>
+              (<code><span title="int">int</span> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the class label. Defaults to None.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+<b><code>ListwiseComparisonResult</code></b> (              <code><span title="prob_conf_mat.experiment_comparison.listwise.ListwiseComparisonResult">ListwiseComparisonResult</span></code>
+)          –
+          <div class="doc-md-description">
+            <p>the unformatted <code>ListwiseComparisonResult</code></p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -3374,6 +3605,100 @@ compared against all others.</p>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>| GROUP   | EXPERIMENT_B |   0.5013 |   0.4987 |
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>| GROUP   | EXPERIMENT_A |   0.4987 |   0.5013 |
 </span></code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="prob_conf_mat.study.Study.report_expected_reward" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">report_expected_reward</span></code>
+
+<a href="#prob_conf_mat.study.Study.report_expected_reward" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents first">
+
+        <p>Computes the expected reward each experiments should receive.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>metric</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the name of the metric</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>class_label</code></b>
+              (<code><span title="int">int</span> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the class label. Leave 0 or None if using a
+multiclass metric. Defaults to None.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>rewards</code></b>
+              (<code><span title="Float">Float</span>[<span title="ArrayLike">ArrayLike</span>, &#39;num_rewards&#39;]</code>, default:
+                  <code>[1.0]</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the rewards each rank earns.
+Should be an ArrayLike with as many entries as there are total number of experiments
+in this study.
+If there are fewer rewards, the rewards array is padded with 0s.
+If there are more rewards than experiments, a ValueError is raised.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Other Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>table_fmt</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the format of the table.
+If 'records', the raw list of values is returned.
+If 'pandas' or 'pd', a Pandas DataFrame is returned.
+In all other cases, it is passed to
+<a href="https://github.com/astanin/python-tabulate#table-format">tabulate</a>.
+Defaults to tabulate's "html".</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>precision</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the precision of floats used when printing. Defaults to 2.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="list">list</span> | <span title="pandas.DataFrame">DataFrame</span> | <span title="str">str</span></code>
+          –
+          <div class="doc-md-description">
+            <p>dict[str, float]: a mapping of experiment name to reward</p>
+          </div>
+        </li>
+    </ul>
 
 
     </div>
@@ -3876,7 +4201,7 @@ Defaults to True.</p>
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_experiment_aggregation.svg"
+    src="../assets/figures/examples/plot_experiment_aggregation.svg"
     alt="A plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img></p>
 
@@ -4213,7 +4538,7 @@ Defaults to 4.</p>
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_forest_plot.svg"
+    src="../assets/figures/examples/plot_forest_plot.svg"
     alt="A forest plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img></p>
 
@@ -4483,7 +4808,7 @@ Defaults to 4.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 19, 2025 15:07:03 UTC">June 19, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 11:22:01 UTC">July 10, 2025</span>
   </span>
 
     
@@ -4589,9 +4914,9 @@ Defaults to 4.</p>
       <script id="__config" type="application/json">{"base": "..", "features": ["content.footnote.tooltips", "content.tooltips", "content.code.copy", "content.code.select", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes", "navigation.tracking", "navigation.prune", "toc.follow", "navigation.top", "search.suggest", "search.highlight", "navigation.footer"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
-        <script src="../_static/mathjax.js"></script>
+        <script src="../assets/mathjax.js"></script>
       
         <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

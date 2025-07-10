@@ -19,8 +19,8 @@
         <link rel="next" href="choosing_a_prior.html">
       
       
-      <link rel="icon" href="../_static/logo_square.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <link rel="icon" href="../assets/logo_square.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -52,7 +52,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../_static/css/main.css">
+      <link rel="stylesheet" href="../assets/css/main.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -144,8 +144,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../index.html" title="Probabilistic Confusion Matrices" class="md-header__button md-logo" aria-label="Probabilistic Confusion Matrices" data-md-component="logo">
-      <img id="logo_light" src="../_static/logo_rectangle_dark_text.svg" alt="logo">
-<img id="logo_dark" src="../_static/logo_rectangle_light_text.svg" alt="logo">
+      <img id="logo_light" src="../assets/logo_rectangle_dark_text.svg" alt="logo">
+<img id="logo_dark" src="../assets/logo_rectangle_light_text.svg" alt="logo">
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
@@ -400,8 +400,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../index.html" title="Probabilistic Confusion Matrices" class="md-nav__button md-logo" aria-label="Probabilistic Confusion Matrices" data-md-component="logo">
-      <img id="logo_light" src="../_static/logo_rectangle_dark_text.svg" alt="logo">
-<img id="logo_dark" src="../_static/logo_rectangle_light_text.svg" alt="logo">
+      <img id="logo_light" src="../assets/logo_rectangle_dark_text.svg" alt="logo">
+<img id="logo_dark" src="../assets/logo_rectangle_light_text.svg" alt="logo">
     </a>
     Probabilistic Confusion Matrices
   </label>
@@ -508,6 +508,8 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
     
     
+      
+        
       
         
       
@@ -686,6 +688,29 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
   
   <span class="md-ellipsis">
     Choose a Prior
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="comparing_many_experiments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compare Many Experiments
     
   </span>
   
@@ -942,15 +967,15 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 
 
 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h1>
-<p>All interaction with experiments should ideally go through the <a href="/ioverho/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study"><code>Study</code></a> class. It controls all sampling and experiment aggregation, and can produce reports about samples.</p>
-<p>Behind the scenes, the configuration of a study is controlled by its parent class: <a href="/ioverho/prob_conf_mat/Reference/Study.html#prob_conf_mat.config.Config"><code>Config</code></a>. It has 5 properties which can be set by the users, each of which is validated upon instantiation, and whenever it is set.</p>
+<p>All interaction with experiments should ideally go through the <a href="../Reference/Study.html#prob_conf_mat.study.Study"><code>Study</code></a> class. It controls all sampling and experiment aggregation, and can produce reports about samples.</p>
+<p>Behind the scenes, the configuration of a study is controlled by its parent class: <a href="../Reference/Study.html#prob_conf_mat.config.Config"><code>Config</code></a>. It has 5 properties which can be set by the users, each of which is validated upon instantiation, and whenever it is set.</p>
 <h2 id="seed"><code>seed</code><a class="headerlink" href="#seed" title="Permanent link">#</a></h2>
 <p>Type: <code>int | None</code></p>
-<p>This is the random seed used to initialise the RNG. If passing <code>None</code>, it defaults to the current time, in fractional seconds. For the purpose of reproducibility, however, it is recommended that you set this value yourself.</p>
+<p>This is the random seed used to initialize the RNG. If passing <code>None</code>, it defaults to the current time, in fractional seconds. For the purpose of reproducibility, however, it is recommended that you set this value yourself.</p>
 <p>It must be a positive integer.</p>
 <h2 id="num_samples"><code>num_samples</code><a class="headerlink" href="#num_samples" title="Permanent link">#</a></h2>
 <p>Type: <code>int | None</code></p>
-<p>This is the number of syntehtic confusion matrices to sample for each experiment. A higher value is better, since it reduces the amount of variation between different runs of the same study, but also more computationally expensive. Keep in mind that confusion matrices are square by definition, such that the computational and storage costs scales as,</p>
+<p>This is the number of synthetic confusion matrices to sample for each experiment. A higher value is better, since it reduces the amount of variation between different runs of the same study, but also more computationally expensive. Keep in mind that confusion matrices are square by definition, such that the computational and storage costs scales as,</p>
 <div class="arithmatex">\[
 \mathcal{O}(\mathtt{num\_samples}\cdot \mathtt{num\_classes}^2)
 \]</div>
@@ -958,12 +983,12 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 <p>It must be a <em>strictly</em> positive integer, so 0 is not allowed. If you want to use the input confusion matrix, you can 'sample' it using the <code>Study.get_metric_samples</code> method, with <code>sampling_method="input"</code>.</p>
 <h2 id="ci_probability"><code>ci_probability</code><a class="headerlink" href="#ci_probability" title="Permanent link">#</a></h2>
 <p>Type: <code>float | None</code></p>
-<p>This is the size of the credibility intervals to compute. Defaults to 0.95, which is an arbitrary value, and should be carefully considered. For more information about the size of the credible interval, see this <a href="https://easystats.github.io/bayestestR/articles/credible_interval.html">bayestestR article</a>.</p>
-<p>It must be a float in the range <span class="arithmatex">\((0, 1)\)</span>. The extremes are not permitted, as these can lead to infitesmal or infinite credible intervals, respectively.</p>
+<p>This is the size of the credibility intervals to compute. Defaults to 0.95, which is an arbitrary value, and should be carefully considered. For more information about the size of the credible interval, see this <a href="https://easystats.github.io/bayestestR/articles/credible_interval">bayestestR article</a>.</p>
+<p>It must be a float in the range <span class="arithmatex">\((0, 1)\)</span>. The extremes are not permitted, as these can lead to infinitesimal or infinite credible intervals, respectively.</p>
 <h2 id="experiments"><code>experiments</code><a class="headerlink" href="#experiments" title="Permanent link">#</a></h2>
 <p>Type: <code>dict[str, dict[str, dict[str, Any]]]</code></p>
 <p>This represents the experiments and experiment groups that comprise the study. These must be passed as a double nested <code>dict</code> that contains (1) the experiment group name, (2) the experiment name, (3) and finally any IO or prior hyperparameters. Defaults to an empty dict, in which case there are no experiments in the study.</p>
-<p>Given that this is a fairly convoluted data structure, the <a href="/ioverho/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study.add_experiment"><code>Study.add_experiment</code></a> is provided, and should be much easier to use.</p>
+<p>Given that this is a fairly convoluted data structure, the <a href="../Reference/Study.html#prob_conf_mat.study.Study.add_experiment"><code>Study.add_experiment</code></a> is provided, and should be much easier to use.</p>
 <p>An example of a valid <code>experiments</code> value is:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="s2">&quot;EXPERIMENT_GROUP_NAME&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -976,15 +1001,15 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="p">}</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>The inner-most <code>dict</code> is additionally checked to make sure it yields valid <code>Experiment</code> instances:</p>
+<p>The innermost <code>dict</code> is additionally checked to make sure it yields valid <code>Experiment</code> instances:</p>
 <ul>
 <li>there must be a valid confusion matrix under the <code>'confusion_matrix'</code> key</li>
-<li>the values under <code>'confusion_prior'</code> and <code>'prevalence_prior'</code> must be a valid Dirichlet prior strategy (see the <a href="/ioverho/prob_conf_mat/Reference/Statistics.html#prob_conf_mat.stats.dirichlet_distribution.dirichlet_prior"><code>dirichlet_prior</code></a> method)</li>
+<li>the values under <code>'confusion_prior'</code> and <code>'prevalence_prior'</code> must be a valid Dirichlet prior strategy (see the <a href="../Reference/Statistics#prob_conf_mat.stats.dirichlet_distribution.dirichlet_prior"><code>dirichlet_prior</code></a> method)</li>
 </ul>
 <h2 id="metrics"><code>metrics</code><a class="headerlink" href="#metrics" title="Permanent link">#</a></h2>
 <p>Type: <code>dict[str, dict[str, Any]]</code></p>
-<p>Finally, the metrics are represented as a nested <code>dict</code> that contains (1) the metric as <a href="/ioverho/prob_conf_mat/Reference/Metrics/index.html#interface">metric syntax strings</a>, (2) and any metric aggregation parameters. Defaults to an empty dict, in which case no metrics are added to the study.</p>
-<p>Similar to the <code>experiments</code> configuration, since this is a convoluted data structure, a more convenient <a href="/ioverho/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study.add_metric"><code>Study.add_metric</code></a> method is provided.</p>
+<p>Finally, the metrics are represented as a nested <code>dict</code> that contains (1) the metric as <a href="../Reference/Metrics/index#interface">metric syntax strings</a>, (2) and any metric aggregation parameters. Defaults to an empty dict, in which case no metrics are added to the study.</p>
+<p>Similar to the <code>experiments</code> configuration, since this is a convoluted data structure, a more convenient <a href="../Reference/Study.html#prob_conf_mat.study.Study.add_metric"><code>Study.add_metric</code></a> method is provided.</p>
 <p>An example of a valid <code>metrics</code> value is:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="s2">&quot;METRIC_SYNTAX_STRING&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -992,10 +1017,10 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="p">}</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>The inner-most <code>dict</code> contains the necessary parameters to instantiate the <a href="/ioverho/prob_conf_mat/Reference/Experiment Aggregation/index.html"><code>ExperimentAggregation</code></a> method. It can be empty, as long as there is only one experiment per experiment group. Otherwise, it must contain an <code>'aggregation'</code> key and value.</p>
+<p>The innermost <code>dict</code> contains the necessary parameters to instantiate the <a href="../Reference/Experiment Aggregation/index"><code>ExperimentAggregation</code></a> method. It can be empty, as long as there is only one experiment per experiment group. Otherwise, it must contain an <code>'aggregation'</code> key and value.</p>
 <h2 id="accessing-the-configuration">Accessing the configuration<a class="headerlink" href="#accessing-the-configuration" title="Permanent link">#</a></h2>
-<p>The complete configuration can be parsed and written to a <code>dict</code> containing only built-in types. This is useful for serialization using JSON, YAML or TOML, for example. To access this config <code>dict</code>, simply use the <a href="/ioverho/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study.to_dict"><code>Study.to_dict</code></a> method.</p>
-<p>See for example, the <code>dict</code> produced in the <a href="ioverho/prob_conf_mat/Getting Started/04_interfacing_with_the_filesystem.html">Interfacing with the Filesystem</a> notebook.</p>
+<p>The complete configuration can be parsed and written to a <code>dict</code> containing only built-in types. This is useful for serialization using JSON, YAML or TOML, for example. To access this config <code>dict</code>, simply use the <a href="../Reference/Study.html#prob_conf_mat.study.Study.to_dict"><code>Study.to_dict</code></a> method.</p>
+<p>See for example, the <code>dict</code> produced in the <a href="../Getting Started/04_interfacing_with_the_filesystem">Interfacing with the Filesystem</a> notebook.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">study</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">{</span> <span class="s1">&#39;seed&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  <span class="s1">&#39;num_samples&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
@@ -1016,10 +1041,10 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
 </span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>               <span class="s1">&#39;f1@macro&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;aggregation&#39;</span><span class="p">:</span> <span class="s1">&#39;fe_gaussian&#39;</span><span class="p">},</span>
 </span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>               <span class="s1">&#39;mcc&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;aggregation&#39;</span><span class="p">:</span> <span class="s1">&#39;beta&#39;</span><span class="p">}}}</span>
 </span></code></pre></div>
-<p>Similarly, the study can be instantiated using the <a href="/ioverho/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study.from_dict"><code>Study.from_dict</code></a> method. Keep in mind that this is a <a href="https://docs.python.org/3.11/library/functions.html#classmethod">classmethod</a>.</p>
+<p>Similarly, the study can be instantiated using the <a href="../Reference/Study.html#prob_conf_mat.study.Study.from_dict"><code>Study.from_dict</code></a> method. Keep in mind that this is a <a href="https://docs.python.org/3.11/library/functions#classmethod">classmethod</a>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">study</span> <span class="o">=</span> <span class="n">Study</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </span></code></pre></div>
-<p>While this creates a study instance with the same configuration, its output will <em>generally</em> not be identical, since this depends on the order of operations. However, the performing the same operations in the same order with identical study isntances should yield the same output.</p>
+<p>While this creates a study instance with the same configuration, its output will <em>generally</em> not be identical, since this depends on the order of operations. However, the performing the same operations in the same order with identical study instances should yield the same output.</p>
 
 
 
@@ -1040,7 +1065,7 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 30, 2025 21:33:29 UTC">June 30, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 11:22:01 UTC">July 10, 2025</span>
   </span>
 
     
@@ -1146,9 +1171,9 @@ Version 0.1.0-pre.2. This library is still under active development. Expect bugs
       <script id="__config" type="application/json">{"base": "..", "features": ["content.footnote.tooltips", "content.tooltips", "content.code.copy", "content.code.select", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes", "navigation.tracking", "navigation.prune", "toc.follow", "navigation.top", "search.suggest", "search.highlight", "navigation.footer"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
-        <script src="../_static/mathjax.js"></script>
+        <script src="../assets/mathjax.js"></script>
       
         <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
