@@ -173,7 +173,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
 @dataclass(frozen=True)
 class ExperimentAggregationResult:
-    """Container class for results from an experiment aggregation method."""
+    """Class containing results from performing experiment aggregation."""
 
     experiment_group: ExperimentGroup
     aggregator: type[ExperimentAggregator]

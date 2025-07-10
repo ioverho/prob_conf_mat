@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+import matplotlib.pyplot as plt
 
 import prob_conf_mat as pcm
 from prob_conf_mat.io import load_csv
@@ -9,6 +10,15 @@ BASIC_METRICS = [
     "acc",
     "f1",
     "f1@macro",
+]
+
+FORMATS = [
+    "simple",  # tabulate
+    "github",  # tabulate
+    "html",  # tabulate
+    "records",  # records
+    "pandas",  # pandas
+    "pd",  # pandas
 ]
 
 
@@ -54,16 +64,25 @@ class TestReportingMethods:
             class_label=0,
         )
 
+        plt.close()
+
+    @pytest.mark.parametrize(argnames="format", argvalues=FORMATS)
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
-    def test_report_random_metric_summaries(self, study, metric):
+    def test_report_random_metric_summaries(self, study, metric, format):
         study.report_random_metric_summaries(
             metric=metric,
             class_label=0,
+            table_fmt=format,
         )
 
+    @pytest.mark.parametrize(argnames="format", argvalues=FORMATS)
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
-    def test_report_aggregated_metric_summaries(self, study, metric):
-        study.report_aggregated_metric_summaries(metric=metric, class_label=0)
+    def test_report_aggregated_metric_summaries(self, study, metric, format):
+        study.report_aggregated_metric_summaries(
+            metric=metric,
+            class_label=0,
+            table_fmt=format,
+        )
 
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
     def test_plot_experiment_aggregation(self, study, metric):
@@ -79,12 +98,17 @@ class TestReportingMethods:
             experiment_group="svm",
         )
 
+        plt.close()
+
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
     def test_forest_plot(self, study, metric):
         study.plot_forest_plot(metric=metric, class_label=0)
 
+        plt.close()
+
+    @pytest.mark.parametrize(argnames="format", argvalues=FORMATS)
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
-    def test_pairwise_comparison(self, study, metric):
+    def test_pairwise_comparison(self, study, metric, format):
         study.report_pairwise_comparison(
             metric=metric,
             class_label=0,
@@ -92,6 +116,16 @@ class TestReportingMethods:
             experiment_b="svm/aggregated",
             min_sig_diff=0.005,
         )
+
+        with pytest.warns(match="does not produce a table"):
+            study.report_pairwise_comparison(
+                metric=metric,
+                class_label=0,
+                experiment_a="mlp/aggregated",
+                experiment_b="svm/aggregated",
+                min_sig_diff=0.005,
+                table_fmt=format,
+            )
 
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
     def test_pairwise_comparison_plot(self, study, metric):
@@ -120,16 +154,22 @@ class TestReportingMethods:
             min_sig_diff=0.005,
         )
 
+        plt.close()
+
+    @pytest.mark.parametrize(argnames="format", argvalues=FORMATS)
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
-    def test_report_pairwise_comparison_to_random(self, study, metric):
+    def test_report_pairwise_comparison_to_random(self, study, metric, format):
         study.report_pairwise_comparison_to_random(
             metric=metric,
             class_label=0,
+            table_fmt=format,
         )
 
+    @pytest.mark.parametrize(argnames="format", argvalues=FORMATS)
     @pytest.mark.parametrize(argnames="metric", argvalues=BASIC_METRICS)
-    def test_report_listwise_comparison(self, study, metric):
+    def test_report_listwise_comparison(self, study, metric, format):
         study.report_listwise_comparison(
             metric=metric,
             class_label=0,
+            table_fmt=format,
         )

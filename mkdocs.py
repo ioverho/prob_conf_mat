@@ -103,7 +103,7 @@ def metrics_and_averaging_overview() -> None:
     logger = logging.getLogger(__name__)
 
     # Load in the template
-    template = Template(Path("./documentation/_partial/metrics_index.md").resolve())
+    template = Template(Path("./documentation/templates/metrics_index.md").resolve())
 
     # Generate a record for each metric alias
     aliases = sorted(METRIC_REGISTRY.items(), key=lambda x: x[0])
@@ -181,7 +181,7 @@ def metrics():
     logger = logging.getLogger(__name__)
 
     # Load in the template
-    template = Template(Path("./documentation/_partial/metrics.md").resolve())
+    template = Template(Path("./documentation/templates/metrics.md").resolve())
 
     all_metrics = {str(metric): metric for metric in METRIC_REGISTRY.values()}
 
@@ -228,7 +228,7 @@ def averaging():
     logger = logging.getLogger(__name__)
 
     # Load in the template
-    template = Template(Path("./documentation/_partial/averaging.md").resolve())
+    template = Template(Path("./documentation/templates/averaging.md").resolve())
 
     all_avg_methods = {
         str(avg_method): avg_method for avg_method in AVERAGING_REGISTRY.values()
@@ -275,7 +275,7 @@ def averaging():
 #     logger = logging.getLogger(__name__)
 
 #     # Load in the template
-#     template = Template(Path("./documentation/_partial/io.md").resolve())
+#     template = Template(Path("./documentation/templates/io.md").resolve())
 
 #     # Complete the template
 #     # Creates a table with some important information as an overview
@@ -300,7 +300,7 @@ def experiment_aggregation():
 
     # Load in the template
     template = Template(
-        Path("./documentation/_partial/experiment_aggregation.md").resolve(),
+        Path("./documentation/templates/experiment_aggregation.md").resolve(),
     )
 
     # Complete the template

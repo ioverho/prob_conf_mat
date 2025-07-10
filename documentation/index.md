@@ -6,8 +6,8 @@ hide:
 <div style="text-align: center;" align="center">
 <div style="margin-bottom: 1rem;">
   <a href="." aria-label="Probabilistic Confusion Matrices" data-md-component="logo" title="Probabilistic Confusion Matrices">
-    <img id="logo_light" src="_static/logo_rectangle_dark_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
-    <img id="logo_dark" src="_static/logo_rectangle_light_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+    <img id="logo_light" src="assets/logo_rectangle_dark_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+    <img id="logo_dark" src="assets/logo_rectangle_light_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
   </a>
 </div>
 
@@ -87,7 +87,7 @@ The development dependencies should automatically install into the `.venv` folde
 
 ## Documentation
 
-For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](./index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](./index.md). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
 
 The documentation is broadly divided into 4 sections:
 
@@ -98,13 +98,13 @@ The documentation is broadly divided into 4 sections:
 
 |                 | Learning                                | Coding                                |
 | --------------- | --------------------------------------- | ------------------------------------- |
-| **Practical**   | [Getting Started](./Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](./How%20To%20Guides/configuration.html) |
-| **Theoretical** | [Explanation](./Explanation/generating_confusion_matrices.html)           | [Reference](./Reference/Study.html)                             |
+| **Practical**   | [Getting Started](./Getting%20Started/01_estimating_uncertainty.md) | [How-To Guides](./How%20To%20Guides/configuration.md) |
+| **Theoretical** | [Explanation](./Explanation/generating_confusion_matrices.md)           | [Reference](./Reference/Study.md)                             |
 
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](./Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](./Getting%20Started/01_estimating_uncertainty.md). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 
@@ -161,7 +161,7 @@ fig = study.plot_metric_summaries(metric="acc")
 ```
 
 <picture>
-  <img alt="Metric distribution" src="_static/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Metric distribution" src="assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
@@ -191,7 +191,7 @@ fig = study.plot_forest_plot(metric="acc")
 ```
 
 <picture>
-  <img alt="Forest plot" src="_static/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Forest plot" src="assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
@@ -208,14 +208,14 @@ fig = study.plot_pairwise_comparison(
 ```
 
 <picture>
-  <img alt="Comparison plot" src="_static/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Comparison plot" src="assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
 
 ## Credits
 
-The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), , [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.html).
+The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), , [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.md).
 
 A lot of the approaches and methods used in this project come from published works. Some especially important works include:
 

@@ -28,7 +28,7 @@ AVERAGING_REGISTRY = dict()
 
 @dataclass(frozen=True)
 class RootMetric:
-    """A container for a metric that all other dependencies depend upon."""
+    """A metric that all other metrics depend upon, but with no dependencies."""
 
     name: str
 

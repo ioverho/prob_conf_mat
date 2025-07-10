@@ -64,11 +64,15 @@ study.plot_metric_summaries(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_metric_summaries_annotated.svg"
+    src="../assets/figures/examples/plot_metric_summaries_annotated.svg"
     alt="A plot of a metric's distribution">
 </img>
 
-## Comparing Experiments
+## Comparing 2 Experiments
+
+::: prob_conf_mat.study.Study.get_pairwise_comparison
+    options:
+        heading_level: 3
 
 ::: prob_conf_mat.study.Study.report_pairwise_comparison
     options:
@@ -101,11 +105,21 @@ study.plot_pairwise_comparison(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_pairwise_comparison_annotated.svg"
+    src="../assets/figures/examples/plot_pairwise_comparison_annotated.svg"
     alt="A plot of the distribution of the difference of two metrics">
 </img>
 
+## Comparing Many Experiments
+
+::: prob_conf_mat.study.Study.get_listwise_comparsion_result
+    options:
+        heading_level: 3
+
 ::: prob_conf_mat.study.Study.report_listwise_comparison
+    options:
+        heading_level: 3
+
+::: prob_conf_mat.study.Study.report_expected_reward
     options:
         heading_level: 3
 
@@ -136,7 +150,7 @@ study.plot_experiment_aggregation(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_experiment_aggregation.svg"
+    src="../assets/figures/examples/plot_experiment_aggregation.svg"
     alt="A plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 
@@ -160,7 +174,7 @@ study.plot_forest_plot(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/examples/plot_forest_plot.svg"
+    src="../assets/figures/examples/plot_forest_plot.svg"
     alt="A forest plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 

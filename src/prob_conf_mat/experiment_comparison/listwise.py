@@ -4,6 +4,8 @@ import typing
 if typing.TYPE_CHECKING:
     import jaxtyping as jtyping
 
+    from prob_conf_mat.utils import MetricLike
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -11,8 +13,10 @@ import numpy as np
 
 @dataclass(frozen=True)
 class ListwiseComparisonResult:
+    """Class to store results from a listwise comparison between experiments."""
+
     experiment_names: list[str]
-    metric_name: str
+    metric: MetricLike
 
     p_experiment_given_rank: jtyping.Float[
         np.ndarray,
@@ -26,8 +30,20 @@ class ListwiseComparisonResult:
 
 def listwise_compare(
     experiment_scores_dict: dict[str, jtyping.Float[np.ndarray, " num_samples"]],
-    metric_name: str,
+    metric: MetricLike,
 ) -> ListwiseComparisonResult:
+    """Compares all experiments against each other in a listwise manner.
+
+    This essentially tries to estimate to the expected ranking of the experiments.
+
+    Args:
+        experiment_scores_dict (dict[str, Float[ndarray, "num_samples" ]]): a mapping of experiment
+            name to sampled metric values
+        metric (MetricLike): the metric used. This parameter is only used for reporting
+
+    Returns:
+        ListwiseComparisonResult: the comparison result
+    """
     # Convert the experiment values to a list of lists
     all_experiment_scores = list(experiment_scores_dict.items())
 
@@ -77,7 +93,7 @@ def listwise_compare(
 
     result = ListwiseComparisonResult(
         experiment_names=[experiment_names[i] for i in idx],
-        metric_name=metric_name,
+        metric=metric,
         p_rank_given_experiment=rank_prob_matrix,
         p_experiment_given_rank=rank_prob_matrix.T,
     )

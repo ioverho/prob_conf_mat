@@ -102,6 +102,7 @@ ignore = [
     "D105",   # Undocumented magic method
     "D107",   # Undocumented __init__ method
     "ICN001", # Matplotlib should be imported as MPL
+    "UP037",  # Removes quotes in type annotations
 ]
 extend-select = [
     "F",   # Pyflakes rules

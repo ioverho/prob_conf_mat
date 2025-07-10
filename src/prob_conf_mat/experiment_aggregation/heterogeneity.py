@@ -132,7 +132,7 @@ def heterogeneity_pm(
 
 @dataclass(frozen=True)
 class HeterogeneityResult:
-    """Container for the output of a heterogeneity computation."""
+    """The output of a heterogeneity computation."""
 
     i2: float
     within_experiment_variance: float

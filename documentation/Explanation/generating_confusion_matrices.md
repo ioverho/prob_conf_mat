@@ -12,7 +12,7 @@ In a binary classification scenario ($|\mathcal{Y}|=2$), each element of the con
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/binary_confusion_matrix.svg"
+    src="../assets/figures/binary_confusion_matrix.svg"
     alt="A binary confusion matrix">
 </img>
 
@@ -70,7 +70,7 @@ While the Totsch model is useful for binary confusion matrices, it does not allo
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../_static/figures/multiclass_confusion_matrix.svg"
+    src="../assets/figures/multiclass_confusion_matrix.svg"
     alt="A multi-class confusion matrix">
 </img>
 

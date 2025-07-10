@@ -1416,7 +1416,7 @@ class Study(Config):
 
         return comparison_result
 
-    def report_pairwise_comparison(
+    def report_pairwise_comparison(  # noqa: D417
         self,
         metric: str,  # type: ignore
         class_label: int | None = None,  # type: ignore
@@ -1425,6 +1425,7 @@ class Study(Config):
         experiment_b: str,
         min_sig_diff: float | None = None,
         precision: int = 4,
+        table_fmt: str | None = None,
     ) -> str:
         """Reports on the comparison between two Experiments or ExperimentGroups.
 
@@ -1474,6 +1475,12 @@ class Study(Config):
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
+
+        if table_fmt is not None:
+            warnings.warn(
+                "Method `report_pairwise_comparison` does not produce a table and as such does not "
+                "need a `table_fmt` parameter. Ignoring.",
+            )
 
         metric, class_label = self._validate_metric_class_label_combination(
             metric=metric,
@@ -2190,7 +2197,7 @@ class Study(Config):
 
         listwise_comparison_result = listwise_compare(
             experiment_scores_dict=experiment_values,
-            metric_name=metric.name,
+            metric=metric,
         )
 
         return listwise_comparison_result
@@ -2299,6 +2306,128 @@ class Study(Config):
                     headers=headers,
                     colalign=["left", "left"] + ["decimal" for _ in headers[2:]],
                     missingval="",
+                )
+
+        return table
+
+    def report_expected_reward(
+        self,
+        metric: str,  # type: ignore
+        class_label: int | None = None,  # type: ignore
+        rewards: jtyping.Float[np.typing.ArrayLike, " num_rewards"] = [1.0],  # type: ignore
+        *,
+        table_fmt: str = "html",
+        precision: int = 2,
+    ) -> list | pd.DataFrame | str:
+        """Computes the expected reward each experiments should receive.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Leave 0 or None if using a
+                multiclass metric. Defaults to None.
+            rewards (Float[ArrayLike, "num_rewards"]): the rewards each rank earns.
+                Should be an ArrayLike with as many entries as there are total number of experiments
+                in this study.
+                If there are fewer rewards, the rewards array is padded with 0s.
+                If there are more rewards than experiments, a ValueError is raised.
+
+        Keyword Args:
+            table_fmt (str, optional): the format of the table.
+                If 'records', the raw list of values is returned.
+                If 'pandas' or 'pd', a Pandas DataFrame is returned.
+                In all other cases, it is passed to
+                [tabulate](https://github.com/astanin/python-tabulate#table-format).
+                Defaults to tabulate's "html".
+            precision (int, optional): the precision of floats used when printing. Defaults to 2.
+
+        Returns:
+            dict[str, float]: a mapping of experiment name to reward
+        """
+        # Typehint the metric and class_label variables
+        metric: MetricLike
+        class_label: int
+
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        # Convert rewards to numpy array
+        rewards: jtyping.Float[np.typing.ArrayLike, " num_rewards"] = np.array(
+            rewards,
+        ).squeeze()
+
+        if len(rewards.shape) == 0:
+            rewards = rewards.reshape((1,))
+
+        elif len(rewards.shape) > 1:
+            raise ValueError(
+                "Rewards of unknown shape."
+                "Should be a 1D array with length in the range [1, num_experiments].",
+            )
+
+        # Fetch p(rank|experiment)
+        listwise_comparsion_result = self.get_listwise_comparsion_result(
+            metric=metric.name,
+            class_label=class_label,
+        )
+
+        p_rank_given_experiment = listwise_comparsion_result.p_rank_given_experiment
+
+        # Fix rewards shape
+        if rewards.shape[0] > p_rank_given_experiment.shape[0]:  # type: ignore
+            raise ValueError(
+                f"There are more rewards then there are experiments. "
+                f"Rewards shape: {rewards.shape[0]}. "  # type: ignore
+                f"Num experiments: {p_rank_given_experiment.shape[0]}",
+            )
+        if rewards.shape[0] < p_rank_given_experiment.shape[0]:  # type: ignore
+            rewards: jtyping.Float[np.typing.ArrayLike, " num_experiments"] = np.pad(
+                array=rewards,
+                pad_width=(0, p_rank_given_experiment.shape[0] - rewards.shape[0]),  # type: ignore
+            )
+
+        expected_rewards = np.dot(
+            p_rank_given_experiment,
+            rewards,
+        )
+
+        records = []
+        for experiment_name, expected_reward in zip(
+            listwise_comparsion_result.experiment_names,
+            expected_rewards,
+        ):
+            group_name, experiment_name = self._split_experiment_name(
+                name=experiment_name,
+                do_warn=False,
+            )
+
+            records.append(
+                {
+                    "Group": group_name,
+                    "Experiment": experiment_name,
+                    "E[Reward]": expected_reward.tolist(),
+                },
+            )
+
+        match table_fmt:
+            case "records":
+                table = records
+
+            case "pd" | "pandas":
+                import pandas as pd
+
+                table = pd.DataFrame.from_records(data=records)
+
+            case _:
+                import tabulate
+
+                table = tabulate.tabulate(  # type: ignore
+                    tabular_data=records,
+                    headers="keys",
+                    floatfmt=f".{precision}f",
+                    colalign=["left", "left", "decimal"],
+                    tablefmt=table_fmt,
                 )
 
         return table

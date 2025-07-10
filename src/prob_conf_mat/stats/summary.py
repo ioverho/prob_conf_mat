@@ -15,7 +15,7 @@ from prob_conf_mat.stats.hdi_estimation import hdi_estimator
 
 @dataclass(frozen=True)
 class PosteriorSummary:
-    """A container for summary statistics of some probability distribution."""
+    """Summary statistics of some probability distribution."""
 
     median: float
     mode: float

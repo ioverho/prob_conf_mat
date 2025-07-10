@@ -1,9 +1,9 @@
 <div style="text-align: center;" align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg">
-  <img alt="Logo" src="https://www.ivoverhoeven.nl/prob_conf_mat/_static/logo_rectangle_dark_text.svg" width="150px">
+  <source media="(prefers-color-scheme: dark)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/assets/logo_rectangle_light_text.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/assets/logo_rectangle_dark_text.svg">
+  <img alt="Logo" src="https://www.ivoverhoeven.nl/prob_conf_mat/assets/logo_rectangle_dark_text.svg" width="150px">
 </picture>
 
 <div style="text-align: center;" align="center">
@@ -155,7 +155,7 @@ fig = study.plot_metric_summaries(metric="acc")
 ```
 
 <picture>
-  <img alt="Metric distribution" src="documentation/_static/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Metric distribution" src="documentation/assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
@@ -185,7 +185,7 @@ fig = study.plot_forest_plot(metric="acc")
 ```
 
 <picture>
-  <img alt="Forest plot" src="documentation/_static/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Forest plot" src="documentation/assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
@@ -202,7 +202,7 @@ fig = study.plot_pairwise_comparison(
 ```
 
 <picture>
-  <img alt="Comparison plot" src="documentation/_static/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Comparison plot" src="documentation/assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
