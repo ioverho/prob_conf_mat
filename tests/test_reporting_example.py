@@ -62,6 +62,15 @@ class TestReportingMethods:
         study.plot_metric_summaries(
             metric=metric,
             class_label=0,
+            method="kde",
+        )
+
+        plt.close()
+
+        study.plot_metric_summaries(
+            metric=metric,
+            class_label=0,
+            method="hist",
         )
 
         plt.close()
