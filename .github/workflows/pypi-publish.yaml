@@ -1,6 +1,6 @@
 # Github: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
 # UV: https://github.com/astral-sh/trusted-publishing-examples/blob/main/.github/workflows/release.yml
-name: Upload Python Package
+name: Publish Python Package
 
 on:
   release:

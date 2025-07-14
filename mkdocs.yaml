@@ -137,9 +137,15 @@ plugins:
   # Search bar
   # https://squidfunk.github.io/mkdocs-material/plugins/search/
   - search
-  - privacy
+  # Local hosting of external files
+  # https://squidfunk.github.io/mkdocs-material/plugins/privacy/
+  # Requires 'Insiders' build...
+  #- privacy:
+  #    assets_exclude:
+  #      # Mathjax cannot be paired with privacy plugin
+  #      # https://squidfunk.github.io/mkdocs-material/plugins/privacy/?h=mathjax#config.assets_exclude
+  #      - unpkg.com/mathjax@3/*
   - social
-  #- ipynb
   - mkdocs-jupyter:
       # Execute notebooks before conversion
       # Set to false for faster rendering

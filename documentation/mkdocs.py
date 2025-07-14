@@ -12,13 +12,20 @@ from prob_conf_mat.utils import fmt
 from prob_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY
 from prob_conf_mat.experiment_aggregation import AGGREGATION_REGISTRY
 
-REFERENCE_PART = "Reference"
-METRICS_AND_AVERAGING_CHAPTER = REFERENCE_PART + "/Metrics"
-METRICS_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Metrics.md"
-AVERAGING_SECTION = METRICS_AND_AVERAGING_CHAPTER + "/Averaging.md"
-# IO_SECTION = REFERENCE_PART + "/IO.md"
-EXPERIMENT_AGGREGATION_SECTION = REFERENCE_PART + "/Experiment Aggregation/index.md"
+logger = logging.getLogger(__name__)
 
+DOCUMENTATION_DIR = Path("documentation")
+
+REFERENCE_PART = DOCUMENTATION_DIR / "Reference"
+
+METRICS_AND_AVERAGING_CHAPTER = REFERENCE_PART / "Metrics"
+METRICS_AND_AVERAGING_OVERVIEW = METRICS_AND_AVERAGING_CHAPTER / "index.md"
+METRICS_SECTION = METRICS_AND_AVERAGING_CHAPTER / "Metrics.md"
+AVERAGING_SECTION = METRICS_AND_AVERAGING_CHAPTER / "Averaging.md"
+
+EXPERIMENT_AGGREGATION_CHAPTER = REFERENCE_PART / "Experiment Aggregation"
+EXPERIMENT_AGGREGATION_SECTION = EXPERIMENT_AGGREGATION_CHAPTER / "index.md"
+HETEROGENEITY_SECTION = EXPERIMENT_AGGREGATION_CHAPTER / "heterogeneity.md"
 
 REPL_STRING = re.compile(r"@@(.+?)@@")
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -100,11 +107,19 @@ class Template:
 
 
 def metrics_and_averaging_overview() -> None:
-    logger = logging.getLogger(__name__)
-
     # Load in the template
-    template = Template(Path("./documentation/templates/metrics_index.md").resolve())
+    template_fp = TEMPLATE_DIR / "metrics_index.md"
+    if not template_fp.exists():
+        raise FileNotFoundError(f"Could not find a template file at '{template_fp}'")
 
+    logger.info(f"Metrics & Averaging - Found template at '{template_fp}'")
+
+    template = Template(
+        file_name=template_fp,
+    )
+
+    # Complete the template
+    # Metrics Table ============================================================
     # Generate a record for each metric alias
     aliases = sorted(METRIC_REGISTRY.items(), key=lambda x: x[0])
     aliases_index = []
@@ -112,7 +127,6 @@ def metrics_and_averaging_overview() -> None:
         aliases_index += [
             [
                 f"'{alias}'",
-                # TODO: check that this works when hosting as well
                 f"[`{metric.__name__}`](Metrics.md#{metric.__module__}.{metric.__name__})",
                 metric.is_multiclass,
                 # metric.bounds,
@@ -120,7 +134,6 @@ def metrics_and_averaging_overview() -> None:
             ],
         ]
 
-    # Complete the template
     # Creates a table with some important information as an overview
     template.set(
         "metrics_table",
@@ -138,8 +151,13 @@ def metrics_and_averaging_overview() -> None:
         ),
     )
 
-    # Generate a record for each metric alias
-    aliases = sorted(list(AVERAGING_REGISTRY.items()), key=lambda x: x[0])
+    logger.info(
+        "Metrics & Averaging - Filled parameter `metrics_table`",
+    )
+
+    # Averaging list ===========================================================
+    # Generate a record for each averaging alias
+    aliases = sorted(AVERAGING_REGISTRY.items(), key=lambda x: x[0])
     aliases_index = []
     for i, (alias, avg_method) in enumerate(aliases):
         aliases_index += [
@@ -151,7 +169,6 @@ def metrics_and_averaging_overview() -> None:
             ],
         ]
 
-    # Complete the template
     # Creates a table with some important information as an overview
     template.set(
         "averaging_table",
@@ -166,27 +183,38 @@ def metrics_and_averaging_overview() -> None:
         ),
     )
 
+    logger.info(
+        "Metrics & Averaging - Filled parameter `averaging_table`",
+    )
+
     # Write the template to a md file
-    Path(f"./documentation/{METRICS_AND_AVERAGING_CHAPTER}/index.md").write_text(
+    output_fp = METRICS_AND_AVERAGING_OVERVIEW.resolve()
+    output_fp.write_text(
         str(template),
         encoding="utf-8",
     )
 
     logger.info(
-        f"Wrote metrics & averaging index to '{METRICS_AND_AVERAGING_CHAPTER}/index.md'",
+        f"Metrics & Averaging - Wrote filled template to '{output_fp}'",
     )
 
 
-def metrics():
-    logger = logging.getLogger(__name__)
-
+def metrics() -> None:
     # Load in the template
-    template = Template(Path("./documentation/templates/metrics.md").resolve())
+    template_fp = TEMPLATE_DIR / "metrics.md"
+    if not template_fp.exists():
+        raise FileNotFoundError(f"Could not find a template file at '{template_fp}'")
 
-    all_metrics = {str(metric): metric for metric in METRIC_REGISTRY.values()}
+    logger.info(f"Metrics - Found template at '{template_fp}'")
+
+    template = Template(
+        file_name=template_fp,
+    )
 
     # Complete the template
-    # Creates a table with some important information as an overview
+    # Metrics list =============================================================
+    all_metrics = {str(metric): metric for metric in METRIC_REGISTRY.values()}
+
     template.set(
         "metrics_list",
         value="\n\n".join(
@@ -215,29 +243,42 @@ def metrics():
         ),
     )
 
+    logger.info(
+        "Metrics - Filled parameter `metrics_list`",
+    )
+
     # Write the template to a md file
-    Path(f"./documentation/{METRICS_SECTION}").write_text(
+    output_fp = METRICS_SECTION.resolve()
+    output_fp.write_text(
         str(template),
         encoding="utf-8",
     )
 
-    logger.info(f"Wrote documentation for '{METRICS_SECTION}'")
+    logger.info(
+        f"Metrics - Wrote filled template to '{output_fp}'",
+    )
 
 
-def averaging():
-    logger = logging.getLogger(__name__)
-
+def averaging() -> None:
     # Load in the template
-    template = Template(Path("./documentation/templates/averaging.md").resolve())
+    template_fp = TEMPLATE_DIR / "averaging.md"
+    if not template_fp.exists():
+        raise FileNotFoundError(f"Could not find a template file at '{template_fp}'")
 
+    logger.info(f"Averaging - Found template at '{template_fp}'")
+
+    template = Template(
+        file_name=template_fp,
+    )
+
+    # Complete the template
+    # Averaging methods list ===================================================
     all_avg_methods = {
         str(avg_method): avg_method for avg_method in AVERAGING_REGISTRY.values()
     }
 
-    # Complete the template
-    # Creates a table with some important information as an overview
     template.set(
-        "averaging_methods_list",
+        key="averaging_methods_list",
         value="\n\n".join(
             (
                 f"::: {avg_method.__module__}.{avg_method.__name__}"
@@ -262,68 +303,68 @@ def averaging():
         ),
     )
 
+    logger.info(
+        "Averaging - Filled parameter `averaging_methods_list`",
+    )
+
     # Write the template to a md file
-    Path(f"./documentation/{AVERAGING_SECTION}").write_text(
+    output_fp = AVERAGING_SECTION.resolve()
+    output_fp.write_text(
         str(template),
         encoding="utf-8",
     )
 
-    logger.info(f"Wrote averaging methods to '{AVERAGING_SECTION}'")
+    logger.info(
+        f"Averaging - Wrote filled template to '{output_fp}'",
+    )
 
 
-# def io():
-#     logger = logging.getLogger(__name__)
-
-#     # Load in the template
-#     template = Template(Path("./documentation/templates/io.md").resolve())
-
-#     # Complete the template
-#     # Creates a table with some important information as an overview
-#     all_io_methods = {str(io_method): io_method for io_method in IO_REGISTRY.values()}
-
-#     template.set(
-#         "io_methods_list",
-#         value="\n".join(
-#             f"::: {io_method.__module__}.{io_method.__name__}"
-#             for io_method in all_io_methods.values()
-#         ),
-#     )
-
-#     # Write the template to a md file
-#     Path(f"./documentation/{IO_SECTION}").write_text(str(template), encoding="utf-8")
-
-#     logger.info(f"Wrote IO methods to '{IO_SECTION}'")
-
-
-def experiment_aggregation():
-    logger = logging.getLogger(__name__)
-
+def experiment_aggregation() -> None:
     # Load in the template
+    template_fp = TEMPLATE_DIR / "experiment_aggregation.md"
+    if not template_fp.exists():
+        raise FileNotFoundError(f"Could not find a template file at '{template_fp}'")
+
+    logger.info(f"Experiment Aggregation - Found template at '{template_fp}'")
+
     template = Template(
-        Path("./documentation/templates/experiment_aggregation.md").resolve(),
+        file_name=template_fp,
     )
 
     # Complete the template
+    # Aliases table ============================================================
     # Creates a table with some important information as an overview
-    all_agg_methods = {
-        str(agg_method): agg_method for agg_method in AGGREGATION_REGISTRY.values()
-    }
+    methods = []
+    for alias, method in AGGREGATION_REGISTRY.items():
+        methods.append(
+            [
+                f"'{alias}'",
+                f"[{method.__name__}](#{method.__module__}.{method.__name__})",
+            ],
+        )
 
-    template.set(
-        "experiment_aggregators_list",
-        value="\n".join(
-            f"::: {agg_method.__module__}.{agg_method.__name__}"
-            for agg_method in all_agg_methods.values()
-        ),
+    methods = sorted(methods, key=lambda x: x[0])
+
+    table_str = tabulate(
+        tabular_data=methods,
+        headers=["Alias", "Method"],
+        tablefmt="github",
     )
 
-    # Write the template to a md file
-    Path(f"./documentation/{EXPERIMENT_AGGREGATION_SECTION}").write_text(
+    template.set(key="experiment_aggregators_table", value=table_str)
+
+    logger.info("Experiment Aggregation - Filled 'experiment_aggregators_table'")
+
+    # Write the template to an md file
+    output_fp = EXPERIMENT_AGGREGATION_SECTION.resolve()
+    output_fp.write_text(
         str(template),
         encoding="utf-8",
     )
 
-    logger.info(f"Wrote IO methods to '{EXPERIMENT_AGGREGATION_SECTION}")
+    logger.info(
+        f"Experiment Aggregation - Wrote filled template to '{output_fp}'",
+    )
 
 
 if __name__ == "__main__":
@@ -342,9 +383,5 @@ if __name__ == "__main__":
     # References/Metrics/index.md
     metrics_and_averaging_overview()
 
-    # TODO: add documentation for IO and utils in general
-    # References/IO.md
-    # io()
-
-    # References/ExperimentAggregation.md
+    # References/Experiment Aggregation/index.md
     experiment_aggregation()

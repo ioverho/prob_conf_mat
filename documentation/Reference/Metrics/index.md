@@ -51,6 +51,7 @@ The following lists all implemented metrics, by alias
 | 'accuracy'                         | [`Accuracy`](Metrics.md#prob_conf_mat.metrics._metrics.Accuracy)                                             | True         | accuracy_score          |
 | 'ba'                               | [`BalancedAccuracy`](Metrics.md#prob_conf_mat.metrics._metrics.BalancedAccuracy)                             | True         | balanced_accuracy_score |
 | 'balanced_accuracy'                | [`BalancedAccuracy`](Metrics.md#prob_conf_mat.metrics._metrics.BalancedAccuracy)                             | True         | balanced_accuracy_score |
+| 'bm'                               | [`Informedness`](Metrics.md#prob_conf_mat.metrics._metrics.Informedness)                                     | False        |                         |
 | 'bookmaker_informedness'           | [`Informedness`](Metrics.md#prob_conf_mat.metrics._metrics.Informedness)                                     | False        |                         |
 | 'cohen_kappa'                      | [`CohensKappa`](Metrics.md#prob_conf_mat.metrics._metrics.CohensKappa)                                       | True         | cohen_kappa_score       |
 | 'critical_success_index'           | [`JaccardIndex`](Metrics.md#prob_conf_mat.metrics._metrics.JaccardIndex)                                     | False        | jaccard_score           |

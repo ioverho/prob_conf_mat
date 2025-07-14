@@ -259,7 +259,7 @@ class FEGaussianAggregator(ExperimentAggregator):
     $$\begin{aligned}
         w_{i}&=\dfrac{\sigma_{i}^{-2}}{\sum_{j}^{M}\sigma_{j}^{-2}} \\
         \tilde{\mu}&=\sum_{i}^{M}w_{i}\mu_{i} \\
-        \tilde{\sigma^2}&=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+        \tilde{\sigma}^2&=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
     \end{aligned}$$
 
     where $M$ is the total number of experiments.

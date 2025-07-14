@@ -4,27 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'src/**'
-      - 'tests/**'
-      - '!tests/data/**'
-      - '!tests/logs/**'
-      - '!tests/profile/**'
-      - 'documentation/Getting Started/**'
   pull_request:
     branches:
       - main
-    paths:
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'src/**'
-      - 'tests/**'
-      - '!tests/data/**'
-      - '!tests/logs/**'
-      - '!tests/profile/**'
-      - 'documentation/Getting Started/**'
 
 permissions:
   contents: read
@@ -46,10 +28,8 @@ jobs:
           fetch-depth: 2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
-          # Install a specific version of uv.
-          version: "0.7.13"
           python-version: ${{ matrix.python-version }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
@@ -65,6 +45,3 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: ioverho/prob_conf_mat
-
-      - name: Minimize uv cache
-        run: uv cache prune --ci
