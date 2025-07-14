@@ -1,6 +1,6 @@
 [project]
 name = "prob-conf-mat"
-version = "0.1.0-pre.3"
+version = "0.1.0-pre.4"
 authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
 description = "Confusion matrices with uncertainty quantification, experiment aggregation and significance testing."
 readme = "README.md"
@@ -32,7 +32,6 @@ dependencies = [
     "scipy>=1.15",
     "tabulate>=0.9",
     "matplotlib>=3.10",
-    "seaborn>=0.13",
 ]
 
 [project.urls]
@@ -56,6 +55,7 @@ dev = [
     "nbconvert>=7.16.4",
     "nbformat>=5.10.4",
     "opt-einsum>=3.4.0",
+    "pandas>=2.3.1",
     "pip>=25.0.1",
     "pre-commit>=4.2.0",
     "pyright>=1.1.402",
@@ -66,6 +66,7 @@ dev = [
     "ruff>=0.11.5",
     "scalene>=1.5.51",
     "scikit-learn>=1.6.1",
+    "seaborn>=0.13.2",
     "snakeviz>=2.2.2",
     "toml>=0.10.2",
     "tqdm>=4.67.1",
