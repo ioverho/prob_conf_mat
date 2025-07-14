@@ -6,19 +6,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'documentation/**'
-      - 'mkdocs.yaml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '.github/**'
-      - 'pyproject.toml'
-      - 'documentation/**'
-      - 'mkdocs.yaml'
 
 permissions:
   contents: write
@@ -37,16 +24,17 @@ jobs:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
-          # Install a specific version of uv.
-          version: "0.7.13"
           python-version: "3.11"
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
         run: uv sync --locked --all-extras --dev
+
+      - name: Compile documentation templates
+        run: uv run --dev ./documentation/mkdocs.py
 
       - name: Build documentation
         run: uv run --dev mkdocs gh-deploy --clean --site-dir "./site" --force
