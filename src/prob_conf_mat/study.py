@@ -909,7 +909,7 @@ class Study(Config):
             class_label (int | None, optional): the class label. Defaults to None.
 
         Keyword Args:
-            method (str, optional): the method for displaying a histogram, provided by Seaborn.
+            method (str, optional): the method for displaying a 1D distribution.
                 Can be either a histogram or KDE.
                 Defaults to "kde".
             bw_method (str | None, optional): the bandwidth selection method to use.
@@ -1584,7 +1584,7 @@ class Study(Config):
                 format. To compare an ExperimentGroup, use 'aggregated' as the experiment name
             min_sig_diff (float | None, optional): the minimal difference which is considered
                 significant. Defaults to 0.1 * std.
-            method (str, optional): the method for displaying a histogram, provided by Seaborn.
+            method (str, optional): the method for displaying a 1D distribution.
                 Can be either a histogram or KDE.
                 Defaults to "kde".
             bw_method (str | None, optional): the bandwidth selection method to use.
@@ -2654,7 +2654,10 @@ class Study(Config):
         *,
         experiment_group: str,
         method: str = "kde",
-        bandwidth: float = 1.0,
+        bw_method: str | None = None,
+        bw_adjust: float = 1.0,
+        cut: float = 1.0,
+        grid_samples: int = 200,
         bins: int | list[int] | str = "auto",
         normalize: bool = False,
         figsize: tuple[float, float] | None = None,
@@ -2697,15 +2700,34 @@ class Study(Config):
             observed_values (dict[str, ExperimentResult]): the observed metric values
             sampled_values (dict[str, ExperimentResult]): the sampled metric values
             metric (Metric | AveragedMetric): the metric
-            method (str, optional): the method for displaying a histogram, provided by Seaborn.
+            method (str, optional): the method for displaying a 1D distribution.
                 Can be either a histogram or KDE.
                 Defaults to "kde".
-            bandwidth (float, optional): the bandwith parameter for the KDE.
-                Corresponds to [Seaborn's `bw_adjust` parameter](https://seaborn.pydata.org/generated/seaborn.kdeplot.html).
-                Defaults to 1.0.
+            bw_method (str | None, optional): the bandwidth selection method to use.
+                Defaults to [Scipy's default](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html)
+                : 'scott'.
+                Only used when `method='kde'`.
+            bw_adjust (float, optional):
+                Factor that multiplicatively scales the bandwidth chosen.
+                Increasing will make the curve smoother.
+                Defaults to 1.
+                Only used when `method='kde'`.
+            cut (float, optional): Factor, multiplied by the smoothing bandwidth, that determines
+                how far the evaluation grid extends past the extreme datapoints.
+                When set to 0, truncate the curve at the data limits.
+                Defaults to 3.
+                Only used when `method='kde'`.
+            clip (tuple[float, float] | None, optional): the bounds outside of which no density
+                values will be computed.
+                Defaults to None.
+                Only used when `method='kde'`.
+            grid_samples (int, optional): the number of KDE points to evaluate at.
+                Defaults to 200.
+                Only used when `method='kde'`.
             bins (int | list[int] | str, optional): the number of bins to use in the histrogram.
                 Corresponds to [numpy's `bins` parameter](https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges).
                 Defaults to "auto".
+                Only used when `method='histogram'`.
             normalize (bool, optional): if normalized, each distribution will be scaled to [0, 1].
                 Otherwise, uses a shared y-axis.
                 Defaults to False.
@@ -2781,6 +2803,10 @@ class Study(Config):
         Returns:
             matplotlib.figure.Figure: the completed figure of the distribution plot
         """  # noqa: D205
+        # Import optional dependencies
+        import matplotlib
+        import matplotlib.pyplot as plt
+
         # Typehint the metric and class_label variables
         metric: MetricLike
         class_label: int
@@ -2789,20 +2815,6 @@ class Study(Config):
             metric=metric,
             class_label=class_label,
         )
-
-        # Import optional dependencies
-        try:
-            import matplotlib
-            import matplotlib.pyplot as plt
-            import seaborn as sns
-
-        except ModuleNotFoundError as e:
-            raise ModuleNotFoundError(
-                (
-                    f"Visualization requires optional dependencies: [matplotlib, pyplot]. "
-                    f"Currently missing: {e}",
-                ),
-            )
 
         total_num_experiments = len(self._experiment_store[experiment_group]) + 1
 
@@ -2858,69 +2870,74 @@ class Study(Config):
             match method:
                 case DistributionPlottingMethods.KDE.value:
                     # Plot the kde
-                    sns.kdeplot(
-                        distribution_samples,
-                        fill=False,
-                        bw_adjust=bandwidth,
-                        ax=axes[i],
-                        color=edge_colour,
+                    kde_result = compute_kde(
+                        samples=distribution_samples,
+                        bw_method=bw_method,
+                        bw_adjust=bw_adjust,
+                        cut=cut,
+                        grid_samples=grid_samples,
                         clip=metric_bounds,
+                    )
+
+                    axes[i].plot(
+                        kde_result.x_vals,
+                        kde_result.y_vals,
+                        color=edge_colour,
                         zorder=2,
                     )
 
-                    kdeline = axes[i].lines[0]
-
-                    kde_x = kdeline.get_xdata()
-                    kde_y = kdeline.get_ydata()
-
-                    all_min_x.append(kde_x[0])
-                    all_max_x.append(kde_x[-1])
-                    all_max_height.append(np.max(kde_y))
+                    all_min_x.append(kde_result.bounds[0])
+                    all_max_x.append(kde_result.bounds[1])
+                    all_max_height.append(np.max(kde_result.y_vals))
 
                     if area_colour is not None:
                         axes[i].fill_between(
-                            kde_x,
-                            kde_y,
+                            kde_result.x_vals,
+                            kde_result.y_vals,
                             color=area_colour,
                             zorder=0,
                             alpha=area_alpha,
                         )
+
+                    cur_x_vals = kde_result.x_vals
+                    cur_y_vals = kde_result.y_vals
 
                 case (
                     DistributionPlottingMethods.HIST.value
                     | DistributionPlottingMethods.HISTOGRAM.value
                 ):
-                    sns.histplot(
+                    count, hist_bins = np.histogram(
                         distribution_samples,
-                        fill=False,
                         bins=bins,
-                        stat="density",
-                        element="step",
-                        ax=axes[i],
+                        density=True,
+                    )
+
+                    axes[i].stairs(
+                        values=count,
+                        edges=hist_bins,
                         color=edge_colour,
+                        fill=False,
                         zorder=2,
                     )
 
-                    kdeline = axes[i].lines[0]
-
-                    kde_x = kdeline.get_xdata()
-                    kde_y = kdeline.get_ydata()
-
-                    all_min_x.append(kde_x[0])
-                    all_max_x.append(kde_x[-1])
-                    all_max_height.append(np.max(kde_y))
-
-                    kde_x = np.repeat(kde_x, 2)
-                    kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
+                    x_vals = np.repeat(hist_bins, repeats=2)
+                    y_vals = np.concatenate([[0], np.repeat(count, repeats=2), [0]])
 
                     if area_colour is not None:
                         axes[i].fill_between(
-                            kde_x,
-                            kde_y,
-                            color=area_colour,
+                            x_vals,
+                            y_vals,
                             zorder=0,
+                            color=area_colour,
                             alpha=area_alpha,
                         )
+
+                    all_min_x.append(hist_bins[0])
+                    all_max_x.append(hist_bins[-1])
+                    all_max_height.append(np.max(count))
+
+                    cur_x_vals = x_vals
+                    cur_y_vals = y_vals
 
                 case _:
                     del fig, axes
@@ -2956,8 +2973,8 @@ class Study(Config):
 
                 y_median = np.interp(
                     x=median_x,
-                    xp=kde_x,
-                    fp=kde_y,
+                    xp=cur_x_vals,
+                    fp=cur_y_vals,
                 )
 
                 axes[i].vlines(
@@ -2974,8 +2991,8 @@ class Study(Config):
 
                 y_hdi_lb = np.interp(
                     x=x_hdi_lb,
-                    xp=kde_x,
-                    fp=kde_y,
+                    xp=cur_x_vals,
+                    fp=cur_y_vals,
                 )
 
                 axes[i].vlines(
@@ -2991,8 +3008,8 @@ class Study(Config):
 
                 y_hdi_ub = np.interp(
                     x=x_hdi_ub,
-                    xp=kde_x,
-                    fp=kde_y,
+                    xp=cur_x_vals,
+                    fp=cur_y_vals,
                 )
 
                 axes[i].vlines(
@@ -3033,70 +3050,74 @@ class Study(Config):
         match method:
             case DistributionPlottingMethods.KDE.value:
                 # Plot the kde
-                sns.kdeplot(
-                    agg_distribution_samples,
-                    fill=False,
-                    bw_adjust=bandwidth,
-                    ax=axes[-1],
-                    color=edge_colour,
+                kde_result = compute_kde(
+                    samples=agg_distribution_samples,
+                    bw_method=bw_method,
+                    bw_adjust=bw_adjust,
+                    cut=cut,
+                    grid_samples=grid_samples,
                     clip=metric_bounds,
+                )
+
+                axes[-1].plot(
+                    kde_result.x_vals,
+                    kde_result.y_vals,
+                    color=edge_colour,
                     zorder=2,
                 )
 
-                kdeline = axes[-1].lines[0]
-
-                kde_x = kdeline.get_xdata()
-                kde_y = kdeline.get_ydata()
-
-                all_min_x.append(kde_x[0])
-                all_max_x.append(kde_x[-1])
-                all_max_height.append(np.max(kde_y))
+                all_min_x.append(kde_result.bounds[0])
+                all_max_x.append(kde_result.bounds[1])
+                all_max_height.append(np.max(kde_result.y_vals))
 
                 if area_colour is not None:
                     axes[-1].fill_between(
-                        kde_x,
-                        kde_y,
+                        kde_result.x_vals,
+                        kde_result.y_vals,
                         color=area_colour,
                         zorder=0,
                         alpha=area_alpha,
                     )
+
+                cur_x_vals = kde_result.x_vals
+                cur_y_vals = kde_result.y_vals
 
             case (
                 DistributionPlottingMethods.HIST.value
                 | DistributionPlottingMethods.HISTOGRAM.value
             ):
-                sns.histplot(
+                count, hist_bins = np.histogram(
                     agg_distribution_samples,
-                    fill=False,
                     bins=bins,
-                    stat="density",
-                    element="step",
-                    ax=axes[-1],
+                    density=True,
+                )
+
+                axes[-1].stairs(
+                    values=count,
+                    edges=hist_bins,
                     color=edge_colour,
+                    fill=False,
                     zorder=2,
                 )
 
-                kdeline = axes[-1].lines[0]
-
-                kde_x = kdeline.get_xdata()
-                kde_y = kdeline.get_ydata()
-
-                all_min_x.append(kde_x[0])
-                all_max_x.append(kde_x[-1])
-                all_max_height.append(np.max(kde_y))
-
-                kde_x = np.repeat(kde_x, 2)
-                kde_y = np.concatenate([[0], np.repeat(kde_y, 2)[:-1]])
+                x_vals = np.repeat(hist_bins, repeats=2)
+                y_vals = np.concatenate([[0], np.repeat(count, repeats=2), [0]])
 
                 if area_colour is not None:
                     axes[-1].fill_between(
-                        kde_x,
-                        kde_y,
-                        color=area_colour,
+                        x_vals,
+                        y_vals,
                         zorder=0,
+                        color=area_colour,
                         alpha=area_alpha,
                     )
 
+                all_min_x.append(hist_bins[0])
+                all_max_x.append(hist_bins[-1])
+                all_max_height.append(np.max(count))
+
+                cur_x_vals = x_vals
+                cur_y_vals = y_vals
             case _:
                 del fig, axes
                 raise ValueError(
@@ -3113,8 +3134,8 @@ class Study(Config):
 
             y_median = np.interp(
                 x=median_x,
-                xp=kde_x,
-                fp=kde_y,
+                xp=cur_x_vals,
+                fp=cur_y_vals,
             )
 
             axes[-1].vlines(
@@ -3131,8 +3152,8 @@ class Study(Config):
 
             y_hdi_lb = np.interp(
                 x=x_hdi_lb,
-                xp=kde_x,
-                fp=kde_y,
+                xp=cur_x_vals,
+                fp=cur_y_vals,
             )
 
             axes[-1].vlines(
@@ -3148,8 +3169,8 @@ class Study(Config):
 
             y_hdi_ub = np.interp(
                 x=x_hdi_ub,
-                xp=kde_x,
-                fp=kde_y,
+                xp=cur_x_vals,
+                fp=cur_y_vals,
             )
 
             axes[-1].vlines(
@@ -3191,6 +3212,7 @@ class Study(Config):
 
         for ax in axes:
             ax.set_xlim(*xlim)
+            ax.set_ylim(bottom=0)
 
         # ==============================================================================
         # Base line, extrema lines, spine
