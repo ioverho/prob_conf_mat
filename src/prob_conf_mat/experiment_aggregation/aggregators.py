@@ -324,12 +324,12 @@ class REGaussianAggregator(ExperimentAggregator):
     fixed-effects model.
 
     Specifically, starting with a Fixed-Effects model
-    $\mathcal{N}(\tilde{\mu}_{\text{FE}}, \tilde{\sigma}_{\text{FE}})$,
+    $\mathcal{N}(\tilde{\mu_{\text{FE}}}, \tilde{\sigma_{\text{FE}}})$,
 
     $$\begin{aligned}
         w_{i}&=\dfrac{\left(\sigma_{i}^2+\tau^2\right)^{-1}}{\sum_{j}^{M}\left(\sigma_{j}^2+\tau^2\right)^{-1}} \\
         \tilde{\mu}&=\sum_{i}^{M}w_{i}\mu_{i} \\
-        \tilde{\sigma}^2&=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+        \tilde{\sigma^2}&=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
     \end{aligned}$$
 
     where $\tau$ is the estimated inter-experiment heterogeneity, and $M$ is the total number
