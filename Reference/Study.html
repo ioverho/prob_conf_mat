@@ -2390,19 +2390,64 @@ Defaults to 4.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the method for displaying a histogram, provided by Seaborn.
+            <p>the method for displaying a 1D distribution.
 Can be either a histogram or KDE.
 Defaults to "kde".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-          <b><code>bandwidth</code></b>
+          <b><code>bw_method</code></b>
+              (<code><span title="str">str</span> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the bandwidth selection method to use.
+Defaults to <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html">Scipy's default</a>
+: 'scott'.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>bw_adjust</code></b>
               (<code><span title="float">float</span></code>)
           –
           <div class="doc-md-description">
-            <p>the bandwith parameter for the KDE.
-Corresponds to <a href="https://seaborn.pydata.org/generated/seaborn.kdeplot.html">Seaborn's <code>bw_adjust</code> parameter</a>.
-Defaults to 1.0.</p>
+            <p>Factor that multiplicatively scales the bandwidth chosen.
+Increasing will make the curve smoother.
+Defaults to 1.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>cut</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Factor, multiplied by the smoothing bandwidth, that determines
+how far the evaluation grid extends past the extreme datapoints.
+When set to 0, truncate the curve at the data limits.
+Defaults to 3.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>clip</code></b>
+              (<code><span title="tuple">tuple</span>[<span title="float">float</span>, <span title="float">float</span>] | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the bounds outside of which no density
+values will be computed.
+Defaults to None.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>grid_samples</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the number of KDE points to evaluate at.
+Defaults to 200.
+Only used when <code>method='kde'</code>.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -2412,7 +2457,8 @@ Defaults to 1.0.</p>
           <div class="doc-md-description">
             <p>the number of bins to use in the histrogram.
 Corresponds to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges">numpy's <code>bins</code> parameter</a>.
-Defaults to "auto".</p>
+Defaults to "auto".
+Only used when <code>method='histogram'</code>.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -2668,6 +2714,15 @@ Defaults to 1.</p>
           <div class="doc-md-description">
             <p>whether to plot the experiment names as labels.
 Defaults to True.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>xlim</code></b>
+              (<code><span title="tuple">tuple</span>[<span title="float">float</span>, <span title="float">float</span>] | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>a custom range for the x-axis.
+Defaults to <code>None</code>, in which this is inferred from the data.</p>
           </div>
         </li>
     </ul>
@@ -3102,19 +3157,64 @@ significant. Defaults to 0.1 * std.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the method for displaying a histogram, provided by Seaborn.
+            <p>the method for displaying a 1D distribution.
 Can be either a histogram or KDE.
 Defaults to "kde".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-          <b><code>bandwidth</code></b>
+          <b><code>bw_method</code></b>
+              (<code><span title="str">str</span> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the bandwidth selection method to use.
+Defaults to <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html">Scipy's default</a>
+: 'scott'.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>bw_adjust</code></b>
               (<code><span title="float">float</span></code>)
           –
           <div class="doc-md-description">
-            <p>the bandwith parameter for the KDE.
-Corresponds to <a href="https://seaborn.pydata.org/generated/seaborn.kdeplot.html">Seaborn's <code>bw_adjust</code> parameter</a>.
-Defaults to 1.0.</p>
+            <p>Factor that multiplicatively scales the bandwidth chosen.
+Increasing will make the curve smoother.
+Defaults to 1.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>cut</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Factor, multiplied by the smoothing bandwidth, that determines
+how far the evaluation grid extends past the extreme datapoints.
+When set to 0, truncate the curve at the data limits.
+Defaults to 3.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>clip</code></b>
+              (<code><span title="tuple">tuple</span>[<span title="float">float</span>, <span title="float">float</span>] | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the bounds outside of which no density
+values will be computed.
+Defaults to None.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>grid_samples</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the number of KDE points to evaluate at.
+Defaults to 200.
+Only used when <code>method='kde'</code>.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -3124,7 +3224,8 @@ Defaults to 1.0.</p>
           <div class="doc-md-description">
             <p>the number of bins to use in the histrogram.
 Corresponds to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges">numpy's <code>bins</code> parameter</a>.
-Defaults to "auto".</p>
+Defaults to "auto".
+Only used when <code>method='histogram'</code>.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -3434,6 +3535,15 @@ Defaults to 1.</p>
             <p>whether to plot the proportions of the data under
 the three areas as text.
 Defaults to True.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>xlim</code></b>
+              (<code><span title="tuple">tuple</span>[<span title="float">float</span>, <span title="float">float</span>] | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>a custom range for the x-axis.
+Defaults to <code>None</code>, in which this is inferred from the data.</p>
           </div>
         </li>
     </ul>
@@ -3905,19 +4015,64 @@ aggregated distribution, for a particular metric and class combination.</p>
               (<code><span title="str">str</span></code>)
           –
           <div class="doc-md-description">
-            <p>the method for displaying a histogram, provided by Seaborn.
+            <p>the method for displaying a 1D distribution.
 Can be either a histogram or KDE.
 Defaults to "kde".</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-          <b><code>bandwidth</code></b>
+          <b><code>bw_method</code></b>
+              (<code><span title="str">str</span> | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the bandwidth selection method to use.
+Defaults to <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html">Scipy's default</a>
+: 'scott'.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>bw_adjust</code></b>
               (<code><span title="float">float</span></code>)
           –
           <div class="doc-md-description">
-            <p>the bandwith parameter for the KDE.
-Corresponds to <a href="https://seaborn.pydata.org/generated/seaborn.kdeplot.html">Seaborn's <code>bw_adjust</code> parameter</a>.
-Defaults to 1.0.</p>
+            <p>Factor that multiplicatively scales the bandwidth chosen.
+Increasing will make the curve smoother.
+Defaults to 1.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>cut</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Factor, multiplied by the smoothing bandwidth, that determines
+how far the evaluation grid extends past the extreme datapoints.
+When set to 0, truncate the curve at the data limits.
+Defaults to 3.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>clip</code></b>
+              (<code><span title="tuple">tuple</span>[<span title="float">float</span>, <span title="float">float</span>] | None</code>)
+          –
+          <div class="doc-md-description">
+            <p>the bounds outside of which no density
+values will be computed.
+Defaults to None.
+Only used when <code>method='kde'</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>grid_samples</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>the number of KDE points to evaluate at.
+Defaults to 200.
+Only used when <code>method='kde'</code>.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -3927,7 +4082,8 @@ Defaults to 1.0.</p>
           <div class="doc-md-description">
             <p>the number of bins to use in the histrogram.
 Corresponds to <a href="https://numpy.org/doc/stable/reference/generated/numpy.histogram_bin_edges.html#numpy.histogram_bin_edges">numpy's <code>bins</code> parameter</a>.
-Defaults to "auto".</p>
+Defaults to "auto".
+Only used when <code>method='histogram'</code>.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
