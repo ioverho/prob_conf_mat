@@ -34,7 +34,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Compile documentation templates
-        run: uv run --dev ./documentation/mkdocs.py
+        run: uv run --dev ./documentation/templates/mkdocs.py
 
       - name: Build documentation
         run: uv run --dev mkdocs gh-deploy --clean --site-dir "./site" --force
