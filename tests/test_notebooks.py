@@ -6,15 +6,19 @@ import pytest
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
-NOTEBOOK_DIR = Path("/home/ioverho/prob_conf_mat/documentation/Getting Started")
+NOTEBOOK_DIR = Path("./documentation/Getting Started")
 SKIP_NOTEBOOKS = []
 TIMEOUT = 600
+
+assert NOTEBOOK_DIR.is_dir(), NOTEBOOK_DIR
 
 
 @pytest.mark.parametrize(
     argnames="notebook",
     argvalues=[
-        file for file in NOTEBOOK_DIR.glob("*.ipynb") if file.name not in SKIP_NOTEBOOKS
+        file
+        for file in NOTEBOOK_DIR.resolve().glob("*.ipynb")
+        if file.name not in SKIP_NOTEBOOKS
     ],
 )
 def test_notebook_execution(notebook: Path) -> None:

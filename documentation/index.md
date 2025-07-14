@@ -57,15 +57,15 @@ The project currently depends on the following packages:
 
 ```txt
 bayes-conf-mat
-├── jaxtyping v0.3.2
-├── matplotlib v3.10.3
-├── numpy v2.3.0
-├── scipy v1.15.3
-├── seaborn v0.13.2
-│   └── pandas v2.3.0
-└── tabulate v0.9.0
+├── jaxtyping
+├── matplotlib
+├── numpy
+├── scipy
+└── tabulate
 
 ```
+
+Additionally, [`pandas`](https://pandas.pydata.org/) is an optional dependency for some reporting functions.
 
 </details>
 
