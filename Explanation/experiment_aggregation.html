@@ -44,8 +44,8 @@
       
         
         
-        
-        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
@@ -751,6 +751,19 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Experiment Aggregation
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="experiment_aggregation.html" class="md-nav__link md-nav__link--active">
         
   
@@ -762,6 +775,52 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#meta-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Meta-Analysis
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conflation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conflation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parametric-assumptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parametric Assumptions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -841,6 +900,41 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#meta-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Meta-Analysis
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conflation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conflation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parametric-assumptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parametric Assumptions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -859,6 +953,64 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
 
 <h1 id="experiment-aggregation">Experiment Aggregation<a class="headerlink" href="#experiment-aggregation" title="Permanent link">#</a></h1>
+<p>With machine-learning setups, it can happen that we have several experiments measuring the same effect. For example, when we perform cross-fold validation, we try to measure the generalization gap for the same learning algorithm, just using different subsets of the same dataset. In those cases, we're typically not interested in the individual experiment values. Instead, we want to know the statistics about the average experiment distribution.</p>
+<p>In <code>bayes_conf_mat</code>, we call this experiment aggregation. Using only samples drawn from the <span class="arithmatex">\(M\)</span> individual empirical metric distributions, <span class="arithmatex">\(\mu\sim p(\mu_{m})\)</span>, we wish to find the distribution of the aggregate distribution <span class="arithmatex">\(q(\mu)\)</span>. Ideally, the aggregate distribution consolidates the information present in each experiment distribution, and produces a distribution that is more confident about the true metric value than any individual experiment could be.</p>
+<p>Specifically for <code>bayes_conf_mat</code>, we utilize two frameworks specifically for producing such aggregate distributions.</p>
+<h2 id="meta-analysis">Meta-Analysis<a class="headerlink" href="#meta-analysis" title="Permanent link">#</a></h2>
+<p>The first, and by far most common, approach to combining different probability distributions is through a method called <a href="https://en.wikipedia.org/wiki/Meta-analysis#Statistical_models_for_aggregate_data">meta-analysis</a>. The simplest meta-analysis estimator is the fixed-effects model, which infers the parameters of the aggregate distribution from an inverse variance weighted mean of the individual distributions.</p>
+<div class="arithmatex">\[
+\begin{aligned}
+    w_{i}&amp;=\dfrac{\sigma_{i}^{-2}}{\sum_{j}^{M}\sigma_{j}^{-2}} \\
+    \tilde{\mu}&amp;=\sum_{i}^{M}w_{i}\mu_{i} \\
+    \tilde{\sigma}^2&amp;=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}} \\
+    q(\mu;\tilde{\mu}, \tilde{\sigma})&amp;=\mathcal{N}(\mu;\tilde{\mu}, \tilde{\sigma})
+\end{aligned}
+\]</div>
+<p>There are many more meta-analysis tools, including <a href="https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/bayesian-ma.html">Bayesian approaches</a>, but these come with additional complexity and assumptions, with little added benefit for <code>bayes_conf_mat</code>.</p>
+<p>We implement the following aggregation methods stemming from this aggregation framework:</p>
+<ol>
+<li><a href="https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator"><code>FEGaussianAggregator</code></a>: the standard fixed effects model</li>
+<li><a href="https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator"><code>REGaussianAggregator</code></a>: a random effects model that tries to correct for inter-experiment heterogeneity</li>
+</ol>
+<p>A standard work on meta-analyses (from the perspective of systematic reviews) is the <a href="https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-10">Cochrane Handbook</a><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.</p>
+<h2 id="conflation">Conflation<a class="headerlink" href="#conflation" title="Permanent link">#</a></h2>
+<p>The second framework for consolidating different experiments is conflation. It's a term coined by Hill in <a href="https://arxiv.org/abs/0808.1808">Hill (2011)</a><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup> &amp; <a href="https://arxiv.org/abs/1005.4978">Hill &amp; Miller (2011)</a><sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>, leverages a very simple method derived from probability theory first principles. Specifically, for a set of <span class="arithmatex">\(M\)</span> probability distributions over the same space (in our case, the classification evaluation metric <span class="arithmatex">\(\mu\)</span>), then the <em>conflated</em> distribution is computed as:</p>
+<div class="arithmatex">\[\begin{aligned}
+    q(\mu)&amp;=\&amp;\left(p_{1}(\mu), p_{2}(\mu),\ldots,p_{M}(\mu)\right) \\
+    &amp;=\dfrac{\prod_{i=1}^{M} p_{i}(\mu)}{\int_{-\infty}^{\infty}\prod_{j=1}^{M} p_{j}(\mu)d\mu}\end{aligned}\]</div>
+<p>In other words, the renormalized product of the individual distributions. For discrete distributions, the integral becomes a sum over the distributions' support.</p>
+<p>This method has a nice intuition: the only way a value <span class="arithmatex">\(\mu\)</span> receives large probability mass/density in the aggregate distribution, is by having mutual agreement among all individual distributions.</p>
+<p>In their papers, Hill &amp; Miller<sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup><sup id="fnref2:3"><a class="footnote-ref" href="#fn:3">3</a></sup> go on to show that conflation uniquely minimizes the loss of Shannon information due to aggregation. What this means, is that the conflated distribution minimizes the additional 'surprise' incurred when replacing each <span class="arithmatex">\(p_i(\mu)\)</span> with <span class="arithmatex">\(\&amp;(p_i(\mu))\)</span>. They also go on to prove a variety of other useful properties, but most importantly, show that under normality assumptions, the fixed-effect meta-analytical estimator is just a special case of conflation.</p>
+<p>We implement the following aggregation methods stemming from this aggregation framework:</p>
+<ol>
+<li><a href="https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator"><code>FEGaussianAggregator</code></a>: the conflation of several Gaussian distributions. Equal to the above meta-analysis framework</li>
+<li><a href="https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator"><code>BetaAggregator</code></a>: the conflation of several Beta distributions. Good for metrics with values near its maxima (or minima)</li>
+<li><a href="https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator"><code>GammaAggregator</code></a>: the conflation of several Gamma distributions. Good for positively unbounded metrics</li>
+<li><a href="https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator"><code>HistogramAggregator</code></a>: the conflation of the discretized histogram approximation of the individual experiment samples</li>
+</ol>
+<h2 id="parametric-assumptions">Parametric Assumptions<a class="headerlink" href="#parametric-assumptions" title="Permanent link">#</a></h2>
+<p>So far, we've been careful not to introduce parametric assumptions into the distributions of experiment metrics. Despite this, each metric distribution has its own <a href="https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/choosing_a_prior.html#effect-of-uninformative-priors-on-metric-samples">distinct shape, even when using uninformative priors</a>.</p>
+<p>When using the listed experiment aggregation methods, however, most require the user to make some assumptions about the metric distributions. While the conflation operator makes non-parametric experiment aggregation possible, in theory, this still requires having access to the probability density/mass function. By design, we don't have access to the PDF/PMF, and have to estimate this from the samples. Unfortunately, especially as distributions become more narrow, it can happen that large parts of the support receive 0 density. As a result, the products in the conflation operator become 0 as well, resulting in an indeterminate expression.</p>
+<p>If all the individual distributions share a support, we can just compute the product over the region where all distributions have non-zero density. There are situations, however, where we would not expect such a region to exist: specifically whenever there is high inter-experiment heterogeneity.</p>
+<p>This can be seen in the following two examples. We have two experiments whose empirical distributions do not overlap in the region between the two experimental distributions, precisely where we would expect the aggregate distribution to lie.</p>
+<p><picture>
+  <img alt="Experiment aggregation under heterogeneity with a histogram aggregator" src="../assets/figures/examples/aggregation_with_heterogeneity_histogram.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+</picture></p>
+<p>Using the histogram aggregator, we get an implausible aggregate distribution, despite it maximizing the areas of high density in the individual experiment distributions. Hence, making a parametric assumption (as we do in <a href="https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html">the how to guides</a>) would be prudent here.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><a href="https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-10">Chandler, J., Cumpston, M., Li, T., Page, M. J., &amp; Welch, V. J. H. W. (2019). Cochrane handbook for systematic reviews of interventions. Hoboken: Wiley, 4.</a>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p><a href="https://arxiv.org/abs/0808.1808">Hill, T. (2011). Conflations of probability distributions. Transactions of the American Mathematical Society, 363(6), 3351-3372.</a>&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p><a href="https://arxiv.org/abs/1005.4978">Hill, T. P., &amp; Miller, J. (2011). How to combine independent data sets for the same quantity. Chaos: An Interdisciplinary Journal of Nonlinear Science, 21(3).</a>&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -879,7 +1031,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 28, 2025 11:41:23 UTC">June 28, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 14, 2025 11:25:50 UTC">July 14, 2025</span>
   </span>
 
     
@@ -989,7 +1141,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       
         <script src="../assets/mathjax.js"></script>
       
-        <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>

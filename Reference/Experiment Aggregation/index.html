@@ -44,8 +44,8 @@
       
         
         
-        
-        <link rel="stylesheet" href="../../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
@@ -988,6 +988,49 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aliases
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abstract-base-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Abstract Base Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Abstract Base Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ExperimentAggregator
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SingletonAggregator
@@ -995,8 +1038,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;BetaAggregator
@@ -1004,8 +1047,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;GammaAggregator
@@ -1013,8 +1056,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;FEGaussianAggregator
@@ -1022,8 +1065,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;REGaussianAggregator
@@ -1031,13 +1074,18 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;HistogramAggregator
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1061,22 +1109,301 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
 
 <h1 id="experiment-aggregators">Experiment Aggregators<a class="headerlink" href="#experiment-aggregators" title="Permanent link">#</a></h1>
+<p>An experiment aggregation method consolidates information from the empirical metric distributions of individual experiments, and creates an aggregate distribution that summarizes the average performance for all experiments in the same experiment group.</p>
+<p>The configuration oft the experiment aggregator must be specified along with the metric, preferably using the <a href="https://ioverho.github.io/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study.add_metric"><code>Study.add_metric</code></a> method. The <code>aggregation</code> key must correspond to one of the aliases listed in the table below.</p>
+<p>To add several experiments to the same <a href="//ioverho.github.io/prob_conf_mat/Reference/ExperimentGroup.html">ExperimentGroup</a>, use the <a href="https://ioverho.github.io/prob_conf_mat/Reference/Study.html#prob_conf_mat.study.Study.add_experiment"><code>Study.add_experiment</code></a> method, and pass the experiment name as <code>'${GROUP_NAME}/${EXPERIMENT_NAME}'</code>, where <code>${GROUP_NAME}</code> is the name of the ExperimentGroup, and <code>${EXPERIMENT_NAME}</code> is the name of the Experiment.</p>
+<h2 id="aliases">Aliases<a class="headerlink" href="#aliases" title="Permanent link">#</a></h2>
+<p>The following aliases are available:</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>'beta'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator">BetaAggregator</a></td>
+</tr>
+<tr>
+<td>'beta_conflation'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator">BetaAggregator</a></td>
+</tr>
+<tr>
+<td>'fe'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator">FEGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'fe_gaussian'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator">FEGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'fe_normal'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator">FEGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'fixed_effect'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator">FEGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'gamma'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator">GammaAggregator</a></td>
+</tr>
+<tr>
+<td>'gamma_conflation'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator">GammaAggregator</a></td>
+</tr>
+<tr>
+<td>'gaussian'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator">FEGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'hist'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator">HistogramAggregator</a></td>
+</tr>
+<tr>
+<td>'histogram'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator">HistogramAggregator</a></td>
+</tr>
+<tr>
+<td>'identity'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator">SingletonAggregator</a></td>
+</tr>
+<tr>
+<td>'normal'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator">FEGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'random_effect'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator">REGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'re'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator">REGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'re_gaussian'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator">REGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'re_normal'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator">REGaussianAggregator</a></td>
+</tr>
+<tr>
+<td>'singleton'</td>
+<td><a href="#prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator">SingletonAggregator</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="abstract-base-classes">Abstract Base Classes<a class="headerlink" href="#abstract-base-classes" title="Permanent link">#</a></h2>
 
 
 <div class="doc doc-object doc-class">
 
 
 
-<h2 id="prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator" class="doc doc-heading">
+<h3 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>ExperimentAggregator</code>
+
+
+<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents first">
+
+
+        <p>The abstract base class for experiment aggregation methods.</p>
+<p>Properties should be implemented as class attributes in derived metrics</p>
+<p>The <code>compute_metric</code> method needs to be implemented</p>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+<h4 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator-attributes">Attributes<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator-attributes" class="headerlink" title="Permanent link">#</a></h4>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.full_name" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">full_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.full_name" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A human-readable name for this experiment-aggregation method.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.aliases" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">aliases</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.aliases" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>A list of all valid aliases for this metric. Can be used in configuration files.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.name" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.name" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The name of the experiment aggregation method.</p>
+
+    </div>
+
+</div>
+
+<h4 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator-functions">Functions<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator-functions" class="headerlink" title="Permanent link">#</a></h4>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.aggregate" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">aggregate</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-abstractmethod"><code>abstractmethod</code></small>
+  </span>
+
+<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.aggregate" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Aggregates samples from many experiments.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>experiment_samples</code></b>
+              (<code><span title="Float">Float</span>[<span title="nd.array">array</span>, &#39;num_samples num_experiments&#39;]</code>)
+          –
+          <div class="doc-md-description">
+            <p>the samples from
+the individual experiments</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>bounds</code></b>
+              (<code><span title="tuple">tuple</span>[<span title="float">float</span>, <span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>the maximum and minimum possible value that the samples
+might take</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="jaxtyping.Float">Float</span>[<span title="numpy.ndarray">ndarray</span>, &#39; num_experiments&#39;]</code>
+          –
+          <div class="doc-md-description">
+            <p>Float[nd.array, "num_samples num_experiments"]: samples from the aggregate distribution</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.__call__" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="fm">__call__</span></code>
+
+<a href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator.__call__" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Aggregates a series of experiment results from a specific ExperimentGroup and Metric.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">#</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>SingletonAggregator</code>
 
 
-<a href="#prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#prob_conf_mat.experiment_aggregation.aggregators.SingletonAggregator" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;ExperimentAggregator&lt;/code&gt; (&lt;code&gt;prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator&lt;/code&gt;)" href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</a></code></p>
 
 
         <p>An aggregation to apply to an ExperimentGroup that needs no aggregation.</p>
@@ -1115,16 +1442,16 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
 
 
-<h2 id="prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator" class="doc doc-heading">
+<h3 id="prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>BetaAggregator</code>
 
 
-<a href="#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;ExperimentAggregator&lt;/code&gt; (&lt;code&gt;prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator&lt;/code&gt;)" href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</a></code></p>
 
 
         <p>Samples from the beta-conflated distribution.</p>
@@ -1205,16 +1532,16 @@ to estimate</p>
 
 
 
-<h2 id="prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator" class="doc doc-heading">
+<h3 id="prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>GammaAggregator</code>
 
 
-<a href="#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;ExperimentAggregator&lt;/code&gt; (&lt;code&gt;prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator&lt;/code&gt;)" href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</a></code></p>
 
 
         <p>Samples from the Gamma-conflated distribution.</p>
@@ -1276,16 +1603,16 @@ aggregate distribution.</p>
 
 
 
-<h2 id="prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator" class="doc doc-heading">
+<h3 id="prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>FEGaussianAggregator</code>
 
 
-<a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;ExperimentAggregator&lt;/code&gt; (&lt;code&gt;prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator&lt;/code&gt;)" href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</a></code></p>
 
 
         <p>Samples from the Gaussian-conflated distribution.</p>
@@ -1295,7 +1622,7 @@ distribution <span class="arithmatex">\(\mathcal{N}(\tilde{\mu}, \tilde{\sigma})
 <div class="arithmatex">\[\begin{aligned}
     w_{i}&amp;=\dfrac{\sigma_{i}^{-2}}{\sum_{j}^{M}\sigma_{j}^{-2}} \\
     \tilde{\mu}&amp;=\sum_{i}^{M}w_{i}\mu_{i} \\
-    \tilde{\sigma^2}&amp;=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
+    \tilde{\sigma}^2&amp;=\dfrac{1}{\sum_{i}^{M}\sigma_{i}^{-2}}
 \end{aligned}\]</div>
 <p>where <span class="arithmatex">\(M\)</span> is the total number of experiments.</p>
 
@@ -1349,16 +1676,16 @@ distribution <span class="arithmatex">\(\mathcal{N}(\tilde{\mu}, \tilde{\sigma})
 
 
 
-<h2 id="prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator" class="doc doc-heading">
+<h3 id="prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>REGaussianAggregator</code>
 
 
-<a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;ExperimentAggregator&lt;/code&gt; (&lt;code&gt;prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator&lt;/code&gt;)" href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</a></code></p>
 
 
         <p>Samples from the Random Effects Meta-Analytical Estimator.</p>
@@ -1462,16 +1789,16 @@ Defaults to False.</p>
 
 
 
-<h2 id="prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator" class="doc doc-heading">
+<h3 id="prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <code>HistogramAggregator</code>
 
 
-<a href="#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;ExperimentAggregator&lt;/code&gt; (&lt;code&gt;prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator&lt;/code&gt;)" href="#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator">ExperimentAggregator</a></code></p>
 
 
         <p>Samples from a histogram approximate conflation distribution.</p>
@@ -1547,7 +1874,7 @@ experiments for the aggregate distribution.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="June 20, 2025 14:08:58 UTC">June 20, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 14, 2025 11:25:50 UTC">July 14, 2025</span>
   </span>
 
     
@@ -1657,7 +1984,7 @@ experiments for the aggregate distribution.</p>
       
         <script src="../../assets/mathjax.js"></script>
       
-        <script src="../../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>

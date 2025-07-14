@@ -44,8 +44,8 @@
       
         
         
-        
-        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
@@ -1409,10 +1409,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="02-comparing-experiments">02. Comparing Experiments<a class="anchor-link" href="#02-comparing-experiments">¶</a></h1><p><strong>Note</strong>: the appearance of this notebook will depend on the environment and screen size you're using. If the tables are being clipped or the figures look off, consider trying Google Colab or Github via the buttons below. This notebook was created in VSCode, and will likely look best locally.</p>
 <a href="https://colab.research.google.com/github/ioverho/prob_conf_mat/blob/main/documentation/Getting%20Started/02_comparing_experiments.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/Run_in_Colab-_.fae9ae7c.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/Run_in_Colab-_?style=for-the-badge&amp;logo=googlecolab&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FGetting%2520Started%2F02_comparing_experiments.ipynb"/>
 </a>
 <a href="https://github.com/ioverho/prob_conf_mat/blob/main/documentation/Getting%20Started/02_comparing_experiments.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/View_in_Github-_.a06d76d7.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/View_in_Github-_?style=for-the-badge&amp;logo=github&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FGetting%2520Started%2F02_comparing_experiments.ipynb"/>
 </a>
 <h2 id="setup">Setup<a class="anchor-link" href="#setup">¶</a></h2><p>Now consider the following common scenario. We train two different models, A and B, on the same dataset. Here model A is our brilliantly designed model, and B is the boring baseline. Now we want to test if our model (A) is a significant improvement over the baseline. To do so, we apply the two models to the held-out test set independently and get the following confusion matrices:</p>
 </div>
@@ -1588,7 +1588,7 @@ study.add_metric(metric="mcc")
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Great! When estimating MCC scores, it seems model A does outperform model B, and by a margin of $0.0116$ median MCC. Before we get on with writing our manuscript, however, note that the credible intervals overlap at the 95% credibility level. So while model A <em>is</em> better, this is not always the case. Then how much better is model A actually?</p>
+<p>Great! When estimating MCC scores, it seems model A does outperform model B, and by a margin of $0.0116$ median MCC. Before we get on with writing our paper, however, note that the credible intervals overlap at the 95% credibility level. So while model A <em>is</em> better, this is not always the case. Then how much better is model A actually?</p>
 <h2 id="bayesian-hypothesis-testing">Bayesian Hypothesis Testing<a class="anchor-link" href="#bayesian-hypothesis-testing">¶</a></h2><p>In the frequentist framework, situations like these call for hypothesis tests. For example, we want to compare the means of the different models' MCC scores, so we can run a t-test. But since we're not operating in the frequentist framework, and the distributions of the various metrics we compute likely invalidate the stringent assumptions that go along with these hypotheses tests, we instead have to a use a different framework.</p>
 <p>Kruschke et al. approach the problem from a Bayesian modelling perspective in <a href="https://jkkweb.sitehost.iu.edu/articles/Kruschke2013JEPG.pdf">'Kruschke in Bayesian Estimation Supersedes the <em>t</em> Test'</a>. If we assume our samples from the two estimated posterior predictive distributions to be correct, we can estimate the difference between the two experiments by simply taking the differences of their samples. The produced difference distribution looks something like this:</p>
 </div>
@@ -2036,7 +2036,7 @@ Relative to two random models (p_ROPE,random=47.27%) significance is 3.5488 time
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 15:42:36 UTC">July 10, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 14, 2025 11:25:50 UTC">July 14, 2025</span>
   </span>
 
     
@@ -2146,7 +2146,7 @@ Relative to two random models (p_ROPE,random=47.27%) significance is 3.5488 time
       
         <script src="../assets/mathjax.js"></script>
       
-        <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>

@@ -44,8 +44,8 @@
       
         
         
-        
-        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
@@ -1391,10 +1391,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="04-interfacing-with-the-filesystem">04. Interfacing with the Filesystem<a class="anchor-link" href="#04-interfacing-with-the-filesystem">¶</a></h1><p><strong>Note</strong>: the appearance of this notebook will depend on the environment and screen size you're using. If the tables are being clipped or the figures look off, consider trying Google Colab or Github via the buttons below. This notebook was created in VSCode, and will likely look best locally.</p>
 <a href="https://colab.research.google.com/github/ioverho/prob_conf_mat/blob/main/documentation/Getting%20Started/04_interfacing_with_the_filesystem.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/Run_in_Colab-_.83215adc.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/Run_in_Colab-_?style=for-the-badge&amp;logo=googlecolab&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FGetting%2520Started%2F04_interfacing_with_the_filesystem.ipynb"/>
 </a>
 <a href="https://github.com/ioverho/prob_conf_mat/blob/main/documentation/Getting%20Started/04_interfacing_with_the_filesystem.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/View_in_Github-_.d111544e.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/View_in_Github-_?style=for-the-badge&amp;logo=github&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FGetting%2520Started%2F04_interfacing_with_the_filesystem.ipynb"/>
 </a>
 <h2 id="setup">Setup<a class="anchor-link" href="#setup">¶</a></h2><p>So far, we've created all of the confusion matrices on the fly, directly in the notebook. This is not really realistic; most of the time a confusion matrix is created in some validation loop in a different environment than the one we'll be using to do analysis on the results. In this notebook, we'll load in some confusion matrices from the filesystem, and we'll save the report configuration to the filesystem for easy reproducibility.</p>
 <p>As an example, let's say we conducted an experiment with the <a href="https://en.wikipedia.org/wiki/MNIST_database">MNIST digits dataset</a>, where we compare the performance of an MLP against that of an SVM. We performed 5 fold cross-validation, and save each produced test split confusion matrix as '{$MODEL}_{$FOLD}.csv' files.</p>
@@ -2291,7 +2291,7 @@ pprint(study_config, indent=2, width=100, depth=3, sort_dicts=False)
       
         <script src="../assets/mathjax.js"></script>
       
-        <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>

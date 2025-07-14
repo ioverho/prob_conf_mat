@@ -44,8 +44,8 @@
       
         
         
-        
-        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
@@ -1427,10 +1427,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="03-aggregating-experiments">03. Aggregating Experiments<a class="anchor-link" href="#03-aggregating-experiments">¶</a></h1><p><strong>Note</strong>: the appearance of this notebook will depend on the environment and screen size you're using. If the tables are being clipped or the figures look off, consider trying Google Colab or Github via the buttons below. This notebook was created in VSCode, and will likely look best locally.</p>
 <a href="https://colab.research.google.com/github/ioverho/prob_conf_mat/blob/main/documentation/Getting%20Started/03_aggregating_experiments.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/Run_in_Colab-_.8ac3ca39.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/Run_in_Colab-_?style=for-the-badge&amp;logo=googlecolab&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FGetting%2520Started%2F03_aggregating_experiments.ipynb"/>
 </a>
 <a href="https://github.com/ioverho/prob_conf_mat/blob/main/documentation/Getting%20Started/03_aggregating_experiments.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/View_in_Github-_.2d7e061d.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/View_in_Github-_?style=for-the-badge&amp;logo=github&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FGetting%2520Started%2F03_aggregating_experiments.ipynb"/>
 </a>
 <h2 id="setup">Setup<a class="anchor-link" href="#setup">¶</a></h2><p>In this example, we're considering another common scenario. Unlike <a href="./02_comparing_experiments.ipynb">the previous notebook</a>, we ran several experiments using the <em>same</em> model, on different subsets of the same dataset (for example, through k-fold cross-validation). This gave us 5 independent folds, all of which together is going to say something about the average behaviour of the model on similar datasets.</p>
 </div>
@@ -1875,13 +1875,13 @@ for i, conf_mat in enumerate([fold_0, fold_1, fold_2, fold_3, fold_4]):
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Looking at the figure and the table, the aggregated distribution is indeed much narrower (the MU is roughly half the size of the individual experiment distributions) and both the observed values and the medians of their distributions are symmetrically spread around the aggregated median value of $0.7071$.</p>
+<p>Looking at the figure and the table, the aggregated distribution is indeed much narrower (the MU is roughly half the size of the individual experiment distributions) and both the observed values and the medians of their distributions are symmetrically spread around the aggregated median value of $0.6831$.</p>
 <p>The summary table now reports three additional metrics:</p>
 <ol>
 <li><strong>Var. Within</strong>: measure the variance of the distributions within each experiment</li>
 <li><strong>Var. Between</strong>: measure the variance between the different experiment distributions</li>
-<li><strong>I2</strong>: is the ratio of the variance between distrubtions to the total variance
-These metrics have to do with the observed heterogeneity between the different distributions. Currently there is none ($I^2=4.28\%$), but we'll experiment with a case where this is the case later.</li>
+<li><strong>I2</strong>: is the ratio of the variance between distributions to the total variance
+These metrics have to do with the observed heterogeneity between the different distributions. Currently, there is none ($I^2=0.00\%$), but we'll experiment with a case where this is the case later.</li>
 </ol>
 <h2 id="parametric-assumptions">Parametric Assumptions<a class="anchor-link" href="#parametric-assumptions">¶</a></h2><p>The parametric assumption we make can impact the shape and summary statistics of the final aggregated distribution. For example, the independent experiment distributions are all negatively skewed. We assumed the aggregated distribution to be a Gaussian, which has no skew or excess kurtosis. If instead, we had chosen a Beta distribution would we have gotten a substantially different result?</p>
 </div>
@@ -2082,7 +2082,8 @@ study.report_aggregated_metric_summaries(metric="ba+adjusted=True")
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Most metrics are bounded in the regions [0, 1] or [-1, 1]. In those cases, the Beta distribution is especially strong. Some metrics, though, are not bounded or only bounded on one side. For example, the diagnostic odds ratio (a ratio of ratios) is bounded by [0, $\infty$). In that case, a Gamma distribution might be a better fit:</p>
+<p>Most metrics are bounded in the regions [0, 1] or [-1, 1]. In those cases, the Beta distribution is especially useful, since it naturally has boundaries.</p>
+<p>Other metrics, are only bounded on one side, or not bounded at all. For example, the diagnostic odds ratio (DOR, a ratio of ratios) is bounded by [0, $\infty$). In that case, a Gamma distribution might be a better fit:</p>
 </div>
 </div>
 </div>
@@ -2448,8 +2449,8 @@ fig = study.plot_experiment_aggregation(
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The medians of the individual experiments are depicted using squares, and their HDI uing a horizontal line. The aggregated distribution is shown at the bottom using a large diamond for its median. The vertical line allows for easy comparison of the individual experiments to the aggregated median. As usual, there are lots of customization options available.</p>
-<h2 id="dealing-with-heterogeneity">Dealing with Heterogeneity<a class="anchor-link" href="#dealing-with-heterogeneity">¶</a></h2><p>Inter-exeperiment heterogeneity means that the individual experiments' medians lie far apart. So far we've only come across cases of little to no heterogeneity. There are instances, however, where one might expect substantially different metric distributions belonging to the same group. For example, if we're estimating the same model's performance on different datasets.</p>
+<p>The medians of the individual experiments are depicted using squares, and their HDI using a horizontal line. The aggregated distribution is shown at the bottom using a large diamond for its median. The vertical line allows for easy comparison of the individual experiments to the aggregated median. As usual, there are lots of customization options available.</p>
+<h2 id="dealing-with-heterogeneity">Dealing with Heterogeneity<a class="anchor-link" href="#dealing-with-heterogeneity">¶</a></h2><p>Inter-experiment heterogeneity means that the individual experiments' medians lie far apart. So far we've only come across cases of little to no heterogeneity. There are instances, however, where one might expect substantially different metric distributions belonging to the same group. For example, if we're estimating the same model's performance on different datasets.</p>
 <p>We can model this by adding an outlier distribution. Experiment group 'bar' is identical to 'foo' for the first 5 experiments, but includes a final outlier as well. This outlier experiment is very precise, relative to the rest.</p>
 </div>
 </div>
@@ -2676,7 +2677,7 @@ fig = study.plot_forest_plot(metric="ba+adjusted=True")
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 15:42:36 UTC">July 10, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 14, 2025 11:25:50 UTC">July 14, 2025</span>
   </span>
 
     
@@ -2786,7 +2787,7 @@ fig = study.plot_forest_plot(metric="ba+adjusted=True")
       
         <script src="../assets/mathjax.js"></script>
       
-        <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>

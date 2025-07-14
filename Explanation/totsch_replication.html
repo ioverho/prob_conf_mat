@@ -42,8 +42,8 @@
       
         
         
-        
-        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
@@ -1448,10 +1448,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="a-replication-of-totsch-n-hoffmann-d-2020-classifier-uncertainty-evidence-potential-impact-and-probabilistic-treatment">A Replication of Tötsch, N. &amp; Hoffmann, D. (2020). 'Classifier uncertainty: evidence, potential impact, and probabilistic treatment'<a class="anchor-link" href="#a-replication-of-totsch-n-hoffmann-d-2020-classifier-uncertainty-evidence-potential-impact-and-probabilistic-treatment">¶</a></h1><p><strong>Note</strong>: the appearance of this notebook will depend on the environment and screen size you're using. If the tables are being clipped or the figures look off, consider trying Google Colab or Github via the buttons below. This notebook was created in VSCode, and will likely look best locally.</p>
 <a href="https://colab.research.google.com/github/ioverho/prob_conf_mat/blob/main/documentation/Explanation/totsch_replication.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/Run_in_Colab-_.7fd41e4c.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/Run_in_Colab-_?style=for-the-badge&amp;logo=googlecolab&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FExplanation/totsch_replication"/>
 </a>
 <a href="https://github.com/ioverho/prob_conf_mat/blob/main/documentation/Explanation/totsch_replication.ipynb" target="_blank">
-<img alt="Static Badge" src="../assets/external/img.shields.io/badge/View_in_Github-_.381f8a85.svg">
+<img alt="Static Badge" src="https://img.shields.io/badge/View_in_Github-_?style=for-the-badge&amp;logo=github&amp;labelColor=gray&amp;color=1082c3&amp;link=https%3A%2F%2Fgithub.com%2Fioverho%2Fprob_conf_mat%2Fblob%2Fmain%2Fdocumentation%2FExplanation/totsch_replication"/>
 </a>
 <p>In this notebook, we'll recreate all the figures presented in <a href="https://peerj.com/articles/cs-398/">Tötsch &amp; Hoffmann (2020)</a> using <code>prob_conf_mat</code>. While perfect replication is not possible, we'll see that all of the results are very similar to each other.</p>
 <p>This is not entirely surprising, since the synthetic confusion matrix sampling in <code>prob_conf_mat</code> is a multiclass generalisation of the model presented in Tötsch &amp; Hoffmann (2020).</p>
@@ -2696,7 +2696,7 @@ fig.show()
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/tmp/ipykernel_2301/2769521887.py:31: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+<pre>/tmp/ipykernel_2505/2769521887.py:31: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
   ax[1].set_xticklabels(list(totsch_table_2_df.index), rotation=90)
 </pre>
 </div>
@@ -3637,11 +3637,11 @@ fig.suptitle("Accuracy MU by N")
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/tmp/ipykernel_2301/2018670692.py:39: UserWarning: *c* argument looks like a single numeric RGB or RGBA sequence, which should be avoided as value-mapping will have precedence in case its length matches with *x* &amp; *y*.  Please use the *color* keyword-argument or provide a 2D array with a single row if you intend to specify the same RGB or RGBA value for all points.
+<pre>/tmp/ipykernel_2505/2018670692.py:39: UserWarning: *c* argument looks like a single numeric RGB or RGBA sequence, which should be avoided as value-mapping will have precedence in case its length matches with *x* &amp; *y*.  Please use the *color* keyword-argument or provide a 2D array with a single row if you intend to specify the same RGB or RGBA value for all points.
   ax[0].scatter(x=ns[ns &lt;= 100], y=metric_summaries.MU[ns &lt;= 100], c=cmap(0))  # type: ignore
-/tmp/ipykernel_2301/2018670692.py:42: RuntimeWarning: divide by zero encountered in power
+/tmp/ipykernel_2505/2018670692.py:42: RuntimeWarning: divide by zero encountered in power
   pred_ys = np.pow(xs, -1 / study.num_classes)
-/tmp/ipykernel_2301/2018670692.py:51: UserWarning: *c* argument looks like a single numeric RGB or RGBA sequence, which should be avoided as value-mapping will have precedence in case its length matches with *x* &amp; *y*.  Please use the *color* keyword-argument or provide a 2D array with a single row if you intend to specify the same RGB or RGBA value for all points.
+/tmp/ipykernel_2505/2018670692.py:51: UserWarning: *c* argument looks like a single numeric RGB or RGBA sequence, which should be avoided as value-mapping will have precedence in case its length matches with *x* &amp; *y*.  Please use the *color* keyword-argument or provide a 2D array with a single row if you intend to specify the same RGB or RGBA value for all points.
   ax[1].scatter(x=ns, y=metric_summaries.MU, c=cmap(0))  # type: ignore
 </pre>
 </div>
@@ -3783,7 +3783,7 @@ fig.suptitle("Accuracy MU by N")
       
         <script src="../assets/mathjax.js"></script>
       
-        <script src="../assets/external/unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>
