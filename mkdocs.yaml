@@ -28,9 +28,7 @@ nav:
       - How To Guides/choosing_a_prior.md
       - How To Guides/comparing_many_experiments.md
       - How To Guides/extending_the_library.md
-      #- How To Guides/configuration.md
       #- How To Guides/metric_syntax.md
-      #- How To Guides/extending_the_library/implementing_metrics_and_aggregations.md
   - Reference:
       - Reference/Study.md
       - Reference/ExperimentGroup.md
@@ -271,10 +269,3 @@ extra_javascript:
   # https://squidfunk.github.io/mkdocs-material/reference/math/#mathjax-mkdocsyml
   - assets/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
-  #- https://polyfill.io/v3/polyfill.min.js?features=es6
-  #- https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-  #- https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-  # Katex
-  #- assets/katex.js
-  #- https://unpkg.com/katex@0/dist/katex.min.js
-  #- https://unpkg.com/katex@0/dist/contrib/auto-render.min.js

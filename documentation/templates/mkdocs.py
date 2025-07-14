@@ -28,7 +28,7 @@ EXPERIMENT_AGGREGATION_SECTION = EXPERIMENT_AGGREGATION_CHAPTER / "index.md"
 HETEROGENEITY_SECTION = EXPERIMENT_AGGREGATION_CHAPTER / "heterogeneity.md"
 
 REPL_STRING = re.compile(r"@@(.+?)@@")
-TEMPLATE_DIR = Path(__file__).parent / "templates"
+TEMPLATE_DIR = Path(__file__).parent
 
 
 @dataclass

@@ -65,7 +65,7 @@ commit: ## Run pre-commit checks
 ##@ Documentation
 .PHONY: docs-build
 docs-build: ## Update the docs
-	@uv run --dev python mkdocs.py
+	@uv run --dev python ./documentation/templates/mkdocs.py
 	@uv run --dev mkdocs build
 
 .PHONY: docs-serve
