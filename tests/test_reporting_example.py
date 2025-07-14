@@ -141,6 +141,7 @@ class TestReportingMethods:
         study.plot_pairwise_comparison(
             metric=metric,
             class_label=0,
+            method="kde",
             experiment_a="mlp/aggregated",
             experiment_b="svm/aggregated",
             min_sig_diff=0.005,
@@ -158,6 +159,7 @@ class TestReportingMethods:
         study.plot_pairwise_comparison(
             metric=metric,
             class_label=0,
+            method="kde",
             experiment_a="mlp/fold_0",
             experiment_b="svm/fold_0",
             min_sig_diff=0.005,
