@@ -2615,6 +2615,7 @@ class Study(Config):
         base_line_format: str = "-",
         base_line_width: int = 1,
         plot_experiment_name: bool = True,
+        xlim: tuple[float, float] | None = None,
     ) -> matplotlib.figure.Figure:
         """Plots the distrbution of sampled metric values for a specific experiment group, with the
         aggregated distribution, for a particular metric and class combination.
@@ -2706,6 +2707,8 @@ class Study(Config):
                 Defaults to 1.
             plot_experiment_name (bool, optional): whether to plot the experiment names as labels.
                 Defaults to True.
+            xlim (tuple[float, float] | None): a custom range for the x-axis.
+                Defaults to `None`, in which this is inferred from the data.
 
         Returns:
             matplotlib.figure.Figure: the completed figure of the distribution plot
@@ -3093,33 +3096,33 @@ class Study(Config):
         # ==============================================================================
         # Determine the plotting domain
         # ==============================================================================
-        smallest_hdi_range = np.min(all_hdi_ranges)
+        if xlim is None:
+            smallest_hdi_range = np.min(all_hdi_ranges)
 
-        # Clip the grand max and min to avoid huge positive or negative outliers
-        # resulting in tiny distributions
-        grand_min_x = max(
-            metric_bounds[0],
-            # np.min(all_min_x),
-            np.min(aggregated_summary.median) - 5 * smallest_hdi_range,
-        )
-        grand_max_x = min(
-            metric_bounds[1],
-            # np.max(all_max_x),
-            np.max(aggregated_summary.median) + 5 * smallest_hdi_range,
-        )
+            # Clip the grand max and min to avoid huge positive or negative outliers
+            # resulting in tiny distributions
+            grand_min_x = max(
+                metric_bounds[0],
+                # np.min(all_min_x),
+                np.min(aggregated_summary.median) - 5 * smallest_hdi_range,
+            )
+            grand_max_x = min(
+                metric_bounds[1],
+                # np.max(all_max_x),
+                np.max(aggregated_summary.median) + 5 * smallest_hdi_range,
+            )
 
-        cur_xlim_min = aggregated_summary.median - np.abs(
-            grand_min_x - aggregated_summary.median,
-        )
-        cur_xlim_max = aggregated_summary.median + np.abs(
-            grand_max_x - aggregated_summary.median,
-        )
+            cur_xlim_min = aggregated_summary.median - np.abs(
+                grand_min_x - aggregated_summary.median,
+            )
+            cur_xlim_max = aggregated_summary.median + np.abs(
+                grand_max_x - aggregated_summary.median,
+            )
+
+            xlim = (cur_xlim_min, cur_xlim_max)
 
         for ax in axes:
-            ax.set_xlim(
-                cur_xlim_min,
-                cur_xlim_max,
-            )
+            ax.set_xlim(*xlim)
 
         # ==============================================================================
         # Base line, extrema lines, spine
@@ -3129,8 +3132,8 @@ class Study(Config):
                 # Add base line
                 ax.hlines(
                     0,
-                    max(all_min_x[i], cur_xlim_max),  # type: ignore
-                    min(all_max_x[i], cur_xlim_min),  # type: ignore
+                    max(all_min_x[i], xlim[1]),  # type: ignore
+                    min(all_max_x[i], xlim[0]),  # type: ignore
                     color=base_line_colour,
                     ls=base_line_format,
                     linewidth=base_line_width,
@@ -3145,7 +3148,7 @@ class Study(Config):
 
             if plot_extrema_lines:
                 # Add lines for the horizontal extrema
-                if all_min_x[i] >= cur_xlim_min:
+                if all_min_x[i] >= xlim[0]:
                     ax.vlines(
                         all_min_x[i],
                         0,
@@ -3157,7 +3160,7 @@ class Study(Config):
                         clip_on=False,
                     )
 
-                if all_max_x[i] <= cur_xlim_max:
+                if all_max_x[i] <= xlim[1]:
                     ax.vlines(
                         all_max_x[i],
                         0,
