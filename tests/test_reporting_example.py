@@ -21,6 +21,10 @@ FORMATS = [
     "pd",  # pandas
 ]
 
+CONF_MAT_PATHS = Path(
+    "./tests/data/mnist_digits",
+).resolve()
+
 
 @pytest.fixture(scope="module")
 def study() -> pcm.Study:
@@ -35,10 +39,7 @@ def study() -> pcm.Study:
         study.add_metric(metric=metric, aggregation="fe_gaussian")
 
     # Add a bunch of experiments
-    conf_mat_paths = Path(
-        "./documentation/Getting Started/mnist_digits",
-    )
-    for file_path in sorted(conf_mat_paths.glob("*.csv")):
+    for file_path in sorted(CONF_MAT_PATHS.glob("*.csv")):
         # Split the file name to recover the model and fold
         model, fold = file_path.stem.split("_")
 
