@@ -69,6 +69,8 @@ METRICS_TO_SKLEARN = {
 # Confusion matrices ===========================================================
 TEST_CASES_DIR = Path("./tests/data/confusion_matrices")
 
+assert TEST_CASES_DIR.is_dir(), TEST_CASES_DIR
+
 # Their combination ============================================================
 all_metrics_to_test = METRICS_TO_SKLEARN.keys()
 

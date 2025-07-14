@@ -139,7 +139,6 @@ dev/
 deprecated_src/
 viz/
 deprecated/
-data/
 .cache
 *.tuna
 deprecated_report/# pixi environments

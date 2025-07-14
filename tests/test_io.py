@@ -11,6 +11,7 @@ from prob_conf_mat.io import (
 
 DATA_DIR = pathlib.Path("./tests/data")
 
+assert DATA_DIR.exists() and DATA_DIR.is_dir(), DATA_DIR
 
 class TestCSV:
     def test_file_not_exist(self):
