@@ -14,20 +14,42 @@ from prob_conf_mat.stats import _DIRICHLET_PRIOR_STRATEGIES
 from prob_conf_mat.utils import RNG
 
 
-# TODO: document this class
 class ConfigWarning(Warning):
+    """A configuration warning."""
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
 
-# TODO: document this class
 class ConfigError(Exception):
+    """A configuration error."""
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
 
 # TODO: document this class
 class Config:
+    """The configuration backend of a Study.
+
+    It controls reproducibility, and validates parameters.
+
+    Args:
+        seed (int, optional): the random seed used to initialise the RNG. Defaults to the current
+            time, in fractional seconds.
+        num_samples (int, optional): the number of syntehtic confusion matrices to sample. A higher
+            value is better, but more computationally expensive. Defaults to 10000, the minimum
+            recommended value.
+        ci_probability (float, optional): the size of the credibility intervals to compute.
+            Defaults to 0.95, which is an arbitrary value, and should be carefully considered.
+        experiments (dict[str, dict[str, dict[str, typing.Any]]], optional): a nested dict that
+            contains (1) the experiment group name, (2) the experiment name, (3) and finally any
+            IO/prior hyperparameters. Defaults to an empty dict.
+        metrics (dict[str, dict[str, typing.Any]], optional): a nested dict that contains (1) the
+            metric as metric syntax strings, (2) and any metric aggregation parameters. Defaults to
+            an empty dict.
+    """
+
     def __init__(
         self,
         seed: int | None = None,
@@ -49,6 +71,11 @@ class Config:
 
     @property
     def seed(self) -> int:
+        """The random seed used to initialise the RNG.
+
+        Defaults to the current time, in fractional seconds.
+
+        """
         return self._seed
 
     def _validate_seed(self, value: int | None) -> int:
@@ -102,6 +129,12 @@ class Config:
 
     @property
     def num_samples(self) -> int:
+        """The number of synthetic confusion matrices to sample.
+
+        A higher value is better, but more computationally expensive.
+
+        Defaults to 10000, the minimum recommended value.
+        """
         return self._num_samples
 
     def _validate_num_samples(self, value: int | None) -> int:
@@ -168,6 +201,11 @@ class Config:
 
     @property
     def ci_probability(self) -> float:
+        """The size of the credibility intervals to compute.
+
+        Defaults to 0.95, which is an arbitrary value, and should be carefully considered.
+
+        """
         return self._ci_probability
 
     def _validate_ci_probability(self, value: float | None) -> float:
@@ -223,6 +261,16 @@ class Config:
 
     @property
     def experiments(self) -> dict[str, dict[str, dict[str, typing.Any]]]:
+        """A nested dict containing all experiment configuration.
+
+        In order:
+            1. the experiment group name
+            2. the experiment name
+            3. any IO/prior hyperparameters.
+
+        Defaults to an empty dict.
+
+        """
         return self._experiments
 
     def _validate_experiments(
@@ -561,14 +609,25 @@ class Config:
 
     @property
     def num_experiments(self) -> int:
+        """The number of experiments in this configuration."""
         return sum(map(len, self.experiments.values()))
 
     @property
     def num_experiment_groups(self) -> int:
+        """The number of experiment groups in this configuration."""
         return len(self.experiments)
 
     @property
     def metrics(self) -> dict[str, dict[str, typing.Any]]:
+        """A nested dict that contains the configuration necessary for any metrics.
+
+        Contains, in order,
+            1. the metric as metric syntax strings
+            2. and any metric aggregation parameters.
+
+        Defaults to an empty dict.
+
+        """
         return self._metrics
 
     def _validate_metrics(
@@ -760,10 +819,12 @@ class Config:
 
     @classmethod
     def from_dict(cls, config_dict: dict[str, typing.Any]) -> typing.Self:
+        """Creates a configuration from a dictionary."""
         raise NotImplementedError
 
     @property
     def fingerprint(self) -> str:
+        """The fingerprint identifier/hash of this configuration."""
         hasher = hashlib.sha256()
         hasher.update(pickle.dumps(self.to_dict()))
 

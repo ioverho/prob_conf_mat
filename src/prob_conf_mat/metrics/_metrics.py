@@ -664,7 +664,7 @@ class F1(Metric):
     Note: Read more:
         1. [sklearn](https://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-f-measure-metrics)
         2. [Wikipedia](https://en.wikipedia.org/wiki/F-score)
-    """
+    """  # noqa: E501
 
     full_name = "F1-score"
     is_multiclass = False

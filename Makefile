@@ -52,7 +52,7 @@ coverage: ## Checks test coverage
 
 .PHONY: lint
 lint: ## Run linting
-	@uv run --dev ruff check ./src/prob_conf_mat ./tests
+	@uv run --dev ruff check ./src/prob_conf_mat --fix
 
 .PHONY: type
 type: ## Run static typechecking
