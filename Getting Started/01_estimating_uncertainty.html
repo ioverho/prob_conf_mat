@@ -1459,8 +1459,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     [13, 0, 0],
     [0, 10, 6],
     [0, 0, 9],
-]
-</div>
+]</div>
 </div>
 </div>
 </div>
@@ -1521,8 +1520,7 @@ study = Study(
     ci_probability=0.95,
 )
 
-study
-</div>
+study</div>
 </div>
 </div>
 </div>
@@ -1576,8 +1574,7 @@ study
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3">study.add_experiment(experiment_name="test", confusion_matrix=confusion_matrix)
 
-study
-</div>
+study</div>
 </div>
 </div>
 </div>
@@ -1641,8 +1638,7 @@ study
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-4">study.add_metric("accuracy")
 
-study
-</div>
+study</div>
 </div>
 </div>
 </div>
@@ -1694,8 +1690,7 @@ study
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">study</span><span class="o">.</span><span class="n">report_metric_summaries</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">"accuracy"</span><span class="p">,</span> <span class="n">table_fmt</span><span class="o">=</span><span class="s2">"html"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5">study.report_metric_summaries(metric="accuracy", table_fmt="html")
-</div>
+<div class="clipboard-copy-txt" id="cell-5">study.report_metric_summaries(metric="accuracy", table_fmt="html")</div>
 </div>
 </div>
 </div>
@@ -1769,8 +1764,7 @@ study
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-6">study.add_metric(metric="f1@macro")
 
-study.metrics
-</div>
+study.metrics</div>
 </div>
 </div>
 </div>
@@ -1809,8 +1803,7 @@ study.metrics
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">study</span><span class="o">.</span><span class="n">report_metric_summaries</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">"f1@macro"</span><span class="p">,</span> <span class="n">table_fmt</span><span class="o">=</span><span class="s2">"html"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-7">study.report_metric_summaries(metric="f1@macro", table_fmt="html")
-</div>
+<div class="clipboard-copy-txt" id="cell-7">study.report_metric_summaries(metric="f1@macro", table_fmt="html")</div>
 </div>
 </div>
 </div>
@@ -1871,8 +1864,7 @@ study.metrics
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-8">study.add_metric("f1")
 
-study.metrics
-</div>
+study.metrics</div>
 </div>
 </div>
 </div>
@@ -1911,8 +1903,7 @@ study.metrics
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">study</span><span class="o">.</span><span class="n">report_metric_summaries</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">"f1"</span><span class="p">,</span> <span class="n">class_label</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">table_fmt</span><span class="o">=</span><span class="s2">"html"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-9">study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")
-</div>
+<div class="clipboard-copy-txt" id="cell-9">study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")</div>
 </div>
 </div>
 </div>
@@ -1979,17 +1970,22 @@ study.metrics
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">study</span><span class="o">.</span><span class="n">add_experiment</span><span class="p">(</span>
-    <span class="s2">"test"</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="o">=</span><span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">confusion_prior</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">prevalence_prior</span><span class="o">=</span><span class="mf">1.0</span>
+    <span class="s2">"test"</span><span class="p">,</span>
+    <span class="n">confusion_matrix</span><span class="o">=</span><span class="n">confusion_matrix</span><span class="p">,</span>
+    <span class="n">confusion_prior</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">prevalence_prior</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">study</span><span class="o">.</span><span class="n">report_metric_summaries</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">"f1"</span><span class="p">,</span> <span class="n">class_label</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">table_fmt</span><span class="o">=</span><span class="s2">"html"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-10">study.add_experiment(
-    "test", confusion_matrix=confusion_matrix, confusion_prior=1.0, prevalence_prior=1.0
+    "test",
+    confusion_matrix=confusion_matrix,
+    confusion_prior=1.0,
+    prevalence_prior=1.0,
 )
 
-study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")
-</div>
+study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")</div>
 </div>
 </div>
 </div>
@@ -2056,8 +2052,7 @@ study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">plot_metric_summaries</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">"f1"</span><span class="p">,</span> <span class="n">class_label</span><span class="o">=</span><span class="mi">0</span><span class="p">);</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-11">fig = study.plot_metric_summaries(metric="f1", class_label=0);
-</div>
+<div class="clipboard-copy-txt" id="cell-11">fig = study.plot_metric_summaries(metric="f1", class_label=0);</div>
 </div>
 </div>
 </div>
@@ -2129,8 +2124,7 @@ study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")
     hdi_lines_colour="white",
     median_line_format="-.",
     figsize=(6.9, 3.4),
-);
-</div>
+);</div>
 </div>
 </div>
 </div>
@@ -2195,7 +2189,7 @@ study.report_metric_summaries(metric="f1", class_label=0, table_fmt="html")
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 14, 2025 11:25:50 UTC">July 14, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 18, 2025 11:12:37 UTC">July 18, 2025</span>
   </span>
 
     
