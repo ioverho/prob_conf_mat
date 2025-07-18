@@ -22,6 +22,8 @@ DELTA = "Δ"
 
 @dataclass(frozen=True)
 class PairwiseComparisonResult:
+    """Contains the result of a pairwise experiment comparison."""
+
     lhs_name: str | None
     rhs_name: str | None
     metric: MetricLike
@@ -51,7 +53,13 @@ class PairwiseComparisonResult:
     # p_uni_sig_interpretation: str
     p_uni_sig_score_interval_width: float
 
-    def template_sentence(self, precision: int = 4):
+    def template_sentence(self, precision: int = 4) -> str:
+        """Produces a template sentences describing the comparison of two Experiments.
+
+        Args:
+            precision (int, optional): the precision of floats when printing.
+                Defaults to 4.
+        """
         # Build the template sentence
         template_sentence = ""
         template_sentence += f"Experiment {self.lhs_name}'s {self.metric.name} being"
@@ -62,8 +70,8 @@ class PairwiseComparisonResult:
         template_sentence += f" '{self.p_direction_interpretation}'* "
 
         # Existence statistics
-        template_sentence += f"(Median {DELTA}={fmt(float(self.diff_dist_summary.median), precision=precision)}, "
-        template_sentence += f"{fmt(self.diff_dist_summary.ci_probability, precision=precision, mode='%')} HDI="
+        template_sentence += f"(Median {DELTA}={fmt(float(self.diff_dist_summary.median), precision=precision)}, "  # noqa: E501
+        template_sentence += f"{fmt(self.diff_dist_summary.ci_probability, precision=precision, mode='%')} HDI="  # noqa: E501
         template_sentence += (
             f"[{fmt(self.diff_dist_summary.hdi[0], precision=4, mode='f')}, "
         )
@@ -133,7 +141,7 @@ class PairwiseComparisonResult:
         return template_sentence
 
 
-def pd_interpretation_guideline(
+def _pd_interpretation_guideline(
     pd: float,
 ) -> (
     typing.Literal["certain"]
@@ -163,7 +171,7 @@ def pd_interpretation_guideline(
     return existence
 
 
-def p_rope_interpretation_guideline(
+def _p_rope_interpretation_guideline(
     p_rope: float,
 ) -> (
     typing.Literal["certain"]
@@ -203,6 +211,29 @@ def pairwise_compare(
     random_diff_dist: jtyping.Float[np.ndarray, " num_samples"] | None = None,
     observed_difference: float | None = None,
 ) -> PairwiseComparisonResult:
+    """Compares the empirical metric distributions of two experiments against each other.
+
+    Args:
+        metric (MetricLike): the metric used in producing the distributions
+        diff_dist (Float[ndarray, ' num_samples']): the distribution of the differences
+        ci_probability (float): the prbability of samples contained in the HDI region
+        min_sig_diff (float | None, optional): the smallest difference which one might consider
+            significant.
+            Set to 0 to disable.
+            Defaults to None, in which case 0.1 standard deviations are used.
+        lhs_name (str | None, optional): the name of the experiment in
+            the left-hand side of the comparison.
+            Defaults to None.
+        rhs_name (str | None, optional): the name of the experiment in
+            the right-hand side of the comparison.
+            Defaults to None.
+        random_diff_dist (Float[ndarray, ' num_samples'] | None, optional): the distribution of
+            differences produced when the model is still random initialized.
+            Defaults to None.
+        observed_difference (float | None, optional): the observed difference between distributions.
+            Defaults to None.
+
+    """
     # Find central tendency of diff dit
     diff_dist_summary = summarize_posterior(diff_dist, ci_probability=ci_probability)
 
@@ -212,7 +243,7 @@ def pairwise_compare(
     else:
         pd: float = np.mean(diff_dist < 0)  # type: ignore
 
-    pd_interpretation = pd_interpretation_guideline(pd=pd)
+    pd_interpretation = _pd_interpretation_guideline(pd=pd)
 
     # Define a default ROPE
     if min_sig_diff is None:
@@ -228,7 +259,7 @@ def pairwise_compare(
     p_sig_neg, p_rope, p_sig_pos = counts / diff_dist.shape[0]
 
     p_bi_sig = 1 - p_rope
-    p_rope_interpretation = p_rope_interpretation_guideline(p_rope)
+    p_rope_interpretation = _p_rope_interpretation_guideline(p_rope)
 
     # Compare p_ROPE to random distributions
     if random_diff_dist is not None and min_sig_diff > 0.0:

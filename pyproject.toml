@@ -28,10 +28,10 @@ keywords = [
 
 dependencies = [
     "numpy",
- "scipy>=1.10",
- "tabulate>=0.9",
- "matplotlib>=3.7",
- "jaxtyping>=0.2.32",
+    "scipy>=1.10",
+    "tabulate>=0.9",
+    "matplotlib>=3.7",
+    "jaxtyping>=0.2.32",
 ]
 
 [project.urls]
@@ -83,7 +83,7 @@ explicit = true
 # Linting
 # Ruff
 [tool.ruff]
-extend-exclude = ["tests/*"]
+extend-exclude = ['tests/*', '**/experimental*']
 builtins = ["jtyping"]
 
 line-length = 88

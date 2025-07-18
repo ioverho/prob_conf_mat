@@ -20,9 +20,9 @@ for metric in METRIC_REGISTRY:
 
         try:
             get_metric(dependency)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise KeyError(
-                f"Dependency `{dependency}` of `{metric}` not valid because: {e}"  # noqa: E501
+                f"Dependency `{dependency}` of `{metric}` not valid because: {e}",  # noqa: E501
             )
 
 for aggregation in AVERAGING_REGISTRY:
@@ -32,7 +32,7 @@ for aggregation in AVERAGING_REGISTRY:
 
         try:
             get_metric(dependency)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise KeyError(
-                f"Dependency `{dependency}` of `{aggregation}` not valid because: {e}"  # noqa: E501
+                f"Dependency `{dependency}` of `{aggregation}` not valid because: {e}",  # noqa: E501
             )

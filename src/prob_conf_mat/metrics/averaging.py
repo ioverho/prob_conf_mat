@@ -21,7 +21,7 @@ class MacroAverage(Averaging):
     sklearn_equivalent = "macro"
     aliases = ["macro", "macro_average", "mean"]
 
-    def compute_average(
+    def compute_average(  # noqa: D102
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
@@ -35,14 +35,14 @@ class MacroAverage(Averaging):
 
 
 class WeightedAverage(Averaging):
-    """Computes the class prevalence weighted mean over all classes, also known as weighted averaging."""
+    """Computes the prevalence weighted mean over all classes, also known as weighted averaging."""
 
     full_name = "Class Prevalence Weighted Averaging"
     dependencies = ("p_condition",)
     sklearn_equivalent = "weighted"
     aliases = ["weighted", "weighted_average", "micro", "micro_average"]
 
-    def compute_average(
+    def compute_average(  # noqa: D102
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
         p_condition: jtyping.Float[np.ndarray, " num_samples num_classes"],
@@ -70,7 +70,7 @@ class SelectPositiveClass(Averaging):
 
         self.positive_class = positive_class
 
-    def compute_average(
+    def compute_average(  # noqa: D102
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
@@ -92,7 +92,7 @@ class HarmonicMean(Averaging):
     sklearn_equivalent = None
     aliases = ["harmonic", "harm"]
 
-    def compute_average(
+    def compute_average(  # noqa: D102
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
@@ -113,7 +113,7 @@ class GeometricMean(Averaging):
     sklearn_equivalent = None
     aliases = ["geometric", "geom"]
 
-    def compute_average(
+    def compute_average(  # noqa: D102
         self,
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:

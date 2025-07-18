@@ -26,7 +26,6 @@ def generate_metric_computation_schedule(
     Returns:
         typing.Generator[Type[Metric] | Type[AggregatedMetric]]
     """
-
     seen_metrics = set()
     stack = deque(metrics)
     topological_sorter = TopologicalSorter()
@@ -54,20 +53,27 @@ def generate_metric_computation_schedule(
 
 
 class MetricCollection:
-    """Endows a list of metrics with various needed properties, like:
+    """Endows a list of metrics with various needed properties.
+
+    These include:
+
         - metric syntax interfacing
         - redundancy checking
         - topological sorting
 
     Args:
-        metrics (typing.Collection[str | MetricLike | typing.Iterable[str | MetricLike] | typing.Self], optional): the initial collection of metrics. Defaults to ().
+        metrics (list[str | MetricLike | list[str | MetricLike] | Self], optional): the initial
+            collection of metrics.
+            Defaults to ().
     """
 
     def __init__(
         self,
-        metrics: typing.Optional[
-            str | MetricLike | typing.Iterable[str | MetricLike] | typing.Self
-        ] = (),
+        metrics: str
+        | MetricLike
+        | typing.Iterable[str | MetricLike]
+        | typing.Self
+        | None = (),
     ) -> None:
         self._metrics = OrderedDict()
         self._metrics_by_alias_or_name = dict()
@@ -77,21 +83,20 @@ class MetricCollection:
 
     def add(
         self,
-        metric: str
-        | MetricLike
-        | typing.Iterable[str | MetricLike]
-        | typing.Self,
+        metric: str | MetricLike | typing.Iterable[str | MetricLike] | typing.Self,
     ) -> None:
-        """Adds a metric to the metric collection. The 'metric' must be one of:
+        """Adds a metric to the metric collection.
+
+        The 'metric' must be one of:
             - a valid metric syntax string
             - an instance of `Metric` or `AveragedMetric`
             - an iterable of the above two
             - a `MetricCollection`
 
         Args:
-            metric (typing.Collection[str | MetricLike | typing.Iterable[str | MetricLike] | typing.Self], optional): the metric to be added
+            metric (Collection[str | MetricLike | Iterable[str | MetricLike] | Self], optional):
+                the metric to be added
         """
-
         # If metric is a str or MetricLike
         if (
             isinstance(metric, str)
@@ -99,14 +104,10 @@ class MetricCollection:
             or issubclass(metric.__class__, AveragedMetric)
             or issubclass(metric.__class__, RootMetric)
         ):
-            self._add_metric(metric=metric) # type: ignore
+            self._add_metric(metric=metric)  # type: ignore
 
         # If metric is a list of MetricLikes
-        elif (
-            isinstance(metric, list)
-            or isinstance(metric, set)
-            or isinstance(metric, tuple)
-        ):
+        elif isinstance(metric, list | set | tuple):
             for m in metric:
                 self.add(metric=m)
 
@@ -118,7 +119,7 @@ class MetricCollection:
         # Otherwise
         else:
             raise ValueError(
-                f"Cannot process input of type `{type(metric)}` into a MetricCollection."
+                f"Cannot process input of type `{type(metric)}` into a MetricCollection.",
             )
 
     def _add_metric(self, metric: str | MetricLike) -> None:
@@ -138,21 +139,23 @@ class MetricCollection:
         # Otherwise
         else:
             raise TypeError(
-                f"Metric must be of type `str`, or a subclass of `Metric` or `AggregatedMetric`, not {metric}: {type(metric)}"  # noqa: E501
+                f"Metric must be of type `str`, or a subclass of `Metric` or `AggregatedMetric`, not {metric}: {type(metric)}",  # noqa: E501
             )
 
         self._metrics.update(((metric_instance, None),))
         self._metrics_by_alias_or_name.update({metric_instance.name: metric_instance})
-        #self._metrics_by_alias_or_name.update(
+        # self._metrics_by_alias_or_name.update(
         #    {alias: metric_instance for alias in metric_instance.aliases}
-        #)
+        # )
 
     def get_insert_order(self) -> tuple[MetricLike]:
+        """Get a collection of metrics in the order they were added to this collection."""
         return tuple(self._metrics.keys())
 
-    def get_compute_order(self) -> "MetricCollection":
+    def get_compute_order(self) -> MetricCollection:
+        """Get a collection of metrics in order of computation."""
         topologically_sorted = generate_metric_computation_schedule(
-            self.get_insert_order()
+            self.get_insert_order(),
         )
 
         return MetricCollection(metrics=topologically_sorted)
@@ -161,8 +164,7 @@ class MetricCollection:
         return self._metrics_by_alias_or_name[key]
 
     def __iter__(self) -> typing.Generator[MetricLike]:
-        for metric in self.get_insert_order():
-            yield metric
+        yield from self.get_insert_order()
 
     def __len__(self):
         return len(self._metrics)

@@ -1,26 +1,27 @@
 import typing
 from collections import defaultdict
 from dataclasses import dataclass
-from pathlib import Path
 
 
 @dataclass
 class NotInCache:
+    """The requested element is not in the cache."""
+
     pass
 
 
 class NestedCache:
-    """Recursive defaultdict for storing stuff in a nested dict.
+    """Recursive defaultdict for caching things recursively.
 
     Examples:
         >>> cache = NestedCache()
 
-        >>> cache.load(['foo', 'bar'])
+        >>> cache.load(["foo", "bar"])
         KeyError: "Keys ['foo', 'bar'] not in cache"
 
-        >>> cache.cache(['foo', 'bar'], 'baz')
+        >>> cache.cache(["foo", "bar"], "baz")
 
-        >>> cache.load(['foo', 'bar'])
+        >>> cache.load(["foo", "bar"])
         'baz'
 
     """
@@ -30,6 +31,7 @@ class NestedCache:
         self.fingerprint = None
 
     def nested_dict(self):
+        """Generates a recursive default dict."""
         return defaultdict(self.nested_dict)
 
     def __getitem__(self, key):
@@ -47,10 +49,15 @@ class NestedCache:
 
         # Otherwise, keep going down the cache until we
         # exhaust the list of keys
-        else:
-            return self._get(obj, keys=keys, i=i + 1)
+        return self._get(obj, keys=keys, i=i + 1)
 
-    def load(self, fingerprint: str, keys, default=NotInCache):
+    def load(
+        self,
+        fingerprint: str,
+        keys,
+        default=NotInCache,
+    ) -> type[NotInCache] | typing.Any:
+        """Loads the element stored at keys in the cache."""
         if fingerprint != self.fingerprint:
             return default
 
@@ -60,8 +67,7 @@ class NestedCache:
 
         if result is NotInCache:
             return default
-        else:
-            return result
+        return result
 
     def _set(self, dd, value, keys, i: int):
         # Recursively set elements in cache
@@ -75,7 +81,8 @@ class NestedCache:
         else:
             self._set(dd[keys[i]], value=value, keys=keys, i=i + 1)
 
-    def cache(self, fingerprint: str, keys: typing.List[typing.Any], value):
+    def cache(self, fingerprint: str, keys: list[typing.Any], value) -> None:
+        """Caches an element at keys."""
         if fingerprint != self.fingerprint:
             self.clean()
             self.fingerprint = fingerprint
@@ -83,29 +90,34 @@ class NestedCache:
         # Method for setting value
         self._set(dd=self._cache, keys=keys, value=value, i=0)
 
-    def clean(self):
+    def clean(self) -> None:
+        """Destroys the current cache state."""
         raise NotImplementedError
 
-    def clear(self):
+    def clear(self) -> None:
+        """Alias of clean."""
         self.clean()
 
-    def empty(self):
+    def empty(self) -> None:
+        """Alias of clean."""
         self.clean()
 
-    def isin(self, fingerprint: str, keys: typing.List[typing.Any]):
+    def isin(self, fingerprint: str, keys: list[typing.Any]) -> bool:
+        """Checks if there is an element at keys."""
         if fingerprint != self.fingerprint:
             return False
 
         result = self._get(dd=self._cache, keys=keys, i=0)
 
-        if result is NotInCache:
-            return False
-        else:
-            return True
+        return result is not NotInCache
+
 
 class InMemoryCache(NestedCache):
-    def clean(self):
+    """A recursive cache that is stored entirely in-memory."""
+    def clean(self) -> None:
+        """Destroys the current cache state."""
         self._cache = self.nested_dict()
+
 
 # TODO: add support for filesystem caching
 # class PickleCache(NestedCache):
