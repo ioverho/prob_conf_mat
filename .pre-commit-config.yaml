@@ -16,10 +16,10 @@ repos:
     -   id: check-merge-conflict
     -   id: name-tests-test
         args: ["--pytest-test-first"]
--   repo: https://github.com/astral-sh/uv-pre-commit
-    # uv version.
-    rev: 0.7.3
-    hooks:
-      - id: uv-lock
-      - id: uv-export
-        args: ["--no-dev", "--frozen", "--format=requirements.txt"]
+#-   repo: https://github.com/astral-sh/uv-pre-commit
+#    # uv version.
+#    rev: 0.7.3
+#    hooks:
+#      - id: uv-lock
+#      - id: uv-export
+#        args: ["--no-dev", "--frozen", "--format=requirements.txt"]
