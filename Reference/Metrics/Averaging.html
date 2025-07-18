@@ -1291,6 +1291,13 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
     <div class="doc doc-contents ">
 
+        <p>All metrics upon which this metric averaging method depends.</p>
+<p>Constructed from the union of all Metric and AveragingMethod dependencies.</p>
+<p>Used to generate a computation schedule, such that no metric is calculated before
+its dependencies.</p>
+<p>The dependencies <strong>must</strong> match the <code>compute_average</code> signature.</p>
+<p>This is checked during class definition.</p>
+
     </div>
 
 </div>
@@ -1312,6 +1319,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
 
     <div class="doc doc-contents ">
+
+        <p>The <code>sklearn</code> equivalent function, if applicable.</p>
 
     </div>
 
@@ -1335,6 +1344,9 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
     <div class="doc doc-contents ">
 
+        <p>A list of all valid aliases for this metric averaging method.</p>
+<p>Can be used when creating metric syntax strings.</p>
+
     </div>
 
 </div>
@@ -1355,6 +1367,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 
 
     <div class="doc doc-contents ">
+
+        <p>Computes the average across experiment classes.</p>
 
 
     </div>
@@ -1488,7 +1502,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Averaging&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Averaging&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Averaging">Averaging</a></code></p>
 
 
-        <p>Computes the class prevalence weighted mean over all classes, also known as weighted averaging.</p>
+        <p>Computes the prevalence weighted mean over all classes, also known as weighted averaging.</p>
 
 
 

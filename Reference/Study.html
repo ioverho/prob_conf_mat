@@ -4739,6 +4739,72 @@ Defaults to 4.</p>
     <div class="doc doc-contents first">
 
 
+        <p>The configuration backend of a Study.</p>
+<p>It controls reproducibility, and validates parameters.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>seed</code></b>
+              (<code><span title="int">int</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the random seed used to initialise the RNG. Defaults to the current
+time, in fractional seconds.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>num_samples</code></b>
+              (<code><span title="int">int</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the number of syntehtic confusion matrices to sample. A higher
+value is better, but more computationally expensive. Defaults to 10000, the minimum
+recommended value.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>ci_probability</code></b>
+              (<code><span title="float">float</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the size of the credibility intervals to compute.
+Defaults to 0.95, which is an arbitrary value, and should be carefully considered.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>experiments</code></b>
+              (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]]</code>, default:
+                  <code>{}</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>a nested dict that
+contains (1) the experiment group name, (2) the experiment name, (3) and finally any
+IO/prior hyperparameters. Defaults to an empty dict.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>metrics</code></b>
+              (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]]</code>, default:
+                  <code>{}</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>a nested dict that contains (1) the
+metric as metric syntax strings, (2) and any metric aggregation parameters. Defaults to
+an empty dict.</p>
+          </div>
+        </li>
+    </ul>
+
 
 
 
@@ -4772,6 +4838,8 @@ Defaults to 4.</p>
 
     <div class="doc doc-contents ">
 
+        <p>The fingerprint identifier/hash of this configuration.</p>
+
     </div>
 
 </div>
@@ -4792,6 +4860,9 @@ Defaults to 4.</p>
 
 
     <div class="doc doc-contents ">
+
+        <p>The random seed used to initialise the RNG.</p>
+<p>Defaults to the current time, in fractional seconds.</p>
 
     </div>
 
@@ -4814,6 +4885,10 @@ Defaults to 4.</p>
 
     <div class="doc doc-contents ">
 
+        <p>The number of synthetic confusion matrices to sample.</p>
+<p>A higher value is better, but more computationally expensive.</p>
+<p>Defaults to 10000, the minimum recommended value.</p>
+
     </div>
 
 </div>
@@ -4834,6 +4909,9 @@ Defaults to 4.</p>
 
 
     <div class="doc doc-contents ">
+
+        <p>The size of the credibility intervals to compute.</p>
+<p>Defaults to 0.95, which is an arbitrary value, and should be carefully considered.</p>
 
     </div>
 
@@ -4856,6 +4934,18 @@ Defaults to 4.</p>
 
     <div class="doc doc-contents ">
 
+        <p>A nested dict containing all experiment configuration.</p>
+
+
+<details class="in-order" open>
+  <summary>In order</summary>
+  <ol>
+<li>the experiment group name</li>
+<li>the experiment name</li>
+<li>any IO/prior hyperparameters.</li>
+</ol>
+</details>        <p>Defaults to an empty dict.</p>
+
     </div>
 
 </div>
@@ -4876,6 +4966,12 @@ Defaults to 4.</p>
 
 
     <div class="doc doc-contents ">
+
+        <p>A nested dict that contains the configuration necessary for any metrics.</p>
+<p>Contains, in order,
+    1. the metric as metric syntax strings
+    2. and any metric aggregation parameters.</p>
+<p>Defaults to an empty dict.</p>
 
     </div>
 

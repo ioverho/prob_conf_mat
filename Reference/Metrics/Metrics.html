@@ -1823,7 +1823,7 @@ This is checked during class definition.</p>
 
     <div class="doc doc-contents ">
 
-        <p>The <code>sklearn</code> equivalent function, if applicable</p>
+        <p>The <code>sklearn</code> equivalent function, if applicable.</p>
 
     </div>
 
@@ -1847,7 +1847,32 @@ This is checked during class definition.</p>
 
     <div class="doc doc-contents ">
 
-        <p>A list of all valid aliases for this metric. Can be used when creating metric syntax strings.</p>
+        <p>A list of all valid aliases for this metric.</p>
+<p>Can be used when creating metric syntax strings.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="prob_conf_mat.metrics.abc.Metric.name" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#prob_conf_mat.metrics.abc.Metric.name" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The name of this metric.</p>
+<p>Will try to use the name used by the user.</p>
+<p>Otherwise, takes the first element in the aliases list.</p>
 
     </div>
 
@@ -1866,6 +1891,24 @@ This is checked during class definition.</p>
   </span>
 
 <a href="#prob_conf_mat.metrics.abc.Metric.compute_metric" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Computes the metric values from its dependencies.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="prob_conf_mat.metrics.abc.Metric.__call__" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="fm">__call__</span></code>
+
+<a href="#prob_conf_mat.metrics.abc.Metric.__call__" class="headerlink" title="Permanent link">#</a></h5>
 
 
     <div class="doc doc-contents ">
@@ -1899,7 +1942,7 @@ This is checked during class definition.</p>
     <div class="doc doc-contents first">
 
 
-        <p>The abstract base class for the composition of any instance of <code>Metric</code> with any instance of <code>Averaging</code>.</p>
+        <p>The composition of any instance of <code>Metric</code> with any instance of <code>Averaging</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1967,6 +2010,28 @@ This is checked during class definition.</p>
 
 
 
+<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.full_name" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">full_name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#prob_conf_mat.metrics.abc.AveragedMetric.full_name" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The full, human-readable name for this composed metric.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="prob_conf_mat.metrics.abc.AveragedMetric.is_multiclass" class="doc doc-heading">
 <code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">is_multiclass</span></code>
 
@@ -1979,7 +2044,7 @@ This is checked during class definition.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Whether or not this metric computes a value for each class individually, or for all classes at once.</p>
+        <p>Whether this metric computes a value for each class, or for all classes at once.</p>
 <p>An AveragedMetric is <em>always</em> multiclass.</p>
 
     </div>
@@ -2002,7 +2067,8 @@ This is checked during class definition.</p>
 
     <div class="doc doc-contents ">
 
-        <p>A tuple of the minimum and maximum possible value for this metric to take. Can be infinite.</p>
+        <p>A tuple of the minimum and maximum possible value for this metric to take.</p>
+<p>Can be non-finite.</p>
 
     </div>
 
@@ -2026,7 +2092,7 @@ This is checked during class definition.</p>
 
         <p>All metrics upon which this AveragedMetric depends.</p>
 <p>Constructed from the union of all Metric and AveragingMethod dependencies.</p>
-<p>Used to generate a computation schedule, such that no metric is calculated before its dependencies.</p>
+<p>Used to generate a computation schedule.</p>
 <p>The dependencies <strong>must</strong> match the <code>compute_metric</code> signature.</p>
 <p>This is checked during class definition.</p>
 
@@ -2050,13 +2116,90 @@ This is checked during class definition.</p>
 
     <div class="doc doc-contents ">
 
-        <p>The <code>sklearn</code> equivalent function, if applicable</p>
+        <p>The <code>sklearn</code> equivalent function, if applicable.</p>
 
     </div>
 
 </div>
 
+<div class="doc doc-object doc-attribute">
 
+
+
+<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.name" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <code class="highlight language-python"><span class="n">name</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#prob_conf_mat.metrics.abc.AveragedMetric.name" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The name of this composed metric.</p>
+<p>Combines the names of the base metric and averaging method instances.</p>
+
+    </div>
+
+</div>
+
+<h4 id="prob_conf_mat.metrics.abc.AveragedMetric-functions">Functions<a href="#prob_conf_mat.metrics.abc.AveragedMetric-functions" class="headerlink" title="Permanent link">#</a></h4>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.compute_metric" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">compute_metric</span></code>
+
+<a href="#prob_conf_mat.metrics.abc.AveragedMetric.compute_metric" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Computes the metric values from its dependencies.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.compute_average" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="n">compute_average</span></code>
+
+<a href="#prob_conf_mat.metrics.abc.AveragedMetric.compute_average" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Computes the average across experiment classes.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="prob_conf_mat.metrics.abc.AveragedMetric.__call__" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <code class="highlight language-python"><span class="fm">__call__</span></code>
+
+<a href="#prob_conf_mat.metrics.abc.AveragedMetric.__call__" class="headerlink" title="Permanent link">#</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Computes the metric and averages it, in succession.</p>
+
+
+    </div>
+
+</div>
 
 
 
