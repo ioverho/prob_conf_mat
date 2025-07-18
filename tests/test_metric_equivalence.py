@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing
+import warnings
 
 if typing.TYPE_CHECKING:
     import jaxtyping as jtyping
@@ -88,9 +89,10 @@ all_args_to_test = list(
 # The 'assert' code for pytest
 # ==============================================================================
 @pytest.mark.parametrize(
-    argnames="conf_mat_fp,metric",
-    argvalues=all_args_to_test,
+    argnames="conf_mat_fp",
+    argvalues=all_confusion_matrices_to_test,
 )
+@pytest.mark.parametrize(argnames="metric", argvalues=all_metrics_to_test)
 def test_metric_equivalence(conf_mat_fp, metric) -> None:
     def _get_our_value(
         metric: str,
@@ -173,4 +175,9 @@ def test_metric_equivalence(conf_mat_fp, metric) -> None:
         assert np.allclose(our_value, sklearn_value), (our_value, sklearn_value)
     # If both report non-finite numbers, accept
     else:
-        assert True
+        warnings.warn(
+            (
+                f"No finite values for metric={metric}, fp={conf_mat_fp}. "
+                f"Values: sklearn={sklearn_value} our={our_value}"
+            ),
+        )

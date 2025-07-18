@@ -26,12 +26,7 @@ keywords = [
 ]
 
 
-dependencies = [
-    "numpy>=2.2",
-    "scipy>=1.15",
-    "tabulate>=0.9",
-    "matplotlib>=3.10",
-]
+dependencies = ["numpy", "scipy>=1.10", "tabulate>=0.9", "matplotlib>=3.7"]
 
 [project.urls]
 Homepage = "https://www.ivoverhoeven.nl/prob_conf_mat/"
@@ -40,7 +35,7 @@ Repository = "https://github.com/ioverho/prob_conf_mat"
 Issues = "https://github.com/ioverho/prob_conf_mat/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "numpy>=2.0.0"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -83,6 +78,7 @@ explicit = true
 # Linting
 # Ruff
 [tool.ruff]
+extend-exclude = ["tests/*"]
 builtins = ["jtyping"]
 
 line-length = 88
@@ -160,6 +156,7 @@ project-excludes = [
     '**/experimental*',
 ]
 venvPath = ".venv"
+venv = ".venv"
 pythonVersion = "3.11"
 pythonPlatform = "Linux"
 

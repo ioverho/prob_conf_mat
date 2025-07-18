@@ -1,6 +1,15 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.12.4
+    hooks:
+    # Run the linter.
+    -   id: ruff-check
+        args: [ --fix ]
+    # Run the formatter.
+    -   id: ruff-format
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -16,10 +25,11 @@ repos:
     -   id: check-merge-conflict
     -   id: name-tests-test
         args: ["--pytest-test-first"]
-#-   repo: https://github.com/astral-sh/uv-pre-commit
-#    # uv version.
-#    rev: 0.7.3
-#    hooks:
-#      - id: uv-lock
-#      - id: uv-export
-#        args: ["--no-dev", "--frozen", "--format=requirements.txt"]
+-   repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.7.3
+    hooks:
+    -   id: uv-lock
+        args: ["--resolution=highest"]
+    -   id: uv-export
+        args: ["--no-dev", "--frozen", "--format=requirements.txt"]
