@@ -1513,6 +1513,7 @@ name = "prob-conf-mat"
 version = "0.1.0rc4"
 source = { editable = "." }
 dependencies = [
+    { name = "jaxtyping" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "scipy" },
@@ -1522,7 +1523,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "griffe-inherited-docstrings" },
-    { name = "jaxtyping" },
     { name = "mkdocs" },
     { name = "mkdocs-git-revision-date-localized-plugin" },
     { name = "mkdocs-jupyter" },
@@ -1550,6 +1550,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "jaxtyping", specifier = ">=0.2.32" },
     { name = "matplotlib", specifier = ">=3.7" },
     { name = "numpy" },
     { name = "scipy", specifier = ">=1.10" },
@@ -1559,7 +1560,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "griffe-inherited-docstrings", specifier = ">=1.1.1" },
-    { name = "jaxtyping", specifier = ">=0.2.32" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-git-revision-date-localized-plugin", specifier = ">=1.3.0" },
     { name = "mkdocs-jupyter", specifier = ">=0.25.1" },
