@@ -1,39 +1,33 @@
+---
+title: 'Compose a Metric'
+---
+
 # Metric Syntax
 
-TODO: rewrite this to reflect the updated library
+To add a metric to a study, it's best to use the [`Study.add_metric`](https://www.ioverho.github.io/prob_conf_mat/Reference/Study#prob_conf_mat.study.Study.add_metric) method:
 
-The metric syntax provides a handy interface to creating unique metric functions not hard-coded into the library. Any (binary) metric function can be combined with an aggregation function. Some metric functions and aggregation functions also require arguments. Rather than having the user search for the required metric and aggregation function, one only needs to pass a single string and have the library return the required function.
+```
+study.add_metric(
+    metric="acc",
+    ...
+)
+```
 
-A valid metric syntax string consists of (in order):
+The specific metric added depends entirely on the sting passed, which should be in metric syntax form. A valid metric syntax string consists of (in order):
 
-1. The metric identifier
-2. Any keyword arguments that need to be passed to the metric function
+1. The metric name. This can be any [alias assigned to the metric](https://www.ioverho.github.io/prob_conf_mat/Reference/Metrics).
+2. Optionally, any keyword arguments that need to be passed to the metric function
 3. Optionally, an `@` symbol
 4. Optionally, the aggregation function identifier
-5. Optionally, any keyword arguments that need to be passed to the metric function
+5. Optionally, any keyword arguments that need to be passed to the averaging function. This can be any [alias assigned to the averaging mthod](https://www.ioverho.github.io/prob_conf_mat/Reference/Averaging).
 
 No spaces should be used. Instead, keywords arguments start with a `+` prepended to the key, followed by a `=` and the value.
 
-All together:
+The benefit of this is that any metric-averaging composed function can now be defined succinctly, without the user having to create these metric instances themselves.
 
-```text
-metric_identifier+arg1=2+arg2=foo@aggregation_identifier+arg1=None+arg2=2.0
-```
+### Examples
 
-Only the metric function identifier is necessary, all other aspects are optional.
-
-## Properties
-
-- The metric name should be one of the registered functions
-- Only keyword arguments are allowed
-- Keywords have keys specified using a `+` their value using a prepended `=`
-- Only numeric (float, int) or string arguments are accepted. The string "None" maps to `None`
-- Any keyword arguments before the aggregation symbol `@` are passed to the metric function, and any after to the aggregation function
-- The order of the keyword arguments does not matter, as long as they appear in the correct block
-
-## Examples
-
-The are meant to illustrate the flexibility of the metric syntax. The defined metrics are not necessarily useful
+Some examples might make understanding the metric syntax strings a lot easier.
 
 1. The MCC score
 
@@ -44,7 +38,7 @@ The are meant to illustrate the flexibility of the metric syntax. The defined me
 2. The F3-score
 
     ```text
-    fbeta+beta=3.0@binary+positive_class=2
+    fbeta+beta=3.0
     ```
 
 3. Macro-averaged precision
@@ -70,3 +64,27 @@ The are meant to illustrate the flexibility of the metric syntax. The defined me
     ```text
     fbeta+beta=2.0@binary+positive_class=1
     ```
+
+7. The ~~macro-averaged MCC score~~MCC score
+
+    ```text
+    mcc@macro
+    ```
+
+    Multi-class metric will just ignore any averaging parameters
+
+
+## Backus-Naur Form
+
+The following describes the metric syntax string in informal [Backus-Naur form](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form). Each `<...>` tag implies a non-terminal node that should be replaced by some other value. All values between quotations, `"..."`, are terminal, and are not replaced.
+
+```text
+<metric>        ::= <alias><metric-kwargs>*<averaging>?
+<alias>         ::= "acc"|"ba"|"f1"|...
+<metric-kwargs> ::= "+"<key>"="<value>
+<averaging>     ::= "@"<avg-alias><avg-kwargs>*
+<avg-alias>     ::= "macro"|"micro"|"geometric"|...
+<avg-kwargs>    ::= "+"<key>"="<value>
+```
+
+Here `...` is meant to denote the existence of many other literal values. Quantifier `*` means the preceding value occurs 0-n times, whereas `?` means the preceding value occurs 0-1 times (i.e., it's optional).

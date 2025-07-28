@@ -83,7 +83,7 @@ explicit = true
 # Linting
 # Ruff
 [tool.ruff]
-extend-exclude = ['tests/*', '**/experimental*']
+extend-exclude = ['tests/*', '**/experimental*', '**/mkdocs.py']
 builtins = ["jtyping"]
 
 line-length = 88

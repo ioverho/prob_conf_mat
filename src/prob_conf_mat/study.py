@@ -143,7 +143,8 @@ class Study(Config):
         Args:
             config_dict (dict[str, typing.Any]): the dictionary representation of the study
                 configuration.
-            kwargs: any additional keyword arguments typically passed to Study's `.__init__` method
+            kwargs: any additional keyword arguments typically passed to
+                Study's `.__init__` method
 
         Returns:
             typing.Self: an instance of a study
@@ -189,10 +190,10 @@ class Study(Config):
         return next(iter(all_num_classes))
 
     def __repr__(self) -> str:  # noqa: D105
-        return f"Study(experiments={self.all_experiments()}), metrics={self._metrics_store})"
+        return f"Study(experiments={self.all_experiments()}), metrics={str(self._metrics_store)})"
 
     def __str__(self) -> str:  # noqa: D105
-        return f"Study(experiments={self.all_experiments()}, metrics={self._metrics_store})"
+        return f"Study(experiments={self.all_experiments()}, metrics={str(self._metrics_store)})"
 
     @property
     def num_classes(self) -> int:
@@ -335,7 +336,7 @@ class Study(Config):
             confusion_prior (str | float | Float[ArrayLike, ' num_classes num_classes'], optional):
                 the prior over the confusion counts for this experiments. Defaults to 0, Haldane's
                 prior.
-            **io_kwargs: any additional keyword arguments that are needed for confusion matrix I/O
+            io_kwargs: any additional keyword arguments that are needed for confusion matrix I/O
 
         Examples:
             Add an experiment named 'test_a' to experiment group 'test'

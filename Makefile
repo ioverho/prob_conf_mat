@@ -70,6 +70,7 @@ docs-build: ## Update the docs
 
 .PHONY: docs-serve
 docs-serve: ## Serve documentation site
+	@uv run --dev python ./documentation/templates/mkdocs.py
 	@uv run mkdocs serve --watch "./documentation" --watch "./src/prob_conf_mat"
 
 #@ Profiling

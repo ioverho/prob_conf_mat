@@ -18,10 +18,8 @@ DOCUMENTATION_DIR = Path("documentation")
 
 REFERENCE_PART = DOCUMENTATION_DIR / "Reference"
 
-METRICS_AND_AVERAGING_CHAPTER = REFERENCE_PART / "Metrics"
-METRICS_AND_AVERAGING_OVERVIEW = METRICS_AND_AVERAGING_CHAPTER / "index.md"
-METRICS_SECTION = METRICS_AND_AVERAGING_CHAPTER / "Metrics.md"
-AVERAGING_SECTION = METRICS_AND_AVERAGING_CHAPTER / "Averaging.md"
+METRICS_SECTION = REFERENCE_PART / "Metrics.md"
+AVERAGING_SECTION = REFERENCE_PART / "Averaging.md"
 
 EXPERIMENT_AGGREGATION_CHAPTER = REFERENCE_PART / "Experiment Aggregation"
 EXPERIMENT_AGGREGATION_SECTION = EXPERIMENT_AGGREGATION_CHAPTER / "index.md"
@@ -106,13 +104,13 @@ class Template:
         return filled_template
 
 
-def metrics_and_averaging_overview() -> None:
+def metrics() -> None:
     # Load in the template
-    template_fp = TEMPLATE_DIR / "metrics_index.md"
+    template_fp = TEMPLATE_DIR / "metrics.md"
     if not template_fp.exists():
         raise FileNotFoundError(f"Could not find a template file at '{template_fp}'")
 
-    logger.info(f"Metrics & Averaging - Found template at '{template_fp}'")
+    logger.info(f"Metrics - Found template at '{template_fp}'")
 
     template = Template(
         file_name=template_fp,
@@ -152,66 +150,9 @@ def metrics_and_averaging_overview() -> None:
     )
 
     logger.info(
-        "Metrics & Averaging - Filled parameter `metrics_table`",
+        "Metrics - Filled parameter `metrics_table`",
     )
 
-    # Averaging list ===========================================================
-    # Generate a record for each averaging alias
-    aliases = sorted(AVERAGING_REGISTRY.items(), key=lambda x: x[0])
-    aliases_index = []
-    for i, (alias, avg_method) in enumerate(aliases):
-        aliases_index += [
-            [
-                f"'{alias}'",
-                # TODO: check that this works when hosting as well
-                f"[`{avg_method.__name__}`](Averaging.md#{avg_method.__module__}.{avg_method.__name__})",
-                avg_method.sklearn_equivalent,
-            ],
-        ]
-
-    # Creates a table with some important information as an overview
-    template.set(
-        "averaging_table",
-        value=tabulate(
-            tabular_data=aliases_index,
-            headers=[
-                "Alias",
-                "Metric",
-                "sklearn",
-            ],
-            tablefmt="github",
-        ),
-    )
-
-    logger.info(
-        "Metrics & Averaging - Filled parameter `averaging_table`",
-    )
-
-    # Write the template to a md file
-    output_fp = METRICS_AND_AVERAGING_OVERVIEW.resolve()
-    output_fp.write_text(
-        str(template),
-        encoding="utf-8",
-    )
-
-    logger.info(
-        f"Metrics & Averaging - Wrote filled template to '{output_fp}'",
-    )
-
-
-def metrics() -> None:
-    # Load in the template
-    template_fp = TEMPLATE_DIR / "metrics.md"
-    if not template_fp.exists():
-        raise FileNotFoundError(f"Could not find a template file at '{template_fp}'")
-
-    logger.info(f"Metrics - Found template at '{template_fp}'")
-
-    template = Template(
-        file_name=template_fp,
-    )
-
-    # Complete the template
     # Metrics list =============================================================
     all_metrics = {str(metric): metric for metric in METRIC_REGISTRY.values()}
 
@@ -272,6 +213,38 @@ def averaging() -> None:
     )
 
     # Complete the template
+    # Averaging table =========================================================
+    # Generate a record for each averaging alias
+    aliases = sorted(AVERAGING_REGISTRY.items(), key=lambda x: x[0])
+    aliases_index = []
+    for i, (alias, avg_method) in enumerate(aliases):
+        aliases_index += [
+            [
+                f"'{alias}'",
+                # TODO: check that this works when hosting as well
+                f"[`{avg_method.__name__}`](#{avg_method.__module__}.{avg_method.__name__})",
+                avg_method.sklearn_equivalent,
+            ],
+        ]
+
+    # Creates a table with some important information as an overview
+    template.set(
+        "averaging_table",
+        value=tabulate(
+            tabular_data=aliases_index,
+            headers=[
+                "Alias",
+                "Metric",
+                "sklearn",
+            ],
+            tablefmt="github",
+        ),
+    )
+
+    logger.info(
+        "Metrics - Filled parameter `averaging_table`",
+    )
+
     # Averaging methods list ===================================================
     all_avg_methods = {
         str(avg_method): avg_method for avg_method in AVERAGING_REGISTRY.values()
@@ -379,9 +352,6 @@ if __name__ == "__main__":
 
     # References/Metrics/Averaging.md
     averaging()
-
-    # References/Metrics/index.md
-    metrics_and_averaging_overview()
 
     # References/Experiment Aggregation/index.md
     experiment_aggregation()

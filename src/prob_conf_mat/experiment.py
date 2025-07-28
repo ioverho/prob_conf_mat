@@ -80,13 +80,13 @@ class Experiment:
     Args:
         name (str): the name of this experiment
         rng (RNG): the RNG used to control randomness
-        confusion_matrix (jtyping.Int[np.ndarray, 'num_classes num_classes']): the confusion matrix
+        confusion_matrix (Int[np.ndarray, 'num_classes num_classes']): the confusion matrix
             for this experiment.
-        prevalence_prior (str | float | jtyping.Float[np.typing.ArrayLike, 'num_classes'], optional)
-            : the prior over the prevalence counts for this experiments.
+        prevalence_prior (str | float | Float[ArrayLike, 'num_classes'], optional):
+            the prior over the prevalence counts for this experiments.
             Defaults to 0, Haldane's prior.
-        confusion_prior (str | float | jtyping.Float[np.typing.ArrayLike, 'num_classes num_classes']
-            , optional): the prior over the confusion counts for this experiments
+        confusion_prior (str | float | Float[ArrayLike, 'num_classes num_classes'], optional):
+            the prior over the confusion counts for this experiments
             Defaults to 0, Haldane's prior.
 
     """

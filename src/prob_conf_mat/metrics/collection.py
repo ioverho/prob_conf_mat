@@ -171,3 +171,6 @@ class MetricCollection:
 
     def __repr__(self) -> str:
         return f"MetricCollection({list(self._metrics.keys())})"
+
+    def __str__(self) -> str:
+        return f"{[x.name for x in self._metrics.keys()]}"  # noqa: SIM118

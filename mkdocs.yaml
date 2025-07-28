@@ -25,6 +25,7 @@ nav:
       - Getting Started/04_interfacing_with_the_filesystem.ipynb
   - How-To:
       - How To Guides/configuration.md
+      - How To Guides/metric_syntax.md
       - How To Guides/choosing_a_prior.md
       - How To Guides/comparing_many_experiments.md
       - How To Guides/extending_the_library.md
@@ -33,10 +34,8 @@ nav:
       - Reference/Study.md
       - Reference/ExperimentGroup.md
       - Reference/Experiment.md
-      - Metrics:
-          - Reference/Metrics/index.md
-          - Reference/Metrics/Metrics.md
-          - Reference/Metrics/Averaging.md
+      - Reference/Metrics.md
+      - Reference/Averaging.md
       - Experiment Aggregation:
           - Reference/Experiment Aggregation/index.md
           - Reference/Experiment Aggregation/heterogeneity.md

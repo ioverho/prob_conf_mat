@@ -71,7 +71,7 @@ Additionally, [`pandas`](https://pandas.pydata.org/) is an optional dependency f
 
 ### Development Environment
 
-This project was developed using [`uv`](https://docs.astral.sh/uv/). To install the development environment, simply clone this github repo:
+This project was developed using [`uv`](https://docs.astral.sh/uv/). To install the development environment, simply clone this GitHub repo:
 
 ```bash
 git clone https://github.com/ioverho/prob_conf_mat.git
@@ -98,13 +98,13 @@ The documentation is broadly divided into 4 sections:
 
 |                 | Learning                                | Coding                                |
 | --------------- | --------------------------------------- | ------------------------------------- |
-| **Practical**   | [Getting Started](./Getting%20Started/01_estimating_uncertainty.md) | [How-To Guides](./How%20To%20Guides/configuration.md) |
-| **Theoretical** | [Explanation](./Explanation/generating_confusion_matrices.md)           | [Reference](./Reference/Study.md)                             |
+| **Practical**   | [Getting Started](https://www.ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://www.ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html) |
+| **Theoretical** | [Explanation](https://www.ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)           | [Reference](https://www.ioverho.github.io/prob_conf_mat/Reference/Study.html)                             |
 
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](./Getting%20Started/01_estimating_uncertainty.md). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](https://www.ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 
@@ -118,7 +118,7 @@ study = Study(
 )
 ```
 
-Then add a experiment and confusion matrix to the study:
+Then add an experiment and confusion matrix to the study:
 
 ```python
 study.add_experiment(
@@ -215,7 +215,7 @@ There's about an 82% probability that the difference is in fact significant. Whi
 
 ## Credits
 
-The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), , [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.md).
+The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.md).
 
 A lot of the approaches and methods used in this project come from published works. Some especially important works include:
 

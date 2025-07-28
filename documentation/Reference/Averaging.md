@@ -1,3 +1,24 @@
+## Aliases
+
+The following lists all implemented metric averaging methods, by alias. These can be used when composing metrics using [metric syntax strings](http://ioverho.github.io/prob_conf_mat/How%20To%20Guides/metric_syntax.html).
+
+| Alias              | Metric                                                                        | sklearn   |
+|--------------------|-------------------------------------------------------------------------------|-----------|
+| 'binary'           | [`SelectPositiveClass`](#prob_conf_mat.metrics.averaging.SelectPositiveClass) | binary    |
+| 'geom'             | [`GeometricMean`](#prob_conf_mat.metrics.averaging.GeometricMean)             |           |
+| 'geometric'        | [`GeometricMean`](#prob_conf_mat.metrics.averaging.GeometricMean)             |           |
+| 'harm'             | [`HarmonicMean`](#prob_conf_mat.metrics.averaging.HarmonicMean)               |           |
+| 'harmonic'         | [`HarmonicMean`](#prob_conf_mat.metrics.averaging.HarmonicMean)               |           |
+| 'macro'            | [`MacroAverage`](#prob_conf_mat.metrics.averaging.MacroAverage)               | macro     |
+| 'macro_average'    | [`MacroAverage`](#prob_conf_mat.metrics.averaging.MacroAverage)               | macro     |
+| 'mean'             | [`MacroAverage`](#prob_conf_mat.metrics.averaging.MacroAverage)               | macro     |
+| 'micro'            | [`WeightedAverage`](#prob_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |
+| 'micro_average'    | [`WeightedAverage`](#prob_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |
+| 'select'           | [`SelectPositiveClass`](#prob_conf_mat.metrics.averaging.SelectPositiveClass) | binary    |
+| 'select_positive'  | [`SelectPositiveClass`](#prob_conf_mat.metrics.averaging.SelectPositiveClass) | binary    |
+| 'weighted'         | [`WeightedAverage`](#prob_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |
+| 'weighted_average' | [`WeightedAverage`](#prob_conf_mat.metrics.averaging.WeightedAverage)         | weighted  |
+
 ## Abstract Base Class
 
 ::: prob_conf_mat.metrics.abc.Averaging

@@ -46,9 +46,3 @@ Only numeric (float, int) or string arguments are accepted. The strings "None", 
 The following lists all implemented metrics, by alias
 
 @@metrics_table@@
-
-## Averaging
-
-The following lists all implemented metric averaging methods, by alias
-
-@@averaging_table@@

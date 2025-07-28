@@ -51,14 +51,15 @@ def compute_kde(
     # Check the space we're allowed to plot in
     empirical_min = np.min(samples)
     empirical_max = np.max(samples)
+    empirical_std = np.std(samples)
 
     min_grid_val = max(
-        empirical_min - cut * bw_adjust,
+        empirical_min - cut * empirical_std,
         clip[0] if clip is not None else -np.inf,
     )
 
     max_grid_val = min(
-        empirical_max + cut * bw_adjust,
+        empirical_max + cut * empirical_std,
         clip[1] if clip is not None else np.inf,
     )
 
