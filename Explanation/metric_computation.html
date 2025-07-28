@@ -130,7 +130,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#computing-metrics-on-counterfactual-confusion-matrices" class="md-skip">
+        <a href="#computing-metrics" class="md-skip">
           Skip to content
         </a>
       
@@ -528,6 +528,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       
         
       
+        
+      
     
     
     
@@ -575,6 +577,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
     
     
+      
+        
       
         
       
@@ -728,6 +732,19 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Computing Metrics
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="metric_computation.html" class="md-nav__link md-nav__link--active">
         
   
@@ -739,6 +756,34 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#computing-metrics-in-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Computing Metrics in Order
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -841,6 +886,23 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#computing-metrics-in-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Computing Metrics in Order
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -858,7 +920,38 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
 
 
-<h1 id="computing-metrics-on-counterfactual-confusion-matrices">Computing Metrics on Counterfactual Confusion Matrices<a class="headerlink" href="#computing-metrics-on-counterfactual-confusion-matrices" title="Permanent link">#</a></h1>
+<h1 id="computing-metrics">Computing Metrics<a class="headerlink" href="#computing-metrics" title="Permanent link">#</a></h1>
+<p>Within the context of a classification experiment, a metric is some function that a confusion matrix as argument, and yields a single value that summarizes the classifier's performance or quality. Typically, the larger a metric value, the better the classifier performed on the evaluation data.</p>
+<p>Metrics come in two flavors:</p>
+<ol>
+<li><strong>Binary</strong>: the metric computes a single value for each class in isolation. As a result, a single <span class="arithmatex">\(|\mathcal{Y}\times\mathcal{Y}|\)</span> confusion matrix produces <span class="arithmatex">\(\mathcal{Y}\)</span> values; one for each condition class</li>
+<li><strong>Multi-Class</strong>: the metric computes a single value for the whole confusion matrix, holistically combining the performance on individual classes into a single value.</li>
+</ol>
+<p>While binary metrics are invaluable when comparing performance across different classes, with multi-class metrics it's substantially easier to interpret the model's performance. When a single value is preferred, it's possible to construct a multi-class metric from a binary one by adding a metric averaging method.</p>
+<p>This process is shown in the figure below. To compute the F1 score for each class, we first split up the multi-class confusion matrix into virtual binary confusion matrices, then we compute the F1 score in isolation, and finally we average the scores across the different classes to produce a single F1-macro score.</p>
+<p><img
+    style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;"
+    src="../assets/figures/examples/averaged_binary_metric_computation.svg"
+    alt="A multi-class being broken into binary confusion matrices for binary metric computation.">
+</img></p>
+<p>In practice, the decomposition of the multi-class confusion matrix only happens virtually, to leverage vectorized metric computations in NumPy.</p>
+<p>With <code>prob_conf_mat</code>, all binary metrics can be combined with a metric averaging method using metric syntax strings.</p>
+<h2 id="computing-metrics-in-order">Computing Metrics in Order<a class="headerlink" href="#computing-metrics-in-order" title="Permanent link">#</a></h2>
+<p>Many of the more <a href="https://en.wikipedia.org/wiki/Confusion_matrix#Table_of_confusion">complex classification metrics</a> are dependent on other metrics. For example, the most common definition of the F1-score is as the harmonic average of the precisions and recall:</p>
+<div class="arithmatex">\[\text{F1}=2\frac{\text{PPV}\times \text{TPR}}{\text{PPV} + \text{TPR}}\]</div>
+<p>To ensure no metric is computed before its dependencies, and to limit the amount of repeated work, we can create a computation schedule by generating a topological sort of the metric dependency tree.</p>
+<p><img
+    style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;"
+    src="../assets/figures/examples/computation_schedule.svg"
+    alt="A computation schedule for computing the F1 score.">
+</img></p>
+<p>The figure above displays such a computation schedule for F1. It depends on the PPV and TPR, which in turn depend on the two conditional distributions, each of which is computed from the (normalized) confusion matrix.</p>
 
 
 
@@ -879,7 +972,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 15:42:36 UTC">July 10, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 28, 2025 15:05:25 UTC">July 28, 2025</span>
   </span>
 
     

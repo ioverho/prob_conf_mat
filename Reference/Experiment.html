@@ -16,7 +16,7 @@
         <link rel="prev" href="ExperimentGroup.html">
       
       
-        <link rel="next" href="Metrics/index.html">
+        <link rel="next" href="Metrics.html">
       
       
       <link rel="icon" href="../assets/logo_square.svg">
@@ -528,6 +528,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       
         
       
+        
+      
     
     
     
@@ -577,6 +579,8 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
     
     
+      
+        
       
         
       
@@ -829,37 +833,9 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
   
   
-    
-    
-      
+    <li class="md-nav__item">
+      <a href="Metrics.html" class="md-nav__link">
         
-          
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
-  
-  
-  
-    <a href="Metrics/index.html" class="md-nav__link">
-      
   
   
   <span class="md-ellipsis">
@@ -868,13 +844,30 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   </span>
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
+      </a>
+    </li>
   
 
-      
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Averaging.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Averaging
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1216,11 +1209,33 @@ and ExperimentGroup are responsible for passing properly validated initializatio
         </li>
         <li class="doc-section-item field-body">
             <b><code>confusion_matrix</code></b>
-              (<code><span title="jaxtyping.Int">Int</span>[<span title="numpy.ndarray">ndarray</span>, &#39;num_classes num_classes&#39;]</code>)
+              (<code><span title="Int">Int</span>[<span title="numpy.ndarray">ndarray</span>, &#39;num_classes num_classes&#39;]</code>)
           –
           <div class="doc-md-description">
             <p>the confusion matrix
 for this experiment.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>prevalence_prior</code></b>
+              (<code><span title="str">str</span> | <span title="float">float</span> | <span title="Float">Float</span>[<span title="ArrayLike">ArrayLike</span>, &#39;num_classes&#39;]</code>, default:
+                  <code>0</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the prior over the prevalence counts for this experiments.
+Defaults to 0, Haldane's prior.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>confusion_prior</code></b>
+              (<code><span title="str">str</span> | <span title="float">float</span> | <span title="Float">Float</span>[<span title="ArrayLike">ArrayLike</span>, &#39;num_classes num_classes&#39;]</code>, default:
+                  <code>0</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the prior over the confusion counts for this experiments
+Defaults to 0, Haldane's prior.</p>
           </div>
         </li>
     </ul>
@@ -1721,13 +1736,13 @@ an <code>ExperimentResult</code> instance</p>
         
         
           
-          <a href="Metrics/index.html" class="md-footer__link md-footer__link--next" aria-label="Next: Metrics and Averaging">
+          <a href="Metrics.html" class="md-footer__link md-footer__link--next" aria-label="Next: Metrics">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Metrics and Averaging
+                Metrics
               </div>
             </div>
             <div class="md-footer__button md-icon">
