@@ -846,12 +846,34 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
 </ol>
 <p>The goal of these 'Getting Started' tutorials is to enable a new user to apply <code>prob_conf_mat</code> succesfully to their own classification experiments, with minimal additional information. The tutorials have been formatted as <code>.ipynb</code> notebooks, and can be executed either locally<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> or using a service like <a href="https://colab.research.google.com/">Google Colab</a><sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.</p>
 <p>The tutorials are structured as follows:</p>
-<ol>
-<li><a href="./01_estimating_uncertainty">Estimating Uncertainty</a>: this notebook will you take through the steps of defining a <a href="../Reference/Study"><code>Study</code></a>, adding a confusion matrix to an experiment, defining some evaluation metrics, and finally producing summary statistics about the experiment's performance</li>
-<li><a href="./02_comparing_experiments">Comparing Experiments</a>: in this tutorial, we walk through comparing two experiments against each other, and produce some basic inferential statistics about which is better</li>
-<li><a href="03_aggregating_experiments.html">Aggregating Experiments</a>: here we take a series of experiments produced by <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)">cross-validation</a>, and generate a distribution of the average performance using experiment aggregation. We produce some forest plots, and discuss how inter-experiment heterogeneity can affect our analysis</li>
-<li><a href="./04_loading_and_saving_to_disk">Interfacing with the Filesystem</a>: finally, we go over how to load confusion matrices from your filesystem, and saving <code>Study</code> configurations to enable reproducibility</li>
-</ol>
+<div class="grid cards">
+<ul>
+<li>
+<p><strong>1. Estimating Uncertainty</strong></p>
+<hr />
+<p>This notebook will you take through the steps of defining a <a href="../Reference/Study.html"><code>Study</code></a>, adding a confusion matrix to an experiment, defining some evaluation metrics, and finally producing summary statistics about the experiment's performance</p>
+<p><a href="./01_estimating_uncertainty.html">&gt; Notebook</a></p>
+</li>
+<li>
+<p><strong>2. Comparing Experiments</strong></p>
+<hr />
+<p>In this tutorial, we walk through comparing two experiments against each other, and produce some basic inferential statistics about which is better</p>
+<p><a href="./02_comparing_experiments.html">&gt; Notebook</a></p>
+</li>
+<li>
+<p><strong>3. Aggregating Experiments</strong></p>
+<hr />
+<p>Here we take a series of experiments produced by <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)">cross-validation</a>, and generate a distribution of the average performance using experiment aggregation. We produce some forest plots, and discuss how inter-experiment heterogeneity can affect our analysis</p>
+<p><a href="./03_aggregating_experiments.html">&gt; Notebook</a></p>
+</li>
+<li>
+<p><strong>4. Loading and Saving to Disk</strong></p>
+<hr />
+<p>We go over how to load confusion matrices from your filesystem, and saving <code>Study</code> configurations to enable reproducibility</p>
+<p><a href="./04_loading_and_saving_to_disk.html">&gt; Notebook</a></p>
+</li>
+</ul>
+</div>
 <p>Each tutorial notoebook assumes some knowledge of the preceding notebooks, so it's best to start at the beginning and work your way through it.</p>
 <div class="footnote">
 <hr />
@@ -881,7 +903,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 6, 2025 15:39:13 UTC">August 6, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 6, 2025 19:06:34 UTC">August 6, 2025</span>
   </span>
 
     
