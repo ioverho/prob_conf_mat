@@ -54,12 +54,13 @@ class TestConfMatValidation:
         ):
             validate_confusion_matrix(confusion_matrix=[[1, "foo"], [0, 1]])
 
-        # Float should fail
-        with pytest.raises(
-            ConfMatIOError,
-            match="The loaded confusion matrix is not of type integer.",
-        ):
-            validate_confusion_matrix(confusion_matrix=[[1.0, 0], [0, 1]])
+        # Float should not fail
+        #with pytest.raises(
+        #    ConfMatIOError,
+        #    match="The loaded confusion matrix is not of type integer.",
+        #):
+        #    validate_confusion_matrix(confusion_matrix=[[1.0, 0], [0, 1]])
+        validate_confusion_matrix(confusion_matrix=[[1.0, 0.0], [0.0, 1.0]])
 
         # uint should not fail
         validate_confusion_matrix(
@@ -82,7 +83,7 @@ class TestConfMatValidation:
 
         with pytest.raises(
             ConfMatIOError,
-            match="The loaded confusion matrix is not of type integer.",
+            match="The loaded confusion matrix has non-finite elements.",
         ):
             validate_confusion_matrix(confusion_matrix=np.array([[1, 0], [np.inf, 1]]))
 

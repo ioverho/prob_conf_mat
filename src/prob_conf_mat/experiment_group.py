@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     import numpy as np
     import jaxtyping as jtyping
 

@@ -5,7 +5,7 @@ from collections import deque, OrderedDict
 from graphlib import TopologicalSorter
 from functools import cache
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from prob_conf_mat.utils.typing import MetricLike
 
 from prob_conf_mat.metrics.interface import get_metric
@@ -21,10 +21,10 @@ def generate_metric_computation_schedule(
     Ensures no function is computed before its dependencies are available.
 
     Args:
-        metrics (Iterable[str | Type[Metric] | Type[AggregatedMetric]]): a iterable of metrics
+        metrics (Sequence[MetricLike]): a iterable of metrics
 
     Returns:
-        typing.Generator[Type[Metric] | Type[AggregatedMetric]]
+        Sequence[MetricLike]
     """
     seen_metrics = set()
     stack = deque(metrics)

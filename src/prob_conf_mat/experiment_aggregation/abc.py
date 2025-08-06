@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
 
     from prob_conf_mat.experiment_group import ExperimentGroup

@@ -19,10 +19,11 @@ copyright: Copyright &copy; 2025 Ivo Verhoeven
 nav:
   - index.md
   - Getting Started:
+      - Getting Started/index.md
       - Getting Started/01_estimating_uncertainty.ipynb
       - Getting Started/02_comparing_experiments.ipynb
       - Getting Started/03_aggregating_experiments.ipynb
-      - Getting Started/04_interfacing_with_the_filesystem.ipynb
+      - Getting Started/04_loading_and_saving_to_disk.ipynb
   - How-To:
       - How To Guides/configuration.md
       - How To Guides/metric_syntax.md
@@ -45,7 +46,7 @@ nav:
       - "Explanation/generating_confusion_matrices.md"
       - "Explanation/metric_computation.md"
       - "Explanation/experiment_aggregation.md"
-      - "Explanation/hypothesis_testing.md"
+      - "Explanation/inference.md"
       - "Explanation/totsch_replication.ipynb"
 
 theme:

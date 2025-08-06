@@ -130,7 +130,7 @@ $$
 
 where $\alpha$ are again various prior hyperparameters. In total, we learn $\mathcal{Y}+1$ Dirichlet-Multinomial posteriors, and sample from each independently to produce a synthetic confusion matrix. The output of the product is a $\mathcal{Y}\times \mathcal{Y}$ matrix, normalized such that $\sum_{i,j}\tilde{\mathbf{C}}_{i,j}=1$.
 
-Sounds complicated, but it's Numpy implementation is dead simple:
+Sounds complicated, but it's NumPy implementation is dead simple:
 
 ```python
 condition_counts, condition_prior: Float[ndarray, "num_classes"]

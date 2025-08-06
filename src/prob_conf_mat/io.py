@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
 
 import pathlib
@@ -13,12 +13,15 @@ import numpy as np
 
 class ConfMatIOWarning(Warning):
     """Some warning to highlight potential undesirable behaviour due to IO."""
+
     ...
 
 
 class ConfMatIOError(Exception):
     """While trying to perform confusion matrix IO, some exception was encountered."""
+
     ...
+
 
 def load_csv(
     location: str | pathlib.Path,
@@ -81,7 +84,7 @@ def load_csv(
 
 def validate_confusion_matrix(
     confusion_matrix: jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"],
-    dtype: np.typing.DTypeLike = np.int64,
+    dtype: np.typing.DTypeLike = np.float64,
 ) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
     """Validates a confusion matrix to prevent any future funny business.
 
@@ -138,7 +141,10 @@ def validate_confusion_matrix(
 
     #! Must be an array of only integers
     # Or at the very least, a dtype such that `dtype + float = float`
-    if not np.issubdtype(confusion_matrix.dtype, np.integer):
+    if not (
+        np.issubdtype(confusion_matrix.dtype, np.integer)
+        or np.issubdtype(confusion_matrix.dtype, np.floating)
+    ):
         try:
             confusion_matrix = confusion_matrix.astype(dtype=dtype, casting="safe")
         except Exception as e:  # noqa: BLE001
