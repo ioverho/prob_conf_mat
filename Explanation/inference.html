@@ -10,7 +10,7 @@
         <meta name="author" content="Ivo Verhoeven">
       
       
-        <link rel="canonical" href="https://github.com/ioverho/prob_conf_mat/Explanation/hypothesis_testing.html">
+        <link rel="canonical" href="https://github.com/ioverho/prob_conf_mat/Explanation/inference.html">
       
       
         <link rel="prev" href="experiment_aggregation.html">
@@ -20,15 +20,15 @@
       
       
       <link rel="icon" href="../assets/logo_square.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
-        <title>Experiment Comparison - Probabilistic Confusion Matrices</title>
+        <title>Statistical Inference - Probabilistic Confusion Matrices</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -74,11 +74,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Experiment Comparison - Probabilistic Confusion Matrices" >
+        <meta  property="og:title"  content="Statistical Inference - Probabilistic Confusion Matrices" >
       
         <meta  property="og:description"  content="" >
       
-        <meta  property="og:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/Explanation/hypothesis_testing.png" >
+        <meta  property="og:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/Explanation/inference.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -86,15 +86,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://github.com/ioverho/prob_conf_mat/Explanation/hypothesis_testing.html" >
+        <meta  property="og:url"  content="https://github.com/ioverho/prob_conf_mat/Explanation/inference.html" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Experiment Comparison - Probabilistic Confusion Matrices" >
+        <meta  name="twitter:title"  content="Statistical Inference - Probabilistic Confusion Matrices" >
       
         <meta  name="twitter:description"  content="" >
       
-        <meta  name="twitter:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/Explanation/hypothesis_testing.png" >
+        <meta  name="twitter:image"  content="https://github.com/ioverho/prob_conf_mat/assets/images/social/Explanation/inference.png" >
       
     
     
@@ -103,9 +103,9 @@
         
     
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Probabilistic Confusion Matrices - Experiment Comparison" />
+<meta property="og:title" content="Probabilistic Confusion Matrices - Statistical Inference" />
 <meta property="og:description" content="" />
-<meta property="og:url" content="https://github.com/ioverho/prob_conf_mat/Explanation/hypothesis_testing.html" />
+<meta property="og:url" content="https://github.com/ioverho/prob_conf_mat/Explanation/inference.html" />
 <meta property="og:image" content="https://ioverho.github.io/prob_conf_mat/assets/social-preview.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
@@ -130,7 +130,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#comparing-different-experiments-metric-distributions" class="md-skip">
+        <a href="#statistical-inference-with-metric-distributions" class="md-skip">
           Skip to content
         </a>
       
@@ -174,7 +174,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Experiment Comparison
+              Statistical Inference
             
           </span>
         </div>
@@ -259,7 +259,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
         <a href="https://github.com/ioverho/prob_conf_mat" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
     ioverho/prob_conf_mat
@@ -302,7 +302,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     
     
       <li class="md-tabs__item">
-        <a href="../Getting%20Started/01_estimating_uncertainty.html" class="md-tabs__link">
+        <a href="../Getting%20Started/index.html" class="md-tabs__link">
           
   
   
@@ -423,7 +423,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       <a href="https://github.com/ioverho/prob_conf_mat" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
     ioverho/prob_conf_mat
@@ -465,6 +465,10 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     
       
         
+          
+        
+      
+        
       
         
       
@@ -490,7 +494,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
   
   
-    <a href="../Getting%20Started/01_estimating_uncertainty.html" class="md-nav__link">
+    <a href="../Getting%20Started/index.html" class="md-nav__link">
       
   
   
@@ -778,12 +782,12 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
         
       
       
-      <a href="hypothesis_testing.html" class="md-nav__link md-nav__link--active">
+      <a href="inference.html" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
-    Experiment Comparison
+    Statistical Inference
     
   </span>
   
@@ -862,7 +866,89 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
   
 
 
-<h1 id="comparing-different-experiments-metric-distributions">Comparing Different Experiments' Metric Distributions<a class="headerlink" href="#comparing-different-experiments-metric-distributions" title="Permanent link">#</a></h1>
+<h1 id="statistical-inference-with-metric-distributions">Statistical Inference with Metric Distributions<a class="headerlink" href="#statistical-inference-with-metric-distributions" title="Permanent link">#</a></h1>
+<p>In frequentist statistics, when we want to make inferences about parameters, we typically do not have access to the distribution of the estimators, and are forced to make assumptions. This is not the case for us. Since we have generated/bootstrapped the distribution of likely confusion matrices, we can take a much more direct approach in comparing metric distributions.</p>
+<p>In that case, a Bayesian approach to generating inferences is likely more suitable. An excellent resource for this, and key inspiration for <code>prob_conf_mat</code>, is the documentation for the <a href="https://easystats.github.io/bayestestR/"><code>bayestestR</code></a> package<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, which was largely inspired by the works of Kruschke et al. on Bayesian hypothesis testing<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup><sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>.</p>
+<p>In short, given that we have access to the metric distributions, when making statistical inference, we are likely interested in 4 things:</p>
+<ol>
+<li>point estimate summaries</li>
+<li>a quantification of the amount of uncertainty present</li>
+<li>a quantification of statistical significance</li>
+<li>a quantification of practical significance</li>
+</ol>
+<p>The first two points are relatively easily covered. For point estimates, we can use any of a number of estimators for central tendency, although the median is typically considered a safe and reasonably robust choice. Otherwise, we can use the mode (i.e., the most probable point), but this is much harder to compute from samples alone.</p>
+<p>To measure the amount of uncertainty present, we can simply compute a credible interval, and measure its width at a certain level of credibility. <a href="https://peerj.com/articles/cs-398.pdf">Tötsch et al. (2020)</a><sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup> specifically use the width of the 95% HDI credible interval as the 'metric uncertainty' (MU). The smaller this width is, the more certain we can be about the true metric value.</p>
+<p><img
+    style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;
+           max-width: 500px;"
+    src="../assets/figures/central_tendency_and_uncertainty.svg"
+    alt="Distributions with different central tendencies and/or metric uncertainties.">
+</img></p>
+<p>Estimating statistical significance is a little more involved. A common sanity check with machine learning models is comparing performance against the expected metric score of a random classifier. The further the classifier's score deviates from the random score, the more certain we can be that the model is actually 'learning'.</p>
+<p>What constitutes random performance, however, depends on the metric used, and typically the number of classes, and the class prevalence. Furthermore, the number of samples in the test set will also influence the width/uncertainty present in the classifier and random performance metric distributions; when there is more evidence available, we can more easily accept a smaller difference between distributions than when less evidence is available.</p>
+<p>To simplify this process, we can simply repeat the analysis, except with confusion matrix that might have been produced by a random classifier, and compare the metric distributions against each other.</p>
+<p><img
+    style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;
+           width: 100%;
+           max-width: 500px;"
+    src="../assets/figures/random_vs_non_random.svg"
+    alt="Random vs non-random metric distributions">
+</img></p>
+<p>We can generate synthetic confusions matrices imitating a random classifier by providing a confusion matrix that has the same class prevalence, but a uniform confusion conditional (i.e., the confusion matrix produced by predicting each class with equal probability, regardless of the true condition).</p>
+<p>Since we have access to samples from both distributions, we can also create an approximation of the difference distribution, simply by subtracting one set of samples from the other: <span class="arithmatex">\(\Delta(\mu|\mathbf{C}, \bar{\mathbf{C}})\)</span>, where <span class="arithmatex">\(\bar{\mathbf{C}}\)</span> is the confusion matrix of the random classifier.</p>
+<p>The output difference distribution is just another distribution, which we can summarize as before. In the depicted example above, the median difference is <span class="arithmatex">\(0.1670\)</span>, with an HDI of <span class="arithmatex">\([0.0798, 0.2531]\)</span>. In other words, we can be fairly certain that the classifier outperforms a random classifier.</p>
+<p>A quantity that encapsulates this, is the <a href="https://easystats.github.io/bayestestR/articles/probability_of_direction.html#relationship-with-the-p-value"><strong>probability of direction</strong></a>, which serves as the Bayesian equivalent of the (complement of the) frequentist p-value. In this case, the probability of direction would be the area under the difference PDF, for which the difference is positive:</p>
+<div class="arithmatex">\[p_{\text{dir}}=\int_{0}^{\infty} \Delta(\mu|\mathbf{C}, \bar{\mathbf{C}}) d\mu\]</div>
+<p>We can be estimate this by simply taking the ratio of samples of the difference distribution which are smaller than 0: <span class="arithmatex">\(\frac{\#p(\mu|\mathbf{C})\geq p(\mu|\bar{\mathbf{C}})}{N}\)</span>. For the above depicted example, this is <span class="arithmatex">\(99.99\%\)</span>, meaning there is a <span class="arithmatex">\(0.01%\)</span> chance that the model achieves random performance.</p>
+<p>While this tells us something about statistical significance, it says nothing about <em>practical significance</em>. An arbitrarily small difference can still be statistically significant, as long as the metric uncertainty is small enough (e.g., the sample size is large enough).</p>
+<p>This is where the <a href="https://easystats.github.io/bayestestR/articles/region_of_practical_equivalence.html"><strong>Region of Practical Equivalence (ROPE)</strong></a> comes in. It is the region around the null effect, 0, bounded by the value which we consider <em>practically</em> equivalent to the null effect. For example, for F1, we might consider any scores within <span class="arithmatex">\(0.01\)</span> of each other to be practically the same.</p>
+<p><img
+    style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;
+           width: 100%;
+           max-width: 500px;"
+    src="../assets/figures/example_rope.svg"
+    alt="Random vs non-random metric distributions">
+</img></p>
+<p>Using the ROPE, which we symbolically denote as <span class="arithmatex">\([-\epsilon, \epsilon]\)</span>, we can define four quantities of interest to describe practical significance:</p>
+<ol>
+<li><span class="arithmatex">\(p_{\text{ROPE}}=\int_{-\epsilon}^{\epsilon} \Delta(\mu|\mathbf{C}, \bar{\mathbf{C}}) d\mu\)</span>: the area within the ROPE, which essentially confirms the null hypothesis</li>
+<li><span class="arithmatex">\(p_{\text{sig}}=1-p_{\text{ROPE}}\)</span>: the area outside the ROPE, where the values are deemed bidirectionally significant (i.e., the probability the probability that the effect is not null)</li>
+<li><span class="arithmatex">\(p_{\text{sig}, +}=\int_{0}^{\epsilon} \Delta(\mu|\mathbf{C}, \bar{\mathbf{C}}) d\mu\)</span>: the area outside the ROPE, and greater than 0, where values are <em>positively</em> significant</li>
+<li><span class="arithmatex">\(p_{\text{sig}, -}=\int_{-\epsilon}^{0} \Delta(\mu|\mathbf{C}, \bar{\mathbf{C}}) d\mu\)</span>: the area outside the ROPE, and lesser than 0, where values are <em>negatively</em> significant</li>
+</ol>
+<p>In the case where a model is being compared to a random model, quantity <span class="arithmatex">\(p_{\text{sig}, +}\)</span> is most relevant, as it directly tells us how probable it is that the model is better.</p>
+<p>So far, we've only considered comparing a model's performance, represented by a confusion matrix, to a virtual random model's performance. The same methodology, however, is applicable to comparing two different models against each other. In that case, we can also compare the achieved <span class="arithmatex">\(p_{\text{sig}}\)</span> values to those achieved by two random models. This gives us a quantity similar to a <a href="https://en.wikipedia.org/wiki/Bayes_factor"><strong>Bayes Factor</strong></a>:</p>
+<div class="arithmatex">\[\text{BF}_{\text{sig}}=\dfrac{p_{\text{sig}}(\mu|\mathbf{C}_{A}, \mathbf{C}_{B})}{p_{\text{sig}}(\mu|\bar{\mathbf{C}}_{A}, \bar{\mathbf{C}}_{B})}\]</div>
+<p>The larger this value is, the more evidence there is that the achieved <span class="arithmatex">\(p_{\text{sig}}\)</span> is not a statistical aberration.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><a href="https://dominiquemakowski.github.io/publication/makowski2019bayestestr/makowski2019bayestestr.pdf">Makowski, D., Ben-Shachar, M. S., &amp; Lüdecke, D. (2019). <em>bayestestR: Describing Effects and their Uncertainty, Existence and Significance within the Bayesian Framework.</em> Journal of Open Source Software, 4(40), 1541. 10.21105/joss.01541</a>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p><a href="https://pubmed.ncbi.nlm.nih.gov/31920819/">Makowski, D., Ben-Shachar, M. S., Chen, S. H. A., &amp; Lüdecke, D. (2019). <em>Indices of Effect Existence and Significance in the Bayesian Framework.</em> Frontiers in Psychology 2019;10:2767. 10.3389/fpsyg.2019.02767</a>&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p><a href="https://journals.sagepub.com/doi/full/10.1177/2515245918771304">Kruschke, J. K. (2018). <em>Rejecting or accepting parameter values in Bayesian estimation.</em> Advances in Methods and Practices in Psychological Science, 1(2), 270–280.</a>&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p><a href="https://link.springer.com/article/10.3758/s13423-016-1221-4">Kruschke, J. K., &amp; Liddell, T. M. (2018). <em>The bayesian new statistics: Hypothesis testing, estimation, meta-analysis, and power analysis from a bayesian perspective.</em> Psychonomic Bulletin &amp; Review, 25(1), 178–206.</a>&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p><a href="https://peerj.com/articles/cs-398.pdf">Tötsch, N., &amp; Hoffmann, D. (2021). Classifier uncertainty: evidence, potential impact, and probabilistic treatment. PeerJ Computer Science, 7, e398.</a>&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -883,7 +969,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="July 10, 2025 15:42:36 UTC">July 10, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="August 6, 2025 15:39:13 UTC">August 6, 2025</span>
   </span>
 
     
@@ -989,7 +1075,7 @@ Version 0.1.0-pre.3. This library is still under active development. Expect bugs
       <script id="__config" type="application/json">{"base": "..", "features": ["content.footnote.tooltips", "content.tooltips", "content.code.copy", "content.code.select", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes", "navigation.tracking", "navigation.prune", "toc.follow", "navigation.top", "search.suggest", "search.highlight", "navigation.footer"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
       
         <script src="../assets/mathjax.js"></script>
       
