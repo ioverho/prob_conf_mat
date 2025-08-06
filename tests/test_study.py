@@ -208,3 +208,18 @@ class TestStudy:
                 metric="foobarbaz",
                 class_label=None,
             )
+
+    def test_pairwise_comparison(self):
+        study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        study.add_metric(metric="acc", aggregation="normal")
+
+        study.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[1, 0], [0, 1]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        with pytest.raises(ValueError):
+            study.report_pairwise_comparison(metric="acc", experiment_a="test/test_a", experiment_b="test/test_a",)

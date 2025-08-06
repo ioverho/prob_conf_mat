@@ -1390,6 +1390,12 @@ class Study(Config):
             class_label=class_label,
         )
 
+        if experiment_a == experiment_b:
+            raise ValueError(
+                f"The value of `experiment_a` and `experiment_b` are identical ({experiment_a}). "
+                f"Comparing these experiments leads to numerical instability.",
+            )
+
         lhs_samples = self.get_metric_samples(
             metric=metric.name,
             experiment_name=experiment_a,
