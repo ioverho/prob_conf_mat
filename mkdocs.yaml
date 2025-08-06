@@ -45,7 +45,7 @@ nav:
       - "Explanation/generating_confusion_matrices.md"
       - "Explanation/metric_computation.md"
       - "Explanation/experiment_aggregation.md"
-      - "Explanation/hypothesis_testing.md"
+      - "Explanation/inference.md"
       - "Explanation/totsch_replication.ipynb"
 
 theme:
