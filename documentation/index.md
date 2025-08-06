@@ -98,13 +98,13 @@ The documentation is broadly divided into 4 sections:
 
 |                 | Learning                                | Coding                                |
 | --------------- | --------------------------------------- | ------------------------------------- |
-| **Practical**   | [Getting Started](https://www.ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://www.ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html) |
-| **Theoretical** | [Explanation](https://www.ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)           | [Reference](https://www.ioverho.github.io/prob_conf_mat/Reference/Study.html)                             |
+| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/index.html) |
+| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)           | [Reference](https://ioverho.github.io/prob_conf_mat/Reference/Study.html)                             |
 
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](https://www.ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 

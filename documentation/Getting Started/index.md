@@ -15,9 +15,40 @@ The goal of these 'Getting Started' tutorials is to enable a new user to apply `
 
 The tutorials are structured as follows:
 
-1. [Estimating Uncertainty](./01_estimating_uncertainty): this notebook will you take through the steps of defining a [`Study`](../Reference/Study), adding a confusion matrix to an experiment, defining some evaluation metrics, and finally producing summary statistics about the experiment's performance
-2. [Comparing Experiments](./02_comparing_experiments): in this tutorial, we walk through comparing two experiments against each other, and produce some basic inferential statistics about which is better
-3. [Aggregating Experiments](./03_aggregating_experiments.ipynb): here we take a series of experiments produced by [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)), and generate a distribution of the average performance using experiment aggregation. We produce some forest plots, and discuss how inter-experiment heterogeneity can affect our analysis
-4. [Interfacing with the Filesystem](./04_loading_and_saving_to_disk): finally, we go over how to load confusion matrices from your filesystem, and saving `Study` configurations to enable reproducibility
+<div class="grid cards" markdown>
+
+-   **1. Estimating Uncertainty**
+
+    ---
+
+    This notebook will you take through the steps of defining a [`Study`](../Reference/Study.html), adding a confusion matrix to an experiment, defining some evaluation metrics, and finally producing summary statistics about the experiment's performance
+
+    [> Notebook](./01_estimating_uncertainty.html)
+
+-   **2. Comparing Experiments**
+
+    ---
+
+    In this tutorial, we walk through comparing two experiments against each other, and produce some basic inferential statistics about which is better
+
+    [> Notebook](./02_comparing_experiments.html)
+
+-   **3. Aggregating Experiments**
+
+    ---
+
+    Here we take a series of experiments produced by [cross-validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)), and generate a distribution of the average performance using experiment aggregation. We produce some forest plots, and discuss how inter-experiment heterogeneity can affect our analysis
+
+    [> Notebook](./03_aggregating_experiments.html)
+
+-   **4. Loading and Saving to Disk**
+
+    ---
+
+    We go over how to load confusion matrices from your filesystem, and saving `Study` configurations to enable reproducibility
+
+    [> Notebook](./04_loading_and_saving_to_disk.html)
+
+</div>
 
 Each tutorial notoebook assumes some knowledge of the preceding notebooks, so it's best to start at the beginning and work your way through it.

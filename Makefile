@@ -56,6 +56,7 @@ lint: ## Run linting
 
 .PHONY: type
 type: ## Run static typechecking
+	@mkdir --parents ./tests/logs/pyright
 	@uv run --dev pyright > ./tests/logs/pyright/report
 
 .PHONY: commit

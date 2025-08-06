@@ -147,7 +147,7 @@ plugins:
   - mkdocs-jupyter:
       # Execute notebooks before conversion
       # Set to false for faster rendering
-      execute: true
+      execute: false
       allow_errors: false
       # Hide cells with code based on tags
       remove_tag_config:
@@ -255,6 +255,12 @@ markdown_extensions:
   #    options:
   #      custom_icons:
   #        - documentation_overrides/.icons
+  # Attribute lists
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#attribute-lists
+  - attr_list
+  # Markdown in HTML
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#markdown-in-html
+  - md_in_html
 
 extra:
   analytics:

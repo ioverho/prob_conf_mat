@@ -1,9 +1,9 @@
 <div style="text-align: center;" align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/assets/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://www.ivoverhoeven.nl/prob_conf_mat/assets/logo_rectangle_dark_text.svg">
-  <img alt="Logo" src="https://www.ivoverhoeven.nl/prob_conf_mat/assets/logo_rectangle_dark_text.svg" width="150px">
+  <source media="(prefers-color-scheme: dark)" srcset="https://ioverho.github.io/prob_conf_mat/assets/logo_rectangle_light_text.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://ioverho.github.io/prob_conf_mat/assets/logo_rectangle_dark_text.svg">
+  <img alt="Logo" src="https://ioverho.github.io/prob_conf_mat/assets/logo_rectangle_dark_text.svg" width="150px">
 </picture>
 
 <div style="text-align: center;" align="center">
@@ -81,7 +81,7 @@ The development dependencies should automatically install into the `.venv` folde
 
 ## Documentation
 
-For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://www.ivoverhoeven.nl/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://ioverho.github.io/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
 
 The documentation is broadly divided into 4 sections:
 
@@ -92,12 +92,12 @@ The documentation is broadly divided into 4 sections:
 
 |                 | Learning                                                                                                     | Coding                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| **Practical**   | [Getting Started](https://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://www.ivoverhoeven.nl/prob_conf_mat/How%20To%20Guides/configuration.html) |
-| **Theoretical** | [Explanation](https://www.ivoverhoeven.nl/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](https://www.ivoverhoeven.nl/prob_conf_mat/Reference/Study.html)                     |
+| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/Getting%20Started/index.html) | [How-To Guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html) |
+| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](https://ioverho.github.io/prob_conf_mat/Reference/Study.html)                     |
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](https://www.ivoverhoeven.nl/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 
