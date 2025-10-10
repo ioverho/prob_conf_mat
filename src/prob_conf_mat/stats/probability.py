@@ -1,4 +1,7 @@
-def odds(prob: float) -> float:
+import numpy as np
+
+
+def odds(prob: np.floating) -> np.floating:
     """Computes the [odds](https://en.wikipedia.org/wiki/Odds) from a probability.
 
     Args:
