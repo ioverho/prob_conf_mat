@@ -15,6 +15,7 @@ from prob_conf_mat.stats import (
     summarize_posterior,
     PosteriorSummary,
     wilson_score_interval,
+    odds,
 )
 
 DELTA = "Δ"
@@ -267,7 +268,7 @@ def pairwise_compare(
             (random_diff_dist < -min_sig_diff) | (random_diff_dist > min_sig_diff),
         )
         p_rope_random = 1 - p_bi_sig_random
-        bf_rope = p_rope / p_rope_random
+        bf_rope = odds(p_rope) / odds(p_rope_random)
 
     else:
         p_bi_sig_random = None

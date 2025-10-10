@@ -147,3 +147,4 @@ deprecated_report/# pixi environments
 /klad/
 /deprecated/
 .ruff_cache
+/dev/
