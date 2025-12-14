@@ -3,17 +3,12 @@
 
 ::: prob_conf_mat.experiment_group.ExperimentGroup
     options:
+        heading_level: 2
         members:
             - num_experiments
-
-## Configuration
-
-::: prob_conf_mat.experiment_group.ExperimentGroup.add_experiment
-    options:
-        heading_level: 3
-
-::: prob_conf_mat.experiment_group.ExperimentGroup.__getitem__
-    options:
-        heading_level: 3
+            - add_experiment
+            - __getitem__
 
 ::: prob_conf_mat.experiment_group.ExperimentGroupResult
+    options:
+        heading_level: 2

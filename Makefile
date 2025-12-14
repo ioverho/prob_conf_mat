@@ -66,13 +66,14 @@ commit: ## Run pre-commit checks
 ##@ Documentation
 .PHONY: docs-build
 docs-build: ## Update the docs
-	@uv run --dev python ./documentation/templates/mkdocs.py
-	@uv run --dev mkdocs build
+#	@uv run --dev python ./docs/templates/mkdocs.py
+	@uv run --dev zensical build --clean
 
 .PHONY: docs-serve
 docs-serve: ## Serve documentation site
-	@uv run --dev python ./documentation/templates/mkdocs.py
-	@uv run mkdocs serve --watch "./documentation" --watch "./src/prob_conf_mat"
+#	@uv run --dev python ./docs/templates/mkdocs.py
+	@uv run --dev zensical build --clean
+	@uv run --dev zensical serve
 
 #@ Profiling
 #.PHONY: importtime

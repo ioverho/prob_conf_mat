@@ -15,3 +15,7 @@
     --md-header-logo-dark: block;
     --md-header-logo-light: none;
 }
+
+/* .md-footer-meta {
+    background-color: var(--md-default-bg-color)
+} */

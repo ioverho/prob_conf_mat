@@ -6,7 +6,7 @@ This is not always the case. For example, if the experiments represent the same 
 
 Heterogeneity can lead to large inter- (or between) experiment variance, which in turn can make estimating an aggregate difficult. The methods in this module try to estimate the degree of heterogeneity present, so users are better informed as to the quality of the experiment aggregation.
 
-See [the guide on experiment aggregation for more details](https://www.ioverho.github.io/prob_conf_mat/Explanation/experiment_aggregation.html).
+See [the guide on experiment aggregation for more details](../../explanation/experiment_aggregation).
 
 ---
 

@@ -3,6 +3,7 @@
 
 ::: prob_conf_mat.experiment.Experiment
     options:
+        heading_level: 2
         members:
             - num_classes
             - num_predictions
@@ -10,16 +11,8 @@
             - confusion_matrix
             - prevalence_prior
             - confusion_prior
-
-## Sampling
-
-::: prob_conf_mat.experiment.Experiment.sample
-    options:
-        heading_level: 3
-
-::: prob_conf_mat.experiment.Experiment.sample_metrics
-    options:
-        heading_level: 3
+            - sample
+            - sample_metrics
 
 ::: prob_conf_mat.experiment.ExperimentResult
     options:

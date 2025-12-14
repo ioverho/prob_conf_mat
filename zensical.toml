@@ -45,12 +45,18 @@ Copyright &copy; 2025-2026 Ivo Verhoeven
 nav = [
     { "Home" = [
         { "About" = "index.md" },
-        { "About" = "." },
         { "Changelog" = "changelog.md" },
         { "License" = "license.md" },
     ] },
     { "Getting Started" = [
-        "getting_started/index.md",
+        { "Overview" = "getting_started/index.md" },
+        { "Estimating Uncertainty" = "getting_started/01_estimating_uncertainty.ipynb" },
+        { "Comparing Experiments" = "getting_started/02_comparing_experiments.ipynb" },
+        { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.ipynb" },
+        { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.ipynb" },
+        { "Examples" = [
+            { "MNIST Classification" = "getting_started/examples/mnist_digits.ipynb" },
+        ] },
     ] },
     { "How To" = [
         "how_to/configuration.md",
@@ -63,13 +69,23 @@ nav = [
         "reference/Study.md",
         "reference/ExperimentGroup.md",
         "reference/Experiment.md",
-        "reference/Metrics.md",
-        "reference/IO.md",
         "reference/Statistics.md",
-        "reference/Averaging.md",
+        "reference/IO.md",
+        { "Metrics" = [
+            "reference/metrics/overview.md",
+            "reference/metrics/metrics.md",
+            "reference/metrics/abc.md",
+        ] },
+        { "Metric Averaging" = [
+            "reference/averaging/overview.md",
+            "reference/averaging/averaging_methods.md",
+            "reference/averaging/abc.md",
+        ] },
         { "Experiment Aggregation" = [
-            "reference/experiment_aggregation/index.md",
+            "reference/experiment_aggregation/overview.md",
+            "reference/experiment_aggregation/experiment_aggregators.md",
             "reference/experiment_aggregation/heterogeneity.md",
+            "reference/experiment_aggregation/abc.md",
         ] },
     ] },
     { "Explanation" = [
@@ -239,7 +255,7 @@ features = [
     # When section index pages are enabled, documents can be directly attached
     # to sections, which is particularly useful for providing overview pages.
     # https://zensical.org/docs/setup/navigation/#section-index-pages
-    "navigation.indexes",
+    #"navigation.indexes",
 
     # When instant navigation is enabled, clicks on all internal links will be
     # intercepted and dispatched via XHR without fully reloading the page.
@@ -301,7 +317,7 @@ features = [
     # When anchor following for the table of contents is enabled, the sidebar
     # is automatically scrolled so that the active anchor is always visible.
     # https://zensical.org/docs/setup/navigation/#anchor-following
-    # "toc.follow",
+    #"toc.follow",
 
     # When navigation integration for the table of contents is enabled, it is
     # always rendered as part of the navigation sidebar on the left.
@@ -372,6 +388,12 @@ link = "https://pypi.org/project/prob-conf-mat/"
 # Admonitions
 # https://zensical.org/docs/setup/extensions/python-markdown/#admonition
 [project.markdown_extensions.admonition]
+
+# Caret, Mark & Tilde
+# https://zensical.org/docs/setup/extensions/python-markdown-extensions/#caret-mark-tilde
+[project.markdown_extensions.pymdownx.caret]
+[project.markdown_extensions.pymdownx.mark]
+[project.markdown_extensions.pymdownx.tilde]
 
 # Collapsible admonitions
 # https://zensical.org/docs/setup/extensions/python-markdown-extensions/#details

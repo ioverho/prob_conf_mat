@@ -4,7 +4,7 @@ title: 'Compose a Metric'
 
 # Metric Syntax
 
-To add a metric to a study, it's best to use the [`Study.add_metric`](https://www.ioverho.github.io/prob_conf_mat/Reference/Study#prob_conf_mat.study.Study.add_metric) method:
+To add a metric to a study, it's best to use the [`Study.add_metric`](../reference/Study#prob_conf_mat.study.Study.add_metric) method:
 
 ```
 study.add_metric(
@@ -15,17 +15,17 @@ study.add_metric(
 
 The specific metric added depends entirely on the sting passed, which should be in metric syntax form. A valid metric syntax string consists of (in order):
 
-1. The metric name. This can be any [alias assigned to the metric](https://www.ioverho.github.io/prob_conf_mat/Reference/Metrics).
+1. The metric name. This can be any [alias assigned to the metric](../reference/metrics/overview).
 2. Optionally, any keyword arguments that need to be passed to the metric function
 3. Optionally, an `@` symbol
 4. Optionally, the aggregation function identifier
-5. Optionally, any keyword arguments that need to be passed to the averaging function. This can be any [alias assigned to the averaging mthod](https://www.ioverho.github.io/prob_conf_mat/Reference/Averaging).
+5. Optionally, any keyword arguments that need to be passed to the averaging function. This can be any [alias assigned to the averaging method](../reference/averaging/overview.md).
 
 No spaces should be used. Instead, keywords arguments start with a `+` prepended to the key, followed by a `=` and the value.
 
 The benefit of this is that any metric-averaging composed function can now be defined succinctly, without the user having to create these metric instances themselves.
 
-### Examples
+## Examples
 
 Some examples might make understanding the metric syntax strings a lot easier.
 
@@ -65,14 +65,13 @@ Some examples might make understanding the metric syntax strings a lot easier.
     fbeta+beta=2.0@binary+positive_class=1
     ```
 
-7. The ~~macro-averaged MCC score~~MCC score
+7. The ~~macro-averaged MCC score~~ MCC score
 
     ```text
     mcc@macro
     ```
 
     Multi-class metric will just ignore any averaging parameters
-
 
 ## Backus-Naur Form
 

@@ -13,7 +13,7 @@ In this guide, we outline some basic steps to help you implement these yourself.
 
 ### Metric
 
-1. First import the base class, `Metric`, as:
+1. First import the base class, [`Metric`](../reference/metrics/abc/#prob_conf_mat.metrics.abc.Metric), as:
 
     ```python
     from prob_conf_mat.metrics.abc import Metric
@@ -82,7 +82,7 @@ study.add_metric("fowlkes_mallows")
 
 ### Metric Averaging
 
-1. First import the base class, `Averaging`, as:
+1. First import the base class, [`Averaging`](../reference/averaging/abc/#prob_conf_mat.metrics.abc.Averaging), as:
 
     ```python
     from prob_conf_mat.metrics.abc import Averaging
@@ -174,7 +174,7 @@ Make sure to call `super().__init__()` first though.
 
 A similar pattern was used in defining experiment aggregation methods.
 
-1. First, import the base class
+1. First, import the base class, [`ExperimentAggregator`](../reference/experiment_aggregation/abc/#prob_conf_mat.experiment_aggregation.abc.ExperimentAggregator), as:
 
     ```python
     from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregator

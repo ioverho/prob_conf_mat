@@ -3,50 +3,51 @@
 
 ::: prob_conf_mat.study.Study
     options:
+        heading_level: 2
         members:
             - num_classes
             - num_experiment_groups
             - num_experiments
 
-## Configuration
+### Configuration
 
 ::: prob_conf_mat.study.Study.to_dict
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.from_dict
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.add_experiment
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.__getitem__
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.add_metric
     options:
-        heading_level: 3
+        heading_level: 4
 
-## Estimating Uncertainty
+### Estimating Uncertainty
 
 ::: prob_conf_mat.study.Study.get_metric_samples
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.report_metric_summaries
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.report_random_metric_summaries
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.plot_metric_summaries
     options:
-        heading_level: 3
+        heading_level: 4
 
 <span class="doc-section-title">Examples:</span>
 
@@ -68,23 +69,23 @@ study.plot_metric_summaries(
     alt="A plot of a metric's distribution">
 </img>
 
-## Comparing 2 Experiments
+### Comparing 2 Experiments
 
 ::: prob_conf_mat.study.Study.get_pairwise_comparison
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.report_pairwise_comparison
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.report_pairwise_comparison_to_random
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.plot_pairwise_comparison
     options:
-        heading_level: 3
+        heading_level: 4
 
 <span class="doc-section-title">Examples:</span>
 
@@ -109,29 +110,29 @@ study.plot_pairwise_comparison(
     alt="A plot of the distribution of the difference of two metrics">
 </img>
 
-## Comparing Many Experiments
+### Comparing Many Experiments
 
 ::: prob_conf_mat.study.Study.get_listwise_comparsion_result
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.report_listwise_comparison
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.report_expected_reward
     options:
-        heading_level: 3
+        heading_level: 4
 
-## Aggregating Experiments
+### Aggregating Experiments
 
 ::: prob_conf_mat.study.Study.report_aggregated_metric_summaries
     options:
-        heading_level: 3
+        heading_level: 4
 
 ::: prob_conf_mat.study.Study.plot_experiment_aggregation
     options:
-        heading_level: 3
+        heading_level: 4
 
 <span class="doc-section-title">Examples:</span>
 
@@ -156,7 +157,7 @@ study.plot_experiment_aggregation(
 
 ::: prob_conf_mat.study.Study.plot_forest_plot
     options:
-        heading_level: 3
+        heading_level: 4
 
 <span class="doc-section-title">Examples:</span>
 
@@ -180,15 +181,11 @@ study.plot_forest_plot(
 
 ::: prob_conf_mat.config.Config
     options:
+        heading_level: 2
         members:
             - fingerprint
             - seed
-            - _validate_seed
             - num_samples
-            - _validate_num_samples
             - ci_probability
-            - _validate_ci_probability
             - experiments
-            - _validate_experiments
             - metrics
-            - _validate_metrics
