@@ -43,7 +43,7 @@ The tutorials are structured as follows:
 
     [:lucide-notebook-text: Notebook](./03_aggregating_experiments.html)
 
--   :material-numeric-4-box:{ .lg .middle } __Open Source, MIT__
+-   :material-numeric-4-box:{ .lg .middle } __Loading and Saving__
 
     ---
 
