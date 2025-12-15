@@ -111,7 +111,10 @@ nav = [
 #
 # Read more: https://zensical.org/docs/customization/#additional-css
 #
-extra_css = ["assets/stylesheets/extra.css"]
+extra_css = [
+    "assets/stylesheets/extra.css",
+    #"assets/stylesheets/outgoing_links.css",
+]
 
 # With the `extra_javascript` option you can add your own JavaScript to your
 # project to customize the behavior according to your needs.

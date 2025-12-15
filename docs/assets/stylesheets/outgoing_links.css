@@ -1,0 +1,49 @@
+/* CSS for all outgoing links */
+a:not([href^="#"],
+    [href^="/"],
+    [href*="localhost"],
+    [href*="ivoverhoeven.com"],
+    [href*="ivoverhoeven.nl"],
+    [href*="192.168"]):not(.footer_socials a):not(.blog-tags) {
+
+    /* background-color: red; */
+
+    & ::after {
+        width: calc(var(--size) * 1.2);
+        height: calc(var(--size) * 1.2);
+        display: inline-block;
+        content: "";
+
+        /* Assumes color.css is loaded */
+        background-color: var(--color-text);
+    }
+
+    /* Uses a mask to overlay an svg on top of the 'content' */
+    /* -webkit-mask: url("/icons/external-link.svg") no-repeat 50% 50%; */
+    & :not([href*="wikipedia.org"])::after {
+        mask-size: cover;
+        mask: url("/icons/external-link.svg") no-repeat 50% 50%;
+        -webkit-mask-size: cover;
+    }
+
+}
+
+a[href*="wikipedia.org"]::after {
+    mask-size: cover;
+    mask: url("/icons/wiki-w.svg") no-repeat 50% 50%;
+    -webkit-mask: url("/icons/wiki-w.svg") no-repeat 50% 50%;
+}
+
+a[href$=".pdf"]::after {
+    width: calc(var(--size) * 0.7);
+    height: calc(var(--size) * 1.4);
+    display: inline-block;
+    content: "";
+
+    /* Assumes color.css is loaded */
+    background-color: var(--color-text);
+
+    mask-size: cover;
+    mask: url("/icons/pdf-file.svg") no-repeat 50% 50%;
+    -webkit-mask: url("/icons/pdf-file.svg") no-repeat 50% 50%;
+}
