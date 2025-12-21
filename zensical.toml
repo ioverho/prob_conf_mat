@@ -50,12 +50,12 @@ nav = [
     ] },
     { "Getting Started" = [
         { "Overview" = "getting_started/index.md" },
-        { "Estimating Uncertainty" = "getting_started/01_estimating_uncertainty.ipynb" },
-        { "Comparing Experiments" = "getting_started/02_comparing_experiments.ipynb" },
-        { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.ipynb" },
-        { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.ipynb" },
+        { "Estimating Uncertainty" = "getting_started/01_estimating_uncertainty.html" },
+        { "Comparing Experiments" = "getting_started/02_comparing_experiments.html" },
+        { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.html" },
+        { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.html" },
         { "Examples" = [
-            { "MNIST Classification" = "getting_started/examples/mnist_digits.ipynb" },
+            { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
         ] },
     ] },
     { "How To" = [

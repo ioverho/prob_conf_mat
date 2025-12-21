@@ -66,14 +66,16 @@ commit: ## Run pre-commit checks
 ##@ Documentation
 .PHONY: docs-build
 docs-build: ## Update the docs
-#	@uv run --dev python ./docs/templates/mkdocs.py
-	@uv run --dev zensical build --clean
+	@rm -rf .cache/
+	@rm -rf site/
+	@uv run --dev zensical build -f zensical.toml
+	@uv run --dev python ./docs/ignore/post-build/convert_notebooks.py --verbose
 
 .PHONY: docs-serve
 docs-serve: ## Serve documentation site
 #	@uv run --dev python ./docs/templates/mkdocs.py
-	@uv run --dev zensical build --clean
-	@uv run --dev zensical serve
+	@$(MAKE) --no-print-directory docs-build
+	@DOCS_BUILD=1 uv run --dev zensical serve -f zensical.toml --open
 
 #@ Profiling
 #.PHONY: importtime

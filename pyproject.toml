@@ -46,6 +46,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "beautifulsoup4>=4.13.5",
     "griffe-inherited-docstrings>=1.1.2",
     "mkdocs>=1.6.1",
     "mkdocs-git-revision-date-localized-plugin>=1.5.0",
