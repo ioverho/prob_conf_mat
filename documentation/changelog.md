@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- added default values to the `Study.get_*` methods
 - moved docs from [mkdocs](https://www.mkdocs.org/) to [zensical](https://zensical.org)
 
 ### Fixed
