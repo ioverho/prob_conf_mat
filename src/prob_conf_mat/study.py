@@ -1433,7 +1433,7 @@ class Study(Config):
                 sampling_method=SamplingMethod.INPUT,
             ).values[:, class_label]
 
-            observed_diff = float(lhs_observed - rhs_observed)
+            observed_diff = float((lhs_observed - rhs_observed).squeeze())
         else:
             observed_diff = None
 
