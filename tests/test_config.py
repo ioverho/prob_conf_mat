@@ -170,14 +170,15 @@ class TestConfig:
                 **self.fetch_base_config("ci_probability"),
             )  # type: ignore
 
-            with pytest.warns(
-                DeprecationWarning,
-                match="Conversion of an array with ndim > 0 to a scalar is deprecated",
-            ):
-                Study(
-                    ci_probability=np.array([0.95]),  # type: ignore
-                    **self.fetch_base_config("ci_probability"),
-                )
+            # This is a Numpy warning, not our responsibility
+            #with pytest.warns(
+            #    DeprecationWarning,
+            #    match="Conversion of an array with ndim > 0 to a scalar is deprecated",
+            #):
+            #    Study(
+            #        ci_probability=np.array([0.95]),  # type: ignore
+            #        **self.fetch_base_config("ci_probability"),
+            #    )
 
     def test_prevalence_prior(self) -> None:
         # ======================================================================

@@ -1366,7 +1366,7 @@ class Study(Config):
     def get_pairwise_comparison(
         self,
         metric: str,  # type: ignore
-        class_label: int | None = None,
+        class_label: int | None = None,  # type: ignore
         *,
         experiment_a: str,
         experiment_b: str,
