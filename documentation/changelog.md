@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Custom background colours in plots
+
 ### Changed
 
 - added default values to the `Study.get_*` methods
 - moved docs from [mkdocs](https://www.mkdocs.org/) to [zensical](https://zensical.org)
+- consistent colour palette for different plots
 
 ### Fixed
 
@@ -33,8 +38,6 @@ Full Changelog: [`0.1.0...0.2.0`](https://github.com/ioverho/prob_conf_mat/compa
 ## [v0.1.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.1.0) - 2025-08-06
 
 This release should serve as the first feature-complete version of this library. Before release 1.0.0, I'd like to focus on tweaks and additional documentation, not new (major) new features.
-
-### Changed
 
 ### Added
 

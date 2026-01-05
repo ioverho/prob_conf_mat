@@ -50,24 +50,25 @@ dev = [
     "mkdocs>=1.6.1",
     "mkdocs-git-revision-date-localized-plugin>=1.5.0",
     "mkdocs-jupyter>=0.25.1",
-    "mkdocs-material[imaging]>=9.7.0",
+    "mkdocs-material[imaging]>=9.7.1",
     "mkdocstrings[python]>=1.0.0",
     "nbconvert>=7.16.4",
     "nbformat>=5.10.4",
     "opt-einsum>=3.4.0",
     "pandas>=2.3.3",
     "pip>=25.3",
-    "pre-commit>=4.5.0",
+    "pre-commit>=4.5.1",
     "pyright>=1.1.407",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "python-markdown-math>=0.9",
     "pyyaml>=6.0.3",
-    "ruff>=0.14.9",
-    "scalene>=1.5.55",
+    "ruff>=0.14.10",
+    "scalene>=2.0.1",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "snakeviz>=2.2.2",
+    "statsmodels>=0.14.6",
     "toml>=0.10.2",
     "tqdm>=4.67.1",
 ]
@@ -105,6 +106,7 @@ ignore = [
     "D107",   # Undocumented __init__ method
     "ICN001", # Matplotlib should be imported as MPL
     "UP037",  # Removes quotes in type annotations
+    "COM812", # Missing trailing comma, should not be used with formatter
 ]
 extend-select = [
     "F",   # Pyflakes rules
