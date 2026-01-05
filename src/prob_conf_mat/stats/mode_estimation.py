@@ -11,7 +11,7 @@ def histogram_mode_estimator(
     samples: jtyping.Float[np.ndarray, " num_samples"],
     bounds: tuple[float, float] | None = None,
 ) -> float:
-    """"Tries to estimate the mode of a distribution from its samples."""
+    """Tries to estimate the mode of a distribution from its samples."""
     bin_counts, bin_edges = np.histogram(samples, bins="auto", range=bounds)
     modal_bin = np.argmax(bin_counts)
 
