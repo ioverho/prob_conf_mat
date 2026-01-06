@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/logo_square.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -286,6 +286,25 @@ Version 0.2.0
   
   
   
+    <li class="md-tabs__item">
+      <a href="../changelog.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
     
     
       <li class="md-tabs__item">
@@ -435,6 +454,33 @@ Version 0.2.0
     
   
     Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
   
 
     
@@ -618,10 +664,10 @@ Version 0.2.0
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -639,8 +685,8 @@ Version 0.2.0
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2272,6 +2318,7 @@ Version 0.2.0
     <div class="doc doc-contents first">
 
 
+
         <p>The abstract base class for metrics.</p>
 <p>Properties should be implemented as class attributes in derived metrics</p>
 <p>The <code>compute_metric</code> method needs to be implemented</p>
@@ -2286,7 +2333,7 @@ Version 0.2.0
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -2532,6 +2579,7 @@ This is checked during class definition.</p>
     <div class="doc doc-contents first">
 
 
+
         <p>The composition of any instance of <code>Metric</code> with any instance of <code>Averaging</code>.</p>
 
 
@@ -2565,7 +2613,7 @@ This is checked during class definition.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -2818,6 +2866,7 @@ This is checked during class definition.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the mass on the diagonal of the normalized confusion matrix.</p>
 <p>It is defined as the rate of true positives to all entries:</p>
 <div class="arithmatex">\[\mathtt{diag}(\mathbf{CM})=TP / N\]</div>
@@ -2836,7 +2885,7 @@ little on its own.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -2969,6 +3018,7 @@ little on its own.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the marginal distribution of condition occurence. Also known as the prevalence.</p>
 <p>It can be defined as the rate of positives to all predictions:</p>
 <div class="arithmatex">\[\mathtt{Prev}=P / N\]</div>
@@ -2986,7 +3036,7 @@ on its own.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -3119,6 +3169,7 @@ on its own.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the marginal distribution of prediction occurence. Also known as the model bias.</p>
 <p>It can be defined as the rate of predicted positives to all predictions:</p>
 <div class="arithmatex">\[\mathtt{Bias}=PP / N\]</div>
@@ -3136,7 +3187,7 @@ on its own.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -3269,6 +3320,7 @@ on its own.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the True Positive Rate, also known as recall, sensitivity.</p>
 <p>It is defined as the ratio of correctly predited positives to all condition positives:</p>
 <div class="arithmatex">\[\mathtt{TPR}=TP / P\]</div>
@@ -3301,7 +3353,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -3434,6 +3486,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the False Negative Rate, also known as the miss-rate.</p>
 <p>It is defined as the ratio of false negatives to condition positives:</p>
 <div class="arithmatex">\[\mathtt{FNR}=FN / (TP + FN)\]</div>
@@ -3463,7 +3516,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -3596,6 +3649,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the Positive Predictive Value, also known as precision.</p>
 <p>It is defined as the ratio of true positives to predicted positives:</p>
 <div class="arithmatex">\[\mathtt{PPV}=TP / (TP + FP)\]</div>
@@ -3627,7 +3681,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -3760,6 +3814,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the False Discovery Rate.</p>
 <p>It is defined as the ratio of falsely predicted positives to predicted positives:</p>
 <div class="arithmatex">\[\mathtt{FDR}=FP / (TP + FP)\]</div>
@@ -3790,7 +3845,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -3923,6 +3978,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the False Positive Rate, the probability of false alarm.</p>
 <p>Also known as the fall-out.</p>
 <p>It is defined as the ratio of falsely predicted positives to condition negatives:</p>
@@ -3954,7 +4010,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -4087,6 +4143,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the True Negative Rate, i.e. specificity, selectivity.</p>
 <p>It is defined as the ratio of true predicted negatives to condition negatives:</p>
 <div class="arithmatex">\[\mathtt{TNR}=TN / (TN + FP)\]</div>
@@ -4117,7 +4174,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -4250,10 +4307,11 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the False Omission Rate.</p>
 <p>It is defined as the ratio of falsely predicted negatives to all predicted negatives:</p>
 <div class="arithmatex">\[\mathtt{FOR}=FN / (TN + FN)\]</div>
-<p>where <span class="arithmatex">\(<span class="arithmatex">\(TN\)</span>\)</span> is the count of true negatives, and <span class="arithmatex">\(<span class="arithmatex">\(FN\)</span>\)</span> the count of falsely predicted negatives.</p>
+<p>where $<span class="arithmatex">\(TN\)</span>$ is the count of true negatives, and $<span class="arithmatex">\(FN\)</span>$ the count of falsely predicted negatives.</p>
 <p>It is the complement of the Negative Predictive Value, <span class="arithmatex">\(FOR=1-NPV\)</span>.</p>
 
 
@@ -4280,7 +4338,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -4413,6 +4471,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the Negative Predicitive Value.</p>
 <p>It is defined as the ratio of true negatives to all predicted negatives:</p>
 <div class="arithmatex">\[\mathtt{NPV}=TN / (TN + FN)\]</div>
@@ -4443,7 +4502,7 @@ measuring retrieval.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -4576,6 +4635,7 @@ measuring retrieval.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the multiclass accuracy score.</p>
 <p>It is defined as the rate of correct classifications to all classifications:</p>
 <div class="arithmatex">\[\mathtt{Acc}=(TP + TN) / N\]</div>
@@ -4609,7 +4669,7 @@ to class imbalance. It is also not directly comparable across datasets.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -4742,6 +4802,7 @@ to class imbalance. It is also not directly comparable across datasets.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the balanced accuracy score.</p>
 <p>It is defined as the the arithmetic average of the per-class true-positive rate:</p>
 <div class="arithmatex">\[\mathtt{BA}=\frac{1}{|C|}\sum TPR_{c}\]</div>
@@ -4790,7 +4851,7 @@ of 0.0. This can be achieved by setting <code>adjusted=True</code>.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -4923,6 +4984,7 @@ of 0.0. This can be achieved by setting <code>adjusted=True</code>.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the multiclass Matthew's Correlation Coefficient (MCC), also known as the phi coefficient.</p>
 <p>Goes by a variety of names, depending on the application scenario.</p>
 <p>A metric that holistically combines many different classification metrics.</p>
@@ -4960,7 +5022,7 @@ single score to establish the quality of a binary classifier prediction in a con
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -5093,6 +5155,7 @@ single score to establish the quality of a binary classifier prediction in a con
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the multiclass Cohen's Kappa coefficient.</p>
 <p>Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
 be used to quantify the quality of a predictor.</p>
@@ -5128,7 +5191,7 @@ the magnitude of the score.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -5261,6 +5324,7 @@ the magnitude of the score.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the univariate <span class="arithmatex">\(F_{1}\)</span>-score.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\mathtt{F}_{1}=2\dfrac{\text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}\]</div>
@@ -5301,7 +5365,7 @@ recommend comparing performance not to a random classifier, but the 'always-on' 
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -5434,6 +5498,7 @@ recommend comparing performance not to a random classifier, but the 'always-on' 
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the univariate <span class="arithmatex">\(F_{\beta}\)</span>-score.</p>
 <p>Commonly used to quantify inter-annotator agreement, Cohen's kappa can also
 be used to quantify the quality of a predictor.</p>
@@ -5475,7 +5540,7 @@ recommend comparing performance not to a random classifier, but the 'always-on' 
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -5608,6 +5673,7 @@ recommend comparing performance not to a random classifier, but the 'always-on' 
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the Informedness metric, also known Youden's J.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\mathtt{J}=\text{sensitivity}+\text{specificity}-1\]</div>
@@ -5642,7 +5708,7 @@ corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -5775,6 +5841,7 @@ corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the markedness metric, also known as <span class="arithmatex">\(\Delta p\)</span>.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\Delta p=\text{precision}+NPV-1\]</div>
@@ -5807,7 +5874,7 @@ corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -5940,6 +6007,7 @@ corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the P4 metric.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\mathtt{P4}=4\left(\dfrac{1}{\text{precision}}+\dfrac{1}{\text{recall}}+\dfrac{1}{\text{specificity}}+\dfrac{1}{NPV}\right)^{-1}\]</div>
@@ -5978,7 +6046,7 @@ metrics are meant to provide a similar amount of information with a single value
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -6111,6 +6179,7 @@ metrics are meant to provide a similar amount of information with a single value
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the Jaccard Index, also known as the threat score.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\mathtt{Jaccard}=\dfrac{TP}{TP+FP+FN}\]</div>
@@ -6145,7 +6214,7 @@ example in evaluating clustering performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -6278,6 +6347,7 @@ example in evaluating clustering performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the positive likelihood ratio.</p>
 <p>It is defined as</p>
 <div class="arithmatex">\[\mathtt{LR}^{+}=\dfrac{\text{sensitivity}}{1-\text{specificity}}\]</div>
@@ -6313,7 +6383,7 @@ with a score of 1 corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -6446,6 +6516,7 @@ with a score of 1 corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the positive likelihood ratio.</p>
 <p>It is defined as</p>
 <div class="arithmatex">\[\mathtt{LogLR}{+}=\log\dfrac{\text{sensitivity}}{1-\text{specificity}}\]</div>
@@ -6482,7 +6553,7 @@ performance, with a score of 0 corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -6615,6 +6686,7 @@ performance, with a score of 0 corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the negative likelihood ratio.</p>
 <p>It is defined as</p>
 <div class="arithmatex">\[\mathtt{LR}^{-}=\dfrac{1-\text{sensitivity}}{\text{specificity}}\]</div>
@@ -6650,7 +6722,7 @@ with a score of 1 corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -6783,6 +6855,7 @@ with a score of 1 corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the negative likelihood ratio.</p>
 <p>It is defined as</p>
 <div class="arithmatex">\[\mathtt{LogLR}{-}=\log \dfrac{1-\text{sensitivity}}{\text{specificity}}\]</div>
@@ -6819,7 +6892,7 @@ performance, with a score of 0 corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -6952,6 +7025,7 @@ performance, with a score of 0 corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the diagnostic odds ratio.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\mathtt{DOR}=\dfrac{\mathtt{LR}^{+}=}{\mathtt{LR}^{-}=}\]</div>
@@ -6986,7 +7060,7 @@ with a score of 1 corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -7119,6 +7193,7 @@ with a score of 1 corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the diagnostic odds ratio.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\mathtt{LogDOR}=\mathtt{LogLR}^{+}-\mathtt{LogLR}^{-}\]</div>
@@ -7152,7 +7227,7 @@ performance, with a score of 0 corresponding to random performance.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -7285,6 +7360,7 @@ performance, with a score of 0 corresponding to random performance.</p>
               Bases: <code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;code&gt;Metric&lt;/code&gt; (&lt;code&gt;prob_conf_mat.metrics.abc.Metric&lt;/code&gt;)" href="#prob_conf_mat.metrics.abc.Metric">Metric</a></code></p>
 
 
+
         <p>Computes the prevalence threshold.</p>
 <p>It is defined as:</p>
 <div class="arithmatex">\[\phi \mathtt{e}=\frac{\sqrt{\mathtt{TPR}\cdot(1-\mathtt{TNR})}+\mathtt{TNR}-1}{\mathtt{TPR}+\mathtt{TNR}-1}\]</div>
@@ -7320,7 +7396,7 @@ for more information.</p>
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -7560,10 +7636,10 @@ for more information.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.footnote.tooltips", "content.tooltips", "content.code.copy", "content.code.select", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes", "navigation.tracking", "navigation.prune", "toc.follow", "navigation.top", "search.suggest", "search.highlight", "navigation.footer"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.footnote.tooltips", "content.tooltips", "content.code.copy", "content.code.select", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes", "navigation.tracking", "navigation.prune", "toc.follow", "navigation.top", "search.suggest", "search.highlight", "navigation.footer"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="../assets/mathjax.js"></script>
       
