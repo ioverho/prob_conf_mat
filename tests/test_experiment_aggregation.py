@@ -6,6 +6,8 @@ import scipy.stats
 from prob_conf_mat.utils.rng import RNG
 from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
 from prob_conf_mat.stats.truncated_sampling import truncated_sample
+from prob_conf_mat.experiment import ExperimentResult
+from prob_conf_mat.metrics import get_metric
 
 SEED = 0
 DIMS = 8
@@ -287,3 +289,37 @@ class TestNonSingletonAggregator:
             np.var(out_samples),
             np.var(samples, axis=0),
         )
+
+    @pytest.mark.parametrize("aggregation", NON_SINGLETON_AGG_METHODS)
+    @pytest.mark.parametrize("num_classes", [1, 2, 4, 8, 16])
+    def test_shape(
+        self,
+        aggregation: str,
+        num_classes: int,
+    ) -> None:
+        metric = get_metric("acc")
+
+        samples = [
+            ExperimentResult(
+                experiment=None,
+                metric=metric,
+                values=NP_RNG.beta(
+                    a=1.0,
+                    b=1.0,
+                    size=(100, num_classes),
+                ),
+            )
+        ]
+
+        aggregator = get_experiment_aggregator(
+            aggregation=aggregation,
+            rng=RNG(seed=SEED),
+        )
+
+        out_samples = aggregator(
+            experiment_group=None,
+            metric=metric,
+            experiment_results=samples,
+        )
+
+        assert samples[0].values.shape == out_samples.values.shape

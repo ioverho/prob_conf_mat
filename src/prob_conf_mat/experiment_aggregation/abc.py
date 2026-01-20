@@ -146,7 +146,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         aggregated_experiment_result: jtyping.Float[
             np.ndarray,
             " num_samples #num_classes",
-        ] = np.vstack(per_class_aggregated_experiment_result)  # type: ignore
+        ] = np.stack(all_class_aggregated_experiment_result, axis=1)  # type: ignore
 
         result = ExperimentAggregationResult(
             experiment_group=experiment_group,
@@ -176,7 +176,7 @@ class ExperimentAggregationResult:
     """Class containing results from performing experiment aggregation."""
 
     experiment_group: ExperimentGroup
-    aggregator: type[ExperimentAggregator]
+    aggregator: ExperimentAggregator
     metric: MetricLike
     heterogeneity_results: list[HeterogeneityResult]
     values: jtyping.Float[np.ndarray, " num_samples #num_classes"]

@@ -504,11 +504,15 @@ class HistogramAggregator(ExperimentAggregator):
         min_min = np.min(experiment_samples)
         max_max = np.max(experiment_samples)
 
-        found_bins = np.arange(
-            start=max(min_min - min_bin_width, bounds[0]),
-            stop=min(max_max + 2 * min_bin_width, bounds[1]),
+        bounded_min_min: int = max(min_min - min_bin_width, bounds[0])
+        bounded_max_max: int = min(max_max + 2 * min_bin_width, bounds[1])
+
+        found_bins = np.arange(  # type: ignore
+            start=bounded_min_min,
+            stop=bounded_max_max,
             step=min_bin_width,
         )
+
         num_bins = found_bins.shape[0]
 
         # The pseudo-counts should have `pseudo_count_weight` times the weight of the true samples

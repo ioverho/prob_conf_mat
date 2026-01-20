@@ -881,8 +881,8 @@ class Study(Config):
         fontsize: float = 9.0,
         axis_fontsize: float | None = None,
         edge_colour: str = "black",
-        area_colour: str = "gray",
-        area_alpha: float = 0.5,
+        area_colour: str = "xkcd:silver",
+        area_alpha: float = 1.0,
         plot_median_line: bool = True,
         median_line_colour: str = "black",
         median_line_format: str = "--",
@@ -903,6 +903,7 @@ class Study(Config):
         base_line_format: str = "-",
         base_line_width: int = 1,
         plot_experiment_name: bool = True,
+        background_colour: str | None = None,
         xlim: tuple[float, float] | None = None,
     ) -> matplotlib.figure.Figure:
         """Plots the distrbution of sampled metric values for a metric and class combination.
@@ -955,10 +956,10 @@ class Study(Config):
                 Defaults to "black".
             area_colour (str, optional): the colour of the histogram or KDE filled area.
                 Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
-                Defaults to "gray".
+                Defaults to "xkcd:silver".
             area_alpha (float, optional): the opacity of the histogram or KDE filled area.
                 Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
-                Defaults to 0.5.
+                Defaults to 1.0.
             plot_median_line (bool, optional): whether to plot the median line. Defaults to True.
             median_line_colour (str, optional): the colour of the median line.
                 Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
@@ -1006,6 +1007,9 @@ class Study(Config):
                 Defaults to 1.
             plot_experiment_name (bool, optional): whether to plot the experiment names as labels.
                 Defaults to True.
+            background_colour (str, optional): the background colour of the figure.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to `None`.
             xlim (tuple[float, float] | None): a custom range for the x-axis.
                 Defaults to `None`, in which this is inferred from the data.
 
@@ -1039,6 +1043,11 @@ class Study(Config):
             figsize=_figsize,
             sharey=(not normalize),
         )
+
+        if background_colour is not None:
+            fig.patch.set_facecolor(background_colour)
+            for ax in axes:
+                ax.set_facecolor(background_colour)
 
         if total_num_experiments == 1:
             axes = np.array([axes])
@@ -1359,7 +1368,7 @@ class Study(Config):
     def get_pairwise_comparison(
         self,
         metric: str,  # type: ignore
-        class_label: int,  # type: ignore
+        class_label: int | None = None,  # type: ignore
         *,
         experiment_a: str,
         experiment_b: str,
@@ -1435,7 +1444,7 @@ class Study(Config):
                 sampling_method=SamplingMethod.INPUT,
             ).values[:, class_label]
 
-            observed_diff = float(lhs_observed - rhs_observed)
+            observed_diff = float((lhs_observed - rhs_observed).squeeze())
         else:
             observed_diff = None
 
@@ -1555,12 +1564,12 @@ class Study(Config):
         plot_min_sig_diff_lines: bool = True,
         min_sig_diff_lines_colour: str = "black",
         min_sig_diff_lines_format: str = "-",
-        rope_area_colour: str = "gray",
-        rope_area_alpha: float = 0.5,
-        neg_sig_diff_area_colour: str = "red",
-        neg_sig_diff_area_alpha: float = 0.5,
-        pos_sig_diff_area_colour: str = "green",
-        pos_sig_diff_area_alpha: float = 0.5,
+        rope_area_colour: str = "xkcd:silver",
+        rope_area_alpha: float = 1.0,
+        neg_sig_diff_area_colour: str = "xkcd:salmon",
+        neg_sig_diff_area_alpha: float = 1.0,
+        pos_sig_diff_area_colour: str = "xkcd:faded green",
+        pos_sig_diff_area_alpha: float = 1.0,
         plot_obs_point: bool = True,
         obs_point_marker: str = "D",
         obs_point_colour: str = "black",
@@ -1578,6 +1587,9 @@ class Study(Config):
         base_line_format: str = "-",
         base_line_width: float = 1.0,
         plot_proportions: bool = True,
+        proportions_colour: str | None = "black",
+        proportions_alpha: float | None = 1.0,
+        background_colour: str | None = None,
         xlim: tuple[float, float] | None = None,
     ) -> matplotlib.figure.Figure:
         """Plots the distribution of the difference between two experiments.
@@ -1646,24 +1658,24 @@ class Study(Config):
                 Defaults to "-".
             rope_area_colour (str, optional): the colour of the ROPE area.
                 Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
-                Defaults to "gray".
+                Defaults to "xkcd:light grey".
             rope_area_alpha (float, optional): the opacity of the ROPE area.
                 Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
-                Defaults to 0.5.
+                Defaults to 1.0.
             neg_sig_diff_area_colour (str, optional): the colour of the negatively significant area.
                 Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
-                Defaults to "red".
+                Defaults to "xkcd:salmon".
             neg_sig_diff_area_alpha (float, optional): the opacity of the
                 negatively significant area.
                 Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
-                Defaults to 0.5.
+                Defaults to 1.0.
             pos_sig_diff_area_colour (str, optional): the colour of the positively significant area.
                 Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
-                Defaults to "green".
+                Defaults to "xkcd:faded green".
             pos_sig_diff_area_alpha (float, optional): the opacity of the
                 positively significant area.
                 Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
-                Defaults to 0.5.
+                Defaults to 1.0.
             plot_obs_point (bool, optional): whether to plot the observed value as a marker.
                 Defaults to True.
             obs_point_marker (str, optional): the marker type of the observed value.
@@ -1706,6 +1718,16 @@ class Study(Config):
             plot_proportions (bool, optional): whether to plot the proportions of the data under
                 the three areas as text.
                 Defaults to True.
+            proportions_colour (str, optional): the colour of the proportions text.
+                Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
+                Defaults to "black".
+                If `None`, uses the colour of the area the proportion is summarizing.
+            proportions_alpha (str, optional): the opacity of the proportions text.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to 1.0.
+            background_colour (str, optional): the background colour of the figure.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to `None`.
             xlim (tuple[float, float] | None): a custom range for the x-axis.
                 Defaults to `None`, in which this is inferred from the data.
 
@@ -1743,6 +1765,10 @@ class Study(Config):
         _figsize = (6.30, 2.52) if figsize is None else figsize
 
         fig, ax = plt.subplots(1, 1, figsize=_figsize)
+
+        if background_colour is not None:
+            fig.patch.set_facecolor(background_colour)
+            ax.set_facecolor(background_colour)
 
         match method:
             case DistributionPlottingMethods.KDE.value:
@@ -2009,7 +2035,12 @@ class Study(Config):
                     horizontalalignment="center",
                     verticalalignment="center_baseline",
                     fontsize=fontsize,
-                    color=pos_sig_diff_area_colour,
+                    color=proportions_colour
+                    if proportions_colour is not None
+                    else pos_sig_diff_area_colour,
+                    alpha=proportions_alpha
+                    if proportions_alpha is not None
+                    else pos_sig_diff_area_alpha,
                 )
 
             if (
@@ -2031,14 +2062,19 @@ class Study(Config):
                     horizontalalignment="center",
                     verticalalignment="center_baseline",
                     fontsize=fontsize,
-                    color=neg_sig_diff_area_colour,
+                    color=proportions_colour
+                    if proportions_colour is not None
+                    else neg_sig_diff_area_colour,
+                    alpha=proportions_alpha
+                    if proportions_alpha is not None
+                    else neg_sig_diff_area_alpha,
                 )
 
             if cur_xlim[0] <= 0 and cur_xlim[1] >= 0:
                 # The proportion in the ROPE
                 ax.text(
                     s=(
-                        f"$p_{{ROPE}}$\n"
+                        f"$p_{{RoPE}}$\n"
                         f"{fmt(comparison_result.p_rope, precision=precision, mode='%')}\n"
                     ),
                     x=0.0,
@@ -2046,7 +2082,12 @@ class Study(Config):
                     horizontalalignment="center",
                     verticalalignment="center_baseline",
                     fontsize=fontsize,
-                    color=rope_area_colour,
+                    color=proportions_colour
+                    if proportions_colour is not None
+                    else rope_area_colour,
+                    alpha=proportions_alpha
+                    if proportions_alpha is not None
+                    else rope_area_alpha,
                 )
 
         # Remove the y ticks
@@ -2072,7 +2113,7 @@ class Study(Config):
     def get_pairwise_random_comparison(
         self,
         metric: str,  # type: ignore
-        class_label: int | None,  # type: ignore
+        class_label: int | None = None,  # type: ignore
         *,
         experiment: str,
         min_sig_diff: float | None = None,
@@ -2673,8 +2714,8 @@ class Study(Config):
         fontsize: float = 9.0,
         axis_fontsize: float | None = None,
         edge_colour: str = "black",
-        area_colour: str = "gray",
-        area_alpha: float = 0.5,
+        area_colour: str = "xkcd:silver",
+        area_alpha: float = 1.0,
         plot_median_line: bool = True,
         median_line_colour: str = "black",
         median_line_format: str = "--",
@@ -2695,6 +2736,7 @@ class Study(Config):
         base_line_format: str = "-",
         base_line_width: int = 1,
         plot_experiment_name: bool = True,
+        background_colour: str | None = None,
         xlim: tuple[float, float] | None = None,
     ) -> matplotlib.figure.Figure:
         """Plots the distrbution of sampled metric values for a specific experiment group, with the
@@ -2752,10 +2794,10 @@ class Study(Config):
                 Defaults to "black".
             area_colour (str, optional): the colour of the histogram or KDE filled area.
                 Corresponds to [matplotlib's `color` parameter](https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def).
-                Defaults to "gray".
+                Defaults to "xkcd:silver".
             area_alpha (float, optional): the opacity of the histogram or KDE filled area.
                 Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
-                Defaults to 0.5.
+                Defaults to 1.0.
             plot_median_line (bool, optional): whether to plot the median line.
                 Defaults to True.
             median_line_colour (str, optional): the colour of the median line.
@@ -2806,6 +2848,9 @@ class Study(Config):
                 Defaults to 1.
             plot_experiment_name (bool, optional): whether to plot the experiment names as labels.
                 Defaults to True.
+            background_colour (str, optional): the background colour of the figure.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to `None`.
             xlim (tuple[float, float] | None): a custom range for the x-axis.
                 Defaults to `None`, in which this is inferred from the data.
 
@@ -2839,6 +2884,11 @@ class Study(Config):
             figsize=_figsize,
             sharey=(not normalize),
         )
+
+        if background_colour is not None:
+            fig.patch.set_facecolor(background_colour)
+            for ax in axes:
+                ax.set_facecolor(background_colour)
 
         if total_num_experiments == 1:
             axes = np.array([axes])
@@ -3331,6 +3381,7 @@ class Study(Config):
         experiment_name_padding: int = 0,
         plot_experiment_info: bool = True,
         precision: int = 4,
+        background_colour: str | None = None,
     ) -> matplotlib.figure.Figure:
         """Plots the distributions for a metric for each Experiment and aggregated ExperimentGroup.
 
@@ -3423,6 +3474,9 @@ class Study(Config):
                 Defaults to True.
             precision (int, optional): the required precision of the presented numbers.
                 Defaults to 4.
+            background_colour (str, optional): the background colour of the figure.
+                Corresponds to [matplotlib's `alpha` parameter](https://matplotlib.org/stable/gallery/color/set_alpha.html).
+                Defaults to `None`.
 
         Returns:
             matplotlib.figure.Figure: the Matplotlib Figure represenation of the forest plot
@@ -3482,6 +3536,11 @@ class Study(Config):
         )
         if isinstance(axes, matplotlib.axes._axes.Axes):  # type: ignore
             axes = np.array([axes])
+
+        if background_colour is not None:
+            fig.patch.set_facecolor(background_colour)
+            for ax in axes:
+                ax.set_facecolor(background_colour)
 
         for i, (experiment_group_name, experiment_group) in enumerate(
             self._experiment_store.items(),
