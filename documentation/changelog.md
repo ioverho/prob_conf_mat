@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- fixed experiment aggregation ignoring all classes beyond 1
 - fixed error when generating observed difference in pairwise comparison (dimensionality was non-zero)
 
 ## [v0.2.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.2.0) - 2025-12-12
