@@ -1,13 +1,16 @@
 name: Documentation
+
 on:
   push:
     branches:
       - master
       - main
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 jobs:
   deploy:
     environment:
@@ -16,14 +19,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/configure-pages@v5
+
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: 3.x
-      - run: pip install zensical
-      - run: zensical build --clean
+          python-version: 3.14
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      - name: Build documentation
+        run: uv run --dev zensical build --clean
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
+
       - uses: actions/deploy-pages@v4
         id: deployment
