@@ -28,7 +28,7 @@ To set priors in `prob_conf_mat`, you can pass either:
 2. a scalar numeric (`float | int`), in which all parameters will be set to that value
 3. an `ArrayLike` of numerics, in which the prior parameters are copied from the passed `ArrayLike`
 
-See [`prob_conf_mat.stats.dirichlet_distribution.dirichlet_prior`](../Reference/Statistics.md#dirichlet-distribution) for more information.
+See [`dirichlet_prior`][prob_conf_mat.stats.dirichlet_distribution.dirichlet_prior] for more information.
 
 ## Effect of Uninformative Priors on Metric Samples
 
@@ -68,7 +68,7 @@ This is similar to using a prior with a much larger constant value (implying a g
 
 Like before, the metric prior distributions are all centered around the random performance value (the number of classes is held constant at 2), and the priors become more narrow as the prior value ($N$) increases.
 
-Creating a truly uninformative prior (i.e., a flat distribution) for each metric is likely not possible with the synthetic confusion matrix sampling procedure `bayes_conf_mat` uses. For experiments with relatively few classes, we can get away with a standard prior, like the Bayes-Laplace prior of all 1s. For experiments with large number of classes, however, any value we choose will lead to a narrow and peaked metric prior, and will have a large effect on our analysis. Hence, we recommend the following guidelines:
+Creating a truly uninformative prior (i.e., a flat distribution) for each metric is likely not possible with the synthetic confusion matrix sampling procedure `prob_conf_mat` uses. For experiments with relatively few classes, we can get away with a standard prior, like the Bayes-Laplace prior of all 1s. For experiments with large number of classes, however, any value we choose will lead to a narrow and peaked metric prior, and will have a large effect on our analysis. Hence, we recommend the following guidelines:
 
 1. If you have very few classes ($<4$), set prior parameters like 0.5 or 1. These will regularize the posterior metric distributions a bit, but not by an undue amount
 2. If you have many classes, and a lot of data, use 0 as your prior value. The posterior will not be regularized, but we expect the data to dominate anyway

@@ -87,7 +87,7 @@ The development dependencies should automatically install into the `.venv` folde
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](./getting_started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 
@@ -207,12 +207,10 @@ The documentation is broadly divided into 4 sections:
 3. **Reference**: in-depth information about how to interface with the library
 4. **Explanation**: explanations about *why* things are the way they are
 
-|                 | Learning                                | Coding                                |
-| --------------- | --------------------------------------- | ------------------------------------- |
-| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/index.html) |
-| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)           | [Reference](https://ioverho.github.io/prob_conf_mat/Reference/Study.html)                             |
-
-
+|                 | Learning                                                    | Coding                                   |
+| --------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| **Practical**   | [Getting Started](./getting_started/)                       | [How-To Guides](./how_to/configuration/) |
+| **Theoretical** | [Explanation](./explanation/generating_confusion_matrices/) | [Reference](./reference/Study/)          |
 
 ## Credits
 

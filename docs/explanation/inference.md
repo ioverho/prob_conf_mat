@@ -74,7 +74,7 @@ We can be estimate this by simply taking the ratio of samples of the difference 
 
 While this tells us something about statistical significance, it says nothing about *practical significance*. An arbitrarily small difference can still be statistically significant, as long as the metric uncertainty is small enough (e.g., the sample size is large enough).
 
-This is where the [**Region of Practical Equivalence (ROPE)**](https://easystats.github.io/bayestestR/articles/region_of_practical_equivalence.html) comes in. It is the region around the null effect, 0, bounded by the value which we consider *practically* equivalent to the null effect. For example, for F1, we might consider any scores within $0.01$ of each other to be practically the same.
+This is where the [**Region of Practical Equivalence (RoPE)**](https://easystats.github.io/bayestestR/articles/region_of_practical_equivalence.html) comes in. It is the region around the null effect, 0, bounded by the value which we consider *practically* equivalent to the null effect. For example, for F1, we might consider any scores within $0.01$ of each other to be practically the same.
 
 <img
     style="display: block;

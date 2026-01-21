@@ -40,17 +40,17 @@ Most important to `prob_conf_mat` is the Tötsch model. In their paper[^totsch],
 
 Specifically, Tötsch et al. (2020)[^totsch] model the binary confusion matrix as products of the following probabilities:
 
-- The prevalence $\phi$, or how often each condition occurs
+* The prevalence $\phi$, or how often each condition occurs
 
 $$
 \phi=\dfrac{\text{TP}+\text{FN}}{\text{TP}+\text{FN}+\text{FP}+\text{TN}}
 $$
 
-- The True Positive Rate (TPR), or the proportion of times the model predicts the condition is present, conditioned on the fact that the condition is actually present
+* The True Positive Rate (TPR), or the proportion of times the model predicts the condition is present, conditioned on the fact that the condition is actually present
 
 $$\text{TPR}=\dfrac{\text{TP}}{\text{TP}+\text{FN}}$$
 
-- The True Negative Rate (TNR), or the proportion of times the model predicts the condition is not present, conditioned on the fact that the condition is actually *not* present
+* The True Negative Rate (TNR), or the proportion of times the model predicts the condition is not present, conditioned on the fact that the condition is actually *not* present
 
 $$\text{TNR}=\dfrac{\text{TN}}{\text{TN}+\text{FP}}$$
 
@@ -77,11 +77,11 @@ Here, $\alpha$ and $\beta$ are different prior hyperparameters.
 
 With the Tötsch model, it's possible to produce plausible synthetic confusion matrices by sampling a prevalence, true positive rate and true negative rate independently, and computing four products. At least for their purposes, this model proved highly effective at generating counterfactual confusion matrices, and allowed the authors to provide confidence intervals for any metric.
 
-One difference between the Tötsch model and convention, however, is that their approach only generates *normalized* confusion matrices, i.e., $\sum_{i,j}\mathbf{C}_{i,j}=1$. As we'll see in [another explainer](./metric_computation.md), this has no effect on the value of the computed metrics.
+One difference between the Tötsch model and convention, however, is that their approach only generates *normalized* confusion matrices, i.e., $\sum_{i,j}\mathbf{C}_{i,j}=1$. As we'll see in [another explainer](./metric_computation), this has no effect on the value of the computed metrics.
 
 ## Multi-Class Confusion Matrices
 
-While the Tötsch model is applicable to binary confusion matrices, they did not make the extension to multi-class confusion matrices. In a multi-class confusion matrix, each condition has its own set of TP, FN, FP, and TN. Specifically, all the elements on the same row or column form the FN and FP, respectively, and the TN are all elements which share neither the same row or column. This is pictured in the following figure:
+While the Tötsch model is applicable to binary confusion matrices, they did not make the extension to multi-class confusion matrices. In a multi-class confusion matrix, each condition has its own set of TP, FN, FP, and TN. Specifically, all the elements on the same row or column form the FN and FP, respectively, and the TN are all elements which share neither the same row nor the same column. This is pictured in the following figure:
 
 <img
     style="display: block;
@@ -149,8 +149,8 @@ p_pred_given_condition = dirichlet_sample(
 norm_confusion_matrix = p_pred_given_condition * p_condition[:, :, np.newaxis]
 ```
 
-[^jaxtyping]: This uses the array annotation syntax introduced by [`jaxtyping`](https://docs.kidger.site/jaxtyping/api/array/). A `Float[ndarray, "num_classes"]` is a one-dimensioanl numpy array float, with length 'num_classes'
+[^jaxtyping]: This uses the array annotation syntax introduced by [`jaxtyping`](https://docs.kidger.site/jaxtyping/api/array/). A `Float[ndarray, "num_classes"]` is a one dimensional NumPy array float, with length 'num_classes'.
 
-[^extra_dimension]: The output of the `dirichlet_sample` method is batched, hence the extra dimension in the multiplication
+[^extra_dimension]: The output of the `dirichlet_sample` method is batched, hence the extra dimension in the multiplication.
 
 To see the `prob_conf_mat` implementation in action, check out [the `Experiment._sample` source code](https://github.com/ioverho/prob_conf_mat/blob/main/src/prob_conf_mat/experiment.py#L186).

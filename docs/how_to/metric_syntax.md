@@ -2,11 +2,9 @@
 title: 'Compose a Metric'
 ---
 
-# Metric Syntax
+To add a metric to a study, it's best to use the [`Study.add_metric`][prob_conf_mat.study.Study.add_metric] method:
 
-To add a metric to a study, it's best to use the [`Study.add_metric`](../reference/Study#prob_conf_mat.study.Study.add_metric) method:
-
-```
+```python
 study.add_metric(
     metric="acc",
     ...

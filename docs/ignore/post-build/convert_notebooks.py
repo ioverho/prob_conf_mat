@@ -105,6 +105,8 @@ def convert_notebooks(docs_dir: Path, output_dir: Path, *, verbose: bool):
                 zensical_template = default_zensical_template
 
             # Wrap the notebook HTML in full Zensical structure
+            # Convert notebook path to HTML path for nav matching
+            page_path = str(relative_path.with_suffix(".html"))
             wrapped_html = wrap_in_full_zensical_template(
                 zensical_template,
                 body_with_ids,
@@ -112,6 +114,7 @@ def convert_notebooks(docs_dir: Path, output_dir: Path, *, verbose: bool):
                 site_name="prob_conf_mat",
                 relative_root=relative_root,
                 headings=headings,
+                page_path=page_path,
             )
 
             # Write HTML file
@@ -179,8 +182,27 @@ def wrap_in_full_zensical_template(
     site_name: str,
     relative_root: str,
     headings: list[dict],
+    page_path: str = "",
 ) -> str:
-    """Wrap notebook HTML in full Zensical template with navigation and TOC."""
+    """Wrap notebook HTML in full Zensical template with navigation and TOC.
+
+    Parameters
+    ----------
+    template : str
+        The base HTML template from index.html
+    notebook_html : str
+        The converted notebook content HTML
+    title : str
+        Page title
+    site_name : str
+        Site name for the template
+    relative_root : str
+        Relative path to site root (e.g., "../../" for 2 levels deep)
+    headings : list[dict]
+        List of headings for TOC generation
+    page_path : str
+        Path to current page relative to docs root (e.g., "analyses/topic/page.html")
+    """
 
     # Replace title
     template = re.sub(
@@ -456,6 +478,8 @@ def wrap_in_full_zensical_template(
             if (
                 href.startswith("http")
                 or href.startswith("#")
+                or href.startswith("mailto:")
+                or href.startswith("tel:")
                 or href.startswith(relative_root)
                 or href.startswith("assets/")
                 or href.startswith("css/")
@@ -468,6 +492,184 @@ def wrap_in_full_zensical_template(
 
         # Fix all href attributes
         template = re.sub(r'href="([^"]+)"', fix_nav_link, template)
+
+    # Fix __md_scope for proper navigation initialization
+    # Material for MkDocs uses this to determine site root for localStorage and nav state
+    if relative_root != "./":
+        scope_path = relative_root.rstrip("/") or "."
+        template = template.replace(
+            '__md_scope=new URL(".",location)',
+            f'__md_scope=new URL("{scope_path}",location)',
+        )
+
+    # Expand parent navigation sections for the current page
+    # This makes the left sidebar show the correct expanded state like markdown pages
+    if page_path:
+        template = _expand_nav_for_page(template, page_path, relative_root)
+
+    return template
+
+
+def _expand_nav_for_page(template: str, page_path: str, relative_root: str) -> str:
+    """Expand parent navigation sections for the current page.
+
+    Uses regex for surgical modifications to preserve the original HTML structure.
+    BeautifulSoup is only used read-only to find the parent nav IDs.
+
+    Parameters
+    ----------
+    template : str
+        The HTML template
+    page_path : str
+        Path to current page (e.g., "analyses/topic/page.html")
+    relative_root : str
+        Relative path to site root (e.g., "../../")
+
+    Returns
+    -------
+    str
+        Template with expanded nav sections
+    """
+    # Step 1: Remove ALL existing active classes from the template
+    # This removes the "Home" active state that comes from index.html template
+    template = re.sub(r"md-nav__link--active\s*", "", template)
+    template = re.sub(r"md-tabs__item--active\s*", "", template)
+
+    # Step 1b: Add active class to the correct top navigation tab
+    # The page_path is like "analyses/food_supply.../file.html"
+    # We need to find the tab with href pointing to the top-level section
+    top_section = page_path.split("/")[0] + "/"  # e.g., "analyses/"
+    tab_href = f"{relative_root}{top_section}"  # e.g., "../../analyses/"
+
+    # Add md-tabs__item--active to the tab containing this href
+    def add_tab_active(match):
+        return match.group(0).replace(
+            "md-tabs__item", "md-tabs__item md-tabs__item--active", 1
+        )
+
+    pattern = rf'<li class="md-tabs__item">\s*<a href="{re.escape(tab_href)}"'
+    template = re.sub(pattern, add_tab_active, template)
+
+    # Step 2: Find the parent nav IDs using BeautifulSoup (read-only)
+    # We need to know which __nav_X checkboxes to mark as checked
+    soup = BeautifulSoup(template, "html.parser")
+
+    # Build the href that should match in the navigation
+    target_href = f"{relative_root}{page_path}"
+    page_filename = page_path.split("/")[-1]
+
+    # Find the nav link that matches our page
+    nav_link = soup.find("a", href=target_href)
+    if not nav_link:
+        # Try matching just the filename in case paths differ
+        for link in soup.find_all("a", class_="md-nav__link"):
+            if not isinstance(link, Tag):
+                continue
+            href = link.get("href", "")
+            if href.endswith(page_filename):
+                nav_link = link
+                break
+
+    if not nav_link:
+        return template
+
+    # Collect parent nav IDs by walking up the DOM
+    parent_nav_ids = []
+    parent = nav_link.parent
+    while parent:
+        if parent.name == "nav" and parent.get("data-md-level"):
+            level = parent.get("data-md-level")
+            # Skip level 0 (primary nav) - it shouldn't have aria-expanded set
+            if level != "0":
+                # Find the associated checkbox input
+                label = parent.find_previous_sibling("label")
+                if isinstance(label, Tag) and label.get("for"):
+                    parent_nav_ids.append(label.get("for"))
+                else:
+                    input_elem = parent.find_previous_sibling(
+                        "input", class_="md-nav__toggle"
+                    )
+                    if isinstance(input_elem, Tag) and input_elem.get("id"):
+                        parent_nav_ids.append(input_elem.get("id"))
+        parent = parent.parent
+
+    # Step 3: Use regex to add md-nav__link--active to the correct link
+    # Escape the href for regex
+    escaped_href = re.escape(target_href)
+    # Also try with just the filename
+    escaped_filename = re.escape(page_filename)
+
+    # Pattern to find the link and add active class
+    # Match: href="...page.html" ... class="...md-nav__link..."
+    def add_active_class(match):
+        full_match = match.group(0)
+        if "md-nav__link--active" not in full_match:
+            # Add --active after md-nav__link
+            return re.sub(
+                r"(md-nav__link)([^\w-])", r"\1 md-nav__link--active\2", full_match
+            )
+        return full_match
+
+    # Try to match the full href first
+    pattern = rf'<a[^>]*href="{escaped_href}"[^>]*class="[^"]*md-nav__link[^"]*"[^>]*>'
+    template = re.sub(pattern, add_active_class, template)
+
+    # Also try matching by filename if full path didn't work
+    pattern = rf'<a[^>]*href="[^"]*{escaped_filename}"[^>]*class="[^"]*md-nav__link[^"]*"[^>]*>'
+    template = re.sub(pattern, add_active_class, template)
+
+    # Step 4: Use regex to mark parent nav toggles as checked and expand them
+    for nav_id in parent_nav_ids:
+        escaped_id = re.escape(nav_id)
+
+        # Add 'checked' attribute to the checkbox (if not already present)
+        # Match: <input ... id="__nav_8" ... > (without checked)
+        def add_checked(match):
+            if "checked" not in match.group(0):
+                # Add checked before the closing >
+                return match.group(0)[:-1] + " checked>"
+            return match.group(0)
+
+        pattern = rf'<input[^>]*id="{escaped_id}"[^>]*>'
+        template = re.sub(pattern, add_checked, template)
+
+        # Remove md-toggle--indeterminate class from the checkbox
+        # Need to handle the case where class comes before id
+        def remove_indeterminate(match):
+            return (
+                match.group(0)
+                .replace("md-toggle--indeterminate", "")
+                .replace("  ", " ")
+            )
+
+        pattern = rf'<input[^>]*id="{escaped_id}"[^>]*>'
+        template = re.sub(pattern, remove_indeterminate, template)
+
+        # Change aria-expanded="false" to "true" for the nav with this label
+        # Match: aria-labelledby="__nav_8_label" ... aria-expanded="false"
+        pattern = rf'(aria-labelledby="{escaped_id}_label"[^>]*aria-expanded=")false(")'
+        template = re.sub(pattern, r"\1true\2", template)
+
+        # Add md-nav__item--active and md-nav__item--section to the parent <li>
+        # The <li> comes before the <input> with the nav_id, with only whitespace between
+        def add_active_section_to_li(match):
+            li_tag = match.group(1)
+            whitespace = match.group(2)
+            input_tag = match.group(3)
+            # Add --active and --section if not present
+            if "md-nav__item--active" not in li_tag:
+                li_tag = li_tag.replace(
+                    "md-nav__item", "md-nav__item md-nav__item--active", 1
+                )
+            if "md-nav__item--section" not in li_tag:
+                li_tag = li_tag.replace(
+                    "md-nav__item ", "md-nav__item md-nav__item--section ", 1
+                )
+            return li_tag + whitespace + input_tag
+
+        # Match <li class="md-nav__item..."> followed by whitespace and the <input> with this id
+        pattern = rf'(<li class="[^"]*md-nav__item[^"]*">)(\s*)(<input[^>]*id="{escaped_id}"[^>]*>)'
+        template = re.sub(pattern, add_active_section_to_li, template)
 
     return template
 

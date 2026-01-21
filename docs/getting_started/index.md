@@ -9,7 +9,7 @@ title: Getting Started
 3. combines the metric distributions from related experiments into **aggregated distributions**
 4. performs comparisons to random models or other trained models to enable **statistical inference**
 
-The goal of these 'Getting Started' tutorials is to enable a new user to apply `prob_conf_mat` succesfully to their own classification experiments, with minimal additional information. The tutorials have been formatted as `.ipynb` notebooks, and can be executed either locally[^1] or using a service like [Google Colab](https://colab.research.google.com/)[^1].
+The goal of these 'Getting Started' tutorials is to enable a new user to apply `prob_conf_mat` successfully to their own classification experiments, with minimal additional information. The tutorials have been formatted as `.ipynb` notebooks, and can be executed either locally[^1] or using a service like [Google Colab](https://colab.research.google.com/)[^1].
 
 [^1]: in either case, we assume that `prob_conf_mat` has been installed: `pip install prob_conf_mat`.
 
@@ -21,7 +21,7 @@ The tutorials are structured as follows:
 
     ---
 
-    This notebook will you take through the steps of defining a [`Study`](../Reference/Study.html), adding a confusion matrix to an experiment, defining some evaluation metrics, and finally producing summary statistics about the experiment's performance
+    This notebook will you take through the steps of defining a [`Study`][prob_conf_mat.study.Study], adding a confusion matrix to an experiment, defining some evaluation metrics, and finally producing summary statistics about the experiment's performance
 
     [:lucide-notebook-text: Notebook](./01_estimating_uncertainty.html)
 

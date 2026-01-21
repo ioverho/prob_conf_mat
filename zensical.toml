@@ -55,9 +55,10 @@ nav = [
         { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.html" },
         { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.html" },
         # TODO: add examples directory
-        # { "Examples" = [
-        #     { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
-        # ] },
+        { "Examples" = [
+            { "Tötsch et al. Replication" = "getting_started/totsch_replication.html" },
+            #     { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
+        ] },
     ] },
     { "How To" = [
         "how_to/configuration.md",
@@ -94,7 +95,6 @@ nav = [
         "explanation/metric_computation.md",
         "explanation/experiment_aggregation.md",
         "explanation/inference.md",
-        { "Tötsch et al. Replication" = "explanation/totsch_replication.html" },
     ] },
 ]
 
@@ -369,9 +369,8 @@ toggle.name = "Switch to light mode"
 # of suitably licensed fonts. There are options for a normal text font and for
 # a monospaced font used in code blocks.
 # ----------------------------------------------------------------------------
-#[project.theme.font]
-text = "Inter"
-code = "Jetbrains Mono"
+[project.theme.font]
+font = false
 
 [project.theme.logos]
 light = "assets/logo_rectangle_dark_text.svg"

@@ -1,3 +1,8 @@
+:root {
+    --md-text-font: system-ui, sans-serif;
+    --md-code-font: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+}
+
 #logo_light {
     display: var(--md-header-logo-light);
 }

@@ -4,7 +4,7 @@ An experiment aggregation method consolidates information from the empirical met
 
 The configuration oft the experiment aggregator must be specified along with the metric, preferably using the [`Study.add_metric`](../Study#prob_conf_mat.study.Study.add_metric) method. The `aggregation` key must correspond to one of the aliases listed in the table below.
 
-To add several experiments to the same [ExperimentGroup](../../reference/ExperimentGroup), use the [`Study.add_experiment`](../Study#prob_conf_mat.study.Study.add_experiment) method, and pass the experiment name as `'${GROUP_NAME}/${EXPERIMENT_NAME}'`, where `${GROUP_NAME}` is the name of the ExperimentGroup, and `${EXPERIMENT_NAME}` is the name of the Experiment.
+To add several experiments to the same [`ExperimentGroup`][prob_conf_mat.experiment_group.ExperimentGroup], use the [`Study.add_experiment`][prob_conf_mat.study.Study.add_experiment] method, and pass the experiment name as `'${GROUP_NAME}/${EXPERIMENT_NAME}'`, where `${GROUP_NAME}` is the name of the ExperimentGroup, and `${EXPERIMENT_NAME}` is the name of the Experiment.
 
 The following aliases are available:
 

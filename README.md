@@ -81,7 +81,7 @@ The development dependencies should automatically install into the `.venv` folde
 
 ## Documentation
 
-For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://ioverho.github.io/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://ioverho.github.io/prob_conf_mat). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
 
 The documentation is broadly divided into 4 sections:
 
@@ -90,14 +90,14 @@ The documentation is broadly divided into 4 sections:
 3. **Reference**: in-depth information about how to interface with the library
 4. **Explanation**: explanations about *why* things are the way they are
 
-|                 | Learning                                                                                                     | Coding                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/Getting%20Started/index.html) | [How-To Guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html) |
-| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](https://ioverho.github.io/prob_conf_mat/Reference/Study.html)                     |
+|                 | Learning                                                                                          | Coding                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/getting_started/)                       | [How-To Guides](https://ioverho.github.io/prob_conf_mat/how_to/configuration/) |
+| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/explanation/generating_confusion_matrices/) | [Reference](https://ioverho.github.io/prob_conf_mat/reference/Study/)          |
 
 ## Quick Start
 
-In depth tutorials taking you through all basic steps are available on the [documentation site](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html). For the impatient, here's a standard use case.
+In depth tutorials taking you through all basic steps are available on the [documentation site](https://ioverho.github.io/prob_conf_mat/getting_started/). For the impatient, here's a standard use case.
 
 First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
 
@@ -111,7 +111,7 @@ study = Study(
 )
 ```
 
-Then add a experiment and confusion matrix to the study:
+Then add an Experiment and confusion matrix to the study:
 
 ```python
 study.add_experiment(
@@ -141,9 +141,9 @@ study.report_metric_summaries(
 )
 ```
 
-| Group   | Experiment   |   Observed |   Median |   Mode |        95.0% HDI |     MU |    Skew |   Kurt |
-|---------|--------------|------------|----------|--------|------------------|--------|---------|--------|
-| model_1 | fold_0       |     0.8421 |   0.8499 | 0.8673 | [0.7307, 0.9464] | 0.2157 | -0.5627 | 0.2720 |
+| Group   | Experiment | Observed | Median | Mode   | 95.0% HDI        | MU     | Skew    | Kurt   |
+| ------- | ---------- | -------- | ------ | ------ | ---------------- | ------ | ------- | ------ |
+| model_1 | fold_0     | 0.8421   | 0.8499 | 0.8673 | [0.7307, 0.9464] | 0.2157 | -0.5627 | 0.2720 |
 
 So while this experiment achieves an accuracy of 84.21%, a more reasonable estimate (given the size of the test set, and) would be 84.99%. There is a 95% probability that the true accuracy lies between 73.07%-94.64%.
 
@@ -153,9 +153,7 @@ Visually that looks something like:
 fig = study.plot_metric_summaries(metric="acc")
 ```
 
-<picture>
-  <img alt="Metric distribution" src="docs/assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
-</picture>
+<img alt="Metric distribution" src="docs/assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 
 Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
 
@@ -183,9 +181,7 @@ study.add_metric(
 fig = study.plot_forest_plot(metric="acc")
 ```
 
-<picture>
-  <img alt="Forest plot" src="docs/assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
-</picture>
+<img alt="Forest plot" src="docs/assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 
 Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
 
@@ -200,9 +196,7 @@ fig = study.plot_pairwise_comparison(
 )
 ```
 
-<picture>
-  <img alt="Comparison plot" src="docs/assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
-</picture>
+<img alt="Comparison plot" src="docs/assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 
 There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
 

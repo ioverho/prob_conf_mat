@@ -1,6 +1,6 @@
 # Compare Many Experiments
 
-In [Getting Started/02 Comparing Experiments](../getting_started/02_comparing_experiments), we discussed comparing two experiments against each other using a variety of methods. This provided lots of information about the probability of existence and significance, as well as visual intuition for how different the metric distributions of two different experiments are.
+In [Getting Started/02 Comparing Experiments](../getting_started/02_comparing_experiments.html), we discussed comparing two experiments against each other using a variety of methods. This provided lots of information about the probability of existence and significance, as well as visual intuition for how different the metric distributions of two different experiments are.
 
 Repeating this process for *many* experiments is tedious, however: [the number of pairwise combinations scales factorially with the number of experiments](https://en.wikipedia.org/wiki/Combination)!
 
@@ -12,20 +12,20 @@ One setting where we can expect having to compare many experiments at once is in
 
 While the test set confusion matrices are hidden, from the accuracy scores and the size of the test set we can recreate a confusion matrix that would have produced those accuracy scores. The table for the top 10 participants might look like this:
 
-| Rank | TeamId  | Score   | TP+TN | FP+FN | TP   | FN  | FP  | TN   |
-| ---- | ------- | :-----: | :-----: | :-----: | ---- | --- | --- | ---- |
-| 1    | 3467175 | 0.99763 | 15087 | 36    | 7544 | 18  | 18  | 7544 |
-| 2    | 3394520 | 0.99672 | 15073 | 50    | 7537 | 25  | 25  | 7537 |
-| 3    | 3338942 | 0.99596 | 15062 | 61    | 7531 | 31  | 31  | 7531 |
-| 4    | 3339018 | 0.99512 | 15049 | 74    | 7525 | 37  | 37  | 7525 |
-| 5    | 3338836 | 0.99498 | 15047 | 76    | 7524 | 38  | 38  | 7524 |
-| 6    | 3429037 | 0.99380 | 15029 | 94    | 7515 | 47  | 47  | 7515 |
-| 7    | 3346448 | 0.99296 | 15017 | 106   | 7509 | 53  | 53  | 7509 |
-| 8    | 3338664 | 0.99296 | 15017 | 106   | 7509 | 53  | 53  | 7509 |
-| 9    | 3338358 | 0.99282 | 15014 | 109   | 7507 | 55  | 55  | 7507 |
-| 10   | 3339624 | 0.99240 | 15008 | 115   | 7504 | 58  | 58  | 7504 |
+| Rank | TeamId  |  Score  | TP+TN | FP+FN | TP   | FN  | FP  | TN   |
+| ---- | ------- | :-----: | :---: | :---: | ---- | --- | --- | ---- |
+| 1    | 3467175 | 0.99763 | 15087 |  36   | 7544 | 18  | 18  | 7544 |
+| 2    | 3394520 | 0.99672 | 15073 |  50   | 7537 | 25  | 25  | 7537 |
+| 3    | 3338942 | 0.99596 | 15062 |  61   | 7531 | 31  | 31  | 7531 |
+| 4    | 3339018 | 0.99512 | 15049 |  74   | 7525 | 37  | 37  | 7525 |
+| 5    | 3338836 | 0.99498 | 15047 |  76   | 7524 | 38  | 38  | 7524 |
+| 6    | 3429037 | 0.99380 | 15029 |  94   | 7515 | 47  | 47  | 7515 |
+| 7    | 3346448 | 0.99296 | 15017 |  106  | 7509 | 53  | 53  | 7509 |
+| 8    | 3338664 | 0.99296 | 15017 |  106  | 7509 | 53  | 53  | 7509 |
+| 9    | 3338358 | 0.99282 | 15014 |  109  | 7507 | 55  | 55  | 7507 |
+| 10   | 3339624 | 0.99240 | 15008 |  115  | 7504 | 58  | 58  | 7504 |
 
-Using the [`Study.report_listwise_comparison`](../reference/Study#prob_conf_mat.study.Study.report_listwise_comparison) we can request a table with the probability that each competitor's accuracy score achieved a certain rank:
+Using the [`Study.report_listwise_comparison`][prob_conf_mat.study.Study.report_listwise_comparison] we can request a table with the probability that each competitor's accuracy score achieved a certain rank:
 
 ```python
 study.report_listwise_comparison(metric="acc")
@@ -53,21 +53,21 @@ study.report_expected_reward(metric='acc', rewards=[10000, 2000, 1000])
 ```
 
 | Group | Experiment | E\[Reward\] |
-| ----- | ---------- | --------: |
-| 1     | 3467175    | 9435.19   |
-| 2     | 3394520    | 2385.68   |
-| 3     | 3338942    | 930.13    |
-| 4     | 3339018    | 146.50    |
-| 5     | 3338836    | 100.89    |
-| 6     | 3429037    | 1.57      |
-| 8     | 3338664    | 0.03      |
-| 7     | 3346448    | 0.01      |
-| 9     | 3338358    | 0.00      |
-| 10    | 3339624    | 0.00      |
+| :---: | :--------: | ----------: |
+|   1   |  3467175   |     9435.19 |
+|   2   |  3394520   |     2385.68 |
+|   3   |  3338942   |      930.13 |
+|   4   |  3339018   |      146.50 |
+|   5   |  3338836   |      100.89 |
+|   6   |  3429037   |        1.57 |
+|   8   |  3338664   |        0.03 |
+|   7   |  3346448   |        0.01 |
+|   9   |  3338358   |        0.00 |
+|  10   |  3339624   |        0.00 |
 
 So while ranks 1 & 2 clearly did deserve the lion's share of the competition winnings, rank 4 & 5 comparatively deserved substantially more than the 0 they received.
 
-The following figure (source code can be found in [Explanation/A Replication of Tötsch, N. & Hoffmann, D. (2020). 'Classifier uncertainty: evidence, potential impact, and probabilistic treatment'](../explanation/totsch_replication.ipynb)) summarizes the situation:
+The following figure (source code can be found in [Examples/A Replication of Tötsch, N. & Hoffmann, D. (2020). 'Classifier uncertainty: evidence, potential impact, and probabilistic treatment'](../getting_started/totsch_replication.html)) summarizes the situation:
 
 <img
     style="display: block;

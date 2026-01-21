@@ -6,9 +6,9 @@ title: Experiment Aggregation
 
 With machine-learning setups, it can happen that we have several experiments measuring the same effect. For example, when we perform cross-fold validation, we try to measure the generalization gap for the same learning algorithm, just using different subsets of the same dataset. In those cases, we're typically not interested in the individual experiment values. Instead, we want to know the statistics about the average experiment distribution.
 
-In `bayes_conf_mat`, we call this experiment aggregation. Using only samples drawn from the $M$ individual empirical metric distributions, $\mu\sim p(\mu_{m})$, we wish to find the distribution of the aggregate distribution $q(\mu)$. Ideally, the aggregate distribution consolidates the information present in each experiment distribution, and produces a distribution that is more confident about the true metric value than any individual experiment could be.
+In `prob_conf_mat`, we call this experiment aggregation. Using only samples drawn from the $M$ individual empirical metric distributions, $\mu\sim p(\mu_{m})$, we wish to find the distribution of the aggregate distribution $q(\mu)$. Ideally, the aggregate distribution consolidates the information present in each experiment distribution, and produces a distribution that is more confident about the true metric value than any individual experiment could be.
 
-Specifically for `bayes_conf_mat`, we utilize two frameworks specifically for producing such aggregate distributions.
+Specifically for `prob_conf_mat`, we utilize two frameworks specifically for producing such aggregate distributions.
 
 ## Meta-Analysis
 
@@ -23,12 +23,12 @@ $$
 \end{aligned}
 $$
 
-There are many more meta-analysis tools, including [Bayesian approaches](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/bayesian-ma.html), but these come with additional complexity and assumptions, with little added benefit for `bayes_conf_mat`.
+There are many more meta-analysis tools, including [Bayesian approaches](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/bayesian-ma.html), but these come with additional complexity and assumptions, with little added benefit for `prob_conf_mat`.
 
 We implement the following aggregation methods stemming from this aggregation framework:
 
-1. [`FEGaussianAggregator`](https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator): the standard fixed effects model
-2. [`REGaussianAggregator`](https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator): a random effects model that tries to correct for inter-experiment heterogeneity
+1. [`FEGaussianAggregator`][prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator]: the standard fixed effects model
+2. [`REGaussianAggregator`][prob_conf_mat.experiment_aggregation.aggregators.REGaussianAggregator]: a random effects model that tries to correct for inter-experiment heterogeneity
 
 A standard work on meta-analyses (from the perspective of systematic reviews) is the [Cochrane Handbook](https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-10)[^1].
 
@@ -53,14 +53,14 @@ In their papers, Hill & Miller[^2][^3] go on to show that conflation uniquely mi
 
 We implement the following aggregation methods stemming from this aggregation framework:
 
-1. [`FEGaussianAggregator`](https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator): the conflation of several Gaussian distributions. Equal to the above meta-analysis framework
-2. [`BetaAggregator`](https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator): the conflation of several Beta distributions. Good for metrics with values near its maxima (or minima)
-3. [`GammaAggregator`](https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator): the conflation of several Gamma distributions. Good for positively unbounded metrics
-4. [`HistogramAggregator`](https://ioverho.github.io/prob_conf_mat/Reference/Experiment%20Aggregation/index.html#prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator): the conflation of the discretized histogram approximation of the individual experiment samples
+1. [`FEGaussianAggregator`][prob_conf_mat.experiment_aggregation.aggregators.FEGaussianAggregator]: the conflation of several Gaussian distributions. Equal to the above meta-analysis framework
+2. [`BetaAggregator`][prob_conf_mat.experiment_aggregation.aggregators.BetaAggregator]: the conflation of several Beta distributions. Good for metrics with values near its maxima (or minima)
+3. [`GammaAggregator`][prob_conf_mat.experiment_aggregation.aggregators.GammaAggregator]: the conflation of several Gamma distributions. Good for positively unbounded metrics
+4. [`HistogramAggregator`][prob_conf_mat.experiment_aggregation.aggregators.HistogramAggregator]: the conflation of the discretized histogram approximation of the individual experiment samples
 
 ## Parametric Assumptions
 
-So far, we've been careful not to introduce parametric assumptions into the distributions of experiment metrics. Despite this, each metric distribution has its own [distinct shape, even when using uninformative priors](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/choosing_a_prior.html#effect-of-uninformative-priors-on-metric-samples).
+So far, we've been careful not to introduce parametric assumptions into the distributions of experiment metrics. Despite this, each metric distribution has its own [distinct shape, even when using uninformative priors](../how_to/priors/#effect-of-uninformative-priors-on-metric-samples).
 
 When using the listed experiment aggregation methods, however, most require the user to make some assumptions about the metric distributions. While the conflation operator makes non-parametric experiment aggregation possible, in theory, this still requires having access to the probability density/mass function. By design, we don't have access to the PDF/PMF, and have to estimate this from the samples. Unfortunately, especially as distributions become more narrow, it can happen that large parts of the support receive 0 density. As a result, the products in the conflation operator become 0 as well, resulting in an indeterminate expression.
 
@@ -72,4 +72,4 @@ This can be seen in the following two examples. We have two experiments whose em
   <img alt="Experiment aggregation under heterogeneity with a histogram aggregator" src="/assets/figures/examples/aggregation_with_heterogeneity_histogram.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;background-color: white;">
 </picture>
 
-Using the histogram aggregator, we get an implausible aggregate distribution, despite it maximizing the areas of high density in the individual experiment distributions. Hence, making a parametric assumption (as we do in [the how to guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html)) would be prudent here.
+Using the histogram aggregator, we get an implausible aggregate distribution, despite it maximizing the areas of high density in the individual experiment distributions. Hence, making a parametric assumption (as we do in [the how to guides](../how_to/configuration)) would be prudent here.
