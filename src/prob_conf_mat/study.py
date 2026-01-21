@@ -134,7 +134,7 @@ class Study(Config):
     def from_dict(
         cls,
         config_dict: dict[str, typing.Any],
-        **kwargs,
+        **kwargs: typing.Unpack,
     ) -> typing.Self:
         """Creates a Study from a dictionary.
 
@@ -143,7 +143,7 @@ class Study(Config):
         Args:
             config_dict (dict[str, typing.Any]): the dictionary representation of the study
                 configuration.
-            kwargs: any additional keyword arguments typically passed to
+            kwargs (Unpack): any additional keyword arguments typically passed to
                 Study's `.__init__` method
 
         Returns:
@@ -320,7 +320,7 @@ class Study(Config):
         | float
         | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"]
         | None = None,
-        **io_kwargs,
+        **io_kwargs: typing.Unpack,
     ) -> None:
         """Adds an experiment to this study.
 
@@ -336,7 +336,8 @@ class Study(Config):
             confusion_prior (str | float | Float[ArrayLike, ' num_classes num_classes'], optional):
                 the prior over the confusion counts for this experiments. Defaults to 0, Haldane's
                 prior.
-            io_kwargs: any additional keyword arguments that are needed for confusion matrix I/O
+            io_kwargs (Unpack): any additional keyword arguments that are needed for confusion
+                matrix I/O
 
         Examples:
             Add an experiment named 'test_a' to experiment group 'test'
@@ -453,7 +454,7 @@ class Study(Config):
         self,
         metric: str | MetricLike,
         aggregation: str | None = None,
-        **aggregation_kwargs,
+        **aggregation_kwargs: typing.Unpack,
     ) -> None:
         """Adds a metric to the study.
 
@@ -463,7 +464,8 @@ class Study(Config):
         Args:
             metric (str | MetricLike): the metric to be added
             aggregation (str, optional): the name of the aggregation method. Defaults to None.
-            aggregation_kwargs: keyword arguments passed to the `get_experiment_aggregator` function
+            aggregation_kwargs (Unpack): keyword arguments passed to the `get_experiment_aggregator`
+                function
         """
         # Try to figure out the metric name
         if isinstance(metric, Metric | AveragedMetric):

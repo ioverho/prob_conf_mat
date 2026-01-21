@@ -1,10 +1,14 @@
-<div style="text-align: center;" align="center">
+---
+title: About
+---
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://ioverho.github.io/prob_conf_mat/assets/logo_rectangle_light_text.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://ioverho.github.io/prob_conf_mat/assets/logo_rectangle_dark_text.svg">
-  <img alt="Logo" src="https://ioverho.github.io/prob_conf_mat/assets/logo_rectangle_dark_text.svg" width="150px">
-</picture>
+<div style="text-align: center;" align="center">
+<div style="margin-bottom: 1em;">
+  <a href="." aria-label="Probabilistic Confusion Matrices" data-md-component="logo" title="Probabilistic Confusion Matrices">
+    <img id="logo_light" src="/assets/logo_rectangle_dark_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+    <img id="logo_dark" src="/assets/logo_rectangle_light_text.svg" alt="logo" style="margin-left: auto;margin-right: auto;">
+  </a>
+</div>
 
 <div style="text-align: center;" align="center">
 
@@ -31,6 +35,7 @@
 
 **`prob_conf_mat`** is a Python package for performing statistical inference with confusion matrices. It quantifies the amount of uncertainty present, aggregates semantically related experiments into experiment groups, and compares experiments against each other for significance.
 
+
 ## Installation
 
 Installation can be done using from [pypi](https://pypi.org/project/prob-conf-mat/) can be done using `pip`:
@@ -51,12 +56,13 @@ The project currently depends on the following packages:
   <summary>Dependency tree</summary>
 
 ```txt
-prob-conf-mat
+bayes-conf-mat
 ├── jaxtyping
 ├── matplotlib
 ├── numpy
 ├── scipy
 └── tabulate
+
 ```
 
 Additionally, [`pandas`](https://pandas.pydata.org/) is an optional dependency for some reporting functions.
@@ -65,7 +71,7 @@ Additionally, [`pandas`](https://pandas.pydata.org/) is an optional dependency f
 
 ### Development Environment
 
-This project was developed using [`uv`](https://docs.astral.sh/uv/). To install the development environment, simply clone this github repo:
+This project was developed using [`uv`](https://docs.astral.sh/uv/). To install the development environment, simply clone this GitHub repo:
 
 ```bash
 git clone https://github.com/ioverho/prob_conf_mat.git
@@ -78,22 +84,6 @@ uv sync --dev
 ```
 
 The development dependencies should automatically install into the `.venv` folder.
-
-## Documentation
-
-For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://ioverho.github.io/prob_conf_mat/index.html). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
-
-The documentation is broadly divided into 4 sections:
-
-1. **Getting Started**: a collection of small tutorials to help new users get started
-2. **How To**: more expansive guides on how to achieve specific things
-3. **Reference**: in-depth information about how to interface with the library
-4. **Explanation**: explanations about *why* things are the way they are
-
-|                 | Learning                                                                                                     | Coding                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/Getting%20Started/index.html) | [How-To Guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/configuration.html) |
-| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)       | [Reference](https://ioverho.github.io/prob_conf_mat/Reference/Study.html)                     |
 
 ## Quick Start
 
@@ -111,7 +101,7 @@ study = Study(
 )
 ```
 
-Then add a experiment and confusion matrix to the study:
+Then add an experiment and confusion matrix to the study:
 
 ```python
 study.add_experiment(
@@ -154,7 +144,7 @@ fig = study.plot_metric_summaries(metric="acc")
 ```
 
 <picture>
-  <img alt="Metric distribution" src="docs/assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Metric distribution" src="/assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
@@ -184,7 +174,7 @@ fig = study.plot_forest_plot(metric="acc")
 ```
 
 <picture>
-  <img alt="Forest plot" src="docs/assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Forest plot" src="/assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
@@ -201,52 +191,32 @@ fig = study.plot_pairwise_comparison(
 ```
 
 <picture>
-  <img alt="Comparison plot" src="docs/assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
+  <img alt="Comparison plot" src="/assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
 </picture>
 
 There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
 
-## Development
+## Documentation
 
-This project was developed using the following (amazing) tools:
+For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](./index.md). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
 
-1. Package management: [`uv`](https://docs.astral.sh/uv/)
-2. Linting: [`ruff`](https://docs.astral.sh/ruff/)
-3. Static Type-Checking: [`pyright`](https://microsoft.github.io/pyright/)
-4. Documentation: [`mkdocs`](https://www.mkdocs.org/)
-5. CI: [`pre-commit`](https://pre-commit.com/)
+The documentation is broadly divided into 4 sections:
 
-Most of the common development commands are included in `./Makefile`. If `make` is installed, you can immediately run the following commands:
+1. **Getting Started**: a collection of small tutorials to help new users get started
+2. **How To**: more expansive guides on how to achieve specific things
+3. **Reference**: in-depth information about how to interface with the library
+4. **Explanation**: explanations about *why* things are the way they are
 
-```txt
-Usage:
-  make <target>
+|                 | Learning                                | Coding                                |
+| --------------- | --------------------------------------- | ------------------------------------- |
+| **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/Getting%20Started/01_estimating_uncertainty.html) | [How-To Guides](https://ioverho.github.io/prob_conf_mat/How%20To%20Guides/index.html) |
+| **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/Explanation/generating_confusion_matrices.html)           | [Reference](https://ioverho.github.io/prob_conf_mat/Reference/Study.html)                             |
 
-Utility
-  help             Display this help
-  hello-world      Tests uv and make
 
-Environment
-  install          Install default dependencies
-  install-dev      Install dev dependencies
-  upgrade          Upgrade installed dependencies
-  export           Export uv to requirements.txt file
-
-Testing, Linting, Typing & Formatting
-  test             Runs all tests
-  coverage         Checks test coverage
-  lint             Run linting
-  type             Run static typechecking
-  commit           Run pre-commit checks
-
-Documentation
-  mkdocs           Update the docs
-  mkdocs-serve     Serve documentation site
-```
 
 ## Credits
 
-The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), , [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.html).
+The following are some packages and libraries which served as inspiration for aspects of this project: [arviz](https://python.arviz.org/en/stable/), [bayestestR](https://easystats.github.io/bayestestR/), [BERTopic](https://github.com/MaartenGr/BERTopic), [jaxtyping](https://github.com/patrick-kidger/jaxtyping), [mici](https://github.com/matt-graham/mici), [python-ci](https://github.com/stinodego/python-ci), [statsmodels](https://www.statsmodels.org/stable/index.md).
 
 A lot of the approaches and methods used in this project come from published works. Some especially important works include:
 

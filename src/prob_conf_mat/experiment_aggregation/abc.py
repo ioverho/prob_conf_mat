@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
 
@@ -32,8 +33,8 @@ class ExperimentAggregator(metaclass=ABCMeta):
     """
 
     def __init__(self, rng: RNG) -> None:
-        self.rng = rng
-        self._init_params = dict()
+        self.rng: RNG = rng
+        self._init_params: dict[typing.Any, typing.Any] = dict()
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)

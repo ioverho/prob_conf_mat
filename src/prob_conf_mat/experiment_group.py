@@ -49,17 +49,17 @@ class ExperimentGroup:
         name: str,
         rng: RNG,
     ) -> None:
-        self.name = name
+        self.name: str = name
 
         # ======================================================================
         # Import hyperparameters
         # ======================================================================
         # The manager's RNG
-        self.rng = rng
+        self.rng: RNG = rng
 
         # The collection of experiments
-        self.num_classes = None
-        self.experiments: OrderedDict = OrderedDict()
+        self.num_classes: int | None = None
+        self.experiments: dict = OrderedDict()
 
     @property
     def num_experiments(self) -> int:
