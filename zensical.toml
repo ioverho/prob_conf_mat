@@ -54,9 +54,10 @@ nav = [
         { "Comparing Experiments" = "getting_started/02_comparing_experiments.html" },
         { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.html" },
         { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.html" },
-        { "Examples" = [
-            { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
-        ] },
+        # TODO: add examples directory
+        # { "Examples" = [
+        #     { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
+        # ] },
     ] },
     { "How To" = [
         "how_to/configuration.md",
