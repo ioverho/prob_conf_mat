@@ -25,9 +25,6 @@ def convert_notebooks(docs_dir: Path, output_dir: Path, *, verbose: bool):
     docs_dir = Path(docs_dir).resolve()
     output_dir = Path(output_dir).resolve()
 
-    # print(Path(docs_dir).resolve(), Path(output_dir).resolve(), verbose)
-    # raise KeyboardInterrupt
-
     # Check if output directory exists
     if not output_dir.exists():
         raise ValueError(
