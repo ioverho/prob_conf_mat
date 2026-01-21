@@ -197,7 +197,7 @@ features = [
     # Zensical includes an announcement bar. This feature allows users to
     # dismiss it then they have read the announcement.
     # https://zensical.org/docs/setup/header/#announcement-bar
-    "announce.dismiss",
+    #"announce.dismiss",
 
     # If you have a repository configured and turn feature this on, Zensical
     # will generate an edit button for the page. This works for common

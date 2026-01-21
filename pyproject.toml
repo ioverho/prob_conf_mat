@@ -1,12 +1,12 @@
 [project]
 name = "prob-conf-mat"
-version = "0.2.0"
+version = "0.3.0"
 authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
 description = "Confusion matrices with uncertainty quantification, experiment aggregation and significance testing."
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
@@ -35,8 +35,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://www.ivoverhoeven.nl/prob_conf_mat/"
-Documentation = "https://www.ivoverhoeven.nl/prob_conf_mat/"
+Homepage = "https://pcm.ivoverhoeven.nl/"
+Documentation = "https://pcm.ivoverhoeven.nl/"
 Repository = "https://github.com/ioverho/prob_conf_mat"
 Issues = "https://github.com/ioverho/prob_conf_mat/issues"
 
