@@ -65,7 +65,7 @@ study.plot_metric_summaries(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/examples/plot_metric_summaries_annotated.svg"
+    src="/assets/figures/examples/plot_metric_summaries_annotated.svg"
     alt="A plot of a metric's distribution">
 </img>
 
@@ -106,7 +106,7 @@ study.plot_pairwise_comparison(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/examples/plot_pairwise_comparison_annotated.svg"
+    src="/assets/figures/examples/plot_pairwise_comparison_annotated.svg"
     alt="A plot of the distribution of the difference of two metrics">
 </img>
 
@@ -151,7 +151,7 @@ study.plot_experiment_aggregation(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/examples/plot_experiment_aggregation.svg"
+    src="/assets/figures/examples/plot_experiment_aggregation.svg"
     alt="A plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 
@@ -175,7 +175,7 @@ study.plot_forest_plot(
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/examples/plot_forest_plot.svg"
+    src="/assets/figures/examples/plot_forest_plot.svg"
     alt="A forest plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 

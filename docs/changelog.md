@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - better io utilities interface
 
-## [v0.3.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.2.0) - 2026-01-21
+## [v0.3.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.3.0) - 2026-01-21
 
 Full Changelog: [`0.2.0...0.3.0`](https://github.com/ioverho/prob_conf_mat/compare/0.2.0...0.3.0)
 

@@ -16,11 +16,8 @@ While binary metrics are invaluable when comparing performance across different 
 This process is shown in the figure below. To compute the F1 score for each class, we first split up the multi-class confusion matrix into virtual binary confusion matrices, then we compute the F1 score in isolation, and finally we average the scores across the different classes to produce a single F1-macro score.
 
 <img
-    style="display: block;
-           margin-left: auto;
-           margin-right: auto;
-           margin-bottom: 0;"
-    src="../assets/figures/examples/averaged_binary_metric_computation.svg"
+    src="/assets/figures/examples/averaged_binary_metric_computation.svg"
+    style="display: block; margin-left: auto; margin-right: auto; margin-bottom: 0;"
     alt="A multi-class being broken into binary confusion matrices for binary metric computation.">
 </img>
 
@@ -41,7 +38,7 @@ To ensure no metric is computed before its dependencies, and to limit the amount
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/examples/computation_schedule.svg"
+    src="/assets/figures/examples/computation_schedule.svg"
     alt="A computation schedule for computing the F1 score.">
 </img>
 

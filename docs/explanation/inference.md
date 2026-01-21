@@ -83,7 +83,7 @@ This is where the [**Region of Practical Equivalence (RoPE)**](https://easystats
            margin-bottom: 0;
            width: 100%;
            max-width: 500px;"
-    src="../assets/figures/example_rope.svg"
+    src="/assets/figures/example_rope.svg"
     alt="Random vs non-random metric distributions">
 </img>
 

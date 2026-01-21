@@ -22,7 +22,7 @@ Visually, this looks like:
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/binary_confusion_matrix.svg"
+    src="/assets/figures/binary_confusion_matrix.svg"
     alt="A binary confusion matrix">
 </img>
 
@@ -88,7 +88,7 @@ While the Tötsch model is applicable to binary confusion matrices, they did not
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="../assets/figures/multiclass_confusion_matrix.svg"
+    src="/assets/figures/multiclass_confusion_matrix.svg"
     alt="A multi-class confusion matrix">
 </img>
 

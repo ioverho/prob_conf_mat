@@ -35,7 +35,6 @@ title: About
 
 **`prob_conf_mat`** is a Python package for performing statistical inference with confusion matrices. It quantifies the amount of uncertainty present, aggregates semantically related experiments into experiment groups, and compares experiments against each other for significance.
 
-
 ## Installation
 
 Installation can be done using from [pypi](https://pypi.org/project/prob-conf-mat/) can be done using `pip`:
