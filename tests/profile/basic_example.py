@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     # Iterate over all found csv files
     conf_mat_paths = Path(
-        "/home/ioverho/prob_conf_mat/documentation/Getting Started/mnist_digits",
+        "/home/ioverho/prob_conf_mat/docs/getting_started/mnist_digits",
     )
     for file_path in sorted(conf_mat_paths.glob("*.csv")):
         # Split the file name to recover the model and fold

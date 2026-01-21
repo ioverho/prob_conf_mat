@@ -29,7 +29,7 @@ def test_get_metric_values() -> None:
 
     # Add a bunch of experiments
     conf_mat_paths = Path(
-        "./documentation/Getting Started/mnist_digits",
+        "./docs/getting_started/mnist_digits",
     )
     for file_path in sorted(conf_mat_paths.glob("*.csv")):
         # Split the file name to recover the model and fold

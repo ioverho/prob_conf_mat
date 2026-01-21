@@ -6,7 +6,7 @@ import pytest
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
-NOTEBOOK_DIR = Path("./documentation/Getting Started")
+NOTEBOOK_DIR = Path("./docs/getting_started")
 SKIP_NOTEBOOKS = []
 TIMEOUT = 600
 
