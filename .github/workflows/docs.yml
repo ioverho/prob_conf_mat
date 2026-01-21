@@ -35,6 +35,9 @@ jobs:
       - name: Build documentation
         run: uv run --dev zensical build --clean
 
+      - name: Convert notebooks
+        run: uv run --dev python ./docs/ignore/post-build/convert_notebooks.py --verbose
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
