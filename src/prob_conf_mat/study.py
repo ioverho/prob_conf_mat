@@ -5,14 +5,15 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
     import matplotlib
     import matplotlib.figure
-    import matplotlib.axes
-    import matplotlib.ticker
+    import matplotlib.axes  # pyright: ignore[reportUnusedImport]
+    import matplotlib.ticker  # pyright: ignore[reportUnusedImport]
     import pandas as pd
 
-    from prob_conf_mat.utils.typing import MetricLike
-    from prob_conf_mat.experiment_comparison.pairwise import PairwiseComparisonResult
-    from prob_conf_mat.experiment_comparison.listwise import ListwiseComparisonResult
     from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
+    from prob_conf_mat.experiment_comparison.listwise import ListwiseComparisonResult
+    from prob_conf_mat.experiment_comparison.pairwise import PairwiseComparisonResult
+    from prob_conf_mat.stats.summary import PosteriorSummary
+    from prob_conf_mat.utils.typing import MetricLike
 
 import warnings
 from collections import OrderedDict
@@ -78,8 +79,8 @@ class Study(Config):
         seed: int | None = None,
         num_samples: int | None = None,
         ci_probability: float | None = None,
-        experiments: dict[str, dict[str, dict[str, typing.Any]]] = {},
-        metrics: dict[str, dict[str, typing.Any]] = {},
+        experiments: dict[str, dict[str, dict[str, typing.Any]]] | None = None,
+        metrics: dict[str, dict[str, typing.Any]] | None = None,
         # cache_dir: typing.Optional[str] = None,
         # overwrite: bool = False,
     ) -> None:
@@ -103,7 +104,7 @@ class Study(Config):
         self._experiments_rng = self.rng.spawn(1)[0]
         self._experiment_store = OrderedDict()
 
-        for experiment_group_name, experiment_group in experiments.items():
+        for experiment_group_name, experiment_group in self.experiments.items():
             for experiment_name, experiment_config in experiment_group.items():
                 self.add_experiment(
                     experiment_name=f"{experiment_group_name}/{experiment_name}",
@@ -117,7 +118,7 @@ class Study(Config):
         # The mapping from metric to aggregator
         self._metric_to_aggregator = dict()
 
-        for metric_name, metric_config in metrics.items():
+        for metric_name, metric_config in self.metrics.items():
             self.add_metric(metric=metric_name, **metric_config)
 
     def to_dict(self) -> dict[str, typing.Any]:
@@ -134,7 +135,7 @@ class Study(Config):
     def from_dict(
         cls,
         config_dict: dict[str, typing.Any],
-        **kwargs: typing.Unpack,
+        **kwargs: typing.Any,
     ) -> typing.Self:
         """Creates a Study from a dictionary.
 
@@ -154,7 +155,7 @@ class Study(Config):
         return instance
 
     @cache
-    def _list_experiments(self, fingerprint) -> list[str]:
+    def _list_experiments(self, fingerprint: str) -> list[str]:  # pyright: ignore[reportUnusedParameter]
         """Returns a sorted list of all the experiments included in this Study."""
         all_experiments = []
         for experiment_group, experiment_configs in self.experiments.items():
@@ -170,7 +171,7 @@ class Study(Config):
         return self._list_experiments(fingerprint=self.fingerprint)
 
     @cache
-    def _compute_num_classes(self, fingerprint) -> int:
+    def _compute_num_classes(self, fingerprint: str) -> int:  # pyright: ignore[reportUnusedParameter]
         """Returns the number of classes used in experiments in this study.
 
         Uses fingerprint to enable caching of result.
@@ -252,8 +253,10 @@ class Study(Config):
 
         else:
             raise ValueError(
-                f"Received invalid experiment name. Currently: {name}. "
-                f"Must have at most 1 '/' character.",
+                (
+                    f"Received invalid experiment name. Currently: {name}. "
+                    f"Must have at most 1 '/' character."
+                ),
             )
 
         return experiment_group_name, experiment_name
@@ -286,8 +289,10 @@ class Study(Config):
             metric_: MetricLike = self._metrics_store[metric]
         except KeyError:
             raise KeyError(
-                f"Could not find metric '{metric}' in the metrics collection. "
-                f"Consider adding it using `self.add_metric`",
+                (
+                    f"Could not find metric '{metric}' in the metrics collection. "
+                    f"Consider adding it using `self.add_metric`"
+                ),
             )
 
         if metric_.is_multiclass:
@@ -302,8 +307,10 @@ class Study(Config):
                 )
             if class_label < 0 or class_label > self.num_classes - 1:
                 raise ValueError(
-                    f"Study only has {self.num_classes} classes. Class label must be in range "
-                    f"[0, {self.num_classes - 1}]. Currently {class_label}.",
+                    (
+                        f"Study only has {self.num_classes} classes. Class label must be in range "
+                        f"[0, {self.num_classes - 1}]. Currently {class_label}."
+                    ),
                 )
 
         return metric_, class_label
@@ -320,7 +327,7 @@ class Study(Config):
         | float
         | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"]
         | None = None,
-        **io_kwargs: typing.Unpack,
+        **io_kwargs: typing.Any,
     ) -> None:
         """Adds an experiment to this study.
 
@@ -420,10 +427,12 @@ class Study(Config):
         Returns:
             Experiment | ExperimentGroup: _description_
         """
-        if not isinstance(key, str):
-            raise TypeError(
-                f"Experiment group names must be of type `str`."
-                f"Received `{key}` of type {type(key)}.",
+        if not isinstance(key, str):  # pyright: ignore[reportUnnecessaryIsInstance]
+            raise TypeError(  # pyright: ignore[reportUnreachable]
+                (
+                    f"Experiment group names must be of type `str`."
+                    f"Received `{key}` of type {type(key)}."
+                ),
             )
 
         if "/" in key:
@@ -444,8 +453,10 @@ class Study(Config):
 
         if experiment_group_name not in self._experiment_store:
             raise KeyError(
-                f"No experiment group with name {experiment_group_name} is currently present in "
-                "this study.",
+                (
+                    f"No experiment group with name {experiment_group_name} "
+                    "is currently present in this study."
+                ),
             )
 
         return self._experiment_store[experiment_group_name]
@@ -454,7 +465,7 @@ class Study(Config):
         self,
         metric: str | MetricLike,
         aggregation: str | None = None,
-        **aggregation_kwargs: typing.Unpack,
+        **aggregation_kwargs: typing.Any,
     ) -> None:
         """Adds a metric to the study.
 
@@ -469,7 +480,7 @@ class Study(Config):
         """
         # Try to figure out the metric name
         if isinstance(metric, Metric | AveragedMetric):
-            metric_name: str = metric.name
+            metric_name: str = metric.name  # pyright: ignore[reportRedeclaration]
         else:
             metric_name: str = typing.cast("str", metric)
 
@@ -575,9 +586,11 @@ class Study(Config):
 
             case _:
                 raise ValueError(
-                    f"Parameter `sampling_method` must be one of "
-                    f"{tuple(sm.value for sm in SamplingMethod)}. "
-                    f"Currently: {sampling_method}",
+                    (
+                        f"Parameter `sampling_method` must be one of "
+                        f"{tuple(sm.value for sm in SamplingMethod)}. "
+                        f"Currently: {sampling_method}"
+                    ),
                 )
 
     def get_metric_samples(
@@ -635,19 +648,19 @@ class Study(Config):
         keys = [metric, experiment_group_name, _experiment_name, sampling_method]
 
         if self.cache.isin(fingerprint=self.fingerprint, keys=keys):
-            result: ExperimentResult | ExperimentAggregationResult | NotInCache = (  # type: ignore
+            result: ExperimentResult | ExperimentAggregationResult | NotInCache = (  # pyright: ignore[reportAssignmentType, reportRedeclaration]
                 self.cache.load(fingerprint=self.fingerprint, keys=keys)
             )
 
         else:
             self._sample_metrics(sampling_method=sampling_method)
 
-            result: ExperimentResult | ExperimentAggregationResult | NotInCache = (  # type: ignore
+            result: ExperimentResult | ExperimentAggregationResult | NotInCache = (  # pyright: ignore[reportAssignmentType, reportRedeclaration]
                 self.cache.load(fingerprint=self.fingerprint, keys=keys)
             )
 
-        if result is NotInCache:
-            raise ValueError(
+        if result is NotInCache:  # pyright: ignore[reportUnnecessaryComparison]
+            raise ValueError(  # pyright: ignore[reportUnreachable]
                 f"Got a NotInCache for {keys}. Cannot continue. Please report this issue.",
             )
         result: ExperimentResult | ExperimentAggregationResult
@@ -663,7 +676,7 @@ class Study(Config):
         table_fmt: str = "html",
         precision: int = 4,
         include_observed_values: bool = False,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         table = []
         for experiment_group_name, experiment_group in self._experiment_store.items():
             for experiment_name, _ in experiment_group.experiments.items():
@@ -673,9 +686,9 @@ class Study(Config):
                     sampling_method=sampling_method,
                 )
 
-                distribution_summary = summarize_posterior(
+                distribution_summary: PosteriorSummary = summarize_posterior(
                     sampled_experiment_result.values[:, class_label],
-                    ci_probability=self.ci_probability,  # type: ignore
+                    ci_probability=self.ci_probability,
                 )
 
                 if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
@@ -718,7 +731,7 @@ class Study(Config):
         if include_observed_values:
             headers += ["Observed"]
 
-        headers += [*distribution_summary.headers]  # type: ignore
+        headers += [*distribution_summary.headers]  # pyright: ignore[reportPossiblyUnboundVariable]
 
         # Apply formatting to the table
         match table_fmt:
@@ -732,7 +745,7 @@ class Study(Config):
             case _:
                 import tabulate
 
-                table = tabulate.tabulate(  # type: ignore
+                table = tabulate.tabulate(
                     tabular_data=table,
                     headers=headers,
                     floatfmt=f".{precision}f",
@@ -744,12 +757,12 @@ class Study(Config):
 
     def report_metric_summaries(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         """Generates a table with summary statistics for all experiments.
 
         Args:
@@ -807,12 +820,12 @@ class Study(Config):
 
     def report_random_metric_summaries(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         """Provides a table with metric results from a simulated random classifier.
 
         Args:
@@ -867,8 +880,8 @@ class Study(Config):
 
     def plot_metric_summaries(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         method: str = "kde",
         bw_method: str | None = None,
@@ -881,7 +894,7 @@ class Study(Config):
         fontsize: float = 9.0,
         axis_fontsize: float | None = None,
         edge_colour: str = "black",
-        area_colour: str = "xkcd:silver",
+        area_colour: str | None = "xkcd:silver",
         area_alpha: float = 1.0,
         plot_median_line: bool = True,
         median_line_colour: str = "black",
@@ -1083,7 +1096,7 @@ class Study(Config):
                 # Get summary statistics
                 posterior_summary = summarize_posterior(
                     posterior_samples=distribution_samples,
-                    ci_probability=self.ci_probability,  # type: ignore
+                    ci_probability=self.ci_probability,
                 )
 
                 all_medians.append(posterior_summary.median)
@@ -1166,9 +1179,11 @@ class Study(Config):
                     case _:
                         del fig, axes
                         raise ValueError(
-                            f"Parameter `method` must be one of "
-                            f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
-                            f"Currently: {method}",
+                            (
+                                f"Parameter `method` must be one of "
+                                f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
+                                f"Currently: {method}"
+                            ),
                         )
 
                 if plot_obs_point:
@@ -1354,7 +1369,7 @@ class Study(Config):
 
         # Add the axes back, but only for the bottom plot
         axes[-1].spines["bottom"].set_visible(True)
-        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
+        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # pyright: ignore[reportAttributeAccessIssue]
         axes[-1].set_yticks([])
         axes[-1].tick_params(
             axis="x",
@@ -1367,8 +1382,8 @@ class Study(Config):
 
     def get_pairwise_comparison(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         experiment_a: str,
         experiment_b: str,
@@ -1403,8 +1418,10 @@ class Study(Config):
 
         if experiment_a == experiment_b:
             raise ValueError(
-                f"The value of `experiment_a` and `experiment_b` are identical ({experiment_a}). "
-                f"Comparing these experiments leads to numerical instability.",
+                (
+                    f"The value of `experiment_a` and `experiment_b` are identical "
+                    f"({experiment_a}). Comparing these experiments leads to numerical instability."
+                ),
             )
 
         lhs_samples = self.get_metric_samples(
@@ -1452,7 +1469,7 @@ class Study(Config):
             metric=metric,
             diff_dist=lhs_samples - rhs_samples,
             random_diff_dist=lhs_random_samples - rhs_random_samples,
-            ci_probability=self.ci_probability,  # type: ignore
+            ci_probability=self.ci_probability,
             min_sig_diff=min_sig_diff,
             observed_difference=observed_diff,
             lhs_name=experiment_a,
@@ -1463,8 +1480,8 @@ class Study(Config):
 
     def report_pairwise_comparison(  # noqa: D417
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         experiment_a: str,
         experiment_b: str,
@@ -1523,8 +1540,10 @@ class Study(Config):
 
         if table_fmt is not None:
             warnings.warn(
-                "Method `report_pairwise_comparison` does not produce a table and as such does not "
-                "need a `table_fmt` parameter. Ignoring.",
+                (
+                    "Method `report_pairwise_comparison` does not produce a table and as such does "
+                    "not need a `table_fmt` parameter. Ignoring."
+                ),
             )
 
         metric, class_label = self._validate_metric_class_label_combination(
@@ -1544,8 +1563,8 @@ class Study(Config):
 
     def plot_pairwise_comparison(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         experiment_a: str,
         experiment_b: str,
@@ -1560,7 +1579,7 @@ class Study(Config):
         fontsize: float = 9,
         axis_fontsize: float | None = None,
         precision: int = 4,
-        edge_colour="black",
+        edge_colour: str = "black",
         plot_min_sig_diff_lines: bool = True,
         min_sig_diff_lines_colour: str = "black",
         min_sig_diff_lines_format: str = "-",
@@ -1816,9 +1835,11 @@ class Study(Config):
             case _:
                 del fig, ax
                 raise ValueError(
-                    f"Parameter `method` must be one of "
-                    f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
-                    f"Currently: {method}",
+                    (
+                        f"Parameter `method` must be one of "
+                        f"{tuple(sm.value for sm in DistributionPlottingMethods)}. "
+                        f"Currently: {method}"
+                    ),
                 )
 
         # Compute the actual maximum and minimum of the difference distribution
@@ -1946,9 +1967,11 @@ class Study(Config):
                     )
             else:
                 warnings.warn(
-                    "Parameter `plot_obs_point` is True, but one of the experiments "
-                    "has no observation (i.e. aggregated). "
-                    "As a result, no observed difference will be shown.",
+                    (
+                        "Parameter `plot_obs_point` is True, but one of the experiments "
+                        "has no observation (i.e. aggregated). "
+                        "As a result, no observed difference will be shown."
+                    ),
                 )
 
         if plot_median_line:
@@ -2112,8 +2135,8 @@ class Study(Config):
 
     def get_pairwise_random_comparison(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         experiment: str,
         min_sig_diff: float | None = None,
@@ -2160,7 +2183,7 @@ class Study(Config):
             metric=metric,
             diff_dist=actual_result - random_results,
             random_diff_dist=None,
-            ci_probability=self.ci_probability,  # type: ignore
+            ci_probability=self.ci_probability,
             min_sig_diff=min_sig_diff,
             observed_difference=None,
             lhs_name=experiment,
@@ -2177,7 +2200,7 @@ class Study(Config):
         min_sig_diff: float | None = None,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         """Reports on the comparison between an Experiment or ExperimentGroup
         and a simulated random classifier.
 
@@ -2268,7 +2291,7 @@ class Study(Config):
             case _:
                 import tabulate
 
-                table = tabulate.tabulate(  # type: ignore
+                table = tabulate.tabulate(
                     tabular_data=records,
                     headers="keys",
                     floatfmt=f".{precision}f",
@@ -2281,8 +2304,8 @@ class Study(Config):
 
     def get_listwise_comparsion_result(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
     ) -> ListwiseComparisonResult:
         """Generates a `ListwiseComparisonResult` comparing all Experiments in this study.
 
@@ -2322,12 +2345,12 @@ class Study(Config):
 
     def report_listwise_comparison(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[list[str]] | pd.DataFrame | str:
         """Reports the probability for an experiment achieving a rank when compared to all other
         experiments on the same metric.
 
@@ -2417,7 +2440,7 @@ class Study(Config):
             case _:
                 import tabulate
 
-                table = tabulate.tabulate(  # type: ignore
+                table = tabulate.tabulate(
                     tabular_data=records,
                     tablefmt=table_fmt,
                     floatfmt=f".{precision}f",
@@ -2430,13 +2453,13 @@ class Study(Config):
 
     def report_expected_reward(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
-        rewards: jtyping.Float[np.typing.ArrayLike, " num_rewards"] = [1.0],  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
+        rewards: jtyping.Float[np.typing.ArrayLike, " num_rewards"] | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         table_fmt: str = "html",
         precision: int = 2,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         """Computes the expected reward each experiments should receive.
 
         Args:
@@ -2448,6 +2471,7 @@ class Study(Config):
                 in this study.
                 If there are fewer rewards, the rewards array is padded with 0s.
                 If there are more rewards than experiments, a ValueError is raised.
+                Defaults to a single reward of 1.0.
 
         Keyword Args:
             table_fmt (str, optional): the format of the table.
@@ -2471,8 +2495,8 @@ class Study(Config):
         )
 
         # Convert rewards to numpy array
-        rewards: jtyping.Float[np.typing.ArrayLike, " num_rewards"] = np.array(
-            rewards,
+        rewards: jtyping.Float[np.typing.ArrayLike, " num_rewards"] = np.array(  # pyright: ignore[reportRedeclaration]
+            rewards if rewards is not None else [1.0],
         ).squeeze()
 
         if len(rewards.shape) == 0:
@@ -2480,8 +2504,10 @@ class Study(Config):
 
         elif len(rewards.shape) > 1:
             raise ValueError(
-                "Rewards of unknown shape."
-                "Should be a 1D array with length in the range [1, num_experiments].",
+                (
+                    "Rewards of unknown shape."
+                    "Should be a 1D array with length in the range [1, num_experiments]."
+                ),
             )
 
         # Fetch p(rank|experiment)
@@ -2493,16 +2519,18 @@ class Study(Config):
         p_rank_given_experiment = listwise_comparsion_result.p_rank_given_experiment
 
         # Fix rewards shape
-        if rewards.shape[0] > p_rank_given_experiment.shape[0]:  # type: ignore
+        if rewards.shape[0] > p_rank_given_experiment.shape[0]:
             raise ValueError(
-                f"There are more rewards then there are experiments. "
-                f"Rewards shape: {rewards.shape[0]}. "  # type: ignore
-                f"Num experiments: {p_rank_given_experiment.shape[0]}",
+                (
+                    f"There are more rewards then there are experiments. "
+                    f"Rewards shape: {rewards.shape[0]}. "
+                    f"Num experiments: {p_rank_given_experiment.shape[0]}"
+                ),
             )
-        if rewards.shape[0] < p_rank_given_experiment.shape[0]:  # type: ignore
+        if rewards.shape[0] < p_rank_given_experiment.shape[0]:
             rewards: jtyping.Float[np.typing.ArrayLike, " num_experiments"] = np.pad(
                 array=rewards,
-                pad_width=(0, p_rank_given_experiment.shape[0] - rewards.shape[0]),  # type: ignore
+                pad_width=(0, p_rank_given_experiment.shape[0] - rewards.shape[0]),
             )
 
         expected_rewards = np.dot(
@@ -2540,7 +2568,7 @@ class Study(Config):
             case _:
                 import tabulate
 
-                table = tabulate.tabulate(  # type: ignore
+                table = tabulate.tabulate(
                     tabular_data=records,
                     headers="keys",
                     floatfmt=f".{precision}f",
@@ -2552,12 +2580,12 @@ class Study(Config):
 
     def report_aggregated_metric_summaries(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         table_fmt: str = "html",
         precision: int = 4,
-    ) -> list | pd.DataFrame | str:
+    ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         """Reports on the aggregation of Experiments in all ExperimentGroups.
 
         Args:
@@ -2606,17 +2634,17 @@ class Study(Config):
 
         table = []
         for experiment_group in list(self.experiments.keys()):
-            experiment_aggregation_result: ExperimentAggregationResult = (
+            experiment_aggregation_result: ExperimentAggregationResult = (  # pyright: ignore[reportAssignmentType]
                 self.get_metric_samples(
                     metric=metric.name,
                     experiment_name=f"{experiment_group}/aggregated",
                     sampling_method=SamplingMethod.POSTERIOR,
                 )
-            )  # type: ignore
+            )
 
             distribution_summary = summarize_posterior(
                 posterior_samples=experiment_aggregation_result.values[:, class_label],
-                ci_probability=self.ci_probability,  # type: ignore
+                ci_probability=self.ci_probability,
             )
 
             if distribution_summary.hdi[1] - distribution_summary.hdi[0] > 1e-4:
@@ -2687,7 +2715,7 @@ class Study(Config):
             case _:
                 import tabulate
 
-                table = tabulate.tabulate(  # type: ignore
+                table = tabulate.tabulate(
                     tabular_data=table,
                     headers=headers,
                     floatfmt=f".{precision}f",
@@ -2699,8 +2727,8 @@ class Study(Config):
 
     def plot_experiment_aggregation(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         experiment_group: str,
         method: str = "kde",
@@ -2714,7 +2742,7 @@ class Study(Config):
         fontsize: float = 9.0,
         axis_fontsize: float | None = None,
         edge_colour: str = "black",
-        area_colour: str = "xkcd:silver",
+        area_colour: str | None = "xkcd:silver",
         area_alpha: float = 1.0,
         plot_median_line: bool = True,
         median_line_colour: str = "black",
@@ -2921,7 +2949,7 @@ class Study(Config):
             # Get summary statistics
             posterior_summary = summarize_posterior(
                 distribution_samples,
-                ci_probability=self.ci_probability,  # type: ignore
+                ci_probability=self.ci_probability,
             )
 
             all_hdi_ranges.append(posterior_summary.hdi[1] - posterior_summary.hdi[0])
@@ -3103,7 +3131,7 @@ class Study(Config):
         # Get summary statistics
         aggregated_summary = summarize_posterior(
             agg_distribution_samples,
-            ci_probability=self.ci_probability,  # type: ignore
+            ci_probability=self.ci_probability,
         )
 
         match method:
@@ -3281,8 +3309,8 @@ class Study(Config):
                 # Add base line
                 ax.hlines(
                     0,
-                    max(all_min_x[i], xlim[1]),  # type: ignore
-                    min(all_max_x[i], xlim[0]),  # type: ignore
+                    max(all_min_x[i], xlim[1]),
+                    min(all_max_x[i], xlim[0]),
                     color=base_line_colour,
                     ls=base_line_format,
                     linewidth=base_line_width,
@@ -3333,7 +3361,7 @@ class Study(Config):
 
         # Add the axes back, but only for the bottom plot
         axes[-1].spines["bottom"].set_visible(True)
-        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # type: ignore
+        axes[-1].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())  # pyright: ignore[reportAttributeAccessIssue]
         axes[-1].tick_params(
             axis="x",
             labelsize=axis_fontsize if axis_fontsize is not None else fontsize,
@@ -3352,8 +3380,8 @@ class Study(Config):
 
     def plot_forest_plot(
         self,
-        metric: str,  # type: ignore
-        class_label: int | None = None,  # type: ignore
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
         figsize: tuple[float, float] | None = None,
         fontsize: float = 9.0,
@@ -3534,7 +3562,7 @@ class Study(Config):
             height_ratios=heights,
             figsize=_figsize,
         )
-        if isinstance(axes, matplotlib.axes._axes.Axes):  # type: ignore
+        if isinstance(axes, matplotlib.axes._axes.Axes):  # pyright: ignore[reportAttributeAccessIssue]
             axes = np.array([axes])
 
         if background_colour is not None:
@@ -3549,7 +3577,7 @@ class Study(Config):
             all_experiment_names = []
             all_summaries = []
             # Get boxpstats for each individual experiment =============================
-            for ii, (experiment_name, experiment) in enumerate(
+            for ii, (experiment_name, _) in enumerate(
                 experiment_group.experiments.items(),
             ):
                 all_experiment_names.append(experiment_name)
@@ -3593,11 +3621,11 @@ class Study(Config):
                 num_experiments += 1
 
             # Get boxp stats for aggregated distribution ===============================
-            aggregation_result: ExperimentAggregationResult = self.get_metric_samples(
+            aggregation_result: ExperimentAggregationResult = self.get_metric_samples(  # pyright: ignore[reportAssignmentType]
                 metric=metric.name,
                 experiment_name=f"{experiment_group_name}/aggregated",
                 sampling_method=SamplingMethod.POSTERIOR,
-            )  # type: ignore
+            )
 
             samples = aggregation_result.values[:, class_label]
 
@@ -3721,7 +3749,7 @@ class Study(Config):
             # Add experiment summary info ==========================================
             if plot_experiment_info:
 
-                def summary_to_row(summary):
+                def summary_to_row(summary: PosteriorSummary) -> dict[str, typing.Any]:
                     if summary.hdi[1] - summary.hdi[0] > 1e-4:
                         hdi_str = (
                             f"[{fmt(summary.hdi[0], precision=precision, mode='f')}, "
@@ -3741,7 +3769,7 @@ class Study(Config):
 
                 summary_rows = [summary_to_row(s) for s in all_summaries + [summary]]
 
-                tabulate_str = tabulate.tabulate(  # type: ignore
+                tabulate_str = tabulate.tabulate(
                     tabular_data=summary_rows,
                     headers="keys",
                     colalign=["right"] * 3,

@@ -65,8 +65,10 @@ def load_csv(
                 row_vals = list(map(int, row))
             except ValueError:
                 raise ConfMatIOError(
-                    f"Row contains values that cannot be converted to int: "
-                    f"Row number: {i}. File: {location}",
+                    (
+                        f"Row contains values that cannot be converted to int: "
+                        f"Row number: {i}. File: {location}"
+                    ),
                 )
 
             rows.append(row_vals)
@@ -75,8 +77,10 @@ def load_csv(
         arr = np.array(rows, dtype=dtype)
     except Exception as e:  # noqa: BLE001
         raise ConfMatIOError(
-            f"Could not convert loaded csv to a confusion matrix."
-            f"Encountered the following exception: {e}",
+            (
+                f"Could not convert loaded csv to a confusion matrix."
+                f"Encountered the following exception: {e}"
+            ),
         )
 
     return arr
@@ -108,35 +112,43 @@ def validate_confusion_matrix(
             confusion_matrix = np.array(object=confusion_matrix)
         except Exception as e:  # noqa: BLE001
             raise ConfMatIOError(
-                f"While trying to convert a confusion matrix to a numpy array, "
-                f"encountered the following exception: {e}.",
+                (
+                    f"While trying to convert a confusion matrix to a numpy array, "
+                    f"encountered the following exception: {e}."
+                ),
             )
 
     #! Must be 2-dimensional
     if not (len(confusion_matrix.shape) == 2):
         raise ConfMatIOError(
-            f"The loaded confusion matrix is malformed. "
-            f"Shape: {confusion_matrix.shape}. "
-            f"A confusion matrix should have exactly 2 dimensions. "
-            f"Current dimensions: {confusion_matrix.shape}",
+            (
+                f"The loaded confusion matrix is malformed. "
+                f"Shape: {confusion_matrix.shape}. "
+                f"A confusion matrix should have exactly 2 dimensions. "
+                f"Current dimensions: {confusion_matrix.shape}"
+            ),
         )
 
     #! Must be square
     if not (confusion_matrix.shape[0] == confusion_matrix.shape[1]):
         raise ConfMatIOError(
-            f"The loaded confusion matrix is malformed. "
-            f"Shape: {confusion_matrix.shape}. "
-            f"A confusion matrix should be square. "
-            f"Current dimensions: {confusion_matrix.shape}",
+            (
+                f"The loaded confusion matrix is malformed. "
+                f"Shape: {confusion_matrix.shape}. "
+                f"A confusion matrix should be square. "
+                f"Current dimensions: {confusion_matrix.shape}"
+            ),
         )
 
     #! Must have at least 2 classes
     if confusion_matrix.shape[0] == 1 or confusion_matrix.shape[1] == 1:
         raise ConfMatIOError(
-            f"The loaded confusion matrix is malformed. "
-            f"Shape: {confusion_matrix.shape}. "
-            f"A confusion matrix should have at least 2 classes. "
-            f"Current dimensions: {confusion_matrix.shape}",
+            (
+                f"The loaded confusion matrix is malformed. "
+                f"Shape: {confusion_matrix.shape}. "
+                f"A confusion matrix should have at least 2 classes. "
+                f"Current dimensions: {confusion_matrix.shape}"
+            ),
         )
 
     #! Must be an array of only integers
@@ -149,23 +161,29 @@ def validate_confusion_matrix(
             confusion_matrix = confusion_matrix.astype(dtype=dtype, casting="safe")
         except Exception as e:  # noqa: BLE001
             raise ConfMatIOError(
-                f"The loaded confusion matrix is not of type integer. "
-                f"While trying to convert, encounterted the following exception: {e}. "
-                f"Confusion matrix: {confusion_matrix}",
+                (
+                    f"The loaded confusion matrix is not of type integer. "
+                    f"While trying to convert, encounterted the following exception: {e}. "
+                    f"Confusion matrix: {confusion_matrix}"
+                ),
             )
 
     #! All values must be finite
     if not np.all(np.isfinite(confusion_matrix)):
         raise ConfMatIOError(
-            f"The loaded confusion matrix has non-finite elements. "
-            f"Confusion matrix: {confusion_matrix}",
+            (
+                f"The loaded confusion matrix has non-finite elements. "
+                f"Confusion matrix: {confusion_matrix}"
+            ),
         )
 
     #! All values must be positive
     if not np.all(confusion_matrix >= 0):
         raise ConfMatIOError(
-            f"The loaded confusion matrix has negative elements. "
-            f"Confusion matrix: {confusion_matrix}",
+            (
+                f"The loaded confusion matrix has negative elements. "
+                f"Confusion matrix: {confusion_matrix}"
+            ),
         )
 
     #! Must have at least one record for each ground truth class
@@ -173,9 +191,11 @@ def validate_confusion_matrix(
     if not np.all(cond_counts > 0):
         offenders = np.where(cond_counts == 0)[0].tolist()
         raise ConfMatIOError(
-            f"Some rows contain no entries, meaning condition does not exist. "
-            f"Rows: {offenders}. "
-            f"Confusion matrix: {confusion_matrix}",
+            (
+                f"Some rows contain no entries, meaning condition does not exist. "
+                f"Rows: {offenders}. "
+                f"Confusion matrix: {confusion_matrix}"
+            ),
         )
 
     #! Should have at least one record for each predicted class
@@ -217,8 +237,10 @@ def pred_cond_to_confusion_matrix(
     support_size = support.shape[0]
     if not (np.arange(support_size) == support).all():
         raise ValueError(
-            f"Predictions file must contain all labels at least once. "
-            f"Found labels for {list(support)}",
+            (
+                f"Predictions file must contain all labels at least once. "
+                f"Found labels for {list(support)}"
+            ),
         )
 
     locs, counts = np.unique(pred_cond, axis=0, return_counts=True)

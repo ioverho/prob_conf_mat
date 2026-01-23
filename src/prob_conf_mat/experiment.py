@@ -48,9 +48,9 @@ class ExperimentResult:
         return self.metric.is_multiclass
 
     @property
-    def bounds(self) -> tuple[float]:
+    def bounds(self) -> tuple[float, float]:
         """The minimum and maximum possible values of the metric that produced this result."""
-        return self.metric.bounds  # type: ignore
+        return self.metric.bounds
 
     @property
     def num_classes(self) -> int:
@@ -190,13 +190,13 @@ class Experiment:
         num_samples: int,
     ) -> dict[MetricLike, ExperimentResult]:
         p_condition = dirichlet_sample(
-            rng=self.rng,  # type: ignore
+            rng=self.rng,
             alphas=condition_counts,
             num_samples=num_samples,
         )
 
         p_pred_given_condition = dirichlet_sample(
-            rng=self.rng,  # type: ignore
+            rng=self.rng,
             alphas=confusion_matrix,
             num_samples=num_samples,
         )

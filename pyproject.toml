@@ -177,6 +177,9 @@ reportUnknownVariableType = false
 reportUnknownMemberType = false
 reportMissingTypeStubs = false
 reportUnannotatedClassAttribute = false
+reportImplicitOverride = false
+reportUnusedCallResult = false
+reportPrivateLocalImportUsage = false
 
 # Testing
 # Coverage

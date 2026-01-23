@@ -59,7 +59,7 @@ class ExperimentGroup:
 
         # The collection of experiments
         self.num_classes: int | None = None
-        self.experiments: dict = OrderedDict()
+        self.experiments: dict[str, Experiment] = OrderedDict()
 
     @property
     def num_experiments(self) -> int:
@@ -183,7 +183,7 @@ class ExperimentGroup:
             all_metrics_experiment_result: dict[MetricLike, ExperimentResult] = (
                 experiment.sample_metrics(
                     metrics=metrics,
-                    sampling_method=sampling_method,
+                    sampling_method=sampling_method,  # pyright: ignore[reportArgumentType]
                     num_samples=num_samples,
                 )
             )
@@ -223,7 +223,7 @@ class ExperimentGroup:
             experiment_aggregation_result: dict[
                 MetricLike,
                 ExperimentAggregationResult,
-            ] = aggregator(
+            ] = aggregator(  # pyright: ignore[reportAssignmentType]
                 experiment_group=self,
                 metric=metric,
                 experiment_results=experiment_results,

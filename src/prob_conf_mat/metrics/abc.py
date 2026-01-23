@@ -2,6 +2,8 @@ from __future__ import annotations
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
+    import collections.abc
+
     import jaxtyping as jtyping
 
 import inspect
@@ -45,7 +47,7 @@ class RootMetric:
         raise TypeError("Root metrics are not directly interpretable.")
 
     @property
-    def dependencies(self) -> typing.Sequence[str]:  # noqa: D102
+    def dependencies(self) -> collections.abc.Sequence[str]:  # noqa: D102
         return ()
 
     @property
@@ -71,7 +73,7 @@ class Metric(metaclass=ABCMeta):
 
         # Validate =============================================================
         # Make sure that all aliases are unique
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             if alias in METRIC_REGISTRY:
                 raise ValueError(
                     f"Alias '{alias}' not unique. "
@@ -81,7 +83,7 @@ class Metric(metaclass=ABCMeta):
         # Make sure the parameters of the `compute_metric` function are actually
         # the ones listed as dependencies
         parameters = set(signature(cls.compute_metric).parameters.keys()) - {"self"}
-        dependencies = set(cls.dependencies)  # type: ignore
+        dependencies = set(cls.dependencies)
         if parameters != dependencies:
             raise TypeError(
                 f"The input for the {cls.__name__}'s `compute_metric` method does not match the specified dependencies: {parameters} != {dependencies}",  # noqa: E501
@@ -94,7 +96,7 @@ class Metric(metaclass=ABCMeta):
                     continue
 
         # Register =============================================================
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             METRIC_REGISTRY[alias] = cls
 
         cls._kwargs = {
@@ -107,7 +109,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str:  # type: ignore
+    def full_name(self) -> str:
         """A human-readable name for this metric."""
         raise NotImplementedError
 
@@ -115,7 +117,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def is_multiclass(self) -> bool:  # type: ignore
+    def is_multiclass(self) -> bool:
         """Whether or not this metric computes a value for each class individually, or for all classes at once."""  # noqa: E501
         raise NotImplementedError
 
@@ -123,7 +125,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def bounds(self) -> tuple[float, float]:  # type: ignore
+    def bounds(self) -> tuple[float, float]:
         """A tuple of the minimum and maximum possible value for this metric to take.
 
         Can be infinite.
@@ -134,7 +136,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def dependencies(self) -> typing.Sequence[str]:  # type: ignore
+    def dependencies(self) -> collections.abc.Sequence[str]:
         """All metrics upon which this metric depends.
 
         Used to generate a computation schedule, such that no metric is calculated before its
@@ -143,11 +145,11 @@ class Metric(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    dependencies: typing.Sequence[str]
+    dependencies: collections.abc.Sequence[str]
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self) -> str | None:  # type: ignore
+    def sklearn_equivalent(self) -> str | None:
         """The `sklearn` equivalent function, if applicable."""
         raise NotImplementedError
 
@@ -155,14 +157,14 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> typing.Sequence[str]:  # type: ignore
+    def aliases(self) -> collections.abc.Sequence[str]:
         """A list of all valid aliases for this metric.
 
         Can be used when creating metric syntax strings.
         """
         raise NotImplementedError
 
-    aliases: typing.Sequence[str]
+    aliases: collections.abc.Sequence[str]
 
     @abstractmethod
     def compute_metric(self, *args, **kwargs):
@@ -225,14 +227,14 @@ class Averaging(metaclass=ABCMeta):
 
         # Validate =============================================================
         # Make sure that all aliases are unique
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             if alias in AVERAGING_REGISTRY:
                 raise ValueError(
                     f"Alias '{alias}' not unique. "
                     f"Currently used by averaging method {AVERAGING_REGISTRY[alias]}.",
                 )
 
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             if alias in METRIC_REGISTRY:
                 raise ValueError(
                     f"Alias '{alias}' not unique. "
@@ -240,7 +242,7 @@ class Averaging(metaclass=ABCMeta):
                 )
 
         # Register =============================================================
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             AVERAGING_REGISTRY[alias] = cls
 
         cls._kwargs = {
@@ -253,7 +255,7 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str:  # type: ignore
+    def full_name(self) -> str:
         """The full, human-readable name of this metric averaging method."""
         raise NotImplementedError
 
@@ -261,7 +263,7 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def dependencies(self) -> typing.Sequence[str]:  # type: ignore
+    def dependencies(self) -> collections.abc.Sequence[str]:
         """All metrics upon which this metric averaging method depends.
 
         Constructed from the union of all Metric and AveragingMethod dependencies.
@@ -274,11 +276,11 @@ class Averaging(metaclass=ABCMeta):
         This is checked during class definition.
         """
 
-    dependencies: typing.Sequence[str]
+    dependencies: collections.abc.Sequence[str]
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self) -> str | None:  # type: ignore
+    def sklearn_equivalent(self) -> str | None:
         """The `sklearn` equivalent function, if applicable."""
         raise NotImplementedError
 
@@ -286,14 +288,14 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> typing.Sequence[str]:  # type: ignore
+    def aliases(self) -> collections.abc.Sequence[str]:
         """A list of all valid aliases for this metric averaging method.
 
         Can be used when creating metric syntax strings.
         """
         raise NotImplementedError
 
-    aliases: typing.Sequence[str]
+    aliases: collections.abc.Sequence[str]
 
     @abstractmethod
     def compute_average(self, *args, **kwargs):
@@ -366,7 +368,7 @@ class AveragedMetric(metaclass=ABCMeta):
         self._instantiation_name: str = ""
 
     @property
-    def aliases(self) -> typing.Sequence[str]:
+    def aliases(self) -> collections.abc.Sequence[str]:
         """A list of all valid aliases for this metric.
 
         Constructed from the product of the all aliases of the Metric and Averaging methods.
@@ -375,7 +377,7 @@ class AveragedMetric(metaclass=ABCMeta):
         """
         return [
             f"{lhs}@{rhs}"
-            for lhs, rhs in product(self.base_metric.aliases, self.averaging.aliases)  # type: ignore
+            for lhs, rhs in product(self.base_metric.aliases, self.averaging.aliases)
         ]
 
     @property
@@ -398,10 +400,10 @@ class AveragedMetric(metaclass=ABCMeta):
         Can be non-finite.
 
         """
-        return self.base_metric.bounds  # type: ignore
+        return self.base_metric.bounds
 
     @property
-    def dependencies(self) -> typing.Sequence[str]:
+    def dependencies(self) -> collections.abc.Sequence[str]:
         """All metrics upon which this AveragedMetric depends.
 
         Constructed from the union of all Metric and AveragingMethod dependencies.
@@ -413,8 +415,8 @@ class AveragedMetric(metaclass=ABCMeta):
         This is checked during class definition.
         """
         dependencies = (
-            *self.base_metric.dependencies,  # type: ignore
-            *self.averaging.dependencies,  # type: ignore
+            *self.base_metric.dependencies,
+            *self.averaging.dependencies,
         )
 
         return dependencies
@@ -425,11 +427,11 @@ class AveragedMetric(metaclass=ABCMeta):
         sklearn_equivalent = self.base_metric.sklearn_equivalent
         if self.averaging.sklearn_equivalent is not None:
             sklearn_equivalent = (
-                sklearn_equivalent.sklearn_equivalent  # type: ignore
+                sklearn_equivalent.sklearn_equivalent
                 + f"with average={self.averaging.sklearn_equivalent}"
             )
 
-        return sklearn_equivalent  # type: ignore
+        return sklearn_equivalent
 
     def compute_metric(
         self,

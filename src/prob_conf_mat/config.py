@@ -10,25 +10,24 @@ import numpy as np
 from prob_conf_mat.metrics import get_metric
 from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
 from prob_conf_mat.io import validate_confusion_matrix
-from prob_conf_mat.stats import _DIRICHLET_PRIOR_STRATEGIES
+from prob_conf_mat.stats import _DIRICHLET_PRIOR_STRATEGIES  # pyright: ignore[reportPrivateUsage]
 from prob_conf_mat.utils import RNG
 
 
 class ConfigWarning(Warning):
     """A configuration warning."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         super().__init__(*args, **kwargs)
 
 
 class ConfigError(Exception):
     """A configuration error."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         super().__init__(*args, **kwargs)
 
 
-# TODO: document this class
 class Config:
     """The configuration backend of a Study.
 
@@ -55,9 +54,14 @@ class Config:
         seed: int | None = None,
         num_samples: int | None = None,
         ci_probability: float | None = None,
-        experiments: dict[str, dict[str, dict[str, typing.Any]]] = {},
-        metrics: dict[str, dict[str, typing.Any]] = {},
+        experiments: dict[str, dict[str, dict[str, typing.Any]]] | None = None,
+        metrics: dict[str, dict[str, typing.Any]] | None = None,
     ) -> None:
+        if experiments is None:
+            experiments = dict()
+        if metrics is None:
+            metrics = dict()
+
         # Set the RNG
         # Allows for potentially updating the seed
         self.rng = RNG(seed=None)
@@ -90,9 +94,9 @@ class Config:
 
         # Handle seed of wrong type
         else:
-            if not isinstance(value, int):
-                try:
-                    initial_value_type = type(value)
+            if not isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
+                try:  # pyright: ignore[reportUnreachable]
+                    initial_value_type = type(value)  # pyright: ignore[reportUnreachable]
                     value = int(value)
 
                     warnings.warn(
@@ -104,7 +108,7 @@ class Config:
                     )
 
                 except Exception as e:  # noqa: BLE001
-                    raise TypeError(
+                    raise TypeError(  # pyright: ignore[reportUnreachable]
                         (
                             f"Parameter `seed` must be a positive integer. "
                             f"Currently: {type(value)}. While trying to convert"
@@ -124,7 +128,7 @@ class Config:
     def seed(self, value: int | None) -> None:
         value_: int = self._validate_seed(value=value)
 
-        self._seed = value_
+        self._seed = value_  # pyright: ignore[reportUninitializedInstanceVariable]
         self.rng.seed = self._seed
 
     @property
@@ -197,7 +201,7 @@ class Config:
     def num_samples(self, value: int) -> None:
         value_ = self._validate_num_samples(value=value)
 
-        self._num_samples = value_
+        self._num_samples = value_  # pyright: ignore[reportUninitializedInstanceVariable]
 
     @property
     def ci_probability(self) -> float:
@@ -257,7 +261,7 @@ class Config:
     def ci_probability(self, value: float) -> None:
         value_ = self._validate_ci_probability(value=value)
 
-        self._ci_probability = value_
+        self._ci_probability = value_  # pyright: ignore[reportUninitializedInstanceVariable]
 
     @property
     def experiments(self) -> dict[str, dict[str, dict[str, typing.Any]]]:
@@ -605,7 +609,7 @@ class Config:
     ) -> None:
         value = self._validate_experiments(value)
 
-        self._experiments = value
+        self._experiments = value  # pyright: ignore[reportUninitializedInstanceVariable]
 
     @property
     def num_experiments(self) -> int:
@@ -634,7 +638,7 @@ class Config:
         self,
         value: dict[str, dict[str, typing.Any]],
     ) -> dict[str, dict[str, typing.Any]]:
-        def validate_metric_configuration(key: str, configuration: dict) -> None:
+        def validate_metric_configuration(key: str, configuration: dict) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
             # Empty configuration is allowed
             if len(configuration) == 0:
                 return
@@ -765,7 +769,7 @@ class Config:
     def metrics(self, value: dict[str, dict[str, typing.Any]]) -> None:
         value = self._validate_metrics(value=value)
 
-        self._metrics = value
+        self._metrics = value  # pyright: ignore[reportUninitializedInstanceVariable]
 
     def to_dict(self) -> dict[str, typing.Any]:
         """Returns the Config as a Pythonic dict."""
