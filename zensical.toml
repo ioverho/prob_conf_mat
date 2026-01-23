@@ -54,9 +54,9 @@ nav = [
         { "Comparing Experiments" = "getting_started/02_comparing_experiments.html" },
         { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.html" },
         { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.html" },
-        # TODO: add examples directory
         { "Examples" = [
             { "Tötsch et al. Replication" = "getting_started/totsch_replication.html" },
+            # TODO: add more examples
             #     { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
         ] },
     ] },
@@ -65,6 +65,7 @@ nav = [
         "how_to/metric_syntax.md",
         "how_to/priors.md",
         "how_to/comparing_many_experiments.md",
+        "how_to/ordinal_regression.md",
         "how_to/extending_the_library.md",
     ] },
     { "Reference" = [

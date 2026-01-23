@@ -65,6 +65,9 @@ METRICS_TO_SKLEARN = {
         )
         for beta in [0.0, 0.5, 1.0, 2.0]
     },
+    "mae": sklearn.metrics.mean_absolute_error,
+    "mse": sklearn.metrics.mean_squared_error,
+    "rmse": sklearn.metrics.root_mean_squared_error,
 }
 
 # Confusion matrices ===========================================================

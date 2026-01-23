@@ -170,12 +170,13 @@ pythonVersion = "3.11"
 pythonPlatform = "Linux"
 
 # Based Pyright
-# analyzeUnannotatedFunctions = false
-# reportAny = false
-# reportUnknownArgumentType = false
-# reportUnknownVariableType = false
-# reportUnknownMemberType = false
-# reportMissingTypeStubs = false
+analyzeUnannotatedFunctions = false
+reportAny = false
+reportUnknownArgumentType = false
+reportUnknownVariableType = false
+reportUnknownMemberType = false
+reportMissingTypeStubs = false
+reportUnannotatedClassAttribute = false
 
 # Testing
 # Coverage

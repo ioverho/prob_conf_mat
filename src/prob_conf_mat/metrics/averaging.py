@@ -2,8 +2,9 @@ from __future__ import annotations
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    import numpy as np
     import jaxtyping as jtyping
+
+import numpy as np
 
 from prob_conf_mat.metrics.abc import Averaging
 from prob_conf_mat.stats import (
@@ -118,6 +119,48 @@ class GeometricMean(Averaging):
         metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         scalar_array = numpy_batched_geometric_mean(
+            metric_values,
+            axis=1,
+            keepdims=False,
+        )
+
+        return scalar_array
+
+
+class Minimum(Averaging):
+    """Computes the minimum over all classes."""
+
+    full_name = "Minimum"
+    dependencies = ()
+    sklearn_equivalent = None
+    aliases = ["min", "minimum"]
+
+    def compute_average(  # noqa: D102
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        scalar_array = np.min(
+            metric_values,
+            axis=1,
+            keepdims=False,
+        )
+
+        return scalar_array
+
+
+class Maximum(Averaging):
+    """Computes the maximum over all classes."""
+
+    full_name = "Maximum"
+    dependencies = ()
+    sklearn_equivalent = None
+    aliases = ["max", "maximum"]
+
+    def compute_average(  # noqa: D102
+        self,
+        metric_values: jtyping.Float[np.ndarray, " num_samples num_classes"],
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
+        scalar_array = np.max(
             metric_values,
             axis=1,
             keepdims=False,

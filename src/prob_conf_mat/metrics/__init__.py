@@ -8,6 +8,7 @@ from .abc import (
     AveragedMetric,
 )
 from ._metrics import *
+from .experimental_metrics import *
 from .averaging import *
 from .interface import get_metric
 from .collection import MetricCollection
