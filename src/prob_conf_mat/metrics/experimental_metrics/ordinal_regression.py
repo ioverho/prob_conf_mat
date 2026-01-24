@@ -248,6 +248,11 @@ class PolynomialWeightedKappa(Metric):
     have an ordering. In other words, the magnitude of the misclassification risk increases with
     the amount of classes in between the true and predicted class.
 
+    Args:
+        power (float, optional): the degree of the interpolating polynomial.
+            A common value is 2, or Quadratic Weighted Kappa.
+            Defaults to 1, in which case this is just linear.
+
     Examples:
         - `pwkappa`
         - `polynomial_weighted_kappa`

@@ -59,7 +59,12 @@ class WeightedAverage(Averaging):
 
 
 class SelectPositiveClass(Averaging):
-    """Selects only the positive class, also known as binary averaging."""
+    """Selects only the positive class, also known as binary averaging.
+
+    Args:
+        positive_class (int): the class to use as the average.
+            Defaults to -1, the last class.
+    """
 
     full_name = "Select Positive Class"
     dependencies = ()

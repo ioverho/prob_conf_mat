@@ -485,6 +485,10 @@ class BalancedAccuracy(Metric):
     accuracy, balanced accuracy can be 'chance corrected', such that random performance is yield a score
     of 0.0. This can be achieved by setting `adjusted=True`.
 
+    Args:
+        adjusted (bool, optional): whether to use the chance corrected metric.
+            Defaults to `False`.
+
     Examples:
         - `ba`
         - `balanced_accuracy@macro`
@@ -713,6 +717,13 @@ class FBeta(Metric):
     Since this value is maximized for $p=1$, [Flach & Kull](https://proceedings.neurips.cc/paper/2015/hash/33e8075e9970de0cfea955afd4644bb2-Abstract.html)
     recommend comparing performance not to a random classifier, but the 'always-on' classifier
     (perfect recall but poor precision). See the `FBetaGain` metric.
+
+    Args:
+        beta (float, optional): the precision versus recall weighting.
+            Generally, the recall is beta times more important than precision.
+            Defaults to 1, in which case precision and recall are balanced, and this
+            metric becomes F1.
+
 
     Examples:
         - `fbeta+beta=2`
@@ -945,6 +956,11 @@ class PositiveLikelihoodRatio(Metric):
     and infinity corresponding to no false positives. Larger values indicate better performance,
     with a score of 1 corresponding to random performance.
 
+    Args:
+        clamp (bool, optional): whether to replace any 0 values with the minimum non-zero value.
+            Ensures no indeterminate ratios or logarithms.
+            Defaults to `False`.
+
     Examples:
         - `plr`
         - `positive_likelihood_ratio@macro`
@@ -992,6 +1008,11 @@ class LogPositiveLikelihoodRatio(Metric):
     Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no
     true positives, and infinity corresponding to no false positives. Larger values indicate better
     performance, with a score of 0 corresponding to random performance.
+
+    Args:
+        clamp (bool, optional): whether to replace any 0 values with the minimum non-zero value.
+            Ensures no indeterminate ratios or logarithms.
+            Defaults to `False`.
 
     Examples:
         - `log_plr`
@@ -1044,6 +1065,11 @@ class NegativeLikelihoodRatio(Metric):
     and infinity corresponding to no true negatives. Smaller values indicate better performance,
     with a score of 1 corresponding to random performance.
 
+    Args:
+        clamp (bool, optional): whether to replace any 0 values with the minimum non-zero value.
+            Ensures no indeterminate ratios or logarithms.
+            Defaults to `False`.
+
     Examples:
         - `nlr`
         - `negative_likelihood_ratio@macro`
@@ -1091,6 +1117,11 @@ class LogNegativeLikelihoodRatio(Metric):
     Possible values lie in the range ($-\infty$, $\infty$), with $-\infty$ corresponding to no
     true positives, and infinity corresponding to no true negatives. Smaller values indicate better
     performance, with a score of 0 corresponding to random performance.
+
+    Args:
+        clamp (bool, optional): whether to replace any 0 values with the minimum non-zero value.
+            Ensures no indeterminate ratios or logarithms.
+            Defaults to `False`.
 
     Examples:
         - `log_nlr`
