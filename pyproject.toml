@@ -88,9 +88,9 @@ explicit = true
 [tool.ruff]
 extend-exclude = [
     'tests/*',
-    '**/experimental*',
     '**/mkdocs.py',
     '**/*ignore*/*',
+    '**/examples/*.ipynb',
 ]
 builtins = ["jtyping"]
 
@@ -167,7 +167,6 @@ exclude = [
     '**/tests*',
     '**/dev*',
     '**/klad*',
-    '**/experimental*',
 ]
 venvPath = "."
 venv = ".venv"

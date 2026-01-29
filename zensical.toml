@@ -55,9 +55,14 @@ nav = [
         { "Aggregating Experiments" = "getting_started/03_aggregating_experiments.html" },
         { "Loading and Saving to Disk" = "getting_started/04_loading_and_saving_to_disk.html" },
         { "Examples" = [
-            { "Tötsch et al. Replication" = "getting_started/totsch_replication.html" },
-            # TODO: add more examples
-            #     { "MNIST Classification" = "getting_started/examples/mnist_digits.html" },
+            # TODO: host these on the website
+            # FIX: zensical formatting of notebooks
+            #{ "Eigenfaces" = "getting_started/examples/eigenfaces.html" },
+            #{ "MNIST with skorch" = "getting_started/examples/mnist_skorch.html" },
+            #{ "Tötsch et al. Replication" = "getting_started/examples/totsch_replication.html" },
+            { "Eigenfaces" = "https://github.com/ioverho/prob_conf_mat/blob/main/docs/getting_started/examples/eigenfaces.ipynb" },
+            { "MNIST with skorch" = "https://github.com/ioverho/prob_conf_mat/blob/main/docs/getting_started/examples/mnist_skorch.ipynb" },
+            { "Tötsch et al. Replication" = "https://github.com/ioverho/prob_conf_mat/blob/main/docs/getting_started/examples/totsch_replication.ipynb" },
         ] },
     ] },
     { "How To" = [

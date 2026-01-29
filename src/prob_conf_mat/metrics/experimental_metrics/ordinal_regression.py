@@ -3,6 +3,7 @@ import jaxtyping as jtyping
 
 from prob_conf_mat.metrics.abc import Metric
 
+
 class MeanAbsoluteError(Metric):
     r"""Computes the Mean Absolute Error (MAE).
 
@@ -32,7 +33,7 @@ class MeanAbsoluteError(Metric):
     sklearn_equivalent = "mean_absolute_error"
     aliases = ["mean_absolute_error", "mae"]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         norm_confusion_matrix: jtyping.Float[
             np.ndarray, " num_samples num_classes num_classes"
@@ -50,11 +51,16 @@ class MeanAbsoluteError(Metric):
             ],
         )
 
-        mae = np.sum(norm_confusion_matrix * dist_matrix[np.newaxis, :, :], axis=(1, 2), keepdims=True)
+        mae = np.sum(
+            norm_confusion_matrix * dist_matrix[np.newaxis, :, :],
+            axis=(1, 2),
+            keepdims=True,
+        )
 
         mae = mae.reshape(-1, 1)
 
         return mae
+
 
 class MeanSquaredError(Metric):
     r"""Computes the Mean Squared Error (MSE).
@@ -85,7 +91,7 @@ class MeanSquaredError(Metric):
     sklearn_equivalent = "mean_squared_error"
     aliases = ["mean_squared_error", "mean_square_error", "mse"]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         norm_confusion_matrix: jtyping.Float[
             np.ndarray, " num_samples num_classes num_classes"
@@ -105,11 +111,16 @@ class MeanSquaredError(Metric):
 
         dist_matrix = np.power(dist_matrix, 2)
 
-        mse = np.sum(norm_confusion_matrix * dist_matrix[np.newaxis, :, :], axis=(1, 2), keepdims=True)
+        mse = np.sum(
+            norm_confusion_matrix * dist_matrix[np.newaxis, :, :],
+            axis=(1, 2),
+            keepdims=True,
+        )
 
         mse = mse.reshape(-1, 1)
 
         return mse
+
 
 class RootMeanSquaredError(Metric):
     r"""Computes the Root Mean Squared Error (RMSE).
@@ -140,7 +151,7 @@ class RootMeanSquaredError(Metric):
     sklearn_equivalent = "root_mean_squared_error"
     aliases = ["root_mean_squared_error", "root_mean_square_error", "rmse"]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         norm_confusion_matrix: jtyping.Float[
             np.ndarray, " num_samples num_classes num_classes"
@@ -160,13 +171,18 @@ class RootMeanSquaredError(Metric):
 
         dist_matrix = np.power(dist_matrix, 2)
 
-        mse = np.sum(norm_confusion_matrix * dist_matrix[np.newaxis, :, :], axis=(1, 2), keepdims=True)
+        mse = np.sum(
+            norm_confusion_matrix * dist_matrix[np.newaxis, :, :],
+            axis=(1, 2),
+            keepdims=True,
+        )
 
         mse = mse.reshape(-1, 1)
 
         rmse = np.sqrt(mse)
 
         return rmse
+
 
 class OffByOneAccuracy(Metric):
     r"""Computes the off-by-1 or adjacent accuracy.
@@ -202,18 +218,32 @@ class OffByOneAccuracy(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = None
-    aliases = ["offby1", "offbyone", "1off", "1off", "oneoff", "adjacc", "adjacent_accuracy"]
+    aliases = [
+        "offby1",
+        "offbyone",
+        "1off",
+        "1off",
+        "oneoff",
+        "adjacc",
+        "adjacent_accuracy",
+    ]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         norm_confusion_matrix: jtyping.Float[
             np.ndarray, " num_samples num_classes num_classes"
         ],
     ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         off_by_1_acc = (
-            np.sum(np.diagonal(norm_confusion_matrix, offset=0, axis1=1, axis2=2), axis=1)
-            + np.sum(np.diagonal(norm_confusion_matrix, offset=-1, axis1=1, axis2=2), axis=1)
-            + np.sum(np.diagonal(norm_confusion_matrix, offset=1, axis1=1, axis2=2), axis=1)
+            np.sum(
+                np.diagonal(norm_confusion_matrix, offset=0, axis1=1, axis2=2), axis=1
+            )
+            + np.sum(
+                np.diagonal(norm_confusion_matrix, offset=-1, axis1=1, axis2=2), axis=1
+            )
+            + np.sum(
+                np.diagonal(norm_confusion_matrix, offset=1, axis1=1, axis2=2), axis=1
+            )
         )
 
         off_by_1_acc = off_by_1_acc.reshape(-1, 1)
@@ -258,12 +288,12 @@ class PolynomialWeightedKappa(Metric):
         - `polynomial_weighted_kappa`
 
     Note: Read more:
-        1. Cohen, J. (1968). Weighted kappa: Nominal scale agreement provision for scaled disagreement
-        or partial credit. Psychological bulletin, 70(4), 213.
+        1. Cohen, J. (1968). Weighted kappa: Nominal scale agreement provision for scaled
+        disagreement or partial credit. Psychological bulletin, 70(4), 213.
         2. de La Torre, J., Puig, D., & Valls, A. (2018). Weighted kappa loss function for
         multi-class classification of ordinal data in deep learning. Pattern Recognition Letters,
         105, 144-154.
-    """
+    """  # noqa: E501
 
     full_name = "Polynomial Weighted Kappa"
     is_multiclass = True
@@ -277,7 +307,7 @@ class PolynomialWeightedKappa(Metric):
 
         self.power = power
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         norm_confusion_matrix: jtyping.Float[
             np.ndarray, " num_samples num_classes num_classes"

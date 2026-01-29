@@ -16,6 +16,14 @@ Users are encouraged to use this when trying to import confusion matrices from d
 
 ## Utilities
 
+::: prob_conf_mat.io.compute_confusion_matrix
+    options:
+        heading_level: 3
+        show_signature: true
+        show_signature_annotations: true
+        separate_signature: true
+        line_length: 80
+
 ::: prob_conf_mat.io.validate_confusion_matrix
     options:
         heading_level: 3

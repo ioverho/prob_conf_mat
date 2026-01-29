@@ -214,6 +214,41 @@ def validate_confusion_matrix(
     return confusion_matrix
 
 
+def compute_confusion_matrix(
+    y_true: jtyping.Int[np.typing.ArrayLike, " num_preds"],
+    y_pred: jtyping.Int[np.typing.ArrayLike, " num_preds"],
+) -> jtyping.Int[np.ndarray, " num_classes num_classes"]:
+    """Computes and validates a confusion matrix from two arrays of predictions and ground-truth
+    classes.
+
+    Confusion matrix *always* has predictions (`y_pred`) on the columns, and ground-truth (`y_true`)
+    on the rows.
+
+    Args:
+        y_true (jtyping.Int[np.ndarray, "num_preds"]): the arraylike collection of
+            ground-truth labels
+        y_pred (jtyping.Int[np.ndarray, "num_preds"]): the arraylike collection of
+            predicted labels
+
+    Returns:
+        jtyping.Int[np.ndarray, " num_classes num_classes"]
+    """  # noqa: D205
+    pred_true = np.stack([y_pred, y_true], axis=1)
+
+    support = np.unique(pred_true)
+    support_size = support.shape[0]
+
+    locs, counts = np.unique(pred_true, axis=0, return_counts=True)
+
+    confusion_matrix = np.zeros((support_size, support_size), dtype=int)
+
+    confusion_matrix[locs[:, 1], locs[:, 0]] = counts
+
+    validate_confusion_matrix(confusion_matrix=confusion_matrix)
+
+    return confusion_matrix
+
+
 def pred_cond_to_confusion_matrix(
     pred_cond: jtyping.Int[np.ndarray, " num_samples 2"],
     *,

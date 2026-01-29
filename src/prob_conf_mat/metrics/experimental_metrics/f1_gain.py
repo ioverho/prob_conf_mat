@@ -4,7 +4,7 @@ import numpy as np
 from prob_conf_mat.metrics.abc import Metric
 
 
-class PrecisionGain(Metric):
+class PrecisionGain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "Precision Gain"
@@ -14,7 +14,7 @@ class PrecisionGain(Metric):
     sklearn_equivalent = None
     aliases = ["precision_gain"]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         precision: jtyping.Float[np.ndarray, "num_samples num_classes"],
         prevalence: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -26,7 +26,7 @@ class PrecisionGain(Metric):
         return precision_gain
 
 
-class RecallGain(Metric):
+class RecallGain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "Recall Gain"
@@ -36,7 +36,7 @@ class RecallGain(Metric):
     sklearn_equivalent = None
     aliases = ["recall_gain"]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         recall: jtyping.Float[np.ndarray, "num_samples num_classes"],
         prevalence: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -48,7 +48,7 @@ class RecallGain(Metric):
         return recall_gain
 
 
-class F1Gain(Metric):
+class F1Gain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "F1 Gain"
@@ -58,7 +58,7 @@ class F1Gain(Metric):
     sklearn_equivalent = None
     aliases = ["f1_gain"]
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         f1: jtyping.Float[np.ndarray, "num_samples num_classes"],
         prevalence: jtyping.Float[np.ndarray, "num_samples num_classes"],
@@ -70,7 +70,7 @@ class F1Gain(Metric):
         return f1_gain
 
 
-class FBetaGain(Metric):
+class FBetaGain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "FBeta Gain"
@@ -89,7 +89,7 @@ class FBetaGain(Metric):
 
         self.beta = beta
 
-    def compute_metric(
+    def compute_metric(  # noqa: D102
         self,
         ppv: jtyping.Float[np.ndarray, "num_samples num_classes"],
         tpr: jtyping.Float[np.ndarray, "num_samples num_classes"],
