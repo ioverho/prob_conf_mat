@@ -50,7 +50,7 @@ dev = [
     "griffe-inherited-docstrings>=1.1.2",
     "mkdocs>=1.6.1",
     "mkdocs-git-revision-date-localized-plugin>=1.5.0",
-    "mkdocs-jupyter>=0.25.1",
+    "mkdocs-jupyter>=0.26.0",
     "mkdocs-material[imaging]>=9.7.1",
     "mkdocstrings[python]>=1.0.0",
     "nbconvert>=7.16.4",
@@ -72,11 +72,15 @@ dev = [
     "statsmodels>=0.14.6",
     "toml>=0.10.2",
     "tqdm>=4.67.1",
-    "zensical>=0.0.29",
+    "zensical>=0.0.23",
 ]
 
 # Building
 # UV
+[tool.uv]
+# For security, prevent packages that are too 'bleeding edge'
+exclude-newer = "30 days"
+
 [[tool.uv.index]]
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
