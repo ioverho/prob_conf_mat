@@ -88,7 +88,7 @@ The documentation is broadly divided into 4 sections:
 1. **Getting Started**: a collection of small tutorials to help new users get started
 2. **How To**: more expansive guides on how to achieve specific things
 3. **Reference**: in-depth information about how to interface with the library
-4. **Explanation**: explanations about *why* things are the way they are
+4. **Explanation**: explanations about _why_ things are the way they are
 
 |                 | Learning                                                                                          | Coding                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |

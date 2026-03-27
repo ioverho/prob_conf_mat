@@ -61,7 +61,11 @@ type: ## Run static typechecking
 
 .PHONY: commit
 commit: ## Run pre-commit checks
-	@uv run --dev pre-commit run --all-files
+	@uv run --dev pre-commit run --verbose
+
+.PHONY: commit-all
+commit: ## Run pre-commit checks
+	@uv run --dev pre-commit run --verbose --all-files
 
 ##@ Documentation
 .PHONY: docs-build
