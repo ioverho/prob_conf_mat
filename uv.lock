@@ -14,7 +14,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-02-26T10:08:24.749885991Z"
+exclude-newer = "2026-02-26T11:26:59.628299567Z"
 exclude-newer-span = "P30D"
 
 [[package]]
@@ -1826,7 +1826,6 @@ wheels = [
 
 [[package]]
 name = "prob-conf-mat"
-version = "0.3.1"
 source = { editable = "." }
 dependencies = [
     { name = "jaxtyping" },

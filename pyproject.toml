@@ -1,6 +1,5 @@
 [project]
 name = "prob-conf-mat"
-version = "v0.3.1"
 authors = [{ name = "Ivo Verhoeven", email = "mail@ivoverhoeven.nl" }]
 description = "Confusion matrices with uncertainty quantification, experiment aggregation and significance testing."
 readme = "README.md"
@@ -25,6 +24,7 @@ keywords = [
     "probabilistic",
 ]
 
+dynamic = ["version"]
 
 dependencies = [
     "numpy",
@@ -41,7 +41,7 @@ Repository = "https://github.com/ioverho/prob_conf_mat"
 Issues = "https://github.com/ioverho/prob_conf_mat/issues"
 
 [build-system]
-requires = ["hatchling", "numpy>=2.0.0"]
+requires = ["hatchling", "numpy>=2.0.0", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -76,9 +76,14 @@ dev = [
 ]
 
 # Building
+# Hatch
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
 # UV
 [tool.uv]
 # For security, prevent packages that are too 'bleeding edge'
+# https://docs.astral.sh/uv/concepts/resolution/#dependency-cooldowns
 exclude-newer = "30 days"
 
 [[tool.uv.index]]
@@ -86,6 +91,9 @@ name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
+
+[tool.uv-dynamic-versioning]
+fallback-version = "0.0.0"
 
 # Linting
 # Ruff
@@ -225,6 +233,14 @@ reportUnusedCallResult = false
 reportPrivateLocalImportUsage = false
 
 # Testing
+# PyTest
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra"]
+strict = true
+log_level = "INFO"
+testpaths = ["tests"]
+
 # Coverage
 [tool.coverage]
 [tool.coverage.run]
