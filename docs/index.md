@@ -28,6 +28,26 @@ title: About
   <img alt="PyPI - Version" src="https://img.shields.io/pypi/v/prob_conf_mat">
 </a>
 
+</div>
+
+<div style="text-align: center;" align="center">
+
+<a href="https://docs.basedpyright.com" >
+  <img alt="basedpyright - checked" src="https://img.shields.io/endpoint?url=https://docs.basedpyright.com/latest/badge.json">
+</a>
+
+<a href="https://github.com/astral-sh/ruff" >
+  <img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json">
+</a>
+
+<a href="https://github.com/j178/prek" >
+  <img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json">
+</a>
+
+</div>
+
+<div style="text-align: center;" align="center">
+
 <h1>Probabilistic Confusion Matrices</h1>
 
 </div>
