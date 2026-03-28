@@ -47,6 +47,9 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "basedpyright>=1.38.1",
+    "ipykernel>=7.2.0",
+    "nbconvert>=7.17.0",
+    "nbformat>=5.10.4",
     "opt-einsum>=3.4.0",
     "pandas>=2.3.3",
     "pip>=25.3",
@@ -128,6 +131,7 @@ ignore = [
     "PD011",
     "ARG002",
     "RUF002",
+    "G004",
 ]
 
 extend-select = [

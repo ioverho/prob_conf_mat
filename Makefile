@@ -73,12 +73,12 @@ commit-log: ## Run pre-commit checks in verbose mode and log output to external 
 docs-build: ## Update the docs
 	@rm -rf .cache/
 	@rm -rf site/
-	@uv run --dev zensical build -f zensical.toml
-	@uv run --dev python ./docs/ignore/post-build/convert_notebooks.py --verbose
+	@uv run --group docs zensical build -f zensical.toml
+	@uv run --group docs python ./docs/ignore/post-build/convert_notebooks.py --verbose
 
 .PHONY: docs-serve
 docs-serve: ## Serve documentation site
-#	@uv run --group docs python ./docs/templates/mkdocs.py
+#	@uv run --group python ./docs/templates/mkdocs.py
 	@$(MAKE) --no-print-directory docs-build
 	@DOCS_BUILD=1 uv run --group docs zensical serve -f zensical.toml --open
 
