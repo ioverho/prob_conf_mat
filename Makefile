@@ -78,9 +78,9 @@ docs-build: ## Update the docs
 
 .PHONY: docs-serve
 docs-serve: ## Serve documentation site
-#	@uv run --dev python ./docs/templates/mkdocs.py
+#	@uv run --group docs python ./docs/templates/mkdocs.py
 	@$(MAKE) --no-print-directory docs-build
-	@DOCS_BUILD=1 uv run --dev zensical serve -f zensical.toml --open
+	@DOCS_BUILD=1 uv run --group docs zensical serve -f zensical.toml --open
 
 #@ Profiling
 #.PHONY: importtime

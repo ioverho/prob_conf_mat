@@ -47,31 +47,25 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "basedpyright>=1.38.1",
-    "beautifulsoup4>=4.13.5",
-    "griffe-inherited-docstrings>=1.1.2",
-    "mkdocs>=1.6.1",
-    "mkdocs-git-revision-date-localized-plugin>=1.5.0",
-    "mkdocs-jupyter>=0.25.1",
-    "mkdocs-material[imaging]>=9.7.1",
-    "mkdocstrings[python]>=1.0.0",
-    "nbconvert>=7.16.4",
-    "nbformat>=5.10.4",
     "opt-einsum>=3.4.0",
     "pandas>=2.3.3",
     "pip>=25.3",
     "prek>=0.3.3",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
-    "python-markdown-math>=0.9",
     "pyyaml>=6.0.3",
     "ruff>=0.14.10",
     "scalene>=2.0.1",
     "scikit-learn>=1.8.0",
-    "seaborn>=0.13.2",
     "snakeviz>=2.2.2",
-    "statsmodels>=0.14.6",
     "toml>=0.10.2",
-    "tqdm>=4.67.1",
+]
+
+docs = [
+    "griffe-inherited-docstrings>=1.1.3",
+    "mkdocstrings[python]>=1.0.3",
+    "nbconvert>=7.17.0",
+    "nbformat>=5.10.4",
     "zensical>=0.0.23",
 ]
 
@@ -172,6 +166,7 @@ extend-select = [
     "RET",  # Good return practices
     "RSE",  # flake8-raise
     "RUF",  # Ruff-specific
+    "S",  # Security
     "SIM",  # Common simplification rules
     "SLOT", # flake8-slots
     "T10",  # flake8-debugger

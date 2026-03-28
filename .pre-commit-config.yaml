@@ -20,7 +20,11 @@ repos:
     rev: "v3.7.4"
     hooks:
       - id: prettier
-        types_or: [yaml, markdown, html, css, scss, javascript, json]
+        types_or: [yaml, html, css, scss, javascript, json]
+  # - repo: https://github.com/jackdewinter/pymarkdown
+  #   rev: v0.9.35
+  #   hooks:
+  #     - id: pymarkdown
   # Dependencies ==============================================================
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
@@ -49,3 +53,8 @@ repos:
   #     - id: codespell
   #       additional_dependencies:
   #         - tomli; python_version<'3.11'
+  # Security ==================================================================
+  # - repo: https://github.com/gitleaks/gitleaks
+  #   rev: v8.24.2
+  #   hooks:
+  #     - id: gitleaks
