@@ -1,16 +1,16 @@
 from __future__ import annotations
+
 import typing
+from dataclasses import dataclass
+
+import numpy as np
+from scipy import stats
+
+from prob_conf_mat.stats.hdi_estimation import hdi_estimator
+from prob_conf_mat.stats.mode_estimation import histogram_mode_estimator
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
-
-import numpy as np
-import scipy.stats as stats
-from dataclasses import dataclass
-import typing
-
-from prob_conf_mat.stats.mode_estimation import histogram_mode_estimator
-from prob_conf_mat.stats.hdi_estimation import hdi_estimator
 
 
 @dataclass(frozen=True)
@@ -48,7 +48,7 @@ class PosteriorSummary:
     def as_dict(self) -> dict[str, float | tuple[float, float]]:
         """Returns the dict representation of the statistics.
 
-        Useful for coverting to a table.
+        Useful for converting to a table.
 
         Returns:
             dict[str, float | tuple[float, float]]
@@ -80,7 +80,7 @@ def summarize_posterior(
     """
     summary = PosteriorSummary(
         median=typing.cast("float", np.median(posterior_samples)),
-        mode=typing.cast("float", histogram_mode_estimator(samples=posterior_samples)),
+        mode=histogram_mode_estimator(samples=posterior_samples),
         ci_probability=ci_probability,
         hdi=typing.cast(
             "tuple[float, float]",

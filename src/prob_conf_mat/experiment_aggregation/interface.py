@@ -8,7 +8,7 @@ from prob_conf_mat.utils import RNG
 def get_experiment_aggregator(
     aggregation: str,
     rng: RNG,
-    **kwargs,
+    **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
 ) -> ExperimentAggregator:
     """Fetches an `ExperimentAggregator` from its registered name.
 
@@ -23,8 +23,10 @@ def get_experiment_aggregator(
     """
     if aggregation not in AGGREGATION_REGISTRY:
         raise ValueError(
-            f"Parameter `aggregation` must be a registered aggregation method. "
-            f"Currently: {aggregation}. Must be one of {set(AGGREGATION_REGISTRY.keys())}",
+            (  # noqa: UP034
+                f"Parameter `aggregation` must be a registered aggregation method. "
+                f"Currently: {aggregation}. Must be one of {set(AGGREGATION_REGISTRY.keys())}"
+            )
         )
 
     aggregator_instance = AGGREGATION_REGISTRY[aggregation](rng=rng, **kwargs)

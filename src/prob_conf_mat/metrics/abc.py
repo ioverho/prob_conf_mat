@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -13,7 +14,6 @@ from inspect import signature
 from itertools import product
 
 import numpy as np
-
 
 # Root metrics are always computed, because they're (almost) always needed as
 # intermediate variables
@@ -68,7 +68,7 @@ class Metric(metaclass=ABCMeta):
 
     """
 
-    def __init_subclass__(cls, **kwargs) -> None:
+    def __init_subclass__(cls, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
@@ -76,8 +76,10 @@ class Metric(metaclass=ABCMeta):
         for alias in cls.aliases:
             if alias in METRIC_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. "
-                    f"Currently used by metric {METRIC_REGISTRY[alias]}.",
+                    (
+                        f"Alias '{alias}' not unique. "
+                        f"Currently used by metric {METRIC_REGISTRY[alias]}."
+                    ),
                 )
 
         # Make sure the parameters of the `compute_metric` function are actually
@@ -109,7 +111,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str:
+    def full_name(self) -> str:  # pyright: ignore[reportRedeclaration]
         """A human-readable name for this metric."""
         raise NotImplementedError
 
@@ -117,7 +119,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def is_multiclass(self) -> bool:
+    def is_multiclass(self) -> bool:  # pyright: ignore[reportRedeclaration]
         """Whether or not this metric computes a value for each class individually, or for all classes at once."""  # noqa: E501
         raise NotImplementedError
 
@@ -125,7 +127,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def bounds(self) -> tuple[float, float]:
+    def bounds(self) -> tuple[float, float]:  # pyright: ignore[reportRedeclaration]
         """A tuple of the minimum and maximum possible value for this metric to take.
 
         Can be infinite.
@@ -136,7 +138,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def dependencies(self) -> collections.abc.Sequence[str]:
+    def dependencies(self) -> collections.abc.Sequence[str]:  # pyright: ignore[reportRedeclaration]
         """All metrics upon which this metric depends.
 
         Used to generate a computation schedule, such that no metric is calculated before its
@@ -149,7 +151,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self) -> str | None:
+    def sklearn_equivalent(self) -> str | None:  # pyright: ignore[reportRedeclaration]
         """The `sklearn` equivalent function, if applicable."""
         raise NotImplementedError
 
@@ -157,7 +159,7 @@ class Metric(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> collections.abc.Sequence[str]:
+    def aliases(self) -> collections.abc.Sequence[str]:  # pyright: ignore[reportRedeclaration]
         """A list of all valid aliases for this metric.
 
         Can be used when creating metric syntax strings.
@@ -167,14 +169,14 @@ class Metric(metaclass=ABCMeta):
     aliases: collections.abc.Sequence[str]
 
     @abstractmethod
-    def compute_metric(self, *args, **kwargs):
+    def compute_metric(self, *args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         """Computes the metric values from its dependencies."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __call__(
         self,
-        *args,
-        **kwargs,
+        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
     ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         """Computes the metric values from its dependencies."""
         return self.compute_metric(*args, **kwargs)
@@ -222,7 +224,7 @@ class Averaging(metaclass=ABCMeta):
 
     """
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
@@ -230,15 +232,19 @@ class Averaging(metaclass=ABCMeta):
         for alias in cls.aliases:
             if alias in AVERAGING_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. "
-                    f"Currently used by averaging method {AVERAGING_REGISTRY[alias]}.",
+                    (
+                        f"Alias '{alias}' not unique. "
+                        f"Currently used by averaging method {AVERAGING_REGISTRY[alias]}."
+                    ),
                 )
 
         for alias in cls.aliases:
             if alias in METRIC_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. "
-                    f"Currently used by metric {METRIC_REGISTRY[alias]}.",
+                    (
+                        f"Alias '{alias}' not unique. "
+                        f"Currently used by metric {METRIC_REGISTRY[alias]}."
+                    ),
                 )
 
         # Register =============================================================
@@ -255,7 +261,7 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str:
+    def full_name(self) -> str:  # pyright: ignore[reportRedeclaration]
         """The full, human-readable name of this metric averaging method."""
         raise NotImplementedError
 
@@ -263,7 +269,7 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def dependencies(self) -> collections.abc.Sequence[str]:
+    def dependencies(self) -> collections.abc.Sequence[str]:  # pyright: ignore[reportRedeclaration]
         """All metrics upon which this metric averaging method depends.
 
         Constructed from the union of all Metric and AveragingMethod dependencies.
@@ -280,7 +286,7 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def sklearn_equivalent(self) -> str | None:
+    def sklearn_equivalent(self) -> str | None:  # pyright: ignore[reportRedeclaration]
         """The `sklearn` equivalent function, if applicable."""
         raise NotImplementedError
 
@@ -288,7 +294,7 @@ class Averaging(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> collections.abc.Sequence[str]:
+    def aliases(self) -> collections.abc.Sequence[str]:  # pyright: ignore[reportRedeclaration]
         """A list of all valid aliases for this metric averaging method.
 
         Can be used when creating metric syntax strings.
@@ -298,15 +304,15 @@ class Averaging(metaclass=ABCMeta):
     aliases: collections.abc.Sequence[str]
 
     @abstractmethod
-    def compute_average(self, *args, **kwargs):
+    def compute_average(self, *args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         """Computes the average across experiment classes."""
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __call__(
         self,
         metric_vals: jtyping.Float[np.ndarray, " num_samples num_classes"],
-        *args,
-        **kwargs,
+        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         """Computes the average across experiment classes."""
         return self.compute_average(metric_vals, *args, **kwargs)
@@ -345,7 +351,7 @@ class Averaging(metaclass=ABCMeta):
         return hash(self.name)
 
 
-class AveragedMetric(metaclass=ABCMeta):
+class AveragedMetric:
     """The composition of any instance of `Metric` with any instance of `Averaging`.
 
     Args:
@@ -360,7 +366,7 @@ class AveragedMetric(metaclass=ABCMeta):
 
         if self.base_metric.is_multiclass:
             raise ValueError(
-                f"Cannot aggregate a metric ({self.base_metric.name}) that is already multiclass.",  # noqa: E501
+                f"Cannot aggregate a metric ({self.base_metric.name}) that is already multiclass.",
             )
 
         self.averaging = averaging
@@ -427,29 +433,28 @@ class AveragedMetric(metaclass=ABCMeta):
         sklearn_equivalent = self.base_metric.sklearn_equivalent
         if self.averaging.sklearn_equivalent is not None:
             sklearn_equivalent = (
-                sklearn_equivalent.sklearn_equivalent
-                + f"with average={self.averaging.sklearn_equivalent}"
+                sklearn_equivalent + f"with average={self.averaging.sklearn_equivalent}"  # pyright: ignore[reportOptionalOperand]
             )
 
         return sklearn_equivalent
 
     def compute_metric(
         self,
-        *args,
-        **kwargs,
+        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
     ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         """Computes the metric values from its dependencies."""
         return self.base_metric(*args, **kwargs)
 
     def compute_average(
         self,
-        *args,
-        **kwargs,
+        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         """Computes the average across experiment classes."""
         return self.averaging.__call__(*args, **kwargs)
 
-    def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples 1"]:
+    def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples 1"]:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         """Computes the metric and averages it, in succession."""
         metric_vals = self.compute_metric(
             **{
@@ -473,8 +478,8 @@ class AveragedMetric(metaclass=ABCMeta):
     @property
     def _kwargs(self) -> dict[str, dict[str, typing.Any]]:
         kwargs = {
-            "metric": self.base_metric._kwargs,
-            "averaging": self.averaging._kwargs,
+            "metric": self.base_metric._kwargs,  # pyright: ignore[reportPrivateUsage]
+            "averaging": self.averaging._kwargs,  # pyright: ignore[reportPrivateUsage]
         }
 
         return kwargs

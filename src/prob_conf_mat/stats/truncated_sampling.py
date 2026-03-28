@@ -1,10 +1,12 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    import scipy
-    import numpy as np
     import jaxtyping as jtyping
+    import numpy as np
+    import scipy
+    import scipy.stats
 
     from prob_conf_mat.utils.rng import RNG
 

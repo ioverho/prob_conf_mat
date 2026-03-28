@@ -4,6 +4,10 @@ import typing
 
 import numpy as np
 
+if typing.TYPE_CHECKING:  # pragma: no cover
+    import collections
+    import collections.abc
+
 
 class RNG:
     """A wrapper for Numpy's Generator class, that tracks any spawned child RNGs.
@@ -11,7 +15,7 @@ class RNG:
     This way, we can change the RNG in a reproducible manner, on the fly.
 
     Args:
-        seed (int | typing.Sequence[int] | None): A seed to initialize the `BitGenerator`.
+        seed (int | collections.abc.Sequence[int] | None): A seed to initialize the `BitGenerator`.
             If None, then fresh, unpredictable entropy will be pulled from the OS.
             If an `int` or `array_like[ints]` is passed, then all values must be non-negative and
             will be passed to `SeedSequence` to derive the initial `BitGenerator` state.
@@ -25,8 +29,8 @@ class RNG:
 
     def __init__(
         self,
-        seed: int | typing.Sequence[int] | None,
-        position: tuple = (),
+        seed: int | collections.abc.Sequence[int] | None,
+        position: tuple[int, ...] = (),
     ) -> None:
         # The current seed & position
         self._seed = seed
@@ -44,11 +48,11 @@ class RNG:
         # Any RNGs spawned from this RNG
         self.children: list[typing.Self] = []
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> typing.Any:
         """Called for failed attribute accesses."""
         return self.rng.__getattribute__(name)
 
-    def spawn(self, n_children: int) -> list[typing.Self]:  # type: ignore
+    def spawn(self, n_children: int) -> list[typing.Self]:
         """Spawns a new independent RNG.
 
         It has a position lower in the tree, but shares the seed of its parent.
@@ -68,19 +72,19 @@ class RNG:
                 position=(*self.position, cur_num_children + i),
             )
 
-            spawned_rngs.append(new_rng)  # type: ignore
+            spawned_rngs.append(new_rng)  # pyright: ignore[reportArgumentType]
 
         self.children.extend(spawned_rngs)
 
         return spawned_rngs
 
     @property
-    def seed(self) -> int | typing.Sequence[int] | None:
+    def seed(self) -> int | collections.abc.Sequence[int] | None:
         """The generator's seed."""
         return self._seed
 
     @seed.setter
-    def seed(self, value: int | typing.Sequence[int] | None) -> None:
+    def seed(self, value: int | collections.abc.Sequence[int] | None) -> None:
         """Changes the seed without changing the position.
 
         Args:

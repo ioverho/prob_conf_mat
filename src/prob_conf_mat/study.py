@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
     import matplotlib
-    import matplotlib.figure
     import matplotlib.axes  # pyright: ignore[reportUnusedImport]
+    import matplotlib.figure
     import matplotlib.ticker  # pyright: ignore[reportUnusedImport]
     import pandas as pd
 
@@ -17,24 +18,22 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 
 import warnings
 from collections import OrderedDict
-from functools import cache
 from enum import StrEnum
 
 import numpy as np
 
-from prob_conf_mat.config import Config, ConfigWarning
-from prob_conf_mat.metrics import MetricCollection, Metric, AveragedMetric
-from prob_conf_mat.experiment import ExperimentResult, SamplingMethod
+from prob_conf_mat.config import Config, ConfigError, ConfigWarning
+from prob_conf_mat.experiment import Experiment, ExperimentResult, SamplingMethod
 from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
+from prob_conf_mat.experiment_comparison import listwise_compare, pairwise_compare
 from prob_conf_mat.experiment_group import ExperimentGroup
-from prob_conf_mat.experiment import Experiment
-from prob_conf_mat.experiment_comparison import pairwise_compare, listwise_compare
+from prob_conf_mat.metrics import AveragedMetric, Metric, MetricCollection
 from prob_conf_mat.stats import summarize_posterior
 from prob_conf_mat.stats.kde import compute_kde
 from prob_conf_mat.utils import (
     InMemoryCache,
-    fmt,
     NotInCache,
+    fmt,
 )
 
 
@@ -61,7 +60,7 @@ class Study(Config):
     Args:
         seed (int, optional): the random seed used to initialise the RNG. Defaults to the current
             time, in fractional seconds.
-        num_samples (int, optional): the number of syntehtic confusion matrices to sample. A higher
+        num_samples (int, optional): the number of synthetic confusion matrices to sample. A higher
             value is better, but more computationally expensive. Defaults to 10000, the minimum
             recommended value.
         ci_probability (float, optional): the size of the credibility intervals to compute.
@@ -154,52 +153,37 @@ class Study(Config):
 
         return instance
 
-    @cache
-    def _list_experiments(self, fingerprint: str) -> list[str]:  # pyright: ignore[reportUnusedParameter]
-        """Returns a sorted list of all the experiments included in this Study."""
+    def all_experiments(self) -> list[str]:
+        """Returns a sorted list with the names of all Experiments in this Study."""
         all_experiments = []
         for experiment_group, experiment_configs in self.experiments.items():
-            for experiment_name, _ in experiment_configs.items():
-                all_experiments.append(f"{experiment_group}/{experiment_name}")
+            all_experiments.extend(
+                f"{experiment_group}/{experiment_name}"
+                for experiment_name in experiment_configs.keys()
+            )
 
         all_experiments = sorted(all_experiments)
 
         return all_experiments
 
-    def all_experiments(self) -> list[str]:
-        """Returns a list with the names of all Experiments in this Study."""
-        return self._list_experiments(fingerprint=self.fingerprint)
-
-    @cache
-    def _compute_num_classes(self, fingerprint: str) -> int:  # pyright: ignore[reportUnusedParameter]
-        """Returns the number of classes used in experiments in this study.
-
-        Uses fingerprint to enable caching of result.
-
-        Returns:
-            int: the number of classes
-        """
-        all_num_classes = set()
-        for experiment_group in self._experiment_store.values():
-            all_num_classes.add(experiment_group.num_classes)
-
-        if len(all_num_classes) > 1:
-            raise ValueError(
-                f"Inconsistent number of classes in experiment groups: {all_num_classes}",
-            )
-
-        return next(iter(all_num_classes))
-
-    def __repr__(self) -> str:  # noqa: D105
-        return f"Study(experiments={self.all_experiments()}), metrics={str(self._metrics_store)})"
-
-    def __str__(self) -> str:  # noqa: D105
-        return f"Study(experiments={self.all_experiments()}, metrics={str(self._metrics_store)})"
-
     @property
     def num_classes(self) -> int:
         """Returns the number of classes used in experiments in this study."""
-        return self._compute_num_classes(fingerprint=self.fingerprint)
+        for experiment_group in self._experiment_store.values():
+            num_classes = experiment_group.num_classes
+            break
+        else:
+            raise ConfigError(
+                "Num classes is not defined for a Study without Experiments"
+            )
+
+        return num_classes
+
+    def __repr__(self) -> str:
+        return f"Study(experiments={self.all_experiments()}), metrics={self._metrics_store!s})"
+
+    def __str__(self) -> str:
+        return f"Study(experiments={self.all_experiments()}, metrics={self._metrics_store!s})"
 
     @property
     def num_experiment_groups(self) -> int:
@@ -249,6 +233,7 @@ class Study(Config):
                         f"string formatted as 'group/name'."
                     ),
                     category=ConfigWarning,
+                    stacklevel=2,
                 )
 
         else:
@@ -287,17 +272,19 @@ class Study(Config):
     ) -> tuple[MetricLike, int]:
         try:
             metric_: MetricLike = self._metrics_store[metric]
-        except KeyError:
+        except KeyError as e:
             raise KeyError(
                 (
                     f"Could not find metric '{metric}' in the metrics collection. "
                     f"Consider adding it using `self.add_metric`"
                 ),
-            )
+            ) from e
 
         if metric_.is_multiclass:
             if not ((class_label == 0) or (class_label is None)):
-                warnings.warn("Metric is multiclass, ignoring class label.")
+                warnings.warn(
+                    "Metric is multiclass, ignoring class label.", stacklevel=2
+                )
 
             class_label = 0
         else:
@@ -679,7 +666,7 @@ class Study(Config):
     ) -> list[dict[str, typing.Any]] | pd.DataFrame | str:
         table = []
         for experiment_group_name, experiment_group in self._experiment_store.items():
-            for experiment_name, _ in experiment_group.experiments.items():
+            for experiment_name in experiment_group.experiments.keys():
                 sampled_experiment_result = self.get_metric_samples(
                     metric=metric.name,
                     experiment_name=f"{experiment_group_name}/{experiment_name}",
@@ -738,12 +725,12 @@ class Study(Config):
             case "records":
                 pass
             case "pd" | "pandas":
-                import pandas as pd
+                import pandas as pd  # noqa: PLC0415
 
                 table = pd.DataFrame.from_records(data=table, columns=headers)
 
             case _:
-                import tabulate
+                import tabulate  # noqa: PLC0415
 
                 table = tabulate.tabulate(
                     tabular_data=table,
@@ -919,7 +906,7 @@ class Study(Config):
         background_colour: str | None = None,
         xlim: tuple[float, float] | None = None,
     ) -> matplotlib.figure.Figure:
-        """Plots the distrbution of sampled metric values for a metric and class combination.
+        """Plots the distribution of sampled metric values for a metric and class combination.
 
         Args:
             metric (str): the name of the metric
@@ -1030,8 +1017,8 @@ class Study(Config):
             matplotlib.figure.Figure: the completed figure of the distribution plot
         """
         # Load slow dependencies
-        import matplotlib
-        import matplotlib.pyplot as plt
+        import matplotlib  # noqa: PLC0415
+        import matplotlib.pyplot as plt  # noqa: PLC0415
 
         # Typehint the metric and class_label variables
         metric: MetricLike
@@ -1075,7 +1062,7 @@ class Study(Config):
         all_medians = []
         all_hdi_ranges = []
         for experiment_group_name, experiment_group in self._experiment_store.items():
-            for experiment_name, _ in experiment_group.experiments.items():
+            for experiment_name in experiment_group.experiments.keys():
                 if plot_experiment_name:
                     # Set the axis title
                     # Needs to happen before KDE
@@ -1544,6 +1531,7 @@ class Study(Config):
                     "Method `report_pairwise_comparison` does not produce a table and as such does "
                     "not need a `table_fmt` parameter. Ignoring."
                 ),
+                stacklevel=2,
             )
 
         metric, class_label = self._validate_metric_class_label_combination(
@@ -1754,7 +1742,7 @@ class Study(Config):
             matplotlib.figure.Figure: the Matplotlib Figure represenation of the plot
         """
         # Import optional dependencies
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # noqa: PLC0415
 
         # Typehint the metric and class_label variables
         metric: MetricLike
@@ -1972,6 +1960,7 @@ class Study(Config):
                         "has no observation (i.e. aggregated). "
                         "As a result, no observed difference will be shown."
                     ),
+                    stacklevel=True,
                 )
 
         if plot_median_line:
@@ -2284,12 +2273,12 @@ class Study(Config):
             case "records":
                 table = records
             case "pd" | "pandas":
-                import pandas as pd
+                import pandas as pd  # noqa: PLC0415
 
                 table = pd.DataFrame.from_records(data=records)
 
             case _:
-                import tabulate
+                import tabulate  # noqa: PLC0415
 
                 table = tabulate.tabulate(
                     tabular_data=records,
@@ -2426,6 +2415,7 @@ class Study(Config):
             for experiment_name, row in zip(
                 listwise_comparison_result.experiment_names,
                 p_experiment_given_rank,
+                strict=True,
             )
         ]
 
@@ -2433,12 +2423,12 @@ class Study(Config):
             case "records":
                 table = records
             case "pd" | "pandas":
-                import pandas as pd
+                import pandas as pd  # noqa: PLC0415
 
                 table = pd.DataFrame.from_records(data=records, columns=headers)
 
             case _:
-                import tabulate
+                import tabulate  # noqa: PLC0415
 
                 table = tabulate.tabulate(
                     tabular_data=records,
@@ -2542,8 +2532,9 @@ class Study(Config):
         for experiment_name, expected_reward in zip(
             listwise_comparsion_result.experiment_names,
             expected_rewards,
+            strict=True,
         ):
-            group_name, experiment_name = self._split_experiment_name(
+            group_name, experiment_name = self._split_experiment_name(  # noqa: PLW2901
                 name=experiment_name,
                 do_warn=False,
             )
@@ -2561,12 +2552,12 @@ class Study(Config):
                 table = records
 
             case "pd" | "pandas":
-                import pandas as pd
+                import pandas as pd  # noqa: PLC0415
 
                 table = pd.DataFrame.from_records(data=records)
 
             case _:
-                import tabulate
+                import tabulate  # noqa: PLC0415
 
                 table = tabulate.tabulate(
                     tabular_data=records,
@@ -2688,6 +2679,7 @@ class Study(Config):
         if len(table) == 0:
             warnings.warn(
                 "The table is empty! This can occur if there are no registered experiments yet.",
+                stacklevel=2,
             )
             return ""
 
@@ -2708,12 +2700,12 @@ class Study(Config):
             case "records":
                 pass
             case "pd" | "pandas":
-                import pandas as pd
+                import pandas as pd  # noqa: PLC0415
 
                 table = pd.DataFrame.from_records(data=table, columns=headers)
 
             case _:
-                import tabulate
+                import tabulate  # noqa: PLC0415
 
                 table = tabulate.tabulate(
                     tabular_data=table,
@@ -2886,8 +2878,8 @@ class Study(Config):
             matplotlib.figure.Figure: the completed figure of the distribution plot
         """  # noqa: D205
         # Import optional dependencies
-        import matplotlib
-        import matplotlib.pyplot as plt
+        import matplotlib  # noqa: PLC0415
+        import matplotlib.pyplot as plt  # noqa: PLC0415
 
         # Typehint the metric and class_label variables
         metric: MetricLike
@@ -3507,7 +3499,7 @@ class Study(Config):
                 Defaults to `None`.
 
         Returns:
-            matplotlib.figure.Figure: the Matplotlib Figure represenation of the forest plot
+            matplotlib.figure.Figure: the Matplotlib Figure representation of the forest plot
         """
         # Typehint the metric and class_label variables
         metric: MetricLike
@@ -3520,9 +3512,9 @@ class Study(Config):
 
         # Import optional dependencies
         try:
-            import tabulate
-            import matplotlib
-            import matplotlib.pyplot as plt
+            import matplotlib  # noqa: PLC0415
+            import matplotlib.pyplot as plt  # noqa: PLC0415
+            import tabulate  # noqa: PLC0415
 
         except ModuleNotFoundError as e:
             raise ModuleNotFoundError(
@@ -3530,7 +3522,7 @@ class Study(Config):
                     f"Visualization requires optional dependencies: [matplotlib, pyplot]. "
                     f"Currently missing: {e}"
                 ),
-            )
+            ) from e
 
         if axis_fontsize is None:
             axis_fontsize = fontsize
@@ -3682,9 +3674,7 @@ class Study(Config):
                 aggregator_name = "Aggregate"
 
                 longest_experiment_name = max(
-                    15,
-                    len(aggregator_name),
-                    max(map(len, all_experiment_names)),
+                    15, len(aggregator_name), *map(len, all_experiment_names)
                 )
 
                 i2_string = fmt(
@@ -3767,7 +3757,7 @@ class Study(Config):
                         "MU": summary.hdi[1] - summary.hdi[0],
                     }
 
-                summary_rows = [summary_to_row(s) for s in all_summaries + [summary]]
+                summary_rows = [summary_to_row(s) for s in [*all_summaries, summary]]
 
                 tabulate_str = tabulate.tabulate(
                     tabular_data=summary_rows,

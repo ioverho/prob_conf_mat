@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -35,7 +36,7 @@ class DiagMass(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = None
-    aliases = ["diag_mass"]
+    aliases = ("diag_mass",)
 
     def compute_metric(
         self,
@@ -54,7 +55,7 @@ class DiagMass(Metric):
 
 
 class Prevalence(Metric):
-    r"""Computes the marginal distribution of condition occurence. Also known as the prevalence.
+    r"""Computes the marginal distribution of condition occurrence. Also known as the prevalence.
 
     It can be defined as the rate of positives to all predictions:
 
@@ -72,7 +73,7 @@ class Prevalence(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("p_condition",)
     sklearn_equivalent = None
-    aliases = ["prevalence"]
+    aliases = ("prevalence",)
 
     def compute_metric(
         self,
@@ -82,7 +83,7 @@ class Prevalence(Metric):
 
 
 class ModelBias(Metric):
-    r"""Computes the marginal distribution of prediction occurence. Also known as the model bias.
+    r"""Computes the marginal distribution of prediction occurrence. Also known as the model bias.
 
     It can be defined as the rate of predicted positives to all predictions:
 
@@ -100,7 +101,7 @@ class ModelBias(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("p_pred",)
     sklearn_equivalent = None
-    aliases = ["model_bias"]
+    aliases = ("model_bias",)
 
     def compute_metric(
         self,
@@ -116,7 +117,7 @@ class ModelBias(Metric):
 # ==============================================================================
 # Simple metrics
 # These tell us a little about model performanec, but not the whole story
-# Can be computed directly on the fundametal metrics, but are still usually
+# Can be computed directly on the fundamental metrics, but are still usually
 # used as intermediate values
 # ==============================================================================
 class TruePositiveRate(Metric):
@@ -145,7 +146,7 @@ class TruePositiveRate(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("p_pred_given_condition",)
     sklearn_equivalent = None
-    aliases = ["true_positive_rate", "sensitivity", "recall", "hit_rate", "tpr"]
+    aliases = ("true_positive_rate", "sensitivity", "recall", "hit_rate", "tpr")
 
     def compute_metric(
         self,
@@ -178,7 +179,7 @@ class FalseNegativeRate(Metric):
 
     Note: Read more:
         1. [Wikipedia](https://en.wikipedia.org/wiki/False_positives_and_false_negatives#Related_terms)
-    """  # noqa: E501
+    """
 
     full_name = "False Negative Rate"
     is_complex = True
@@ -186,7 +187,7 @@ class FalseNegativeRate(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("true_positive_rate",)
     sklearn_equivalent = None
-    aliases = ["false_negative_rate", "miss_rate", "fnr"]
+    aliases = ("false_negative_rate", "miss_rate", "fnr")
 
     def compute_metric(
         self,
@@ -215,7 +216,7 @@ class PositivePredictiveValue(Metric):
     Note: Read more:
         1. [scikit-learn](https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html)
         2. [Wikipedia](https://en.wikipedia.org/wiki/Precision_and_recall)
-    """  # noqa: E501
+    """
 
     full_name = "Positive Predictive Value"
     is_complex = True
@@ -223,7 +224,7 @@ class PositivePredictiveValue(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("p_condition_given_pred",)
     sklearn_equivalent = None
-    aliases = ["positive_predictive_value", "precision", "ppv"]
+    aliases = ("positive_predictive_value", "precision", "ppv")
 
     def compute_metric(
         self,
@@ -255,7 +256,7 @@ class FalseDiscoveryRate(Metric):
 
     Note: Read more:
         1. [Wikipedia](https://en.wikipedia.org/wiki/False_discovery_rate)
-    """  # noqa: E501
+    """
 
     full_name = "False Discovery Rate"
     is_complex = True
@@ -263,7 +264,7 @@ class FalseDiscoveryRate(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("positive_predictive_value",)
     sklearn_equivalent = None
-    aliases = ["false_discovery_rate", "fdr"]
+    aliases = ("false_discovery_rate", "fdr")
 
     def compute_metric(
         self,
@@ -296,7 +297,7 @@ class FalsePositiveRate(Metric):
 
     Note: Read more:
         1. [Wikipedia](https://en.wikipedia.org/wiki/False_positive_rate)
-    """  # noqa: E501
+    """
 
     full_name = "False Positive Rate"
     is_complex = True
@@ -304,7 +305,7 @@ class FalsePositiveRate(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("diag_mass", "p_pred", "p_condition")
     sklearn_equivalent = None
-    aliases = ["false_positive_rate", "fall-out", "fall_out", "fpr"]
+    aliases = ("false_positive_rate", "fall-out", "fall_out", "fpr")
 
     def compute_metric(
         self,
@@ -334,7 +335,7 @@ class TrueNegativeRate(Metric):
 
     Note: Read more:
         1. [Wikipedia](https://en.wikipedia.org/wiki/Sensitivity_and_specificity)
-    """  # noqa: E501
+    """
 
     full_name = "True Negative Rate"
     is_complex = True
@@ -342,7 +343,7 @@ class TrueNegativeRate(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("false_positive_rate",)
     sklearn_equivalent = None
-    aliases = ["true_negative_rate", "specificity", "selectivity", "tnr"]
+    aliases = ("true_negative_rate", "specificity", "selectivity", "tnr")
 
     def compute_metric(
         self,
@@ -378,7 +379,7 @@ class FalseOmissionRate(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("p_condition", "p_pred", "diag_mass")
     sklearn_equivalent = None
-    aliases = ["false_omission_rate", "for"]
+    aliases = ("false_omission_rate", "for")
 
     def compute_metric(
         self,
@@ -394,7 +395,7 @@ class FalseOmissionRate(Metric):
 
 
 class NegativePredictiveValue(Metric):
-    r"""Computes the Negative Predicitive Value.
+    r"""Computes the Negative Predictive Value.
 
     It is defined as the ratio of true negatives to all predicted negatives:
 
@@ -410,7 +411,7 @@ class NegativePredictiveValue(Metric):
 
     Note: Read more:
         1. [Wikipedia](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value_(NPV))
-    """  # noqa: E501
+    """
 
     full_name = "Negative Predictive Value"
     is_complex = True
@@ -418,7 +419,7 @@ class NegativePredictiveValue(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("false_omission_rate",)
     sklearn_equivalent = None
-    aliases = ["negative_predictive_value", "npv"]
+    aliases = ("negative_predictive_value", "npv")
 
     def compute_metric(
         self,
@@ -462,7 +463,7 @@ class Accuracy(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("diag_mass",)
     sklearn_equivalent = "accuracy_score"
-    aliases = ["acc", "accuracy"]
+    aliases = ("acc", "accuracy")
 
     def compute_metric(
         self,
@@ -506,7 +507,7 @@ class BalancedAccuracy(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("tpr", "p_condition")
     sklearn_equivalent = "balanced_accuracy_score"
-    aliases = ["ba", "balanced_accuracy"]
+    aliases = ("ba", "balanced_accuracy")
 
     def __init__(self, *, adjusted: bool = False) -> None:
         super().__init__()
@@ -566,13 +567,13 @@ class MatthewsCorrelationCoefficient(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("diag_mass", "p_condition", "p_pred")
     sklearn_equivalent = "matthews_corrcoef"
-    aliases = [
+    aliases = (
         "mcc",
         "matthews_corrcoef",
         "matthews_correlation_coefficient",
         "phi",
         "phi_coefficient",
-    ]
+    )
 
     def compute_metric(
         self,
@@ -620,7 +621,7 @@ class CohensKappa(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("diag_mass", "p_condition", "p_pred")
     sklearn_equivalent = "cohen_kappa_score"
-    aliases = ["kappa", "cohen_kappa"]
+    aliases = ("kappa", "cohen_kappa")
 
     def compute_metric(
         self,
@@ -647,7 +648,7 @@ class F1(Metric):
     or simply put, the harmonic mean between precision (PPV) and recall (TPR).
 
     It is an exceedingly common metric used to evaluate machine learning performance. It is closely
-    related to the Precision-Recall curve, an anlysis with varying thresholds.
+    related to the Precision-Recall curve, an analysis with varying thresholds.
 
     The 1 in the name from an unseen $\beta$ parameter that weights precision and recall.
     See the `FBeta` metric.
@@ -675,7 +676,7 @@ class F1(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("ppv", "tpr")
     sklearn_equivalent = "f1_score"
-    aliases = ["f1"]
+    aliases = ("f1",)
 
     def compute_metric(
         self,
@@ -739,7 +740,7 @@ class FBeta(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("ppv", "tpr")
     sklearn_equivalent = "fbeta_score"
-    aliases = ["fbeta"]
+    aliases = ("fbeta",)
 
     def __init__(self, beta: float = 1.0):
         super().__init__()
@@ -794,7 +795,7 @@ class Informedness(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("tpr", "tnr")
     sklearn_equivalent = None
-    aliases = ["informedness", "youdenj", "youden_j", "bookmaker_informedness", "bm"]
+    aliases = ("informedness", "youdenj", "youden_j", "bookmaker_informedness", "bm")
 
     def compute_metric(
         self,
@@ -831,7 +832,7 @@ class Markedness(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("ppv", "npv")
     sklearn_equivalent = None
-    aliases = ["markedness", "delta_p"]
+    aliases = ("markedness", "delta_p")
 
     def compute_metric(
         self,
@@ -876,7 +877,7 @@ class P4(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("ppv", "tpr", "tnr", "npv")
     sklearn_equivalent = None
-    aliases = ["p4"]
+    aliases = ("p4",)
 
     def compute_metric(
         self,
@@ -928,7 +929,7 @@ class JaccardIndex(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("diag_mass", "p_pred", "p_condition")
     sklearn_equivalent = "jaccard_score"
-    aliases = ["jaccard", "jaccard_index", "threat_score", "critical_success_index"]
+    aliases = ("jaccard", "jaccard_index", "threat_score", "critical_success_index")
 
     def compute_metric(
         self,
@@ -975,7 +976,7 @@ class PositiveLikelihoodRatio(Metric):
     bounds = (0.0, float("inf"))
     dependencies = ("tpr", "fpr")
     sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["plr", "positive_likelihood_ratio"]
+    aliases = ("plr", "positive_likelihood_ratio")
 
     def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
@@ -1029,7 +1030,7 @@ class LogPositiveLikelihoodRatio(Metric):
     bounds = (-float("inf"), float("inf"))
     dependencies = ("tpr", "fpr")
     sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["log_plr", "lplr", "log_positive_likelihood_ratio"]
+    aliases = ("log_plr", "lplr", "log_positive_likelihood_ratio")
 
     def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
@@ -1084,7 +1085,7 @@ class NegativeLikelihoodRatio(Metric):
     bounds = (0.0, float("inf"))
     dependencies = ("fnr", "tnr")
     sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["negative_likelihood_ratio", "nlr"]
+    aliases = ("negative_likelihood_ratio", "nlr")
 
     def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
@@ -1138,7 +1139,7 @@ class LogNegativeLikelihoodRatio(Metric):
     bounds = (-float("inf"), float("inf"))
     dependencies = ("fnr", "tnr")
     sklearn_equivalent = "class_likelihood_ratios"
-    aliases = ["lnlr", "log_negative_likelihood_ratio", "log_nlr"]
+    aliases = ("lnlr", "log_negative_likelihood_ratio", "log_nlr")
 
     def __init__(self, *, clamp: bool = False) -> None:
         super().__init__()
@@ -1187,7 +1188,7 @@ class DiagnosticOddsRatio(Metric):
     bounds = (0.0, float("inf"))
     dependencies = ("nlr", "plr")
     sklearn_equivalent = None
-    aliases = ["dor", "diagnostic_odds_ratio"]
+    aliases = ("dor", "diagnostic_odds_ratio")
 
     def compute_metric(
         self,
@@ -1225,7 +1226,7 @@ class LogDiagnosticOddsRatio(Metric):
     bounds = (-float("inf"), float("inf"))
     dependencies = ("log_plr", "log_nlr")
     sklearn_equivalent = None
-    aliases = ["log_dor", "ldor", "log_diagnostic_odds_ratio"]
+    aliases = ("log_dor", "ldor", "log_diagnostic_odds_ratio")
 
     def compute_metric(
         self,
@@ -1268,7 +1269,7 @@ class PrevalenceThreshold(Metric):
     bounds = (0, 1)
     dependencies = ("tpr", "tnr")
     sklearn_equivalent = None
-    aliases = ["prev_thresh", "pt", "prevalence_threshold"]
+    aliases = ("prev_thresh", "pt", "prevalence_threshold")
 
     def compute_metric(
         self,

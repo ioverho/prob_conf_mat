@@ -12,7 +12,7 @@ class PrecisionGain(Metric):  # noqa: D101
     bounds = (0.0, 1.0)
     dependencies = ("precision", "prevalence")
     sklearn_equivalent = None
-    aliases = ["precision_gain"]
+    aliases = ("precision_gain",)
 
     def compute_metric(  # noqa: D102
         self,
@@ -34,7 +34,7 @@ class RecallGain(Metric):  # noqa: D101
     bounds = (0.0, 1.0)
     dependencies = ("recall", "prevalence")
     sklearn_equivalent = None
-    aliases = ["recall_gain"]
+    aliases = ("recall_gain",)
 
     def compute_metric(  # noqa: D102
         self,
@@ -56,7 +56,7 @@ class F1Gain(Metric):  # noqa: D101
     bounds = (0.0, 1.0)
     dependencies = ("f1", "prevalence")
     sklearn_equivalent = None
-    aliases = ["f1_gain"]
+    aliases = ("f1_gain",)
 
     def compute_metric(  # noqa: D102
         self,
@@ -82,7 +82,7 @@ class FBetaGain(Metric):  # noqa: D101
         "prevalence",
     )
     sklearn_equivalent = None
-    aliases = ["fbeta_gain"]
+    aliases = ("fbeta_gain",)
 
     def __init__(self, beta: float = 1.0):
         super().__init__()

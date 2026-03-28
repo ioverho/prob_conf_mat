@@ -81,32 +81,29 @@ Found on [learn.scientific-python.org](https://learn.scientific-python.org/devel
 ## Pre-commit
 
 - [x] **PC100**: Has pre-commit-hooks
-- [] **PC110**: Uses black or ruff-format
-
-  Must have one of <https://github.com/astral-sh/ruff-pre-commit> (with ruff-format hook), <https://github.com/psf/black-pre-commit-mirror> in .pre-commit-config.yaml
-
+- [x] **PC110**: Uses black or ruff-format
 - [x] **PC111**: Uses blacken-docs [skipped]
 - [ ] **PC140**: Uses a type checker
 
   Must have <https://github.com/pre-commit/mirrors-mypy> in .pre-commit-config.yaml
 
-- [] **PC160**: Uses a spell checker
+  **Response**: we use [basedpyright](https://docs.basedpyright.com/latest/), which has been added to the pre-commit file
+
+- [ ] **PC160**: Uses a spell checker
 
   Must have one of <https://github.com/codespell-project/codespell>, <https://github.com/crate-ci/typos> in .pre-commit-config.yaml
+
+  **Response**: common spellcheckers have low signal-to-noise ratio, and should not be run for every commit. Instead, we use this infrequently for code and constantly for documentation
 
 - [ ] **PC170**: Uses PyGrep hooks (only needed if rST present)
 
   Must have <https://github.com/pre-commit/pygrep-hooks> in .pre-commit-config.yaml
 
-- [ ] **PC180**: Uses a markdown formatter
+  **Response**: no rST is present, and other hooks are covered by ruff/basedpyright
 
-  Must have one of <https://github.com/davidanson/markdownlint-cli2>, <https://github.com/hukkin/mdformat>, <https://github.com/rbubley/mirrors-prettier>, <https://github.com/rvben/rumdl-pre-commit> in .pre-commit-config.yaml
-
+- [x] **PC180**: Uses a markdown formatter
 - [x] **PC190**: Uses Ruff
 - [x] **PC191**: Ruff show fixes if fixes enabled
-
-  If --fix is present, --show-fixes must be too.
-
 - [x] **PC192**: Ruff uses `ruff-check` instead of `ruff` (legacy)
 - [ ] **PC901**: Custom pre-commit CI update message
 
@@ -137,46 +134,15 @@ Found on [learn.scientific-python.org](https://learn.scientific-python.org/devel
 
 ## MyPy
 
-- [ ] **MY100**: Uses MyPy (pyproject config)
-
-  Must have tool.mypy section in pyproject.toml. Other forms of configuration are not supported by this check.
-
-- [ ] **MY101**: MyPy strict mode [skipped]
-- [ ] **MY102**: MyPy show_error_codes deprecated [skipped]
-- [ ] **MY103**: MyPy warn unreachable [skipped]
-- [ ] **MY104**: MyPy enables ignore-without-code [skipped]
-- [ ] **MY105**: MyPy enables redundant-expr [skipped]
-- [ ] **MY106**: MyPy enables truthy-bool [skipped]
+Omitted, we use [basedpyright](https://docs.basedpyright.com/latest/)
 
 ## Ruff
-
-Rules mentioned in guide but not here: "PIE", "FURB", "T20", "PERF", "LOG", "YTT", "EM", "TRY", "PD", "RSE", "Q", "ARG", "PL", "T10", "I", "PT", "B", "EXE", "G", "PGH", "DTZ", "SLOT", "PYI", "FLY", "RUF"
 
 - [x] **RF001**: Has Ruff config
 - [x] **RF002**: Target version must be set
 - [x] **RF003**: src directory doesn't need to be specified anymore (0.6+)
-- [ ] **RF101**: Bugbear must be selected
-
-  Must select the flake8-bugbear B checks. Recommended:
-
-  ```yaml
-  [tool.ruff.lint]
-  extend-select = [
-      "B",  # flake8-bugbear
-  ]
-  ```
-
-- [ ] **RF102**: isort must be selected
-
-  Must select the isort I checks. Recommended:
-
-  ```yaml
-  [tool.ruff.lint]
-  extend-select = [
-      "I",  # isort
-  ]
-  ```
-
+- [x] **RF101**: Bugbear must be selected
+- [x] **RF102**: isort must be selected
 - [x] **RF103**: pyupgrade must be selected
 - [x] **RF201**: Avoid using deprecated config settings
 - [x] **RF202**: Use (new) lint config section

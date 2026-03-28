@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 import warnings
 
@@ -19,12 +20,12 @@ from prob_conf_mat.experiment_aggregation.heterogeneity import (
 from prob_conf_mat.stats import truncated_sample
 
 __all__ = [
-    "SingletonAggregator",
     "BetaAggregator",
-    "GammaAggregator",
     "FEGaussianAggregator",
-    "REGaussianAggregator",
+    "GammaAggregator",
     "HistogramAggregator",
+    "REGaussianAggregator",
+    "SingletonAggregator",
 ]
 
 
@@ -40,14 +41,14 @@ class SingletonAggregator(ExperimentAggregator):
     """
 
     full_name = "Singleton experiment aggregation"
-    aliases = ["singleton", "identity"]
+    aliases: typing.ClassVar[list[str]] = ["singleton", "identity"]  # pyright: ignore[reportIncompatibleVariableOverride]
 
     def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_samples, num_experiments = experiment_samples.shape
+        _, num_experiments = experiment_samples.shape
 
         if num_experiments > 1:
             raise ValueError(
@@ -92,7 +93,7 @@ class BetaAggregator(ExperimentAggregator):
     """
 
     full_name = "Beta conflated experiment aggregation"
-    aliases = ["beta", "beta_conflation"]
+    aliases: typing.ClassVar[list[str]] = ["beta", "beta_conflation"]  # pyright: ignore[reportIncompatibleVariableOverride]
 
     def __init__(self, rng: RNG, *, estimation_method: str = "mle") -> None:
         super().__init__(rng=rng)
@@ -110,7 +111,7 @@ class BetaAggregator(ExperimentAggregator):
 
         if bounds[0] == -float("inf") or bounds[1] == float("inf"):
             raise NotImplementedError(
-                "Beta aggregation does not (yet) support metrics with infite bounds.",
+                "Beta aggregation does not (yet) support metrics with infinite bounds.",
             )
 
         alphas = []
@@ -144,7 +145,7 @@ class BetaAggregator(ExperimentAggregator):
                 scale=bounds[1] - bounds[0],
                 random_state=self.rng.rng,
             )
-        )  # type: ignore
+        )
 
         # conflated_distribution_samples = (
         #    bounds[1] - bounds[0]
@@ -181,7 +182,7 @@ class GammaAggregator(ExperimentAggregator):
     """  # noqa: E501
 
     full_name = "Gamma conflated experiment aggregator"
-    aliases = ["gamma", "gamma_conflation"]
+    aliases: typing.ClassVar[list[str]] = ["gamma", "gamma_conflation"]  # pyright: ignore[reportIncompatibleVariableOverride]
 
     def __init__(self, rng: RNG, *, shifted: bool = False) -> None:
         super().__init__(rng=rng)
@@ -213,6 +214,7 @@ class GammaAggregator(ExperimentAggregator):
             if finite_samples.shape[0] < 0.9 * per_experiment_samples.shape[0]:
                 warnings.warn(
                     "An experiment sample has more than 10% non-finite values.",
+                    stacklevel=2,
                 )
 
             alpha, _, beta = scipy.stats.gamma.fit(
@@ -278,14 +280,21 @@ class FEGaussianAggregator(ExperimentAggregator):
     """  # noqa: E501
 
     full_name = "Fixed-effect Gaussian meta-analytical experiment aggregator"
-    aliases = ["fe", "fixed_effect", "fe_gaussian", "gaussian", "normal", "fe_normal"]
+    aliases: typing.ClassVar[list[str]] = [  # pyright: ignore[reportIncompatibleVariableOverride]
+        "fe",
+        "fixed_effect",
+        "fe_gaussian",
+        "gaussian",
+        "normal",
+        "fe_normal",
+    ]
 
     def aggregate(  # noqa: D102
         self,
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_samples, num_experiments = experiment_samples.shape
+        num_samples, _ = experiment_samples.shape
 
         # Estimate the means and variances for each distribution
         means = np.mean(experiment_samples, axis=0)
@@ -365,7 +374,12 @@ class REGaussianAggregator(ExperimentAggregator):
     """  # noqa: E501
 
     full_name = "Random-effects Gaussian meta-analytical experiment aggregator"
-    aliases = ["re", "random_effect", "re_gaussian", "re_normal"]
+    aliases: typing.ClassVar[list[str]] = [  # pyright: ignore[reportIncompatibleVariableOverride]
+        "re",
+        "random_effect",
+        "re_gaussian",
+        "re_normal",
+    ]
 
     def __init__(
         self,
@@ -424,7 +438,7 @@ class REGaussianAggregator(ExperimentAggregator):
             )
 
         else:
-            # Uses Gaussian distrbution
+            # Uses Gaussian distribution
             aggregated_distribution = scipy.stats.norm(
                 loc=agg_mean,
                 scale=np.sqrt(agg_variance),
@@ -467,7 +481,7 @@ class HistogramAggregator(ExperimentAggregator):
     """  # noqa: E501
 
     full_name = "Histrogram approximated conflation experiment aggregation"
-    aliases = ["hist", "histogram"]
+    aliases: typing.ClassVar[list[str]] = ["hist", "histogram"]  # pyright: ignore[reportIncompatibleVariableOverride]
 
     def __init__(
         self,
@@ -484,7 +498,7 @@ class HistogramAggregator(ExperimentAggregator):
         experiment_samples: jtyping.Float[np.ndarray, " num_samples num_experiments"],
         bounds: tuple[float, float],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
-        num_samples, num_experiments = experiment_samples.shape
+        num_samples, _ = experiment_samples.shape
 
         # Find the smallest recommended bin width for all experiments
         min_bin_width = float("inf")
@@ -496,8 +510,7 @@ class HistogramAggregator(ExperimentAggregator):
 
             bin_width = distribution_bins[2] - distribution_bins[1]
 
-            if bin_width < min_bin_width:
-                min_bin_width = bin_width
+            min_bin_width = min(min_bin_width, bin_width)
 
         # Find the support for the aggregated histogram
         # Avoids having lots of zero-count bins
@@ -507,7 +520,7 @@ class HistogramAggregator(ExperimentAggregator):
         bounded_min_min: int = max(min_min - min_bin_width, bounds[0])
         bounded_max_max: int = min(max_max + 2 * min_bin_width, bounds[1])
 
-        found_bins = np.arange(  # type: ignore
+        found_bins = np.arange(  # pyright: ignore[reportCallIssue]
             start=bounded_min_min,
             stop=bounded_max_max,
             step=min_bin_width,
@@ -541,7 +554,7 @@ class HistogramAggregator(ExperimentAggregator):
         # Resample the conflated distribution
         # Samples at the midpoint of each bin
         conflated_distribution_samples = self.rng.choice(
-            (bins[:-1] + bins[1:]) / 2,  # type: ignore
+            (bins[:-1] + bins[1:]) / 2,  # pyright: ignore[reportPossiblyUnboundVariable]
             size=num_samples,
             p=conflated_distribution,
         )

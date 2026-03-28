@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -49,7 +50,7 @@ def listwise_compare(
 
     # Transpose the list of lists
     experiment_names, experiment_scores = list(
-        map(list, zip(*all_experiment_scores)),
+        map(list, zip(*all_experiment_scores, strict=True)),
     )
 
     # Stack the experiments into a [num_samples, num_experiments] array
@@ -74,7 +75,7 @@ def listwise_compare(
     for i in range(num_experiments):
         ranks, counts = np.unique(experiment_ranks[:, i], axis=0, return_counts=True)
 
-        for rank, rank_count in zip(ranks, counts):
+        for rank, rank_count in zip(ranks, counts, strict=True):
             rank_count_matrix[i, rank - 1] = rank_count
 
     # Normalize the matrix

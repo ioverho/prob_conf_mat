@@ -1,17 +1,17 @@
 from __future__ import annotations
+
 import typing
-
-if typing.TYPE_CHECKING:  # pragma: no cover
-    from typing import Literal
-
-    import jaxtyping as jtyping
-
 from dataclasses import dataclass
 
 import numpy as np
 import scipy
 
 from prob_conf_mat.utils.formatting import fmt
+
+if typing.TYPE_CHECKING:  # pragma: no cover
+    from typing import Literal
+
+    import jaxtyping as jtyping
 
 
 def heterogeneity_dl(

@@ -1,5 +1,5 @@
+from .cache import InMemoryCache, NotInCache
 from .formatting import fmt
-from .cache import NotInCache, InMemoryCache
 from .rng import RNG
 from .typing import *
 

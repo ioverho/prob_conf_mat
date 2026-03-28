@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import math
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -10,13 +12,13 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from prob_conf_mat.utils.formatting import fmt
 from prob_conf_mat.stats import (
-    summarize_posterior,
     PosteriorSummary,
-    wilson_score_interval,
     odds,
+    summarize_posterior,
+    wilson_score_interval,
 )
+from prob_conf_mat.utils.formatting import fmt
 
 DELTA = "Δ"
 
@@ -118,7 +120,7 @@ class PairwiseComparisonResult:
             f" p_neg={fmt(self.p_sig_neg, precision=precision, mode='%')}).\n\n"
         )
 
-        if self.bf_rope is not None:
+        if not math.isnan(self.bf_rope):
             # Bidirectional significance to random
             template_sentence += (
                 f"Relative to two random models "
@@ -144,13 +146,7 @@ class PairwiseComparisonResult:
 
 def _pd_interpretation_guideline(
     pd: float,
-) -> (
-    typing.Literal["certain"]
-    | typing.Literal["probable"]
-    | typing.Literal["likely"]
-    | typing.Literal["possible"]
-    | typing.Literal["dubious"]
-):
+) -> typing.Literal["certain", "probable", "likely", "possible", "dubious"]:
     # https://easystats.github.io/bayestestR/articles/guidelines.html#existence
     if pd < 0.0 or pd > 1.0:
         raise ValueError(f"Encountered pd value of {pd}, outside of range (0, 1).")
@@ -174,13 +170,9 @@ def _pd_interpretation_guideline(
 
 def _p_rope_interpretation_guideline(
     p_rope: float,
-) -> (
-    typing.Literal["certain"]
-    | typing.Literal["probable"]
-    | typing.Literal["undecided"]
-    | typing.Literal["probably negligible"]
-    | typing.Literal["negligible"]
-):
+) -> typing.Literal[
+    "certain", "probable", "undecided", "probably negligible", "negligible"
+]:
     # https://easystats.github.io/bayestestR/articles/guidelines.html#significance
     if p_rope < 0.0 or p_rope > 1.0:
         raise ValueError(f"Encountered p_rope value of {p_rope}, outside of range.")
@@ -206,7 +198,7 @@ def pairwise_compare(
     metric: MetricLike,
     diff_dist: jtyping.Float[np.ndarray, " num_samples"],
     ci_probability: float,
-    min_sig_diff: float | None = None,  # type: ignore
+    min_sig_diff: float | None = None,  # pyright: ignore[reportRedeclaration]
     lhs_name: str | None = None,
     rhs_name: str | None = None,
     random_diff_dist: jtyping.Float[np.ndarray, " num_samples"] | None = None,
@@ -240,15 +232,15 @@ def pairwise_compare(
 
     # Probability of existence
     if diff_dist_summary.median > 0:
-        pd: float = np.mean(diff_dist > 0)  # type: ignore
+        pd: float = np.mean(diff_dist > 0)  # pyright: ignore[reportAssignmentType, reportRedeclaration]
     else:
-        pd: float = np.mean(diff_dist < 0)  # type: ignore
+        pd: float = np.mean(diff_dist < 0)  # pyright: ignore[reportAssignmentType]
 
     pd_interpretation = _pd_interpretation_guideline(pd=pd)
 
     # Define a default ROPE
     if min_sig_diff is None:
-        min_sig_diff: float = 0.1 * np.std(diff_dist)  # type: ignore
+        min_sig_diff: float = 0.1 * np.std(diff_dist)  # pyright: ignore[reportAssignmentType]
 
     # Count the number of instances within each bin
     # Significantly negative, within ROPE, significantly positive
@@ -271,9 +263,9 @@ def pairwise_compare(
         bf_rope = odds(p_rope) / odds(p_rope_random)
 
     else:
-        p_bi_sig_random = None
-        p_rope_random = None
-        bf_rope = None
+        p_bi_sig_random = float("nan")
+        p_rope_random = float("nan")
+        bf_rope = float("nan")
 
     result = PairwiseComparisonResult(
         # Admin
@@ -305,8 +297,8 @@ def pairwise_compare(
             n=diff_dist.shape[0],
         ),
         # Significance relative to random
-        p_rope_random=p_rope_random,  # type: ignore
-        bf_rope=bf_rope,  # type: ignore
+        p_rope_random=p_rope_random,  # pyright: ignore[reportArgumentType]
+        bf_rope=bf_rope,  # pyright: ignore[reportArgumentType]
         # Unidirectional significance
         p_uni_sig=p_sig_pos if diff_dist_summary.median > 0 else p_sig_neg,
         p_uni_sig_score_interval_width=wilson_score_interval(

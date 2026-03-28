@@ -24,6 +24,26 @@
   <img alt="PyPI - Version" src="https://img.shields.io/pypi/v/prob_conf_mat">
 </a>
 
+</div>
+
+<div style="text-align: center;" align="center">
+
+<a href="https://docs.basedpyright.com" >
+  <img alt="basedpyright - checked" src="https://img.shields.io/endpoint?url=https://docs.basedpyright.com/latest/badge.json">
+</a>
+
+<a href="https://github.com/astral-sh/ruff" >
+  <img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json">
+</a>
+
+<a href="https://github.com/j178/prek" >
+  <img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json">
+</a>
+
+</div>
+
+<div style="text-align: center;" align="center">
+
 <h1>Probabilistic Confusion Matrices</h1>
 
 </div>
@@ -95,120 +115,15 @@ The documentation is broadly divided into 4 sections:
 | **Practical**   | [Getting Started](https://ioverho.github.io/prob_conf_mat/getting_started/)                       | [How-To Guides](https://ioverho.github.io/prob_conf_mat/how_to/configuration/) |
 | **Theoretical** | [Explanation](https://ioverho.github.io/prob_conf_mat/explanation/generating_confusion_matrices/) | [Reference](https://ioverho.github.io/prob_conf_mat/reference/Study/)          |
 
-## Quick Start
-
-In depth tutorials taking you through all basic steps are available on the [documentation site](https://ioverho.github.io/prob_conf_mat/getting_started/). For the impatient, here's a standard use case.
-
-First define a study, and set some sensible hyperparameters for the simulated confusion matrices.
-
-```python
-from prob_conf_mat import Study
-
-study = Study(
-    seed=0,
-    num_samples=10000,
-    ci_probability=0.95,
-)
-```
-
-Then add an Experiment and confusion matrix to the study:
-
-```python
-study.add_experiment(
-  experiment_name="model_1/fold_0",
-  confusion_matrix=[
-    [13, 0, 0],
-    [0, 10, 6],
-    [0,  0, 9],
-  ],
-  confusion_prior=0,
-  prevalence_prior=1,
-)
-```
-
-Finally, add some metrics to the study:
-
-```python
-study.add_metric("acc")
-```
-
-We are now ready to start generating summary statistics about this experiment. For example:
-
-```python
-study.report_metric_summaries(
-  metric="acc",
-  table_fmt="github"
-)
-```
-
-| Group   | Experiment | Observed | Median | Mode   | 95.0% HDI        | MU     | Skew    | Kurt   |
-| ------- | ---------- | -------- | ------ | ------ | ---------------- | ------ | ------- | ------ |
-| model_1 | fold_0     | 0.8421   | 0.8499 | 0.8673 | [0.7307, 0.9464] | 0.2157 | -0.5627 | 0.2720 |
-
-So while this experiment achieves an accuracy of 84.21%, a more reasonable estimate (given the size of the test set, and) would be 84.99%. There is a 95% probability that the true accuracy lies between 73.07%-94.64%.
-
-Visually that looks something like:
-
-```python
-fig = study.plot_metric_summaries(metric="acc")
-```
-
-<img alt="Metric distribution" src="docs/assets/figures/readme/uncertainty_fig.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
-
-Now let's add a confusion matrix for the same model, but estimated using a different fold. We want to know what the average performance is for that model across the different folds:
-
-```python
-study.add_experiment(
-  experiment_name="model_1/fold_1",
-  confusion_matrix=[
-      [12, 1, 0],
-      [1, 8, 7],
-      [0, 2, 7],
-  ],
-  confusion_prior=0,
-  prevalence_prior=1,
-)
-```
-
-We can equip each metric with an inter-experiment aggregation method, and we can then request summary statistics about the aggregate performance of the experiments using `'model_1'`:
-
-```python
-study.add_metric(
-    metric="acc",
-    aggregation="beta",
-)
-
-fig = study.plot_forest_plot(metric="acc")
-```
-
-<img alt="Forest plot" src="docs/assets/figures/readme/forest_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
-
-Note that estimated aggregate accuracy has much less uncertainty (a smaller HDI/MU).
-
-These experiments seem pretty different. But is this difference significant? Let's assume that for this example a difference needs to be at least `'0.05'` to be considered significant. In that case, we can quickly request the probability of their difference:
-
-```python
-fig = study.plot_pairwise_comparison(
-    metric="acc",
-    experiment_a="model_1/fold_0",
-    experiment_b="model_1/fold_1",
-    min_sig_diff=0.05,
-)
-```
-
-<img alt="Comparison plot" src="docs/assets/figures/readme/comparison_plot.svg" width="80%" style="display: block;margin-left: auto;margin-right: auto; max-width: 500;">
-
-There's about an 82% probability that the difference is in fact significant. While likely, there isn't quite enough data to be sure.
-
 ## Development
 
 This project was developed using the following (amazing) tools:
 
 1. Package management: [`uv`](https://docs.astral.sh/uv/)
 2. Linting: [`ruff`](https://docs.astral.sh/ruff/)
-3. Static Type-Checking: [`pyright`](https://microsoft.github.io/pyright/)
-4. Documentation: [`mkdocs`](https://www.mkdocs.org/)
-5. CI: [`pre-commit`](https://pre-commit.com/)
+3. Static Type-Checking: [`basedpyright`](https://docs.basedpyright.com)
+4. Documentation: [`zensical`](https://zensical.org/docs/get-started/)
+5. Pre-commit: [`prek`](https://prek.j178.dev/)
 
 Most of the common development commands are included in `./Makefile`. If `make` is installed, you can immediately run the following commands:
 
@@ -219,6 +134,7 @@ Usage:
 Utility
   help             Display this help
   hello-world      Tests uv and make
+  clean            Clean up caches and build artifacts
 
 Environment
   install          Install default dependencies
@@ -232,10 +148,11 @@ Testing, Linting, Typing & Formatting
   lint             Run linting
   type             Run static typechecking
   commit           Run pre-commit checks
+  commit-log       Run pre-commit checks in verbose mode and log output to external file
 
 Documentation
-  mkdocs           Update the docs
-  mkdocs-serve     Serve documentation site
+  docs-build       Update the docs
+  docs-serve       Serve documentation site
 ```
 
 ## Credits

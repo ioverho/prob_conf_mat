@@ -1,5 +1,5 @@
-import numpy as np
 import jaxtyping as jtyping
+import numpy as np
 
 from prob_conf_mat.metrics.abc import Metric
 
@@ -31,7 +31,7 @@ class MeanAbsoluteError(Metric):
     bounds = (0.0, float("inf"))
     dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = "mean_absolute_error"
-    aliases = ["mean_absolute_error", "mae"]
+    aliases = ("mean_absolute_error", "mae")
 
     def compute_metric(  # noqa: D102
         self,
@@ -89,7 +89,7 @@ class MeanSquaredError(Metric):
     bounds = (0.0, float("inf"))
     dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = "mean_squared_error"
-    aliases = ["mean_squared_error", "mean_square_error", "mse"]
+    aliases = ("mean_squared_error", "mean_square_error", "mse")
 
     def compute_metric(  # noqa: D102
         self,
@@ -149,7 +149,7 @@ class RootMeanSquaredError(Metric):
     bounds = (0.0, float("inf"))
     dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = "root_mean_squared_error"
-    aliases = ["root_mean_squared_error", "root_mean_square_error", "rmse"]
+    aliases = ("root_mean_squared_error", "root_mean_square_error", "rmse")
 
     def compute_metric(  # noqa: D102
         self,
@@ -218,7 +218,7 @@ class OffByOneAccuracy(Metric):
     bounds = (0.0, 1.0)
     dependencies = ("norm_confusion_matrix",)
     sklearn_equivalent = None
-    aliases = [
+    aliases = (
         "offby1",
         "offbyone",
         "1off",
@@ -226,7 +226,7 @@ class OffByOneAccuracy(Metric):
         "oneoff",
         "adjacc",
         "adjacent_accuracy",
-    ]
+    )
 
     def compute_metric(  # noqa: D102
         self,
@@ -300,7 +300,7 @@ class PolynomialWeightedKappa(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("norm_confusion_matrix", "p_condition", "p_pred")
     sklearn_equivalent = None
-    aliases = ["polynomial_weighted_kappa", "pwkappa"]
+    aliases = ("polynomial_weighted_kappa", "pwkappa")
 
     def __init__(self, power: float = 1.0):
         super().__init__()
@@ -330,7 +330,6 @@ class PolynomialWeightedKappa(Metric):
 
         omega = (omega_numerator**self.power) / (omega_denominator**self.power)
 
-        #
         numerator = omega[np.newaxis, :, :] * norm_confusion_matrix
         denominator = omega[np.newaxis, :, :] * np.einsum(
             "bc, bd->bcd", p_condition, p_pred

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -7,7 +8,6 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     from prob_conf_mat.utils import RNG
 
 import numpy as np
-
 
 _DIRICHLET_PRIOR_STRATEGIES = {
     "bayes-laplace": 1.0,
@@ -27,7 +27,7 @@ _DIRICHLET_PRIOR_STRATEGIES = {
 
 # TODO: add support for other dtypes
 def dirichlet_prior(
-    strategy: str | float | int | jtyping.Float[np.typing.ArrayLike, " ..."],
+    strategy: str | float | jtyping.Float[np.typing.ArrayLike, " ..."],
     shape: tuple[int, ...],
 ) -> jtyping.Float[np.ndarray, " ..."]:
     """Creates a prior array for a Dirichlet distribution.
@@ -46,8 +46,10 @@ def dirichlet_prior(
     elif isinstance(strategy, str):
         if strategy not in _DIRICHLET_PRIOR_STRATEGIES:
             raise ValueError(
-                f"Prior strategy `{strategy}` not recognized. "
-                f"Choose one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}",
+                (
+                    f"Prior strategy `{strategy}` not recognized. "
+                    f"Choose one of: {set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
+                ),
             )
 
         strategy_fill_value = _DIRICHLET_PRIOR_STRATEGIES[strategy]
@@ -57,16 +59,21 @@ def dirichlet_prior(
         try:
             # TODO: control dtype
             prior = np.array(strategy, dtype=np.float64)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise ValueError(
-                f"While trying to convert {strategy} to a numpy array, "
-                f"received the following error:\n{e}",
-            )
+                (
+                    f"While trying to convert {strategy} to a numpy array, "
+                    f"received the following error:\n{e}"
+                ),
+            ) from e
 
         if prior.shape != shape:
             raise ValueError(
-                f"Prior does not match required shape, {prior.shape} != {shape}. "
-                f"Parsed {prior} of type {type(prior)} from {strategy} fo type {type(strategy)}.",
+                (
+                    f"Prior does not match required shape, {prior.shape} != {shape}. "
+                    f"Parsed {prior} of type {type(prior)} "
+                    f"from {strategy} of type {type(strategy)}."
+                ),
             )
 
     return prior

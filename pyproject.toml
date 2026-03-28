@@ -46,6 +46,7 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.38.1",
     "beautifulsoup4>=4.13.5",
     "griffe-inherited-docstrings>=1.1.2",
     "mkdocs>=1.6.1",
@@ -58,8 +59,7 @@ dev = [
     "opt-einsum>=3.4.0",
     "pandas>=2.3.3",
     "pip>=25.3",
-    "pre-commit>=4.5.1",
-    "pyright>=1.1.407",
+    "prek>=0.3.3",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "python-markdown-math>=0.9",
@@ -94,7 +94,8 @@ extend-exclude = [
     'tests/*',
     '**/mkdocs.py',
     '**/*ignore*/*',
-    '**/examples/*.ipynb',
+    'docs/**/*.ipynb',
+    "**/__init__.py",
 ]
 builtins = ["jtyping"]
 
@@ -124,6 +125,7 @@ ignore = [
     "SIM118",
     "PD011",
     "ARG002",
+    "RUF002",
 ]
 
 extend-select = [
@@ -203,6 +205,7 @@ exclude = [
     '**/tests*',
     '**/dev*',
     '**/klad*',
+    '**/__init__.py',
 ]
 venvPath = "."
 venv = ".venv"

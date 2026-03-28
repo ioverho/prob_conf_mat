@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -20,7 +21,7 @@ class MacroAverage(Averaging):
     full_name = "Macro Averaging"
     dependencies = ()
     sklearn_equivalent = "macro"
-    aliases = ["macro", "macro_average", "mean"]
+    aliases = ("macro", "macro_average", "mean")
 
     def compute_average(  # noqa: D102
         self,
@@ -41,7 +42,7 @@ class WeightedAverage(Averaging):
     full_name = "Class Prevalence Weighted Averaging"
     dependencies = ("p_condition",)
     sklearn_equivalent = "weighted"
-    aliases = ["weighted", "weighted_average", "micro", "micro_average"]
+    aliases = ("weighted", "weighted_average", "micro", "micro_average")
 
     def compute_average(  # noqa: D102
         self,
@@ -69,7 +70,7 @@ class SelectPositiveClass(Averaging):
     full_name = "Select Positive Class"
     dependencies = ()
     sklearn_equivalent = "binary"
-    aliases = ["select_positive", "binary", "select"]
+    aliases = ("select_positive", "binary", "select")
 
     def __init__(self, positive_class: int = -1) -> None:
         super().__init__()
@@ -96,7 +97,7 @@ class HarmonicMean(Averaging):
     full_name = "Harmonic Mean Averaging"
     dependencies = ()
     sklearn_equivalent = None
-    aliases = ["harmonic", "harm"]
+    aliases = ("harmonic", "harm")
 
     def compute_average(  # noqa: D102
         self,
@@ -117,7 +118,7 @@ class GeometricMean(Averaging):
     full_name = "Geometric Mean Averaging"
     dependencies = ()
     sklearn_equivalent = None
-    aliases = ["geometric", "geom"]
+    aliases = ("geometric", "geom")
 
     def compute_average(  # noqa: D102
         self,
@@ -138,7 +139,7 @@ class Minimum(Averaging):
     full_name = "Minimum"
     dependencies = ()
     sklearn_equivalent = None
-    aliases = ["min", "minimum"]
+    aliases = ("min", "minimum")
 
     def compute_average(  # noqa: D102
         self,
@@ -159,7 +160,7 @@ class Maximum(Averaging):
     full_name = "Maximum"
     dependencies = ()
     sklearn_equivalent = None
-    aliases = ["max", "maximum"]
+    aliases = ("max", "maximum")
 
     def compute_average(  # noqa: D102
         self,

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -34,7 +35,7 @@ def numpy_batched_harmonic_mean(
     *,
     keepdims: bool = True,
 ) -> jtyping.Float[np.ndarray, "... 1 ..."]:
-    """Computes the [harmonic mean](https://en.wikipedia.org/wiki/Harmonic_mean) over an axis."""  # noqa: E501
+    """Computes the [harmonic mean](https://en.wikipedia.org/wiki/Harmonic_mean) over an axis."""
     return np.power(np.mean(np.power(array, -1), axis=axis, keepdims=keepdims), -1)
 
 
@@ -44,5 +45,5 @@ def numpy_batched_geometric_mean(
     *,
     keepdims: bool = True,
 ) -> jtyping.Float[np.ndarray, "... 1 ..."]:
-    """Computes the [weighted mean](https://en.wikipedia.org/wiki/Geometric_mean) over an axis."""  # noqa: E501
+    """Computes the [weighted mean](https://en.wikipedia.org/wiki/Geometric_mean) over an axis."""
     return np.exp(np.mean(np.log(array), axis=axis, keepdims=keepdims))

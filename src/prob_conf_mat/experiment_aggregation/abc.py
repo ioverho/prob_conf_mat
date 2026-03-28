@@ -1,23 +1,27 @@
+# pyright: reportImportCycles=false
+# Circular import caused by type hints
+# Currently, basedpyright identifies this as an error
+# Should be a warning
 from __future__ import annotations
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:  # pragma: no cover
-    import jaxtyping as jtyping
-
-    from prob_conf_mat.experiment_group import ExperimentGroup
-    from prob_conf_mat.experiment import ExperimentResult
-    from prob_conf_mat.experiment_aggregation.heterogeneity import HeterogeneityResult
-    from prob_conf_mat.utils import RNG
-    from prob_conf_mat.utils.typing import MetricLike
 
 import inspect
 import typing
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from prob_conf_mat.experiment_aggregation.heterogeneity import estimate_i2
+
+if TYPE_CHECKING:  # pragma: no cover
+    import jaxtyping as jtyping
+
+    from prob_conf_mat.experiment import ExperimentResult
+    from prob_conf_mat.experiment_aggregation.heterogeneity import HeterogeneityResult
+    from prob_conf_mat.experiment_group import ExperimentGroup
+    from prob_conf_mat.utils import RNG
+    from prob_conf_mat.utils.typing import MetricLike
 
 AGGREGATION_REGISTRY = dict()
 
@@ -35,19 +39,19 @@ class ExperimentAggregator(metaclass=ABCMeta):
         self.rng: RNG = rng
         self._init_params: dict[typing.Any, typing.Any] = dict()
 
-    def __init_subclass__(cls, **kwargs) -> None:
+    def __init_subclass__(cls, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
         # Make sure that all aliases are unique
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             if alias in AGGREGATION_REGISTRY:
                 raise ValueError(
-                    f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}.",  # noqa: E501
+                    f"Alias '{alias}' not unique. Currently used by {AGGREGATION_REGISTRY[alias]}.",
                 )
 
         # Register =============================================================
-        for alias in cls.aliases:  # type: ignore
+        for alias in cls.aliases:
             AGGREGATION_REGISTRY[alias] = cls
 
         cls._kwargs = {
@@ -57,7 +61,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def full_name(self) -> str:  # type: ignore
+    def full_name(self) -> str:  # pyright: ignore[reportRedeclaration]
         """A human-readable name for this experiment-aggregation method."""
         raise NotImplementedError
 
@@ -65,7 +69,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def aliases(self) -> list[str]:  # type: ignore
+    def aliases(self) -> list[str]:  # pyright: ignore[reportRedeclaration]
         """A list of all valid aliases for this metric. Can be used in configuration files."""
         raise NotImplementedError
 
@@ -98,7 +102,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def _mappable_aggregate(self, kwargs: dict):
+    def _mappable_aggregate(self, kwargs: dict):  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         return self.aggregate(**kwargs)
 
     def __call__(
@@ -131,7 +135,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
                 " num_samples",
             ] = self.aggregate(
                 experiment_samples=per_class_stacked_experiment_results,
-                bounds=metric.bounds,  # type: ignore
+                bounds=metric.bounds,
             )
 
             all_class_aggregated_experiment_result.append(
@@ -146,11 +150,11 @@ class ExperimentAggregator(metaclass=ABCMeta):
         aggregated_experiment_result: jtyping.Float[
             np.ndarray,
             " num_samples #num_classes",
-        ] = np.stack(all_class_aggregated_experiment_result, axis=1)  # type: ignore
+        ] = np.stack(all_class_aggregated_experiment_result, axis=1)
 
         result = ExperimentAggregationResult(
             experiment_group=experiment_group,
-            aggregator=self,  # type: ignore
+            aggregator=self,
             metric=metric,
             heterogeneity_results=all_class_heterogeneity,
             values=aggregated_experiment_result,
@@ -158,16 +162,16 @@ class ExperimentAggregator(metaclass=ABCMeta):
 
         return result
 
-    def __repr__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:
         return f"ExperimentAggregator({self.name})"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __str__(self) -> str:
         return f"ExperimentAggregator({self.name})"
 
-    def __eq__(self, other: object) -> bool:  # noqa: D105
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.name == other.name
 
-    def __hash__(self):  # noqa: D105
+    def __hash__(self) -> int:
         return hash(self.name)
 
 

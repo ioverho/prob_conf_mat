@@ -9,9 +9,9 @@ import re
 from functools import cache
 
 from prob_conf_mat.metrics.abc import (
-    _ROOT_METRICS,
-    METRIC_REGISTRY,
+    _ROOT_METRICS,  # pyright: ignore[reportPrivateUsage]
     AVERAGING_REGISTRY,
+    METRIC_REGISTRY,
     AveragedMetric,
     RootMetric,
 )
@@ -75,9 +75,11 @@ def get_metric(syntax_string: str) -> MetricLike:
 
     else:
         raise ValueError(
-            f"Metric alias must be registered. "
-            f"Currently: {metric_name}. "
-            f"Must be one of {set(METRIC_REGISTRY.keys())}",
+            (
+                f"Metric alias must be registered. "
+                f"Currently: {metric_name}. "
+                f"Must be one of {set(METRIC_REGISTRY.keys())}"
+            ),
         )
 
     # Parse and pass the kwargs for the metric function ========================
@@ -90,8 +92,10 @@ def get_metric(syntax_string: str) -> MetricLike:
     unterminated_kwargs = UNTERMINATED_ARGUMENT_REGEX.findall(metric_string)
     if len(unterminated_kwargs) != len(metric_kwargs):
         raise ValueError(
-            f"Found potentially unterminated kwarg in: {metric_string}. "
-            "Make sure kwargs are written as '+foo=bar'",
+            (
+                f"Found potentially unterminated kwarg in: {metric_string}. "
+                "Make sure kwargs are written as '+foo=bar'"
+            ),
         )
 
     metric_instance = metric_class(**metric_kwargs)
@@ -111,12 +115,14 @@ def get_metric(syntax_string: str) -> MetricLike:
 
         try:
             averaging_class = AVERAGING_REGISTRY[averaging_name]
-        except KeyError:
+        except KeyError as e:
             raise ValueError(
-                f"Averaging alias must be registered. "
-                f"Currently: {averaging_name}. "
-                f"Must be one of {set(AVERAGING_REGISTRY.keys())}",
-            )
+                (
+                    f"Averaging alias must be registered. "
+                    f"Currently: {averaging_name}. "
+                    f"Must be one of {set(AVERAGING_REGISTRY.keys())}"
+                ),
+            ) from e
 
         # Parse and pass the kwargs for the metric function ========================
         averaging_kwargs = ARGUMENT_REGEX.findall(averaging_string)
@@ -128,8 +134,10 @@ def get_metric(syntax_string: str) -> MetricLike:
         unterminated_kwargs = UNTERMINATED_ARGUMENT_REGEX.findall(averaging_string)
         if len(unterminated_kwargs) != len(averaging_kwargs):
             raise ValueError(
-                f"Found potentially unterminated kwarg in: {averaging_string}. "
-                "Make sure kwargs are written as '+foo=bar'",
+                (
+                    f"Found potentially unterminated kwarg in: {averaging_string}. "
+                    "Make sure kwargs are written as '+foo=bar'"
+                ),
             )
 
         averaging_instance = averaging_class(**averaging_kwargs)
@@ -140,7 +148,7 @@ def get_metric(syntax_string: str) -> MetricLike:
             averaging=averaging_instance,
         )
 
-        composed_metric_instance._instantiation_name = syntax_string  # type: ignore
+        composed_metric_instance._instantiation_name = syntax_string  # pyright: ignore[reportPrivateUsage]
 
         return composed_metric_instance
 

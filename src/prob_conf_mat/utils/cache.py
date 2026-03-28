@@ -7,8 +7,6 @@ from dataclasses import dataclass
 class NotInCache:
     """The requested element is not in the cache."""
 
-    pass
-
 
 class NestedCache:
     """Recursive defaultdict for caching things recursively.
@@ -30,14 +28,14 @@ class NestedCache:
         self._cache = self.nested_dict()
         self.fingerprint = None
 
-    def nested_dict(self):
+    def nested_dict(self) -> defaultdict:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
         """Generates a recursive default dict."""
         return defaultdict(self.nested_dict)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> typing.Any:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         return self._cache[key]
 
-    def _get(self, dd, keys, i: int):
+    def _get(self, dd, keys, i: int) -> type[NotInCache] | typing.Any:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         # Recursively look up elements in cache
         # First check current layer
         obj = dd.get(keys[i], NotInCache)
@@ -54,8 +52,8 @@ class NestedCache:
     def load(
         self,
         fingerprint: str,
-        keys,
-        default=NotInCache,
+        keys,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        default=NotInCache,  # pyright: ignore[reportMissingParameterType]
     ) -> type[NotInCache] | typing.Any:
         """Loads the element stored at keys in the cache."""
         if fingerprint != self.fingerprint:
@@ -69,7 +67,7 @@ class NestedCache:
             return default
         return result
 
-    def _set(self, dd, value, keys, i: int):
+    def _set(self, dd, value, keys, i: int):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         # Recursively set elements in cache
         # If we've exhausted the list of keys,
         # set the value
@@ -81,7 +79,7 @@ class NestedCache:
         else:
             self._set(dd[keys[i]], value=value, keys=keys, i=i + 1)
 
-    def cache(self, fingerprint: str, keys: list[typing.Any], value) -> None:
+    def cache(self, fingerprint: str, keys: list[typing.Any], value) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
         """Caches an element at keys."""
         if fingerprint != self.fingerprint:
             self.clean()
@@ -114,6 +112,7 @@ class NestedCache:
 
 class InMemoryCache(NestedCache):
     """A recursive cache that is stored entirely in-memory."""
+
     def clean(self) -> None:
         """Destroys the current cache state."""
         self._cache = self.nested_dict()

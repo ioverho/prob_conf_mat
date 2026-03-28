@@ -1,19 +1,20 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    import numpy as np
     import jaxtyping as jtyping
+    import numpy as np
 
-    from prob_conf_mat.metrics import MetricCollection
     from prob_conf_mat.experiment import ExperimentResult
     from prob_conf_mat.experiment_aggregation import ExperimentAggregator
     from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
+    from prob_conf_mat.metrics import MetricCollection
     from prob_conf_mat.utils import RNG, MetricLike
 
 from collections import OrderedDict
-from warnings import warn
 from dataclasses import dataclass
+from warnings import warn
 
 from prob_conf_mat.experiment import Experiment, ExperimentResult
 from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
@@ -36,7 +37,7 @@ class ExperimentGroup:
     The results across experiments can be aggregated to give an average result for the group.
 
     For example, this could represent the same model evaluated across different folds of the same
-    dataset. Or they could be results on te same dataset from models with different
+    dataset. Or they could be results on the same dataset from models with different
     weight initializations.
 
     Args:
@@ -128,9 +129,10 @@ class ExperimentGroup:
 
         # Check if this experiment already exists
         # Overwrite if so
-        if self.experiments.get(name, None) is not None:  # type: ignore
+        if self.experiments.get(name, None) is not None:
             warn(
                 message=f"Experiment '{self.name}/{name}' already exists. Overwriting.",
+                stacklevel=2,
             )
 
         # Finally, add the experiment to the experiment store
@@ -155,7 +157,7 @@ class ExperimentGroup:
 
         return self.experiments[key]
 
-    def sample_metrics(  # noqa: D102
+    def sample_metrics(
         self,
         metrics: MetricCollection,
         sampling_method: str,
@@ -179,7 +181,7 @@ class ExperimentGroup:
             MetricLike,
             list[ExperimentResult],
         ] = {metric: [] for metric in metrics.get_insert_order()}
-        for _, experiment in self.experiments.items():
+        for experiment in self.experiments.values():
             all_metrics_experiment_result: dict[MetricLike, ExperimentResult] = (
                 experiment.sample_metrics(
                     metrics=metrics,
@@ -227,7 +229,7 @@ class ExperimentGroup:
                 experiment_group=self,
                 metric=metric,
                 experiment_results=experiment_results,
-            )  # type: ignore
+            )
 
             all_metrics_experiment_aggregation_result[metric] = (
                 experiment_aggregation_result
@@ -267,8 +269,8 @@ class ExperimentGroup:
             individual_experiment_results=all_metrics_experiment_results_cleaned,
         )
 
-    def __repr__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:
         return f"ExperimentGroup({self.name})"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __str__(self) -> str:
         return f"ExperimentGroup({self.name})"

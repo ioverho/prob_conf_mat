@@ -57,15 +57,16 @@ lint: ## Run linting
 .PHONY: type
 type: ## Run static typechecking
 	@mkdir --parents ./tests/logs/pyright
-	@uv run --dev pyright > ./tests/logs/pyright/report
+	@uv run --dev basedpyright > ./tests/logs/pyright/report
 
 .PHONY: commit
 commit: ## Run pre-commit checks
-	@uv run --dev pre-commit run --verbose
+	@uv run --dev prek run
 
-.PHONY: commit-all
-commit: ## Run pre-commit checks
-	@uv run --dev pre-commit run --verbose --all-files
+.PHONY: commit-log
+commit-log: ## Run pre-commit checks in verbose mode and log output to external file
+	@mkdir --parents ./tests/logs/prek
+	@uv run --dev prek run --all-files --verbose > ./tests/logs/prek/prek.log
 
 ##@ Documentation
 .PHONY: docs-build

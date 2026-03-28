@@ -1,4 +1,3 @@
-from .summary import summarize_posterior, PosteriorSummary
 from .batched_averaging import (
     numpy_batched_arithmetic_mean,
     numpy_batched_convex_combination,
@@ -10,7 +9,8 @@ from .dirichlet_distribution import (
     dirichlet_prior,
     dirichlet_sample,
 )
-from .score_interval import wilson_score_interval
-from .truncated_sampling import truncated_sample
 from .hdi_estimation import hdi_estimator
 from .probability import odds
+from .score_interval import wilson_score_interval
+from .summary import PosteriorSummary, summarize_posterior
+from .truncated_sampling import truncated_sample

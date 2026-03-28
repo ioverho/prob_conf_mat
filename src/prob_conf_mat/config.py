@@ -1,17 +1,67 @@
-from collections import OrderedDict
 import hashlib
 import pickle
 import time
 import typing
 import warnings
+from collections import OrderedDict
 
 import numpy as np
 
-from prob_conf_mat.metrics import get_metric
 from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
 from prob_conf_mat.io import validate_confusion_matrix
-from prob_conf_mat.stats import _DIRICHLET_PRIOR_STRATEGIES  # pyright: ignore[reportPrivateUsage]
+from prob_conf_mat.metrics import get_metric
+from prob_conf_mat.stats import (
+    _DIRICHLET_PRIOR_STRATEGIES,  # pyright: ignore[reportPrivateUsage]
+)
 from prob_conf_mat.utils import RNG
+
+
+def _generate_default_value(parameter_name: str):
+    match parameter_name:
+        case "seed":
+            value = int(time.time() * 256)
+
+            warnings.warn(
+                f"Received `None` as seed. Defaulting to fractional seconds: {value}",
+                category=ConfigWarning,
+                stacklevel=2,
+            )
+
+            return value
+
+        case "num_samples":
+            value = 10000
+
+            warnings.warn(
+                message=(
+                    "Parameter `num_samples` is `None`. "
+                    f"Setting to default value of {value}. "
+                    "This value is arbitrary, however, and should be carefully considered."
+                ),
+                category=ConfigWarning,
+                stacklevel=2,
+            )
+
+            return value
+
+        case "ci_probability":
+            value = 0.95
+
+            warnings.warn(
+                message=(
+                    f"Parameter `ci_probability` is `None`. Setting to default value of {value}. "
+                    "This value is arbitrary, however, and should be carefully considered."
+                ),
+                category=ConfigWarning,
+                stacklevel=2,
+            )
+
+            return value
+
+        case _:
+            raise ConfigError(
+                f"Do not know how to set default value for parameter {parameter_name}"
+            )
 
 
 class ConfigWarning(Warning):
@@ -36,7 +86,7 @@ class Config:
     Args:
         seed (int, optional): the random seed used to initialise the RNG. Defaults to the current
             time, in fractional seconds.
-        num_samples (int, optional): the number of syntehtic confusion matrices to sample. A higher
+        num_samples (int, optional): the number of synthetic confusion matrices to sample. A higher
             value is better, but more computationally expensive. Defaults to 10000, the minimum
             recommended value.
         ci_probability (float, optional): the size of the credibility intervals to compute.
@@ -82,39 +132,34 @@ class Config:
         """
         return self._seed
 
-    def _validate_seed(self, value: int | None) -> int:
+    def _validate_seed(self, value: int | None) -> int:  # pyright: ignore[reportRedeclaration]
         # Handle default seed
         if value is None:
-            value = int(time.time() * 256)
-
-            warnings.warn(
-                f"Recieved `None` as seed. Defaulting to fractional seconds: {value}",
-                category=ConfigWarning,
-            )
+            value: int = _generate_default_value("seed")  # pyright: ignore[reportAssignmentType]
 
         # Handle seed of wrong type
-        else:
-            if not isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
-                try:  # pyright: ignore[reportUnreachable]
-                    initial_value_type = type(value)  # pyright: ignore[reportUnreachable]
-                    value = int(value)
+        elif not isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
+            try:  # pyright: ignore[reportUnreachable]
+                initial_value_type = type(value)  # pyright: ignore[reportUnreachable]
+                value = int(value)
 
-                    warnings.warn(
-                        (
-                            f"Parameter `seed` must be a positive integer. "
-                            f"Received: {initial_value_type}. Parsed as: {value}"
-                        ),
-                        category=ConfigWarning,
-                    )
+                warnings.warn(
+                    (
+                        f"Parameter `seed` must be a positive integer. "
+                        f"Received: {initial_value_type}. Parsed as: {value}"
+                    ),
+                    category=ConfigWarning,
+                    stacklevel=2,
+                )
 
-                except Exception as e:  # noqa: BLE001
-                    raise TypeError(  # pyright: ignore[reportUnreachable]
-                        (
-                            f"Parameter `seed` must be a positive integer. "
-                            f"Currently: {type(value)}. While trying to convert"
-                            f"encountered the following exception: {e}"
-                        ),
-                    )
+            except Exception as e:
+                raise TypeError(  # pyright: ignore[reportUnreachable]
+                    (
+                        f"Parameter `seed` must be a positive integer. "
+                        f"Currently: {type(value)}. While trying to convert"
+                        f"encountered the following exception: {e}"
+                    ),
+                ) from e
 
         # Validate seed value
         if value < 0:
@@ -125,7 +170,7 @@ class Config:
         return value
 
     @seed.setter
-    def seed(self, value: int | None) -> None:
+    def seed(self, value: int | None) -> None:  # pyright: ignore[reportPropertyTypeMismatch]
         value_: int = self._validate_seed(value=value)
 
         self._seed = value_  # pyright: ignore[reportUninitializedInstanceVariable]
@@ -141,43 +186,34 @@ class Config:
         """
         return self._num_samples
 
-    def _validate_num_samples(self, value: int | None) -> int:
+    def _validate_num_samples(self, value: int | None) -> int:  # pyright: ignore[reportRedeclaration]
         # Handle default parameter
         if value is None:
-            warnings.warn(
-                message=(
-                    "Parameter `num_samples` is `None`. "
-                    "Setting to default value of 10000. "
-                    "This value is arbitrary, however, and should be carefully considered."
-                ),
-                category=ConfigWarning,
-            )
-
-            value = 10000
+            value: int = _generate_default_value("num_samples")  # pyright: ignore[reportAssignmentType]
 
         # Handle parameter of wrong type
-        else:
-            if not isinstance(value, int):
-                try:
-                    initial_value_type = type(value)
-                    value = int(value)
+        elif not isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
+            try:  # pyright: ignore[reportUnreachable]
+                initial_value_type = type(value)  # pyright: ignore[reportUnreachable]
+                value = int(value)
 
-                    warnings.warn(
-                        (
-                            f"Parameter `num_samples` must be a strictly positive integer. "
-                            f"Received: {initial_value_type}. Parsed as: {value}"
-                        ),
-                        category=ConfigWarning,
-                    )
+                warnings.warn(
+                    (
+                        f"Parameter `num_samples` must be a strictly positive integer. "
+                        f"Received: {initial_value_type}. Parsed as: {value}"
+                    ),
+                    stacklevel=2,
+                    category=ConfigWarning,
+                )
 
-                except Exception as e:  # noqa: BLE001
-                    raise TypeError(
-                        (
-                            f"Parameter `num_samples` must be a strictly positive integer. "
-                            f"Currently: {type(value)}. While trying to convert encountered "
-                            f"the following exception: {e}"
-                        ),
-                    )
+            except Exception as e:
+                raise TypeError(  # pyright: ignore[reportUnreachable]
+                    (
+                        f"Parameter `num_samples` must be a strictly positive integer. "
+                        f"Currently: {type(value)}. While trying to convert encountered "
+                        f"the following exception: {e}"
+                    ),
+                ) from e
 
         # Validate num_samples value
         if value <= 0:
@@ -193,6 +229,7 @@ class Config:
                     f"Consider increasing. Currently: {value}"
                 ),
                 category=ConfigWarning,
+                stacklevel=2,
             )
 
         return value
@@ -212,42 +249,34 @@ class Config:
         """
         return self._ci_probability
 
-    def _validate_ci_probability(self, value: float | None) -> float:
+    def _validate_ci_probability(self, value: float | None) -> float:  # pyright: ignore[reportRedeclaration]
         # Handle default parameter
         if value is None:
-            warnings.warn(
-                message=(
-                    "Parameter `ci_probability` is `None`. Setting to default value of 0.95. "
-                    "This value is arbitrary, however, and should be carefully considered."
-                ),
-                category=ConfigWarning,
-            )
-
-            value = 0.95
+            value: float = _generate_default_value("ci_probability")
 
         # Handle parameter of wrong type
-        else:
-            if not isinstance(value, float):
-                try:
-                    initial_value_type = type(value)
-                    value = float(value)
+        elif not isinstance(value, float):
+            try:
+                initial_value_type = type(value)
+                value = float(value)
 
-                    warnings.warn(
-                        (
-                            f"Parameter `ci_probability` must be a float. "
-                            f"Received: {initial_value_type}. Parsed as: {value}"
-                        ),
-                        category=ConfigWarning,
-                    )
+                warnings.warn(
+                    (
+                        f"Parameter `ci_probability` must be a float. "
+                        f"Received: {initial_value_type}. Parsed as: {value}"
+                    ),
+                    category=ConfigWarning,
+                    stacklevel=2,
+                )
 
-                except Exception as e:  # noqa: BLE001
-                    raise TypeError(
-                        (
-                            "Parameter `ci_probability` must be a float. "
-                            f"Currently: {type(value)}. "
-                            f"While trying to convert encountered the following exception: {e}"
-                        ),
-                    )
+            except Exception as e:
+                raise TypeError(
+                    (
+                        "Parameter `ci_probability` must be a float. "
+                        f"Currently: {type(value)}. "
+                        f"While trying to convert encountered the following exception: {e}"
+                    ),
+                ) from e
 
         # Validate ci_probability value
         if not (value > 0.0 and value <= 1.0):
@@ -318,6 +347,7 @@ class Config:
                         f"Defaulting to the 0 (Haldane) prior."
                     ),
                     category=ConfigWarning,
+                    stacklevel=2,
                 )
 
                 prevalence_prior = 0.0
@@ -347,7 +377,7 @@ class Config:
             else:
                 try:
                     prevalence_prior = np.array(prevalence_prior, dtype=np.float64)
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     raise ConfigError(
                         (
                             f"Experiment '{experiment_name}'s prevalence prior is invalid. "
@@ -356,7 +386,7 @@ class Config:
                             f"While trying to convert to `np.ndarray`, the following exception "
                             f"was encountered: {e}"
                         ),
-                    )
+                    ) from e
 
                 # Additional numpy array validation
                 # Check shape against confusion matrix
@@ -368,7 +398,7 @@ class Config:
                         prevalence_prior = prevalence_prior.reshape(
                             (confusion_matrix.shape[0],),
                         )
-                    except Exception as e:  # noqa: BLE001
+                    except Exception as e:
                         raise ConfigError(
                             (
                                 f"Experiment '{experiment_name}'s prevalence prior is malformed. "
@@ -377,7 +407,7 @@ class Config:
                                 f"Expecting shape: {(confusion_matrix.shape[0],)}. "
                                 f"While trying to reshape, encountered the following exception: {e}"
                             ),
-                        )
+                        ) from e
 
                 # Check that values are all positive
                 if not np.all(prevalence_prior > 0.0):
@@ -405,6 +435,7 @@ class Config:
                         f"Defaulting to the 0 (Haldane) prior."
                     ),
                     category=ConfigWarning,
+                    stacklevel=2,
                 )
 
                 confusion_prior = 0.0
@@ -415,7 +446,7 @@ class Config:
                         (
                             f"Experiment '{experiment_name}'s confusion prior is invalid. "
                             f"Currently: {confusion_prior}. If `str`, must be one of: "
-                            f"{set(_DIRICHLET_PRIOR_STRATEGIES.keys())}",
+                            f"{set(_DIRICHLET_PRIOR_STRATEGIES.keys())}"
                         ),
                     )
 
@@ -432,7 +463,7 @@ class Config:
             else:
                 try:
                     confusion_prior = np.array(confusion_prior, dtype=np.float64)
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     raise ConfigError(
                         (
                             f"Experiment '{experiment_name}'s confusion prior is invalid. "
@@ -440,7 +471,7 @@ class Config:
                             f"Currently: {type(confusion_prior)}. While trying to convert to "
                             f"`np.ndarray`, the following exception was encountered: {e}"
                         ),
-                    )
+                    ) from e
 
                 # Check shape against confusion matrix
                 if (
@@ -453,7 +484,7 @@ class Config:
                         confusion_prior = confusion_prior.reshape(
                             confusion_matrix.shape,
                         )
-                    except Exception as e:  # noqa: BLE001
+                    except Exception as e:
                         raise ConfigError(
                             (
                                 f"Experiment '{experiment_name}'s confusion prior is malformed. "
@@ -463,7 +494,7 @@ class Config:
                                 f"Expecting shape: {confusion_matrix.shape}. "
                                 f"While trying to reshape, encountered the following exception: {e}"
                             ),
-                        )
+                        ) from e
 
                 # Check that values are all positive
                 if not np.all(confusion_prior > 0.0):
@@ -494,6 +525,7 @@ class Config:
                         f"These are currently just ignored."
                     ),
                     category=ConfigWarning,
+                    stacklevel=2,
                 )
 
             updated_experiment_config.update(kwargs)
@@ -524,15 +556,15 @@ class Config:
 
             if not isinstance(experiment_group_name, str):
                 try:
-                    experiment_group_name = str(experiment_group_name)
-                except Exception as e:  # noqa: BLE001
+                    experiment_group_name = str(experiment_group_name)  # noqa: PLW2901
+                except Exception as e:
                     raise ConfigError(
                         (
                             f"Experiment group `{experiment_group_name}` must be an instance of "
                             f"`str`, but got `{type(experiment_group_name)}`. "
                             f"While trying to convert, ran into the following exception: {e}"
                         ),
-                    )
+                    ) from e
 
             # Duck type to make sure it matches dict protocol
             if not (
@@ -559,8 +591,8 @@ class Config:
 
                 if not isinstance(experiment_name, str):
                     try:
-                        experiment_name = str(experiment_name)
-                    except Exception as e:  # noqa: BLE001
+                        experiment_name = str(experiment_name)  # noqa: PLW2901
+                    except Exception as e:
                         raise ConfigError(
                             (
                                 f"The key for `{experiment_group_name}/{experiment_name}` "
@@ -568,7 +600,7 @@ class Config:
                                 f"`{type(experiment_group_name)}`. "
                                 f"While trying to convert, ran into the following exception: {e}"
                             ),
-                        )
+                        ) from e
 
                 # ==============================================================
                 # Experiment
@@ -636,14 +668,14 @@ class Config:
 
     def _validate_metrics(
         self,
-        value: dict[str, dict[str, typing.Any]],
+        value: dict[str, dict[str, typing.Any]] | None,
     ) -> dict[str, dict[str, typing.Any]]:
         def validate_metric_configuration(key: str, configuration: dict) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
             # Empty configuration is allowed
             if len(configuration) == 0:
                 return
 
-            #! If non-empty, must contain an aggregation key
+            # Rule: If non-empty, must contain an aggregation key
             if "aggregation" not in configuration:
                 raise ConfigError(
                     (
@@ -652,8 +684,8 @@ class Config:
                     ),
                 )
 
-            #! Aggregation key must map to registered aggregation
-            #! Aggregation config must be valid
+            # Rule: Aggregation key must map to registered aggregation
+            # Rule: Aggregation config must be valid
             try:
                 kwargs = {k: v for k, v in configuration.items() if k != "aggregation"}
                 get_experiment_aggregator(
@@ -662,14 +694,14 @@ class Config:
                     **kwargs,
                 )
 
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 raise ConfigError(
                     (
                         f"The aggregation configuration for metric {key} is invalid. "
                         f"Currently: {configuration}. "
                         f"While trying to parse, the following exception was encountered: {e}"
                     ),
-                )
+                ) from e
 
         # If not yet initialized, initialize to an empty dictionary
         if value is None:
@@ -697,17 +729,17 @@ class Config:
                 continue
 
             # Validate type ====================================================
-            if not isinstance(metric_key, str):
+            if not isinstance(metric_key, str):  # pyright: ignore[reportUnnecessaryIsInstance]
                 try:
-                    metric_key = str(metric_key)
-                except Exception as e:  # noqa: BLE001
+                    metric_key = str(metric_key)  # noqa: PLW2901
+                except Exception as e:
                     raise ConfigError(
                         (
                             f"The keys in metrics must of type `str`. "
                             f"Currently: {type(metric_key)}. "
                             f"While trying to convert, the following exception was encountered: {e}"
                         ),
-                    )
+                    ) from e
 
             if not (hasattr(value, "get") and hasattr(value, "items")):
                 raise ConfigError(
@@ -721,13 +753,13 @@ class Config:
             # Validate the key of the metric config ============================
             try:
                 get_metric(metric_key)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 raise ConfigError(
                     (
                         f"The following metric is an invalid metric syntax string: `{metric_key}`. "
                         f"While trying to parse, the following exception was encountered: {e}"
                     ),
-                )
+                ) from e
 
             # Validate the metric config =======================================
             if len(metric_config) == 0 and len(default_config) == 0:
@@ -745,6 +777,7 @@ class Config:
                             f"but no aggregation method is provided for metric `{metric_key}`."
                         ),
                         category=ConfigWarning,
+                        stacklevel=2,
                     )
 
                 updated_metrics_config[metric_key] = dict()
@@ -822,7 +855,7 @@ class Config:
         return state_dict
 
     @classmethod
-    def from_dict(cls, config_dict: dict[str, typing.Any]) -> typing.Self:
+    def from_dict(cls, config_dict: dict[str, typing.Any]) -> typing.Self:  # pyright: ignore[reportUnusedParameter]
         """Creates a configuration from a dictionary."""
         raise NotImplementedError
 

@@ -1,12 +1,13 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     import jaxtyping as jtyping
 
+import csv
 import pathlib
 import warnings
-import csv
 
 import numpy as np
 
@@ -14,13 +15,9 @@ import numpy as np
 class ConfMatIOWarning(Warning):
     """Some warning to highlight potential undesirable behaviour due to IO."""
 
-    ...
-
 
 class ConfMatIOError(Exception):
     """While trying to perform confusion matrix IO, some exception was encountered."""
-
-    ...
 
 
 def load_csv(
@@ -51,7 +48,7 @@ def load_csv(
     with location.open(
         mode="r",
         newline=newline,
-        encoding=encoding,  # type: ignore
+        encoding=encoding,
     ) as f:
         reader = csv.reader(
             f,
@@ -63,25 +60,25 @@ def load_csv(
         for i, row in enumerate(reader):
             try:
                 row_vals = list(map(int, row))
-            except ValueError:
+            except ValueError as e:
                 raise ConfMatIOError(
                     (
                         f"Row contains values that cannot be converted to int: "
                         f"Row number: {i}. File: {location}"
                     ),
-                )
+                ) from e
 
             rows.append(row_vals)
 
     try:
         arr = np.array(rows, dtype=dtype)
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         raise ConfMatIOError(
             (
                 f"Could not convert loaded csv to a confusion matrix."
                 f"Encountered the following exception: {e}"
             ),
-        )
+        ) from e
 
     return arr
 
@@ -106,19 +103,19 @@ def validate_confusion_matrix(
     Returns:
         Int[ndarray, 'num_classes num_classes']: the validated confusion matrix as a numpy ndarray
     """
-    #! Must be an np.ndarray
+    # Rule: Must be an np.ndarray
     if not isinstance(confusion_matrix, np.ndarray):
         try:
             confusion_matrix = np.array(object=confusion_matrix)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise ConfMatIOError(
                 (
                     f"While trying to convert a confusion matrix to a numpy array, "
                     f"encountered the following exception: {e}."
                 ),
-            )
+            ) from e
 
-    #! Must be 2-dimensional
+    # Rule: Must be 2-dimensional
     if not (len(confusion_matrix.shape) == 2):
         raise ConfMatIOError(
             (
@@ -129,7 +126,7 @@ def validate_confusion_matrix(
             ),
         )
 
-    #! Must be square
+    # Rule: Must be square
     if not (confusion_matrix.shape[0] == confusion_matrix.shape[1]):
         raise ConfMatIOError(
             (
@@ -140,7 +137,7 @@ def validate_confusion_matrix(
             ),
         )
 
-    #! Must have at least 2 classes
+    # Rule: Must have at least 2 classes
     if confusion_matrix.shape[0] == 1 or confusion_matrix.shape[1] == 1:
         raise ConfMatIOError(
             (
@@ -151,7 +148,7 @@ def validate_confusion_matrix(
             ),
         )
 
-    #! Must be an array of only integers
+    # Rule: Must be an array of only integers
     # Or at the very least, a dtype such that `dtype + float = float`
     if not (
         np.issubdtype(confusion_matrix.dtype, np.integer)
@@ -159,16 +156,16 @@ def validate_confusion_matrix(
     ):
         try:
             confusion_matrix = confusion_matrix.astype(dtype=dtype, casting="safe")
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise ConfMatIOError(
                 (
                     f"The loaded confusion matrix is not of type integer. "
                     f"While trying to convert, encounterted the following exception: {e}. "
                     f"Confusion matrix: {confusion_matrix}"
                 ),
-            )
+            ) from e
 
-    #! All values must be finite
+    # Rule: All values must be finite
     if not np.all(np.isfinite(confusion_matrix)):
         raise ConfMatIOError(
             (
@@ -177,7 +174,7 @@ def validate_confusion_matrix(
             ),
         )
 
-    #! All values must be positive
+    # Rule: All values must be positive
     if not np.all(confusion_matrix >= 0):
         raise ConfMatIOError(
             (
@@ -186,7 +183,7 @@ def validate_confusion_matrix(
             ),
         )
 
-    #! Must have at least one record for each ground truth class
+    # Rule: Must have at least one record for each ground truth class
     cond_counts = confusion_matrix.sum(axis=1)
     if not np.all(cond_counts > 0):
         offenders = np.where(cond_counts == 0)[0].tolist()
@@ -198,7 +195,7 @@ def validate_confusion_matrix(
             ),
         )
 
-    #! Should have at least one record for each predicted class
+    # Rule: Should have at least one record for each predicted class
     # This is easily violated for poorly optimized models with class imbalance
     pred_counts = confusion_matrix.sum(axis=0)
     if not np.all(pred_counts > 0):
@@ -209,6 +206,7 @@ def validate_confusion_matrix(
                 f"Columns: {offenders}. Confusion matrix: {confusion_matrix}"
             ),
             category=ConfMatIOWarning,
+            stacklevel=2,
         )
 
     return confusion_matrix
@@ -312,11 +310,11 @@ def confusion_matrix_to_pred_cond(
     """  # noqa: D205
     output = []
     for row_num, row in enumerate(confusion_matrix):
-        for col_num, occurences in enumerate(row):
+        for col_num, occurrences in enumerate(row):
             if pred_first:
-                output.extend([[col_num, row_num]] * occurences)
+                output.extend([[col_num, row_num]] * occurrences)
             else:
-                output.extend([[row_num, col_num]] * occurences)
+                output.extend([[row_num, col_num]] * occurrences)
 
     output = np.array(output)
 

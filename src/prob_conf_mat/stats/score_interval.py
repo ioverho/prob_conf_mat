@@ -2,7 +2,7 @@ from math import sqrt
 
 
 def wilson_score_interval(p: float, n: int, z: float = 1.96) -> float:
-    """Estimates the radius of the intveral around a proprotion using the Wilson score interval.
+    """Estimates the radius of the intveral around a proportion using the Wilson score interval.
 
     Adapted from [Stack Overflow](https://stackoverflow.com/a/74035575)
 

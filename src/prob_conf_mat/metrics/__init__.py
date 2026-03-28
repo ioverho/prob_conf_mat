@@ -1,17 +1,17 @@
-#! The order matters, do not change
-from .abc import (
-    _ROOT_METRICS,
-    METRIC_REGISTRY,
-    AVERAGING_REGISTRY,
-    RootMetric,
-    Metric,
-    AveragedMetric,
-)
+# IMPORTANT: The order matters, do not change
 from ._metrics import *
-from .experimental_metrics import *
+from .abc import (
+    _ROOT_METRICS,  # pyright: ignore[reportPrivateUsage]
+    AVERAGING_REGISTRY,
+    METRIC_REGISTRY,
+    AveragedMetric,
+    Metric,
+    RootMetric,
+)
 from .averaging import *
-from .interface import get_metric
 from .collection import MetricCollection
+from .experimental_metrics import *
+from .interface import get_metric
 
 # Check that all metrics have valid dependencies
 for metric in METRIC_REGISTRY:
@@ -21,10 +21,10 @@ for metric in METRIC_REGISTRY:
 
         try:
             get_metric(dependency)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise KeyError(
-                f"Dependency `{dependency}` of `{metric}` not valid because: {e}",  # noqa: E501
-            )
+                f"Dependency `{dependency}` of `{metric}` not valid because: {e}",
+            ) from e
 
 for aggregation in AVERAGING_REGISTRY:
     for dependency in AVERAGING_REGISTRY[aggregation].dependencies:
@@ -33,7 +33,7 @@ for aggregation in AVERAGING_REGISTRY:
 
         try:
             get_metric(dependency)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise KeyError(
-                f"Dependency `{dependency}` of `{aggregation}` not valid because: {e}",  # noqa: E501
-            )
+                f"Dependency `{dependency}` of `{aggregation}` not valid because: {e}",
+            ) from e

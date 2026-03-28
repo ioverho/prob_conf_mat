@@ -1,21 +1,23 @@
 from __future__ import annotations
 
+import collections
+import collections.abc
 import typing
-from collections import deque, OrderedDict
-from graphlib import TopologicalSorter
+from collections import OrderedDict, deque
 from functools import cache
+from graphlib import TopologicalSorter
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from prob_conf_mat.utils.typing import MetricLike
 
+from prob_conf_mat.metrics.abc import AveragedMetric, Metric, RootMetric
 from prob_conf_mat.metrics.interface import get_metric
-from prob_conf_mat.metrics.abc import RootMetric, Metric, AveragedMetric
 
 
 @cache
 def generate_metric_computation_schedule(
-    metrics: typing.Sequence[MetricLike],
-) -> typing.Sequence[MetricLike]:
+    metrics: collections.abc.Sequence[MetricLike],
+) -> collections.abc.Sequence[MetricLike]:
     """Generates a topological ordering of the inserted metrics and their dependencies.
 
     Ensures no function is computed before its dependencies are available.
@@ -38,8 +40,8 @@ def generate_metric_computation_schedule(
         if metric in seen_metrics:
             continue
 
-        for dependency in metric.dependencies:
-            dependency = get_metric(dependency)
+        for dep in metric.dependencies:
+            dependency = get_metric(dep)
 
             topological_sorter.add(metric, dependency)
 
@@ -71,7 +73,7 @@ class MetricCollection:
         self,
         metrics: str
         | MetricLike
-        | typing.Iterable[str | MetricLike]
+        | collections.abc.Iterable[str | MetricLike]
         | typing.Self
         | None = (),
     ) -> None:
@@ -83,7 +85,10 @@ class MetricCollection:
 
     def add(
         self,
-        metric: str | MetricLike | typing.Iterable[str | MetricLike] | typing.Self,
+        metric: str
+        | MetricLike
+        | collections.abc.Iterable[str | MetricLike]
+        | typing.Self,
     ) -> None:
         """Adds a metric to the metric collection.
 
@@ -104,7 +109,7 @@ class MetricCollection:
             or issubclass(metric.__class__, AveragedMetric)
             or issubclass(metric.__class__, RootMetric)
         ):
-            self._add_metric(metric=metric)  # type: ignore
+            self._add_metric(metric=metric)  # pyright: ignore[reportArgumentType]
 
         # If metric is a list of MetricLikes
         elif isinstance(metric, list | set | tuple):
@@ -118,7 +123,7 @@ class MetricCollection:
 
         # Otherwise
         else:
-            raise ValueError(
+            raise TypeError(
                 f"Cannot process input of type `{type(metric)}` into a MetricCollection.",
             )
 
@@ -132,7 +137,7 @@ class MetricCollection:
         elif (
             issubclass(metric.__class__, Metric)
             or issubclass(metric.__class__, AveragedMetric)
-            or issubclass(metric.__class__, RootMetric)
+            or issubclass(metric.__class__, RootMetric)  # pyright: ignore[reportUnnecessaryIsInstance]
         ):
             metric_instance = metric
 
@@ -160,17 +165,17 @@ class MetricCollection:
 
         return MetricCollection(metrics=topologically_sorted)
 
-    def __getitem__(self, key: str | MetricLike):
+    def __getitem__(self, key: str | MetricLike) -> MetricLike:
         return self._metrics_by_alias_or_name[key]
 
-    def __iter__(self) -> typing.Generator[MetricLike]:
+    def __iter__(self) -> collections.abc.Generator[MetricLike]:
         yield from self.get_insert_order()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._metrics)
 
     def __repr__(self) -> str:
         return f"MetricCollection({list(self._metrics.keys())})"
 
     def __str__(self) -> str:
-        return f"{[x.name for x in self._metrics.keys()]}"  # noqa: SIM118
+        return f"{[x.name for x in self._metrics.keys()]}"

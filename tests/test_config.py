@@ -58,7 +58,7 @@ class TestConfig:
         # Test a 'None'
         with pytest.warns(
             ConfigWarning,
-            match="Recieved `None` as seed. Defaulting to fractional seconds:",
+            match="Received `None` as seed. Defaulting to fractional seconds:",
         ):
             Study(seed=None, **self.fetch_base_config("seed"))
 

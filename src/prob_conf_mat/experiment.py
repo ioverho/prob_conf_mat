@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -6,14 +7,14 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 
     from prob_conf_mat.utils import RNG, MetricLike
 
-from dataclasses import dataclass
 from collections import OrderedDict
+from dataclasses import dataclass
 from enum import StrEnum
 
 import numpy as np
 
-from prob_conf_mat.metrics import RootMetric, MetricCollection
-from prob_conf_mat.stats import dirichlet_sample, dirichlet_prior
+from prob_conf_mat.metrics import MetricCollection, RootMetric
+from prob_conf_mat.stats import dirichlet_prior, dirichlet_sample
 
 
 class SamplingMethod(StrEnum):
@@ -35,7 +36,7 @@ class ExperimentResult:
         experiment (Experiment): the experiment which produced these results
         metric (MetricLike): the metric instance that produced these results
         values (jtyping.Float[np.ndarray, " num_samples #num_classes"]): the actual produced values
-    """  # noqa: E501
+    """
 
     experiment: Experiment
     metric: MetricLike
@@ -54,7 +55,7 @@ class ExperimentResult:
 
     @property
     def num_classes(self) -> int:
-        """The number of classes in the experiment that poduced this result."""
+        """The number of classes in the experiment that produced this result."""
         return self.experiment.num_classes
 
     @property
@@ -62,10 +63,10 @@ class ExperimentResult:
         """How many confusion matrices were sampled."""
         return self.values.shape[0]
 
-    def __repr__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:
         return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __str__(self) -> str:
         return f"ExperimentResult(experiment={self.experiment}, metric={self.metric})"
 
 
@@ -431,8 +432,8 @@ class Experiment:
 
         return results
 
-    def __repr__(self) -> str:  # noqa: D105
+    def __repr__(self) -> str:
         return f"Experiment({self.name})"
 
-    def __str__(self) -> str:  # noqa: D105
+    def __str__(self) -> str:
         return f"Experiment({self.name})"
