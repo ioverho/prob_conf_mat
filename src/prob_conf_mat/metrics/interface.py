@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -33,12 +34,12 @@ def _parse_kwargs(kwargs: dict[str, str]) -> dict[str, typing.Any]:
     for k, v in kwargs.items():
         # First try to eval
         try:
-            val = eval(v)
+            val = ast.literal_eval(v)
 
             kwargs[k] = val
 
         # If it fails, assume a string
-        except:  # noqa: E722
+        except:  # noqa: E722, S112
             continue
 
     return kwargs
