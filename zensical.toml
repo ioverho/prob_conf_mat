@@ -47,6 +47,7 @@ nav = [
         { "About" = "index.md" },
         { "Changelog" = "changelog.md" },
         { "License" = "license.md" },
+        { "Repo Review" = "repo-review.md" },
     ] },
     { "Getting Started" = [
         { "Overview" = "getting_started/index.md" },
