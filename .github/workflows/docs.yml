@@ -1,10 +1,11 @@
 name: Documentation
 
 on:
-  push:
-    branches:
-      - master
-      - main
+  # Only runs when tests have passed
+  workflow_run:
+    workflows: ["Test"]
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -30,13 +31,13 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
-        run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --group docs
 
       - name: Build documentation
-        run: uv run --dev zensical build --clean
+        run: uv run --group docs zensical build --clean
 
       - name: Convert notebooks
-        run: uv run --dev python ./docs/ignore/post-build/convert_notebooks.py --verbose
+        run: uv run --group docs python ./docs/ignore/post-build/convert_notebooks.py --verbose
 
       - uses: actions/upload-pages-artifact@v4
         with:
