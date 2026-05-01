@@ -39,7 +39,7 @@ jobs:
       - name: Convert notebooks
         run: uv run --group docs python ./docs/ignore/post-build/convert_notebooks.py --verbose
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
