@@ -31,20 +31,20 @@ Found on [learn.scientific-python.org](https://learn.scientific-python.org/devel
 - [x] **PP002**: Has a proper build-system table
 - [x] **PP003**: Does not list wheel as a build-dep
 - [x] **PP004**: Does not upper cap Python requires
-- [x] **PP005**: Using SPDX project.license should not use deprecated trove classifiers [skipped]
+- [x] **PP005**: Using SPDX project.license should not use deprecated trove classifiers \[skipped\]
 - [x] **PP006**: The dev dependency group should be defined
 - [ ] **PP301**: Has pytest in pyproject
 
-  Must have a [tool.pytest] (pytest 9+) or [tool.pytest.ini_options] (pytest 6+) configuration section in pyproject.toml. If you must have it in ini format, ignore this check. pytest.toml and .pytest.toml files (pytest 9+) are also supported.
+  Must have a `[tool.pytest]` (pytest 9+) or `[tool.pytest.ini_options]` (pytest 6+) configuration section in pyproject.toml. If you must have it in ini format, ignore this check. pytest.toml and .pytest.toml files (pytest 9+) are also supported.
 
-- [ ] **PP302**: Sets a minimum pytest to at least 6 or 9 [skipped]
-- [ ] **PP303**: Sets the test paths [skipped]
-- [ ] **PP304**: Sets the log level in pytest [skipped]
-- [ ] **PP305**: Specifies strict xfail [skipped]
-- [ ] **PP306**: Specifies strict config [skipped]
-- [ ] **PP307**: Specifies strict markers [skipped]
-- [ ] **PP308**: Specifies useful pytest summary [skipped]
-- [ ] **PP309**: Filter warnings specified [skipped]
+- [ ] **PP302**: Sets a minimum pytest to at least 6 or 9 \[skipped\]
+- [ ] **PP303**: Sets the test paths \[skipped\]
+- [ ] **PP304**: Sets the log level in pytest \[skipped\]
+- [ ] **PP305**: Specifies strict xfail \[skipped\]
+- [ ] **PP306**: Specifies strict config \[skipped\]
+- [ ] **PP307**: Specifies strict markers \[skipped\]
+- [ ] **PP308**: Specifies useful pytest summary \[skipped\]
+- [ ] **PP309**: Filter warnings specified \[skipped\]
 
 ## GitHub Actions
 
@@ -76,15 +76,15 @@ Found on [learn.scientific-python.org](https://learn.scientific-python.org/devel
           interval: "weekly"
   ```
 
-- [x] **GH210**: Maintains the GitHub action versions with Dependabot [skipped]
-- [x] **GH211**: Do not pin core actions as major versions [skipped]
-- [x] **GH212**:: Require GHA update grouping [skipped]
+- [x] **GH210**: Maintains the GitHub action versions with Dependabot \[skipped\]
+- [x] **GH211**: Do not pin core actions as major versions \[skipped\]
+- [x] **GH212**:: Require GHA update grouping \[skipped\]
 
 ## Pre-commit
 
 - [x] **PC100**: Has pre-commit-hooks
 - [x] **PC110**: Uses black or ruff-format
-- [x] **PC111**: Uses blacken-docs [skipped]
+- [x] **PC111**: Uses blacken-docs \[skipped\]
 - [ ] **PC140**: Uses a type checker
 
   Must have <https://github.com/pre-commit/mirrors-mypy> in .pre-commit-config.yaml

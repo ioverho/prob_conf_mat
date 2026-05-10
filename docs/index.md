@@ -150,9 +150,9 @@ study.report_metric_summaries(
 )
 ```
 
-| Group   | Experiment   |   Observed |   Median |   Mode |        95.0% HDI |     MU |    Skew |   Kurt |
-|---------|--------------|------------|----------|--------|------------------|--------|---------|--------|
-| model_1 | fold_0       |     0.8421 |   0.8499 | 0.8673 | [0.7307, 0.9464] | 0.2157 | -0.5627 | 0.2720 |
+| Group   | Experiment | Observed | Median | Mode   | 95.0% HDI          | MU     | Skew    | Kurt   |
+| ------- | ---------- | -------- | ------ | ------ | ------------------ | ------ | ------- | ------ |
+| model_1 | fold_0     | 0.8421   | 0.8499 | 0.8673 | \[0.7307, 0.9464\] | 0.2157 | -0.5627 | 0.2720 |
 
 So while this experiment achieves an accuracy of 84.21%, a more reasonable estimate (given the size of the test set, and) would be 84.99%. There is a 95% probability that the true accuracy lies between 73.07%-94.64%.
 

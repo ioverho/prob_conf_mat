@@ -46,13 +46,13 @@ Full Changelog: [`0.1.0...0.2.0`](https://github.com/ioverho/prob_conf_mat/compa
 
 ### Changed
 
-- Changed definition of BF-RoPE to an odds ratio instead of a probability ratio. This better matches the definitions provided in Morey & Rouder [1] and Makowski et al. [2].
+- Changed definition of BF-RoPE to an odds ratio instead of a probability ratio. This better matches the definitions provided in Morey & Rouder \[1\] and Makowski et al. \[2\].
 
 ### References
 
-[1] Richard D. Morey and Jeffrey N. Rouder. “Bayes Factor Approaches for Testing Interval Null Hypotheses.” In: Psychological Methods 16.4 (Dec. 2011), pp. 406–419. ISSN: 1939-1463, 1082-989X. DOI: 10.1037/a0024377. URL: https://doi.apa.org/doi/10.1037/a0024377.
+\[1\] Richard D. Morey and Jeffrey N. Rouder. “Bayes Factor Approaches for Testing Interval Null Hypotheses.” In: Psychological Methods 16.4 (Dec. 2011), pp. 406–419. ISSN: 1939-1463, 1082-989X. DOI: 10.1037/a0024377. URL: https://doi.apa.org/doi/10.1037/a0024377.
 
-[2] Dominique Makowski et al. “Indices of Effect Existence and Significance in the Bayesian Framework”. In: Frontiers in Psychology 10 (Dec. 10, 2019). ISSN: 1664-1078. DOI: 10.3389/fpsyg.2019.02767. URL: https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.02767/full.
+\[2\] Dominique Makowski et al. “Indices of Effect Existence and Significance in the Bayesian Framework”. In: Frontiers in Psychology 10 (Dec. 10, 2019). ISSN: 1664-1078. DOI: 10.3389/fpsyg.2019.02767. URL: https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.02767/full.
 
 ## [v0.1.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.1.0) - 2025-08-06
 

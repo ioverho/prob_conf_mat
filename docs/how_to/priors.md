@@ -9,7 +9,7 @@ title: "Choose a Prior"
 
     If you are running into errors, use 0 as a prior value.
 
-In `prob_conf_mat`, we use a probabilistic model of the confusion matrix to sample synthetic confusion matrices. Specifically, we use the product of several [Dirichlet-Categorical](../Explanation/generating_confusion_matrices.md) distributions to sample counterfactuals. These distributions are constrained by the data in the true confusion matrix, and in Bayesian statistics would be called a [posterior distribution](https://en.wikipedia.org/wiki/Posterior_probability); the distribution that arises when we combine knowledge we know *a priori* with evidence.
+In `prob_conf_mat`, we use a probabilistic model of the confusion matrix to sample synthetic confusion matrices. Specifically, we use the product of several [Dirichlet-Categorical](../explanation/generating_confusion_matrices.md) distributions to sample counterfactuals. These distributions are constrained by the data in the true confusion matrix, and in Bayesian statistics would be called a [posterior distribution](https://en.wikipedia.org/wiki/Posterior_probability); the distribution that arises when we combine knowledge we know *a priori* with evidence.
 
 The knowledge we know *a priori* is summarized as a [prior distribution](https://en.wikipedia.org/wiki/Prior_probability), and represents the knowledge contained in the model before any evidence is taken into account.
 
