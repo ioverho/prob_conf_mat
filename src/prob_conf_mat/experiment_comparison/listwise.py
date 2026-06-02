@@ -28,6 +28,16 @@ class ListwiseComparisonResult:
         " num_experiments num_experiments",
     ]
 
+    mean_rank: jtyping.Float[
+        np.ndarray,
+        " num_experiments",
+    ]
+
+    mrr: jtyping.Float[
+        np.ndarray,
+        " num_experiments",
+    ]
+
 
 def listwise_compare(
     experiment_scores_dict: dict[str, jtyping.Float[np.ndarray, " num_samples"]],
@@ -82,7 +92,13 @@ def listwise_compare(
     rank_prob_matrix = rank_count_matrix / num_samples
 
     # Sort the table by MRR
-    reciprocal_rank = 1 / (np.arange(rank_prob_matrix.shape[0]) + 1)
+    ranks = np.arange(rank_prob_matrix.shape[0]) + 1
+    reciprocal_rank = 1 / (ranks)
+
+    mean_rank = np.sum(
+        ranks[np.newaxis, :] * rank_prob_matrix,
+        axis=1,
+    )
 
     mrr = np.sum(
         reciprocal_rank[np.newaxis, :] * rank_prob_matrix,
@@ -97,6 +113,8 @@ def listwise_compare(
         metric=metric,
         p_rank_given_experiment=rank_prob_matrix,
         p_experiment_given_rank=rank_prob_matrix.T,
+        mean_rank=mean_rank[idx],
+        mrr=mrr[idx],
     )
 
     return result

@@ -2395,12 +2395,19 @@ class Study(Config):
             class_label=class_label,
         )
 
-        headers = ["Group", "Experiment"] + [
-            f"Rank {i + 1}"
-            for i in range(
-                listwise_comparison_result.p_experiment_given_rank.shape[0],
-            )
-        ]
+        headers = (
+            ["Group", "Experiment"]
+            + [
+                "Mean Rank",
+                "MRR",
+            ]
+            + [
+                f"Rank {i + 1}"
+                for i in range(
+                    listwise_comparison_result.p_experiment_given_rank.shape[0],
+                )
+            ]
+        )
 
         p_experiment_given_rank = (
             listwise_comparison_result.p_experiment_given_rank.tolist()
@@ -2411,9 +2418,11 @@ class Study(Config):
                     p_experiment_given_rank[row_id][col_id] = None
 
         records = [
-            [*self._split_experiment_name(experiment_name), *row]
-            for experiment_name, row in zip(
+            [*self._split_experiment_name(experiment_name), mean_rank, mrr, *row]
+            for experiment_name, mean_rank, mrr, row in zip(
                 listwise_comparison_result.experiment_names,
+                listwise_comparison_result.mean_rank,
+                listwise_comparison_result.mrr,
                 p_experiment_given_rank,
                 strict=True,
             )
@@ -2440,6 +2449,122 @@ class Study(Config):
                 )
 
         return table
+
+    def plot_listwise_ranks(
+        self,
+        metric: str,  # pyright: ignore[reportRedeclaration]
+        class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
+        *,
+        top_k: int | None = None,
+        cmap: str = "Reds",
+        vmin: float = 0.0,
+        vmax: float = 1.0,
+        plot_mean_rank: bool = True,
+        plot_mrr: bool = False,
+        precision: int = 4,
+    ):
+        """Plots the joint rank probability table.
+
+        Args:
+            metric (str): the name of the metric
+            class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            top_k (int): the maximum number of experiments to include.
+                Plots from rank 1 to `top_k`.
+            cmap (str): the name of the color map used.
+                Corresponds to [matplotlib's `cmap` parameter for imshow](https://matplotlib.org/stable/users/explain/colors/colormaps.html).
+                Defaults to 'Reds'.
+            vmin (float): defines the minimum of the colorbar.
+                Defaults to 0.0.
+            vmax (float): defines the maximum of the colorbar.
+                Defaults to 1.0.
+            plot_mean_rank (bool): whether to plot the mean rank in a secondary axis.
+                Defaults to True.
+            plot_mrr (bool): whether to plot the MRR in a secondary axis.
+                Defaults to False.
+            precision (int, optional): the required precision of the presented numbers.
+                Defaults to 4.
+
+        Returns:
+            matplotlib.figure.Figure: the completed figure of the distribution plot
+        """
+        # Import optional dependencies
+        import matplotlib.pyplot as plt  # noqa: PLC0415
+
+        # Typehint the metric and class_label variables
+        metric: MetricLike
+        class_label: int
+
+        metric, class_label = self._validate_metric_class_label_combination(
+            metric=metric,
+            class_label=class_label,
+        )
+
+        listwise_comparison_result = self.get_listwise_comparsion_result(
+            metric=metric.name,
+            class_label=class_label,
+        )
+
+        num_experiments = len(listwise_comparison_result.experiment_names)
+
+        if top_k is None:
+            top_k = num_experiments
+
+        num_experiments = min(top_k, num_experiments)
+
+        p_experiment_given_rank = listwise_comparison_result.p_experiment_given_rank[
+            :top_k, :top_k
+        ]
+
+        fig, ax = plt.subplots(1, 1)
+
+        ax.imshow(
+            np.where(
+                p_experiment_given_rank == 0,
+                np.nan,
+                p_experiment_given_rank,
+            ),
+            vmin=vmin,
+            vmax=vmax,
+            cmap=cmap,
+        )
+
+        ax.set_yticks(np.arange(num_experiments))
+        ax.set_yticklabels(listwise_comparison_result.experiment_names[:top_k])
+
+        ax.set_xticks(np.arange(num_experiments))
+        ax.set_xticklabels(np.arange(num_experiments) + 1)
+
+        ax.set_ylabel("Experiment")
+        ax.set_xlabel("Rank")
+
+        if plot_mean_rank and plot_mrr:
+            raise ValueError("Cannot plot both MRR and Mean Rank.")
+
+        if plot_mean_rank:
+            secax = ax.secondary_yaxis("right")
+            secax.set_yticks(np.arange(num_experiments))
+            secax.set_yticklabels(
+                [
+                    fmt(val, precision=precision, mode="f")
+                    for val in listwise_comparison_result.mean_rank[:top_k]
+                ]
+            )
+            secax.set_ylabel("Mean Rank")
+
+        elif plot_mrr:
+            secax = ax.secondary_yaxis("right")
+            secax.set_yticks(np.arange(num_experiments))
+            secax.set_yticklabels(
+                [
+                    fmt(val, precision=precision, mode="f")
+                    for val in listwise_comparison_result.mrr[:top_k]
+                ]
+            )
+            secax.set_ylabel("HMR")
+
+        return fig
 
     def report_expected_reward(
         self,
