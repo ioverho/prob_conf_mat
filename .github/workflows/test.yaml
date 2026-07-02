@@ -41,7 +41,7 @@ jobs:
         run: uv run --dev pytest --cov --cov-branch --cov-report=xml
 
       - name: Upload results to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: ioverho/prob_conf_mat
