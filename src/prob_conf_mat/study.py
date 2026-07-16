@@ -642,7 +642,7 @@ class Study(Config):
             )
 
         # Validate the sampling method before trying to fetch its value
-        if sampling_method not in SamplingMethod:
+        if sampling_method not in list(SamplingMethod._value2member_map_.keys()):
             raise ValueError(
                 (
                     "Sampling method {sampling_method} is currently implemented. "
