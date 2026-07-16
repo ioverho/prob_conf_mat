@@ -632,6 +632,24 @@ class Study(Config):
             experiment_name,
         )
 
+        # Validate the metric before trying to fetch its value
+        if metric not in self._metrics:
+            raise ValueError(
+                (
+                    f"Metric {metric} has not been registered in this Study. "
+                    "Try adding it using the `study.add_metric` method."
+                )
+            )
+
+        # Validate the sampling method before trying to fetch its value
+        if sampling_method not in SamplingMethod:
+            raise ValueError(
+                (
+                    "Sampling method {sampling_method} is currently implemented. "
+                    f"Must be one of '{list(SamplingMethod._value2member_map_.keys())}'."
+                )
+            )
+
         keys = [metric, experiment_group_name, _experiment_name, sampling_method]
 
         if self.cache.isin(fingerprint=self.fingerprint, keys=keys):

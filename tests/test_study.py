@@ -1,8 +1,10 @@
+import numpy as np
 import pytest
 
 from prob_conf_mat.study import Study
 from prob_conf_mat.experiment_group import ExperimentGroup
-from prob_conf_mat.experiment import Experiment
+from prob_conf_mat.experiment import Experiment, ExperimentResult
+from prob_conf_mat.experiment_aggregation.abc import ExperimentAggregationResult
 
 
 class TestStudy:
@@ -223,3 +225,101 @@ class TestStudy:
 
         with pytest.raises(ValueError):
             study.report_pairwise_comparison(metric="acc", experiment_a="test/test_a", experiment_b="test/test_a",)
+
+    def test_get_samples_api(self):
+        # Define some studies
+        study_a = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        study_a.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[8, 2], [1, 9]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+        study_a.add_experiment(
+            "test/test_b",
+            confusion_matrix=[[7, 3], [2, 8]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        study_a.add_metric(metric="acc", aggregation="fe_gaussian")
+
+        study_b = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        study_b.add_experiment(
+            "test/test_a",
+            confusion_matrix=[[8, 2], [1, 9]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+        study_b.add_experiment(
+            "test/test_b",
+            confusion_matrix=[[7, 3], [2, 8]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        study_b.add_metric(metric="acc", aggregation="fe_gaussian")
+
+        # Check RNG equivalence
+        result_a = study_a.get_metric_samples(
+            metric="acc",
+            experiment_name="test/test_a",
+            sampling_method="posterior",
+        )
+
+        result_b = study_b.get_metric_samples(
+            metric="acc",
+            experiment_name="test/test_a",
+            sampling_method="posterior",
+        )
+
+        # Identically seeded studies produce identical samples
+        assert np.array_equal(result_a.values, result_b.values)
+
+        # Test get_metric_samples accepts both metric string and instance
+        result_from_str = study_a.get_metric_samples(
+            metric="acc",
+            experiment_name="test/test_a",
+            sampling_method="posterior",
+        )
+
+        result_from_instance = study_a.get_metric_samples(
+            metric=study_a._metrics_store["acc"],
+            experiment_name="test/test_a",
+            sampling_method="posterior",
+        )
+
+        # Both spellings hit the same cache entry
+        assert result_from_instance is result_from_str
+
+        for sampling_method in ["posterior", "prior", "random", "input"]:
+            result = study_a.get_metric_samples(
+                metric="acc",
+                experiment_name="test/test_a",
+                sampling_method=sampling_method,
+            )
+
+            assert isinstance(result, ExperimentResult)
+            assert isinstance(result.values, np.ndarray
+            )
+
+        # Test return type
+        result = study_a.get_metric_samples(
+            metric="acc",
+            experiment_name="test/test_a",
+            sampling_method="posterior",
+        )
+
+        assert isinstance(result, ExperimentResult)
+        assert result.metric.name == "acc"
+        assert result.values.shape[0] == study_a.num_samples
+
+        result = study_a.get_metric_samples(
+            metric="acc",
+            experiment_name="test/aggregated",
+            sampling_method="posterior",
+        )
+
+        assert isinstance(result, ExperimentAggregationResult)

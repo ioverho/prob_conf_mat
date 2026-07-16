@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - more documentation examples
 - a [`pcm.io.compute_confusion_matrix`][prob_conf_mat.io.compute_confusion_matrix] function for quickly converting from predictions to a valid confusion matrix
 
+### Changed
+- added separate dependency group for documentation
+- stricter linting rules
+
+### Fixed
+- added argument validation in `get_samples` method
+
 ## [v0.3.1](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.3.1) - 2026-01-23
 
 Full Changelog: [`0.3.0...0.3.1`](https://github.com/ioverho/prob_conf_mat/compare/0.3.0...0.3.1)

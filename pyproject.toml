@@ -139,6 +139,7 @@ ignore = [
     "ARG002",
     "RUF002",
     "G004",
+    "UP034", # Unnecessary parentheses
 ]
 
 extend-select = [
