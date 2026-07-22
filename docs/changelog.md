@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [v0.4.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.4.0) - 2026-07-22
+
 ### Added
 
 - more documentation examples
