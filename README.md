@@ -99,6 +99,32 @@ uv sync --dev
 
 The development dependencies should automatically install into the `.venv` folder.
 
+## Quick Start
+
+```python
+from prob_conf_mat import Study
+
+study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+study.add_experiment(
+  experiment_name="baseline",
+  confusion_matrix=[[50, 2, 1], [3, 45, 4], [0, 5, 40]]
+)
+
+study.add_metric("f1@macro")
+
+print(study.report_metric_summaries(metric="f1@macro", table_fmt="github"))
+```
+
+| Group    | Experiment | Observed | Median | Mode   | 95.0% HDI        | MU     | Skew    | Kurt   |
+| -------- | ---------- | -------- | ------ | ------ | ---------------- | ------ | ------- | ------ |
+| baseline | baseline   | 0.8992   | 0.9001 | 0.9043 | [0.8507, 0.9448] | 0.0941 | -0.4361 | 0.3485 |
+
+
+Rather than a single point estimate, you get a distribution of plausible macro F1 score, which we summarize using a variety of statistics.
+
+See the [Getting Started tutorials](https://ioverho.github.io/prob_conf_mat/getting_started/) and the worked-example notebooks in [`docs/getting_started/examples`](docs/getting_started/examples/) for more.
+
 ## Documentation
 
 For more information about the package, motivation, how-to guides and implementation, please see the [documentation website](https://ioverho.github.io/prob_conf_mat). We try to use [Daniele Procida's structure for Python documentation](https://docs.divio.com/documentation-system/).
