@@ -617,3 +617,83 @@ class TestConfig:
                 prevalence_prior=0,
                 confusion_prior=0,
             )
+
+    def test_sklearn_interoperability(self) -> None:
+        import sklearn.metrics
+
+        # Generate some sklearn-style predictions covering every class
+        rng = np.random.default_rng(0)
+        y_true = rng.integers(low=0, high=4, size=1000)
+        y_pred = rng.integers(low=0, high=4, size=1000)
+
+        # The confusion matrix built from `y_true`/`y_pred` should be identical
+        # to the one produced by sklearn (true on rows, predicted on columns)
+        study = Study(**self.fetch_base_config())
+
+        study.add_experiment(
+            experiment_name="test/test",
+            y_true=y_true,
+            y_pred=y_pred,
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        sklearn_confusion_matrix = sklearn.metrics.confusion_matrix(
+            y_true=y_true,
+            y_pred=y_pred,
+        )
+
+        assert np.array_equal(
+            study["test/test"].confusion_matrix,  # type: ignore
+            sklearn_confusion_matrix,
+        )
+
+        # Passing neither a confusion matrix nor both of `y_true`/`y_pred`
+        # should raise an error
+        with pytest.raises(
+            ValueError,
+            match=r"both `y_true` and `y_pred` must \*not\* be `None`",
+        ):
+            study = Study(**self.fetch_base_config())
+
+            study.add_experiment(
+                experiment_name="test/test",
+                y_true=y_true,
+                prevalence_prior=0,
+                confusion_prior=0,
+            )
+
+        with pytest.raises(
+            ValueError,
+            match=r"both `y_true` and `y_pred` must \*not\* be `None`",
+        ):
+            study = Study(**self.fetch_base_config())
+
+            study.add_experiment(
+                experiment_name="test/test",
+                y_pred=y_pred,
+                prevalence_prior=0,
+                confusion_prior=0,
+            )
+
+        # Passing both a confusion matrix and predictions should warn, and
+        # ignore the predictions in favor of the confusion matrix
+        with pytest.warns(
+            ConfigWarning,
+            match=r"Ignoring `y_true` or `y_pred` in favor of `confusion_matrix`",
+        ):
+            study = Study(**self.fetch_base_config())
+
+            study.add_experiment(
+                experiment_name="test/test",
+                confusion_matrix=np.array([[1, 0], [0, 1]]),
+                y_true=y_true,
+                y_pred=y_pred,
+                prevalence_prior=0,
+                confusion_prior=0,
+            )
+
+        assert np.array_equal(
+            study["test/test"].confusion_matrix,  # type: ignore
+            np.array([[1, 0], [0, 1]]),
+        )

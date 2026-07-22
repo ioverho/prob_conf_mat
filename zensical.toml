@@ -68,6 +68,7 @@ nav = [
     ] },
     { "How To" = [
         "how_to/configuration.md",
+        "how_to/confusion_matrix_io.md",
         "how_to/metric_syntax.md",
         "how_to/priors.md",
         "how_to/comparing_many_experiments.md",

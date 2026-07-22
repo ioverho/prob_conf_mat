@@ -27,6 +27,7 @@ from prob_conf_mat.experiment import Experiment, ExperimentResult, SamplingMetho
 from prob_conf_mat.experiment_aggregation import get_experiment_aggregator
 from prob_conf_mat.experiment_comparison import listwise_compare, pairwise_compare
 from prob_conf_mat.experiment_group import ExperimentGroup
+from prob_conf_mat.io import compute_confusion_matrix
 from prob_conf_mat.metrics import AveragedMetric, Metric, MetricCollection
 from prob_conf_mat.stats import summarize_posterior
 from prob_conf_mat.stats.kde import compute_kde
@@ -305,7 +306,8 @@ class Study(Config):
     def add_experiment(
         self,
         experiment_name: str,
-        confusion_matrix: jtyping.Int[np.typing.ArrayLike, " num_classes num_classes"],
+        confusion_matrix: jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"]
+        | None = None,
         prevalence_prior: str
         | float
         | jtyping.Float[np.typing.ArrayLike, " num_classes"]
@@ -314,6 +316,8 @@ class Study(Config):
         | float
         | jtyping.Float[np.typing.ArrayLike, " num_classes num_classes"]
         | None = None,
+        y_true: jtyping.Int[np.typing.ArrayLike, " num_predictions"] | None = None,
+        y_pred: jtyping.Int[np.typing.ArrayLike, " num_predictions"] | None = None,
         **io_kwargs: typing.Any,
     ) -> None:
         """Adds an experiment to this study.
@@ -322,14 +326,23 @@ class Study(Config):
             experiment_name (str): the name of the experiment and experiment group. Should be
                 written as 'experiment_group/experiment'. If the experiment group name is omitted,
                     the experiment gets added to a new experiment group of the same name.
-            confusion_matrix (Int[ArrayLike, 'num_classes num_classes']): the confusion matrix for
-                this experiment
+            confusion_matrix (Float[ArrayLike, 'num_classes num_classes']): the confusion matrix for
+                this experiment.
+                If None, must provide both `y_true` and `y_pred`
             prevalence_prior (str | float | Float[ArrayLike, ' num_classes'], optional):
                 the prior over the prevalence counts for this experiments. Defaults to 0, Haldane's
                 prior.
             confusion_prior (str | float | Float[ArrayLike, ' num_classes num_classes'], optional):
                 the prior over the confusion counts for this experiments. Defaults to 0, Haldane's
                 prior.
+            y_true (Int[ArrayLike, ' num_predictions'], optional):
+                ground truth (correct) target values.
+                Gets converted to a confusion matrix.
+                Must match `y_pred`.
+            y_pred (Int[ArrayLike, ' num_predictions'], optional):
+                estimated targets as returned by a classifier.
+                Gets converted to a confusion matrix.
+                Must match `y_true`.
             io_kwargs (Unpack): any additional keyword arguments that are needed for confusion
                 matrix I/O
 
@@ -355,6 +368,29 @@ class Study(Config):
         experiment_group_name, experiment_name = self._split_experiment_name(
             experiment_name,
         )
+
+        # Conf mat conversion ==================================================
+        if confusion_matrix is None:
+            if y_true is None or y_pred is None:
+                raise ValueError(
+                    (
+                        "If `confusion_matrix=None`, then both `y_true` and `y_pred` "
+                        "must *not* be `None`."
+                        f"Currently: y_true={y_true}, y_pred={y_pred}"
+                    )
+                )
+
+            confusion_matrix = compute_confusion_matrix(y_true=y_true, y_pred=y_pred)
+
+        if (y_true is not None) or (y_pred is not None):
+            warnings.warn(
+                (
+                    "Both `confusion_matrix` and `y_true` or `y_pred` are provided. "
+                    "Ignoring `y_true` or `y_pred` in favor of `confusion_matrix`."
+                ),
+                category=ConfigWarning,
+                stacklevel=2,
+            )
 
         # Type checking ========================================================
         # If passing a list or np.ndarray as the confusion matrix, wraps it into

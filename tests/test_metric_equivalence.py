@@ -38,24 +38,20 @@ METRICS_TO_SKLEARN = {
     y_pred: sklearn.metrics.class_likelihood_ratios(
         y_true=y_true,
         y_pred=y_pred,
-        raise_warning=False,
     )[0],
     "nlr@binary+positive_class=0": lambda y_true,
     y_pred: sklearn.metrics.class_likelihood_ratios(
         y_true=y_true,
         y_pred=y_pred,
-        raise_warning=False,
     )[1],
     "dor@binary+positive_class=0": lambda y_true,
     y_pred: sklearn.metrics.class_likelihood_ratios(
         y_true=y_true,
         y_pred=y_pred,
-        raise_warning=False,
     )[0]
     / sklearn.metrics.class_likelihood_ratios(
         y_true=y_true,
         y_pred=y_pred,
-        raise_warning=False,
     )[1],
     **{
         f"fbeta+beta={beta}": partial(

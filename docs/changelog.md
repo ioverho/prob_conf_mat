@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - more documentation examples
 - a [`pcm.io.compute_confusion_matrix`][prob_conf_mat.io.compute_confusion_matrix] function for quickly converting from predictions to a valid confusion matrix
+- [`Study.add_experiment`][prob_conf_mat.study.add_experiment] now interoperates with sklearn's `y_true`/`y_pred` pattern
 
 ### Changed
 - added separate dependency group for documentation
