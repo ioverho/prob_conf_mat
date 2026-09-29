@@ -236,3 +236,4 @@ deprecated_report/# pixi environments
 .ruff_cache
 /dev/
 /paper/
+/.claude/

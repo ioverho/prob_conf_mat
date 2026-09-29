@@ -53,20 +53,20 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "basedpyright>=1.38.1",
+    "basedpyright>=1.40.1",
     "ipykernel>=7.2.0",
     "nbconvert>=7.17.0",
-    "nbformat>=5.10.4",
+    "nbformat>=5.11.1",
     "opt-einsum>=3.4.0",
-    "pandas>=2.3.3",
-    "pip>=25.3",
-    "prek>=0.3.3",
+    "pandas>=3.0.6",
+    "pip>=26.2.1",
+    "prek>=0.5.3",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "pyyaml>=6.0.3",
-    "ruff>=0.14.10",
+    "ruff>=0.16.8",
     "scalene>=2.0.1",
-    "scikit-learn>=1.9.0",
+    "scikit-learn>=1.9.1",
     "snakeviz>=2.2.2",
     "toml>=0.10.2",
 ]
@@ -76,7 +76,7 @@ docs = [
     "mkdocstrings[python]>=1.0.3",
     "nbconvert>=7.17.0",
     "nbformat>=5.10.4",
-    "zensical>=0.0.50",
+    "zensical>=0.0.63",
 ]
 
 # Building
