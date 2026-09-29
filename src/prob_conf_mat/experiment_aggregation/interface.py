@@ -1,3 +1,5 @@
+import typing
+
 from prob_conf_mat.experiment_aggregation.abc import (
     AGGREGATION_REGISTRY,
     ExperimentAggregator,
@@ -8,7 +10,7 @@ from prob_conf_mat.utils import RNG
 def get_experiment_aggregator(
     aggregation: str,
     rng: RNG,
-    **kwargs,  # pyright: ignore[reportMissingParameterType]
+    **kwargs: dict[str, typing.Any],
 ) -> ExperimentAggregator:
     """Fetches an `ExperimentAggregator` from its registered name.
 

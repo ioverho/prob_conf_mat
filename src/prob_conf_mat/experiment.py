@@ -407,7 +407,7 @@ class Experiment:
             # Filter out all the dependencies for the current metric
             # Since we allow each metric to define it's own dependencies by name (or alias)
             # We have to be a little lenient with how we look these up
-            dependencies: dict[str, np.ndarray] = dict()
+            dependencies: dict[str, jtyping.Float[np.ndarray, "num_samples"]] = dict()
             for dependency_name in metric.dependencies:
                 dependency = metric_compute_order[dependency_name]
 

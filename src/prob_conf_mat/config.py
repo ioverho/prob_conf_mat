@@ -67,14 +67,14 @@ def _generate_default_value(parameter_name: str):
 class ConfigWarning(Warning):
     """A configuration warning."""
 
-    def __init__(self, *args, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __init__(self, *args: typing.Any, **kwargs: dict[str, typing.Any]) -> None:
         super().__init__(*args, **kwargs)
 
 
 class ConfigError(Exception):
     """A configuration error."""
 
-    def __init__(self, *args, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __init__(self, *args: typing.Any, **kwargs: dict[str, typing.Any]) -> None:
         super().__init__(*args, **kwargs)
 
 
@@ -670,7 +670,7 @@ class Config:
         self,
         value: dict[str, dict[str, typing.Any]] | None,
     ) -> dict[str, dict[str, typing.Any]]:
-        def validate_metric_configuration(key: str, configuration: dict) -> None:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+        def validate_metric_configuration(key: str, configuration: dict) -> None:  # pyright: ignore[reportMissingTypeArgument]
             # Empty configuration is allowed
             if len(configuration) == 0:
                 return

@@ -68,7 +68,7 @@ class Metric(metaclass=ABCMeta):
 
     """
 
-    def __init_subclass__(cls, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __init_subclass__(cls, **kwargs: dict[str, typing.Any]) -> None:
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
@@ -169,17 +169,20 @@ class Metric(metaclass=ABCMeta):
     aliases: collections.abc.Sequence[str]
 
     @abstractmethod
-    def compute_metric(self, *args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def compute_metric(
+        self,
+        *args: typing.Any,
+        **kwargs: typing.Any,
+    ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         """Computes the metric values from its dependencies."""
         raise NotImplementedError
 
     def __call__(
         self,
-        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
-        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        **kwargs: jtyping.Float[np.ndarray, "num_samples *"],
     ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         """Computes the metric values from its dependencies."""
-        return self.compute_metric(*args, **kwargs)
+        return self.compute_metric(**kwargs)
 
     @property
     def _metric_name(self) -> str | None:
@@ -224,7 +227,7 @@ class Averaging(metaclass=ABCMeta):
 
     """
 
-    def __init_subclass__(cls, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __init_subclass__(cls, **kwargs: typing.Any):
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
@@ -304,15 +307,17 @@ class Averaging(metaclass=ABCMeta):
     aliases: collections.abc.Sequence[str]
 
     @abstractmethod
-    def compute_average(self, *args, **kwargs):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def compute_average(
+        self, *args: typing.Any, **kwargs: typing.Any
+    ) -> jtyping.Float[np.ndarray, " num_samples"]:
         """Computes the average across experiment classes."""
         raise NotImplementedError
 
     def __call__(
         self,
         metric_vals: jtyping.Float[np.ndarray, " num_samples num_classes"],
-        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
-        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        *args: typing.Any,
+        **kwargs: dict[str, typing.Any],
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         """Computes the average across experiment classes."""
         return self.compute_average(metric_vals, *args, **kwargs)
@@ -440,21 +445,24 @@ class AveragedMetric:
 
     def compute_metric(
         self,
-        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
-        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        *args: typing.Any,
+        **kwargs: typing.Any,
     ) -> jtyping.Float[np.ndarray, " num_samples ..."]:
         """Computes the metric values from its dependencies."""
         return self.base_metric(*args, **kwargs)
 
     def compute_average(
         self,
-        *args,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
-        **kwargs,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        *args: typing.Any,
+        **kwargs: typing.Any,
     ) -> jtyping.Float[np.ndarray, " num_samples"]:
         """Computes the average across experiment classes."""
         return self.averaging.__call__(*args, **kwargs)
 
-    def __call__(self, **kwargs) -> jtyping.Float[np.ndarray, " num_samples 1"]:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __call__(
+        self,
+        **kwargs: typing.Any,
+    ) -> jtyping.Float[np.ndarray, " num_samples 1"]:
         """Computes the metric and averages it, in succession."""
         metric_vals = self.compute_metric(
             **{

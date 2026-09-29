@@ -40,6 +40,7 @@ class DiagMass(Metric):
 
     def compute_metric(
         self,
+        *,
         norm_confusion_matrix: jtyping.Float[
             np.ndarray,
             " num_samples num_classes num_classes",
@@ -192,7 +193,7 @@ class FalseNegativeRate(Metric):
     def compute_metric(
         self,
         true_positive_rate: jtyping.Float[np.ndarray, " num_samples num_classes"],
-    ) -> jtyping.Float[np.ndarray, " num_samples num_classes num_classes"]:
+    ) -> jtyping.Float[np.ndarray, " num_samples num_classes"]:
         false_negative_rate = 1 - true_positive_rate
 
         return false_negative_rate

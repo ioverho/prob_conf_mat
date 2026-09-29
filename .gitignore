@@ -235,3 +235,4 @@ deprecated_report/# pixi environments
 /deprecated/
 .ruff_cache
 /dev/
+/paper/

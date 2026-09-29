@@ -28,14 +28,14 @@ class NestedCache:
         self._cache = self.nested_dict()
         self.fingerprint = None
 
-    def nested_dict(self) -> defaultdict:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    def nested_dict(self) -> defaultdict:  # pyright: ignore[reportMissingTypeArgument]
         """Generates a recursive default dict."""
         return defaultdict(self.nested_dict)
 
-    def __getitem__(self, key) -> typing.Any:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __getitem__(self, key) -> typing.Any:  # pyright: ignore[reportMissingParameterType]
         return self._cache[key]
 
-    def _get(self, dd, keys, i: int) -> type[NotInCache] | typing.Any:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def _get(self, dd, keys, i: int) -> type[NotInCache] | typing.Any:  # pyright: ignore[reportMissingParameterType]
         # Recursively look up elements in cache
         # First check current layer
         obj = dd.get(keys[i], NotInCache)
@@ -52,7 +52,7 @@ class NestedCache:
     def load(
         self,
         fingerprint: str,
-        keys,  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+        keys,  # pyright: ignore[reportMissingParameterType]
         default=NotInCache,  # pyright: ignore[reportMissingParameterType]
     ) -> type[NotInCache] | typing.Any:
         """Loads the element stored at keys in the cache."""
@@ -67,7 +67,7 @@ class NestedCache:
             return default
         return result
 
-    def _set(self, dd, value, keys, i: int):  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def _set(self, dd, value, keys, i: int):  # pyright: ignore[reportMissingParameterType]
         # Recursively set elements in cache
         # If we've exhausted the list of keys,
         # set the value
@@ -79,7 +79,7 @@ class NestedCache:
         else:
             self._set(dd[keys[i]], value=value, keys=keys, i=i + 1)
 
-    def cache(self, fingerprint: str, keys: list[typing.Any], value) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def cache(self, fingerprint: str, keys: list[typing.Any], value) -> None:  # pyright: ignore[reportMissingParameterType]
         """Caches an element at keys."""
         if fingerprint != self.fingerprint:
             self.clean()

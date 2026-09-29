@@ -232,15 +232,15 @@ def pairwise_compare(
 
     # Probability of existence
     if diff_dist_summary.median > 0:
-        pd: float = np.mean(diff_dist > 0)  # pyright: ignore[reportAssignmentType, reportRedeclaration]
+        pd: float = np.mean(diff_dist > 0)  # pyright: ignore[reportRedeclaration]
     else:
-        pd: float = np.mean(diff_dist < 0)  # pyright: ignore[reportAssignmentType]
+        pd: float = np.mean(diff_dist < 0)
 
     pd_interpretation = _pd_interpretation_guideline(pd=pd)
 
     # Define a default ROPE
     if min_sig_diff is None:
-        min_sig_diff: float = 0.1 * np.std(diff_dist)  # pyright: ignore[reportAssignmentType]
+        min_sig_diff: float = 0.1 * np.std(diff_dist)
 
     # Count the number of instances within each bin
     # Significantly negative, within ROPE, significantly positive
@@ -297,7 +297,7 @@ def pairwise_compare(
             n=diff_dist.shape[0],
         ),
         # Significance relative to random
-        p_rope_random=p_rope_random,  # pyright: ignore[reportArgumentType]
+        p_rope_random=p_rope_random,
         bf_rope=bf_rope,  # pyright: ignore[reportArgumentType]
         # Unidirectional significance
         p_uni_sig=p_sig_pos if diff_dist_summary.median > 0 else p_sig_neg,

@@ -14,7 +14,7 @@ class TestConfig:
         ci_probability=0.95,
     )
 
-    def fetch_base_config(self, *args) -> dict[str, typing.Any]:
+    def fetch_base_config(self, *args:  typing.Any) -> dict[str, typing.Any]:
         return {k: v for k, v in self.base_config.items() if k not in args}
 
     def test_seed(self) -> None:

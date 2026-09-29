@@ -39,7 +39,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         self.rng: RNG = rng
         self._init_params: dict[typing.Any, typing.Any] = dict()
 
-    def __init_subclass__(cls, **kwargs) -> None:  # pyright: ignore[reportUnknownParameterType, reportMissingParameterType]
+    def __init_subclass__(cls, **kwargs: dict[str, typing.Any]) -> None:
         super().__init_subclass__(**kwargs)
 
         # Validate =============================================================
@@ -102,7 +102,7 @@ class ExperimentAggregator(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    def _mappable_aggregate(self, kwargs: dict):  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    def _mappable_aggregate(self, **kwargs: typing.Any):
         return self.aggregate(**kwargs)
 
     def __call__(
