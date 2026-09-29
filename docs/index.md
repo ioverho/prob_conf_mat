@@ -20,7 +20,7 @@ title: About
  <img src="https://codecov.io/github/ioverho/prob_conf_mat/graph/badge.svg?token=EU85JBF8M2"/ alt="Codecov report">
 </a>
 
-<a href="./LICENSE" >
+<a href="license.md" >
  <img alt="GitHub License" src="https://img.shields.io/github/license/ioverho/prob_conf_mat">
 </a>
 
