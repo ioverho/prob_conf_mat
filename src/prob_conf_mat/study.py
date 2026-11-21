@@ -382,7 +382,7 @@ class Study(Config):
 
             confusion_matrix = compute_confusion_matrix(y_true=y_true, y_pred=y_pred)
 
-        if (y_true is not None) or (y_pred is not None):
+        elif (y_true is not None) or (y_pred is not None):
             warnings.warn(
                 (
                     "Both `confusion_matrix` and `y_true` or `y_pred` are provided. "

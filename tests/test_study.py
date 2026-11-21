@@ -1,6 +1,9 @@
+import warnings
+
 import numpy as np
 import pytest
 
+from prob_conf_mat.config import ConfigWarning
 from prob_conf_mat.study import Study
 from prob_conf_mat.experiment_group import ExperimentGroup
 from prob_conf_mat.experiment import Experiment, ExperimentResult
@@ -210,6 +213,68 @@ class TestStudy:
                 metric="foobarbaz",
                 class_label=None,
             )
+
+    @pytest.mark.parametrize(
+        argnames=("pass_conf_mat", "pass_y_true", "pass_y_pred"),
+        argvalues=[
+            (cm, yt, yp)
+            for cm in (True, False)
+            for yt in (True, False)
+            for yp in (True, False)
+        ],
+    )
+    def test_add_experiment_input_combinations(
+        self,
+        pass_conf_mat: bool,
+        pass_y_true: bool,
+        pass_y_pred: bool,
+    ):
+        conf_mat = [[2, 0], [0, 2]]
+        y_true = [0, 0, 1, 1]
+        y_pred = [0, 1, 1, 1]
+        # Rows are ground truth, columns are predictions
+        conf_mat_from_y = [[1, 1], [0, 2]]
+
+        kwargs = dict(
+            confusion_matrix=conf_mat if pass_conf_mat else None,
+            y_true=y_true if pass_y_true else None,
+            y_pred=y_pred if pass_y_pred else None,
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+        study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        if pass_conf_mat and (pass_y_true or pass_y_pred):
+            # Confusion matrix takes precedence, with a warning
+            with pytest.warns(
+                ConfigWarning, match="Both `confusion_matrix` and `y_true`"
+            ):
+                study.add_experiment("test/test_a", **kwargs)
+            expected = conf_mat
+
+        elif pass_conf_mat:
+            # Only the confusion matrix: no warning
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", category=ConfigWarning)
+                study.add_experiment("test/test_a", **kwargs)
+            expected = conf_mat
+
+        elif pass_y_true and pass_y_pred:
+            # Only y_true/y_pred: confusion matrix is computed from them
+            study.add_experiment("test/test_a", **kwargs)
+            expected = conf_mat_from_y
+
+        else:
+            # Missing the confusion matrix and at least one of y_true/y_pred
+            with pytest.raises(ValueError, match=r"If `confusion_matrix=None`"):
+                study.add_experiment("test/test_a", **kwargs)
+            return
+
+        assert np.array_equal(
+            study["test/test_a"].confusion_matrix,  # type: ignore
+            expected,
+        )
 
     def test_pairwise_comparison(self):
         study = Study(seed=0, num_samples=10000, ci_probability=0.95)
