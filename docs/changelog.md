@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- added an experimental metrics API, disabled by default
+
+### Fixed
+
+- ensure that rejected metrics and experiments are not written into the config
+
 ## [v0.4.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.4.0) - 2026-07-22
 
 ### Added
@@ -16,10 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [`Study.add_experiment`][prob_conf_mat.study.add_experiment] now interoperates with sklearn's `y_true`/`y_pred` pattern
 
 ### Changed
+
 - added separate dependency group for documentation
 - stricter linting rules
 
 ### Fixed
+
 - added argument validation in `get_samples` method
 
 ## [v0.3.1](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.3.1) - 2026-01-23

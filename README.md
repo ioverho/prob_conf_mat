@@ -123,7 +123,7 @@ print(study.report_metric_summaries(metric="f1@macro", table_fmt="github"))
 
 Rather than a single point estimate, you get a distribution of plausible macro F1 score, which we summarize using a variety of statistics.
 
-See the [Getting Started tutorials](https://ioverho.github.io/prob_conf_mat/getting_started/) and the worked-example notebooks in [`docs/getting_started/examples`](docs/getting_started/examples/) for more.
+See the [Getting Started tutorials](https://ioverho.github.io/prob_conf_mat/getting_started/) and the worked-example notebooks in [`docs/getting_started/examples`](docs/examples) for more.
 
 ## Documentation
 

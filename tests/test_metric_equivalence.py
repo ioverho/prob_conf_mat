@@ -2,6 +2,8 @@ from __future__ import annotations
 import typing
 import warnings
 
+from prob_conf_mat.config import ConfigError
+
 if typing.TYPE_CHECKING:
     import jaxtyping as jtyping
 
@@ -21,6 +23,7 @@ from prob_conf_mat.io import (
     load_csv,
     confusion_matrix_to_pred_cond,
 )
+from prob_conf_mat.metrics.experimental import enable_experimental_metrics, ExperimentalMetricsError
 
 # ==============================================================================
 # Setup all test cases
@@ -152,7 +155,11 @@ def test_metric_equivalence(conf_mat_fp, metric) -> None:
         ci_probability=0.95,
     )
 
-    study.add_metric(metric=metric)
+    try:
+        study.add_metric(metric=metric)
+    except ConfigError:
+        enable_experimental_metrics()
+        study.add_metric(metric=metric)
 
     conf_mat = load_csv(
         location=conf_mat_fp,

@@ -181,7 +181,7 @@ class Study(Config):
         return num_classes
 
     def __repr__(self) -> str:
-        return f"Study(experiments={self.all_experiments()}), metrics={self._metrics_store!s})"
+        return f"Study(experiments={self.all_experiments()}, metrics={self._metrics_store!s})"
 
     def __str__(self) -> str:
         return f"Study(experiments={self.all_experiments()}, metrics={self._metrics_store!s})"
@@ -403,7 +403,13 @@ class Study(Config):
         }
 
         # Add the experiment to the config back-end ============================
-        cur_experiments = self.experiments
+        # Copy the experiments before writing to it
+        cur_experiments = {
+            group: dict(experiments) for group, experiments in self.experiments.items()
+        }
+        cur_experiments.setdefault(experiment_group_name, {})[experiment_name] = (
+            conf_mat_io_config
+        )
         if experiment_group_name not in cur_experiments:
             cur_experiments[experiment_group_name] = dict()
 
@@ -508,7 +514,8 @@ class Study(Config):
             metric_name: str = typing.cast("str", metric)
 
         # Retrieve the current set of metrics
-        cur_metrics = self.metrics
+        # Copy first before reassigning
+        cur_metrics = dict(self.metrics)
         if aggregation is None:
             cur_metrics[metric_name] = dict()
         else:

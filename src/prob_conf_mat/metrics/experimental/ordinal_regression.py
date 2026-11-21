@@ -2,8 +2,13 @@ import jaxtyping as jtyping
 import numpy as np
 
 from prob_conf_mat.metrics.abc import Metric
+from prob_conf_mat.metrics.experimental.interface import mark_experimental
 
 
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
 class MeanAbsoluteError(Metric):
     r"""Computes the Mean Absolute Error (MAE).
 
@@ -62,6 +67,10 @@ class MeanAbsoluteError(Metric):
         return mae
 
 
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
 class MeanSquaredError(Metric):
     r"""Computes the Mean Squared Error (MSE).
 
@@ -122,6 +131,10 @@ class MeanSquaredError(Metric):
         return mse
 
 
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
 class RootMeanSquaredError(Metric):
     r"""Computes the Root Mean Squared Error (RMSE).
 
@@ -184,6 +197,10 @@ class RootMeanSquaredError(Metric):
         return rmse
 
 
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
 class OffByOneAccuracy(Metric):
     r"""Computes the off-by-1 or adjacent accuracy.
 
@@ -251,6 +268,10 @@ class OffByOneAccuracy(Metric):
         return off_by_1_acc
 
 
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
 class PolynomialWeightedKappa(Metric):
     r"""Computes the Polynomial Weighted Kappa Coefficient.
 
@@ -284,7 +305,7 @@ class PolynomialWeightedKappa(Metric):
             Defaults to 1, in which case this is just linear.
 
     Examples:
-        - `pwkappa`
+        - `pwkappa@power=3`
         - `polynomial_weighted_kappa`
 
     Note: Read more:
@@ -300,7 +321,7 @@ class PolynomialWeightedKappa(Metric):
     bounds = (-1.0, 1.0)
     dependencies = ("norm_confusion_matrix", "p_condition", "p_pred")
     sklearn_equivalent = None
-    aliases = ("polynomial_weighted_kappa", "pwkappa")
+    aliases = ("polynomial_weighted_kappa", "pwkappa", "pwk")
 
     def __init__(self, power: float = 1.0):
         super().__init__()
@@ -340,3 +361,109 @@ class PolynomialWeightedKappa(Metric):
         kappa = kappa.reshape(-1, 1)
 
         return kappa
+
+
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
+class LinearWeightedKappa(PolynomialWeightedKappa):
+    r"""Computes the Linear Weighted Kappa Coefficient.
+
+    It is defined as:
+
+    $$1-\frac{\sum_{i,j}\omega_{i,j} C_{i,j}}{\sum_{i,j}\omega_{i,j} C_{i,\bullet}C_{\bullet,j}^{\intercal}}$$
+
+    where $C$ is the normalized confusion matrix, $C_{i,\bullet}$ and $C_{\bullet,j}$ the predicted
+    and ground truth marginals (respectively), and $\omega$ is the distance weighting matrix.
+
+    Specifically, $\omega$ is defined as:
+
+    $$\omega_{ij}=\frac{|i-j|}{(K-1)}$$
+
+    This approach increases the weight on a misclassification based on the distance of classes $i$
+    and $j$ by linearly interpolating between $0$ ($i=j$) and $1$ ($i=1\wedge j=K$).
+
+    It is related to [Cohen's Kappa][prob_conf_mat.metrics.CohensKappa].
+    Perfect agreement yields a score of 1, with a score of
+    0 corresponding to random performance. Several guidelines exist to interpret
+    the magnitude of the score.
+
+    Note that this is an **ordinal** classification metric. It assumes that the different classes
+    have an ordering. In other words, the magnitude of the misclassification risk increases with
+    the amount of classes in between the true and predicted class.
+
+    Examples:
+        - `lwk`
+        - `linear_weighted_kappa`
+
+    Note: Read more:
+        1. Cohen, J. (1968). Weighted kappa: Nominal scale agreement provision for scaled
+        disagreement or partial credit. Psychological bulletin, 70(4), 213.
+        2. de La Torre, J., Puig, D., & Valls, A. (2018). Weighted kappa loss function for
+        multi-class classification of ordinal data in deep learning. Pattern Recognition Letters,
+        105, 144-154.
+    """  # noqa: E501
+
+    full_name = "Linear Weighted Kappa"
+    is_multiclass = True
+    bounds = (-1.0, 1.0)
+    dependencies = ("norm_confusion_matrix", "p_condition", "p_pred")
+    sklearn_equivalent = None
+    aliases = ("linear_weighted_kappa", "lwkappa", "lwk")
+
+    def __init__(self):
+        super().__init__(power=1.0)
+
+
+@mark_experimental(
+    since="v0.3.1",
+    reason="Has not been tested against oracle implementation.",
+)
+class QuadraticWeightedKappa(PolynomialWeightedKappa):
+    r"""Computes the Quadratic Weighted Kappa Coefficient.
+
+    It is defined as:
+
+    $$1-\frac{\sum_{i,j}\omega_{i,j} C_{i,j}}{\sum_{i,j}\omega_{i,j} C_{i,\bullet}C_{\bullet,j}^{\intercal}}$$
+
+    where $C$ is the normalized confusion matrix, $C_{i,\bullet}$ and $C_{\bullet,j}$ the predicted
+    and ground truth marginals (respectively), and $\omega$ is the distance weighting matrix.
+
+    Specifically, $\omega$ is defined as:
+
+    $$\omega_{ij}=\frac{|i-j|^2}{(K-1)^2}$$
+
+    This approach increases the weight on a misclassification based on the distance of classes $i$
+    and $j$ by quadratically interpolating between $0$ ($i=j$) and $1$ ($i=1\wedge j=K$).
+
+    It is related to [Cohen's Kappa][prob_conf_mat.metrics.CohensKappa].
+    Perfect agreement yields a score of 1, with a score of
+    0 corresponding to random performance. Several guidelines exist to interpret
+    the magnitude of the score.
+
+    Note that this is an **ordinal** classification metric. It assumes that the different classes
+    have an ordering. In other words, the magnitude of the misclassification risk increases with
+    the amount of classes in between the true and predicted class.
+
+    Examples:
+        - `qwk`
+        - `quadratic_weighted_kappa`
+
+    Note: Read more:
+        1. Cohen, J. (1968). Weighted kappa: Nominal scale agreement provision for scaled
+        disagreement or partial credit. Psychological bulletin, 70(4), 213.
+        2. de La Torre, J., Puig, D., & Valls, A. (2018). Weighted kappa loss function for
+        multi-class classification of ordinal data in deep learning. Pattern Recognition Letters,
+        105, 144-154.
+    """  # noqa: E501
+
+    full_name = "Quadratic Weighted Kappa"
+    is_multiclass = True
+    bounds = (-1.0, 1.0)
+    dependencies = ("norm_confusion_matrix", "p_condition", "p_pred")
+    sklearn_equivalent = None
+    aliases = ("quadratic_weighted_kappa", "qwkappa", "qwk")
+
+    def __init__(self):
+        super().__init__(power=2.0)

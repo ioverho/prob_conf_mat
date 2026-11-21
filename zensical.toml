@@ -84,6 +84,7 @@ nav = [
         { "Metrics" = [
             "reference/metrics/overview.md",
             "reference/metrics/metrics.md",
+            "reference/metrics/experimental_metrics.md",
             "reference/metrics/abc.md",
         ] },
         { "Metric Averaging" = [

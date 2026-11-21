@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import ast
+import re
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from prob_conf_mat.utils.typing import MetricLike
-
-import re
-from functools import cache
 
 from prob_conf_mat.metrics.abc import (
     _ROOT_METRICS,  # pyright: ignore[reportPrivateUsage]
@@ -15,6 +13,11 @@ from prob_conf_mat.metrics.abc import (
     METRIC_REGISTRY,
     AveragedMetric,
     RootMetric,
+)
+from prob_conf_mat.metrics.experimental import (
+    ExperimentalMetricsError,
+    is_experimental,
+    is_experimental_metrics_enabled,
 )
 
 RESERVED_CHARACTERS = {
@@ -45,7 +48,6 @@ def _parse_kwargs(kwargs: dict[str, str]) -> dict[str, typing.Any]:
     return kwargs
 
 
-@cache
 def get_metric(syntax_string: str) -> MetricLike:
     """Takes a metric syntax string and returns a metric class instance, potentially with included averaging.
 
@@ -99,6 +101,11 @@ def get_metric(syntax_string: str) -> MetricLike:
             ),
         )
 
+    # Check if metric is experimental
+    if is_experimental(metric_class) and not is_experimental_metrics_enabled():
+        raise ExperimentalMetricsError
+
+    # Instantiate the metric
     metric_instance = metric_class(**metric_kwargs)
 
     metric_instance._instantiation_name = metric_string
@@ -141,6 +148,11 @@ def get_metric(syntax_string: str) -> MetricLike:
                 ),
             )
 
+        # Check if averaging method is experimental
+        if is_experimental(averaging_class) and not is_experimental_metrics_enabled():
+            raise ExperimentalMetricsError
+
+        # Instantiate the averaging method
         averaging_instance = averaging_class(**averaging_kwargs)
 
         # Compose the metric & averaging function ============================
@@ -148,6 +160,9 @@ def get_metric(syntax_string: str) -> MetricLike:
             metric=metric_instance,
             averaging=averaging_instance,
         )
+
+        if is_experimental(metric_class) or is_experimental(averaging_class):
+            composed_metric_instance._experimental = True  # pyright: ignore[reportAttributeAccessIssue]
 
         composed_metric_instance._instantiation_name = syntax_string  # pyright: ignore[reportPrivateUsage]
 

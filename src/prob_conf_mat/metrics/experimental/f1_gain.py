@@ -2,14 +2,19 @@ import jaxtyping as jtyping
 import numpy as np
 
 from prob_conf_mat.metrics.abc import Metric
+from prob_conf_mat.metrics.experimental.interface import mark_experimental
 
 
+@mark_experimental(
+    since="v0.1.0",
+    reason="Has not been tested against oracle implementation.",
+)
 class PrecisionGain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "Precision Gain"
     is_multiclass = False
-    bounds = (0.0, 1.0)
+    bounds = (-float("inf"), 1.0)
     dependencies = ("precision", "prevalence")
     sklearn_equivalent = None
     aliases = ("precision_gain",)
@@ -26,12 +31,16 @@ class PrecisionGain(Metric):  # noqa: D101
         return precision_gain
 
 
+@mark_experimental(
+    since="v0.1.0",
+    reason="Has not been tested against oracle implementation.",
+)
 class RecallGain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "Recall Gain"
     is_multiclass = False
-    bounds = (0.0, 1.0)
+    bounds = (-float("inf"), 1.0)
     dependencies = ("recall", "prevalence")
     sklearn_equivalent = None
     aliases = ("recall_gain",)
@@ -48,12 +57,16 @@ class RecallGain(Metric):  # noqa: D101
         return recall_gain
 
 
+@mark_experimental(
+    since="v0.1.0",
+    reason="Has not been tested against oracle implementation.",
+)
 class F1Gain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "F1 Gain"
     is_multiclass = False
-    bounds = (0.0, 1.0)
+    bounds = (-float("inf"), 1.0)
     dependencies = ("f1", "prevalence")
     sklearn_equivalent = None
     aliases = ("f1_gain",)
@@ -70,12 +83,16 @@ class F1Gain(Metric):  # noqa: D101
         return f1_gain
 
 
+@mark_experimental(
+    since="v0.1.0",
+    reason="Has not been tested against oracle implementation.",
+)
 class FBetaGain(Metric):  # noqa: D101
     # TODO: write documentation
 
     full_name = "FBeta Gain"
     is_multiclass = False
-    bounds = (0.0, 1.0)
+    bounds = (-float("inf"), 1.0)
     dependencies = (
         "ppv",
         "tpr",

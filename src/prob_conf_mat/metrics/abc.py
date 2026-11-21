@@ -88,7 +88,10 @@ class Metric(metaclass=ABCMeta):
         dependencies = set(cls.dependencies)
         if parameters != dependencies:
             raise TypeError(
-                f"The input for the {cls.__name__}'s `compute_metric` method does not match the specified dependencies: {parameters} != {dependencies}",  # noqa: E501
+                (
+                    f"The input for the {cls.__name__}'s `compute_metric` method does not match "
+                    f"the specified dependencies: {parameters} != {dependencies}"
+                ),
             )
 
         # Make sure the dependencies actually exist

@@ -4,8 +4,10 @@ from itertools import product
 import pytest
 
 import prob_conf_mat as pcm
+from prob_conf_mat.config import ConfigError
 from prob_conf_mat.metrics import METRIC_REGISTRY, AVERAGING_REGISTRY, get_metric
 from prob_conf_mat.metrics.abc import AveragedMetric, Metric, RootMetric
+from prob_conf_mat.metrics.experimental import enable_experimental_metrics
 from prob_conf_mat.metrics.interface import _parse_kwargs
 from prob_conf_mat.io import load_csv
 
@@ -48,7 +50,11 @@ def test_get_metric_values() -> None:
 
     for metric_str in all_metrics_avgs_combinations:
         # Add a bucnh of metrics
-        study.add_metric(metric=metric_str, aggregation="fe_gaussian")
+        try:
+            study.add_metric(metric=metric_str, aggregation="fe_gaussian")
+        except ConfigError:
+            enable_experimental_metrics()
+            study.add_metric(metric=metric_str, aggregation="fe_gaussian")
 
     for metric_str in all_metrics_avgs_combinations:
         study.get_metric_samples(
