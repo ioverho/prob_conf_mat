@@ -49,7 +49,7 @@ The tutorials are structured as follows:
 
     We go over how to load confusion matrices from your file system, and saving `Study` configurations to enable reproducibility
 
-    <br style="margin-top:4.9em;">
+    <br style="margin-top:2.9em;">
 
     [:lucide-notebook-text: Notebook](./04_loading_and_saving_to_disk.html)
 

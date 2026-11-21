@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Visualization",
@@ -79,7 +80,7 @@ docs = [
     "mkdocstrings[python]>=1.0.6",
     "nbconvert>=7.17.1",
     "nbformat>=5.10.4",
-    "zensical>=0.0.68",
+    "zensical>=0.1.1",
 ]
 
 # Building

@@ -44,6 +44,12 @@
 
 <div style="text-align: center;" align="center">
 
+<img alt="Supported Vesrions" src="https://img.shields.io/pypi/pyversions/prob_conf_mat">
+
+</div>
+
+<div style="text-align: center;" align="center">
+
 <h1>Probabilistic Confusion Matrices</h1>
 
 </div>

@@ -2355,7 +2355,7 @@ docs = [
     { name = "mkdocstrings", extras = ["python"], marker = "python_full_version >= '3.12'", specifier = ">=1.0.6" },
     { name = "nbconvert", marker = "python_full_version >= '3.12'", specifier = ">=7.17.1" },
     { name = "nbformat", marker = "python_full_version >= '3.12'", specifier = ">=5.10.4" },
-    { name = "zensical", marker = "python_full_version >= '3.12'", specifier = ">=0.0.68" },
+    { name = "zensical", marker = "python_full_version >= '3.12'", specifier = ">=0.1.1" },
 ]
 
 [[package]]
