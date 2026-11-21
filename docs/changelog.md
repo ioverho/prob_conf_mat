@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- added an experimental metrics API, disabled by default
+-   added an experimental metrics API, disabled by default
+    - this includes ordinal regression, and f1-gain metrics for now
 
 ### Fixed
 
 - ensure that rejected metrics and experiments are not written into the config
+- removed warning when using sklearn style input for `Study.add_experiment`
 
 ## [v0.4.0](https://github.com/ioverho/prob_conf_mat/releases/tag/v0.4.0) - 2026-07-22
 
