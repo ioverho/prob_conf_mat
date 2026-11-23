@@ -551,8 +551,10 @@ class Config:
             # ==================================================================
             # Experiment group name
             # ==================================================================
-            if experiment_group_name == "aggregated":
-                raise ConfigError("An experiment group may not be named 'aggregated'.")
+            if experiment_group_name in ("aggregated", "agg"):
+                raise ConfigError(
+                    "An experiment group may not be named 'aggregated' or 'agg'."
+                )
 
             if not isinstance(experiment_group_name, str):
                 try:

@@ -1,4 +1,5 @@
 <!-- LTeX: enabled=false -->
+
 # Study
 
 ::: prob_conf_mat.study.Study
@@ -31,6 +32,14 @@
     options:
         heading_level: 4
 
+::: prob_conf_mat.study.Study.all_experiments
+    options:
+        heading_level: 4
+
+::: prob_conf_mat.study.Study.filter_experiments
+    options:
+        heading_level: 4
+
 ### Estimating Uncertainty
 
 ::: prob_conf_mat.study.Study.get_metric_samples
@@ -53,7 +62,7 @@
 
 Plot a distribution of metric values
 
-```python
+``` python
 study.plot_metric_summaries(
     metric="acc",
     class_label=0,
@@ -61,12 +70,67 @@ study.plot_metric_summaries(
 ```
 
 <img
-    style="display: block;
+style="display: block;
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="/assets/figures/examples/plot_metric_summaries_annotated.svg"
-    alt="A plot of a metric's distribution">
+src="/assets/figures/examples/plot_metric_summaries_annotated.svg"
+alt="A plot of a metric's distribution">
+</img>
+
+### Aggregating Experiments
+
+::: prob_conf_mat.study.Study.report_aggregated_metric_summaries
+    options:
+        heading_level: 4
+
+::: prob_conf_mat.study.Study.plot_experiment_aggregation
+    options:
+        heading_level: 4
+
+<span class="doc-section-title">Examples:</span>
+
+Plot the distributions and the aggregated distribution for ExperimentGroup 'GROUP'.
+
+``` python
+study.plot_experiment_aggregation(
+    metric="acc",
+    class_label=0,
+    experiment_group="GROUP",
+)
+```
+
+<img
+style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;"
+src="/assets/figures/examples/plot_experiment_aggregation.svg"
+alt="A plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
+</img>
+
+::: prob_conf_mat.study.Study.plot_forest_plot
+    options:
+        heading_level: 4
+
+<span class="doc-section-title">Examples:</span>
+
+Plot the distributions and the aggregated distribution for all ExperimentGroups as a forest plot.
+
+``` python
+study.plot_forest_plot(
+    metric="acc",
+    class_label=0,
+)
+```
+
+<img
+style="display: block;
+           margin-left: auto;
+           margin-right: auto;
+           margin-bottom: 0;"
+src="/assets/figures/examples/plot_forest_plot.svg"
+alt="A forest plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
 </img>
 
 ### Comparing 2 Experiments
@@ -91,7 +155,7 @@ study.plot_metric_summaries(
 
 Plot the distribution of the difference of two metrics
 
-```python
+``` python
 study.plot_pairwise_comparison(
     metric="acc",
     class_label=0,
@@ -102,12 +166,12 @@ study.plot_pairwise_comparison(
 ```
 
 <img
-    style="display: block;
+style="display: block;
            margin-left: auto;
            margin-right: auto;
            margin-bottom: 0;"
-    src="/assets/figures/examples/plot_pairwise_comparison_annotated.svg"
-    alt="A plot of the distribution of the difference of two metrics">
+src="/assets/figures/examples/plot_pairwise_comparison_annotated.svg"
+alt="A plot of the distribution of the difference of two metrics">
 </img>
 
 ### Comparing Many Experiments
@@ -123,61 +187,6 @@ study.plot_pairwise_comparison(
 ::: prob_conf_mat.study.Study.report_expected_reward
     options:
         heading_level: 4
-
-### Aggregating Experiments
-
-::: prob_conf_mat.study.Study.report_aggregated_metric_summaries
-    options:
-        heading_level: 4
-
-::: prob_conf_mat.study.Study.plot_experiment_aggregation
-    options:
-        heading_level: 4
-
-<span class="doc-section-title">Examples:</span>
-
-Plot the distributions and the aggregated distribution for ExperimentGroup 'GROUP'.
-
-```python
-study.plot_experiment_aggregation(
-    metric="acc",
-    class_label=0,
-    experiment_group="GROUP",
-)
-```
-
-<img
-    style="display: block;
-           margin-left: auto;
-           margin-right: auto;
-           margin-bottom: 0;"
-    src="/assets/figures/examples/plot_experiment_aggregation.svg"
-    alt="A plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
-</img>
-
-::: prob_conf_mat.study.Study.plot_forest_plot
-    options:
-        heading_level: 4
-
-<span class="doc-section-title">Examples:</span>
-
-Plot the distributions and the aggregated distribution for all ExperimentGroups as a forest plot.
-
-```python
-study.plot_forest_plot(
-    metric="acc",
-    class_label=0,
-)
-```
-
-<img
-    style="display: block;
-           margin-left: auto;
-           margin-right: auto;
-           margin-bottom: 0;"
-    src="/assets/figures/examples/plot_forest_plot.svg"
-    alt="A forest plot of the distributions in an ExperimentGroup, along with the aggregated distribution.">
-</img>
 
 ::: prob_conf_mat.config.Config
     options:

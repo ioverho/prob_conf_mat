@@ -388,3 +388,191 @@ class TestStudy:
         )
 
         assert isinstance(result, ExperimentAggregationResult)
+
+
+# Groups are deliberately not inserted in sorted order, and include names with
+# regex metacharacters, mixed case and a bare (group-less) registration
+FILTER_EXPERIMENT_NAMES = [
+    "transformer/bert",
+    "transformer/roberta",
+    "transformer/model.v2",
+    "transformer/modelXv2",
+    "transformer/run(1)",
+    "cnn/resnet",
+    "cnn/bert",
+    "bert",  # Registered without a group, becomes 'bert/bert'
+    "bert/large",
+    "Baseline/majority",
+    "seeds/run_1",
+    "seeds/run_2",
+    "seeds/run_a",
+]
+
+FILTER_ALL_EXPERIMENTS = sorted(
+    name if "/" in name else f"{name}/{name}" for name in FILTER_EXPERIMENT_NAMES
+)
+
+FILTER_GROUPS = ["transformer", "cnn", "bert", "Baseline", "seeds"]
+
+
+@pytest.fixture
+def filter_study() -> Study:
+    study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+    for name in FILTER_EXPERIMENT_NAMES:
+        study.add_experiment(
+            name,
+            confusion_matrix=[[1, 0], [0, 1]],
+            prevalence_prior=0,
+            confusion_prior=0,
+        )
+
+    return study
+
+
+class TestFilterExperiments:
+    def test_fixture_sanity(self, filter_study: Study):
+        assert filter_study.all_experiments() == FILTER_ALL_EXPERIMENTS
+
+    @pytest.mark.parametrize(argnames="pattern", argvalues=["*", "*/*"])
+    def test_match_all(self, filter_study: Study, pattern: str):
+        assert filter_study.filter_experiments(pattern) == FILTER_ALL_EXPERIMENTS
+
+    def test_default_pattern_matches_all(self, filter_study: Study):
+        assert filter_study.filter_experiments() == FILTER_ALL_EXPERIMENTS
+
+    @pytest.mark.parametrize(
+        argnames=("pattern", "expected"),
+        argvalues=[
+            # Whole group
+            ("cnn/*", ["cnn/bert", "cnn/resnet"]),
+            ("bert/*", ["bert/bert", "bert/large"]),
+            # Same experiment name across groups
+            ("*/bert", ["bert/bert", "cnn/bert", "transformer/bert"]),
+            # Exact name
+            ("transformer/roberta", ["transformer/roberta"]),
+            # Wildcards in both parts
+            (
+                "*/run*",
+                [
+                    "seeds/run_1",
+                    "seeds/run_2",
+                    "seeds/run_a",
+                    "transformer/run(1)",
+                ],
+            ),
+            ("c*/*e*", ["cnn/bert", "cnn/resnet"]),
+        ],
+    )
+    def test_glob_patterns(
+        self, filter_study: Study, pattern: str, expected: list[str]
+    ):
+        assert filter_study.filter_experiments(pattern) == expected
+
+    @pytest.mark.parametrize(
+        argnames=("pattern", "expected"),
+        argvalues=[
+            ("seeds/run_?", ["seeds/run_1", "seeds/run_2", "seeds/run_a"]),
+            ("seeds/run_[0-9]", ["seeds/run_1", "seeds/run_2"]),
+            ("seeds/run_[12]", ["seeds/run_1", "seeds/run_2"]),
+            ("seeds/run_[!0-9]", ["seeds/run_a"]),
+            ("*/model?v2", ["transformer/model.v2", "transformer/modelXv2"]),
+        ],
+    )
+    def test_single_character_wildcards(
+        self, filter_study: Study, pattern: str, expected: list[str]
+    ):
+        assert filter_study.filter_experiments(pattern) == expected
+
+    def test_bare_name_matches_name_slash_name(self, filter_study: Study):
+        # A bare name follows the registration convention: 'bert' -> 'bert/bert'.
+        # It must *not* select the whole 'bert' group
+        assert filter_study.filter_experiments("bert") == ["bert/bert"]
+
+        # 'cnn' has no 'cnn/cnn' experiment
+        assert filter_study.filter_experiments("cnn") == []
+
+    @pytest.mark.parametrize(
+        argnames=("pattern", "expected"),
+        argvalues=[
+            # '.' is literal, so 'modelXv2' must not match
+            ("transformer/model.v2", ["transformer/model.v2"]),
+            ("*/model.v2", ["transformer/model.v2"]),
+            # Parentheses are literal, and must not raise a regex error
+            ("*/run(1)", ["transformer/run(1)"]),
+            # Regex syntax has no special meaning
+            ("*/bert|resnet", []),
+            ("*/ber.+", []),
+            ("^cnn/*", []),
+        ],
+    )
+    def test_regex_metacharacters_are_literal(
+        self, filter_study: Study, pattern: str, expected: list[str]
+    ):
+        assert filter_study.filter_experiments(pattern) == expected
+
+    @pytest.mark.parametrize(
+        argnames="pattern",
+        argvalues=[
+            # Partial matches must not return fragments or substrings
+            "*/res",
+            "*/ber",
+            "ert",
+            "nsformer/*",
+            "grp/x",
+        ],
+    )
+    def test_only_whole_names_match(self, filter_study: Study, pattern: str):
+        assert filter_study.filter_experiments(pattern) == []
+
+    def test_wildcards_do_not_cross_divider(self, filter_study: Study):
+        # As a single regex, 'trans*bert' would match 'transformer/bert'
+        assert filter_study.filter_experiments("trans*bert") == []
+        assert filter_study.filter_experiments("transformer*/bert") == [
+            "transformer/bert"
+        ]
+
+    def test_case_sensitive(self, filter_study: Study):
+        assert filter_study.filter_experiments("Baseline/*") == ["Baseline/majority"]
+        assert filter_study.filter_experiments("baseline/*") == []
+        assert filter_study.filter_experiments("*/BERT") == []
+
+    def test_no_matches_returns_empty_list(self, filter_study: Study):
+        assert filter_study.filter_experiments("nonexistent/*") == []
+
+    def test_results_are_sorted(self, filter_study: Study):
+        result = filter_study.filter_experiments("*")
+
+        assert result == sorted(result)
+        # 'Baseline' sorts before lowercase groups, despite being inserted later
+        assert result[0] == "Baseline/majority"
+
+    @pytest.mark.parametrize(
+        argnames="pattern",
+        argvalues=["a/b/c", "*/*/*", "transformer/bert/"],
+    )
+    def test_too_many_dividers_raises(self, filter_study: Study, pattern: str):
+        with pytest.raises(ValueError, match="Must have at most 1 '/' character"):
+            filter_study.filter_experiments(pattern)
+
+    @pytest.mark.parametrize(argnames="pattern", argvalues=["agg", "aggregated"])
+    def test_aggregated_keyword(self, filter_study: Study, pattern: str):
+        result = filter_study.filter_experiments(pattern)
+
+        assert sorted(result) == sorted(
+            f"{group}/aggregated" for group in FILTER_GROUPS
+        )
+
+    @pytest.mark.parametrize(argnames="pattern", argvalues=["*", "*/*", "agg"])
+    def test_empty_study(self, pattern: str):
+        study = Study(seed=0, num_samples=10000, ci_probability=0.95)
+
+        assert study.filter_experiments(pattern) == []
+
+    def test_does_not_mutate_study(self, filter_study: Study):
+        before = filter_study.all_experiments()
+
+        filter_study.filter_experiments("*/bert")
+        filter_study.filter_experiments("agg")
+
+        assert filter_study.all_experiments() == before

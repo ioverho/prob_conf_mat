@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fnmatch
 import typing
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -166,6 +167,55 @@ class Study(Config):
         all_experiments = sorted(all_experiments)
 
         return all_experiments
+
+    def filter_experiments(self, pattern: str = "*"):
+        """Selects experiment names using Unix shell-style wildcards.
+
+        Patterns follow the 'GROUP/EXPERIMENT' convention.
+        Wildcards never cross the '/' divider.
+
+        Valid wildcards are:
+
+        | Pattern | Meaning                                       |
+        | ------- | :-------------------------------------------- |
+        | *       | any sequence of characters, including none    |
+        | ?       | any single character                          |
+        | [seq]   | any one character in seq, e.g. [abc] or [0-9] |
+        | [!seq]  | any one character not in seq                  |
+
+        Some example patterns:
+
+        - 'agg' or 'aggregated' returns all experiment groups with '/aggregated' append
+        - '*' or '*/*' returns all experiments
+        - 'foo/*' returns all experiments belonging to the 'foo' group
+        - '*/foo' returns experiments across all groups named 'foo'
+
+        Args:
+            pattern (str): the pattern
+
+        Returns:
+            list[str]: the sorted names of all matching experiments
+        """
+        if pattern in ("agg", "aggregated"):
+            matched_experiments = [
+                group + "/aggregated" for group in self.experiments.keys()
+            ]
+
+            return matched_experiments
+
+        group_pattern, experiment_pattern = self._split_experiment_name(pattern)
+
+        matched_experiments = [
+            f"{group}/{experiment}"
+            for group, experiment_configs in self.experiments.items()
+            for experiment in experiment_configs.keys()
+            if fnmatch.fnmatchcase(group, group_pattern)
+            and fnmatch.fnmatchcase(experiment, experiment_pattern)
+        ]
+
+        matched_experiments = sorted(matched_experiments)
+
+        return matched_experiments
 
     @property
     def num_classes(self) -> int:
@@ -2356,12 +2406,22 @@ class Study(Config):
         self,
         metric: str,  # pyright: ignore[reportRedeclaration]
         class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
+        *,
+        experiment_pattern: str = "aggregated",
     ) -> ListwiseComparisonResult:
         """Generates a `ListwiseComparisonResult` comparing all Experiments in this study.
 
         Args:
             metric (str): the name of the metric
             class_label (int | None, optional): the class label. Defaults to None.
+
+        Keyword Args:
+            experiment_pattern (str): the pattern used to search for experiments.
+                See the documentation for `Study.filter_experiments` for valid patterns.
+                To compare aggregated experiment groups, pass 'agg' or 'aggregated'.
+                To compare all experiments within the same group, pass 'foo/*'.
+                To compare all similarly named experiments across groups, pass '*/foo'.
+                Defaults to 'aggregated'.
 
         Returns:
             ListwiseComparisonResult: the unformatted `ListwiseComparisonResult`
@@ -2375,19 +2435,24 @@ class Study(Config):
             class_label=class_label,
         )
 
-        # TODO: should this comparison happen for all experiments
-        # or for each experiment group?
-        experiment_values = {
-            experiment: self.get_metric_samples(
-                experiment_name=experiment,
+        matched_experiments = self.filter_experiments(experiment_pattern)
+
+        if len(matched_experiments) == 0:
+            raise ValueError(
+                f"No experiments match pattern {experiment_pattern} not found."
+            )
+
+        matched_experiment_values = {
+            ex: self.get_metric_samples(
+                experiment_name=ex,
                 metric=metric.name,
                 sampling_method=SamplingMethod.POSTERIOR,
             ).values[:, class_label]
-            for experiment in self.all_experiments()
+            for ex in matched_experiments
         }
 
         listwise_comparison_result = listwise_compare(
-            experiment_scores_dict=experiment_values,
+            experiment_scores_dict=matched_experiment_values,
             metric=metric,
         )
 
@@ -2398,6 +2463,7 @@ class Study(Config):
         metric: str,  # pyright: ignore[reportRedeclaration]
         class_label: int | None = None,  # pyright: ignore[reportRedeclaration]
         *,
+        experiment_pattern: str = "aggregated",
         table_fmt: str = "html",
         precision: int = 4,
     ) -> list[list[str]] | pd.DataFrame | str:
@@ -2412,6 +2478,12 @@ class Study(Config):
                 multiclass metric. Defaults to None.
 
         Keyword Args:
+            experiment_pattern (str): the pattern used to search for experiments.
+                See the documentation for `Study.filter_experiments` for valid patterns.
+                To compare aggregated experiment groups, pass 'agg' or 'aggregated'.
+                To compare all experiments within the same group, pass 'foo/*'.
+                To compare all similarly named experiments across groups, pass '*/foo'.
+                Defaults to 'aggregated'.
             table_fmt (str, optional): the format of the table.
                 If 'records', the raw list of values is returned.
                 If 'pandas' or 'pd', a Pandas DataFrame is returned.
@@ -2432,6 +2504,7 @@ class Study(Config):
             ...         metric="acc",
             ...         class_label=0,
             ...         table_fmt="github",
+            ...         experiment_pattern="GROUP/*",
             ...     ),
             ... )
 
@@ -2454,6 +2527,7 @@ class Study(Config):
         listwise_comparison_result = self.get_listwise_comparsion_result(
             metric=metric.name,
             class_label=class_label,
+            experiment_pattern=experiment_pattern,
         )
 
         headers = ["Group", "Experiment"] + [
